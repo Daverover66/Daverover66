@@ -1,0 +1,372 @@
+### Actionable notification to request charge level of battery overnight
+
+alias: Get desired battery %
+description: Send a notification asking for desired battery percentage
+trigger:
+  - platform: time
+    at: "22:00:00"
+condition: []
+action:
+  - alias: Send notification
+    service: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: >
+        What battery % do you want to charge to? (default {{
+        states('input_number.default_battery_percentage')|int }}%) Estimated
+        Production Tomorrow: {{ states('sensor.energy_production_tomorrow_3')
+        }}kWh Estimated Peak Power At: {{
+        as_timestamp(states('sensor.power_highest_peak_time_tomorrow_3')) |
+        timestamp_custom("%H:%M", local=True, default="ERROR") }}
+      title: Set battery charge %
+      data:
+        actions:
+          - action: FULL
+            title: 100%
+          - action: HALF
+            title: 50%
+          - action: REPLY
+            title: Custom
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: FULL
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: REPLY
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: HALF
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: "{{ states('input_number.default_battery_percentage') | float }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"FULL\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: 100
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: |
+                {{ wait.trigger.event.data.reply_text | int(0) }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"HALF\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: 50
+mode: single
+
+### Charge battery to desired level from the grid during off-peak
+
+alias: "Charge Battery to Desired % "
+description: Charge the Home Battery to the desired % from the grid during off-peak time
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    enabled: true
+    id: Battery State of Energy
+  - platform: time
+    at: "02:00:00"
+    id: Start of off peak
+    alias: When off-peak period has started
+  - platform: time
+    at: "05:00:00"
+    id: End of off peak
+    alias: When off-peak period has ended
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of off peak
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.desired_battery_percentage
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 10800
+            alias: Set Storage Command Timeout to 10800s (3hrs for Flux period)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Charge from Solar Power and Grid
+            alias: Set Storage Command Mode to Charge from Solar Power and Grid
+      - conditions:
+          - condition: trigger
+            id: Battery State of Energy
+          - condition: device
+            device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: selected_option
+            option: Charge from Solar Power and Grid
+            alias: Storage Command Mode is Charge from Solar Power and Grid
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.solaredge_b1_state_of_energy
+                above: input_number.desired_battery_percentage
+              - condition: numeric_state
+                entity_id: sensor.solaredge_b1_state_of_energy
+                above: 99.5
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 3600
+            alias: Set Storage Command Timeout to 3600s (default)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+          - service: input_number.set_value
+            data:
+              value: 0
+            target:
+              entity_id: input_number.desired_battery_percentage
+            alias: Set Desired Battery % to zero
+      - conditions:
+          - condition: trigger
+            id: End of off peak
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: select.solaredge_i1_storage_command_mode
+                type: selected_option
+                option: Maximize Self Consumption
+            alias: Test if Storage Command Mode is MSC
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 3600
+            alias: Set Storage Command Timeout to 3600s (default)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+mode: single
+
+### Actionable notification to request discharge level of battery during peak export
+
+alias: Get Desired Battery Discharge %
+description: Send a notification asking for desired battery discharge percentage
+trigger:
+  - platform: time
+    at: "15:45:00"
+condition: []
+action:
+  - alias: Send notification
+    service: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: >
+        What battery % do you want to discharge to? (default {{
+        states('input_number.default_battery_discharge_percentage')|int }}%)
+        Current Battery Level is {{
+        states('sensor.solaredge_b1_state_of_energy') }}kWh
+      title: Set battery discharge %
+      data:
+        actions:
+          - action: FIFTYFIVE
+            title: 55%
+          - action: FORTYFIVE
+            title: 45%
+          - action: REPLY
+            title: Custom
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: FIFTYFIVE
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: REPLY
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: FORTYFIVE
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+            data:
+              value: "{{ states('input_number.default_battery_percentage') | float }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"FIFTYFIVE\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 55
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+            data:
+              value: |
+                {{ wait.trigger.event.data.reply_text | int(0) }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"FORTYFIVE\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 45
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+mode: single
+
+### Discharge battery to desired level during peak export period
+
+alias: Discharge Battery to Desired %
+description: Disharge the Home Battery to the desired % during Flux peak time
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    enabled: true
+    id: Battery State of Energy
+  - platform: time
+    at: "16:00:00"
+    id: Start of peak
+    alias: When peak period has started
+  - platform: time
+    at: "19:00:00"
+    id: End of peak
+    alias: When peak period has ended
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of peak
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            above: input_number.desired_battery_discharge_percentage
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 6300
+            alias: Set Storage Command Timeout to 6300s (last 1 hr 45 mns of Flux period)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Discharge to Maximize Export
+            alias: Set Storage Command Mode to Discharge to Maximise Export
+      - conditions:
+          - condition: trigger
+            id: Battery State of Energy
+          - condition: device
+            device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: selected_option
+            option: Discharge to Maximize Export
+            alias: Storage Command Mode is Discharge to Maximise Export
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.desired_battery_discharge_percentage
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 3600
+            alias: Set Storage Command Timeout to 3600s (default)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+      - conditions:
+          - condition: trigger
+            id: End of peak
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: select.solaredge_i1_storage_command_mode
+                type: selected_option
+                option: Maximize Self Consumption
+            alias: Test if Storage Command Mode is MSC
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: number
+            entity_id: number.solaredge_i1_storage_command_timeout
+            type: set_value
+            value: 3600
+            alias: Set Storage Command Timeout to 3600s (default)
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+mode: single
+
+
