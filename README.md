@@ -1,4 +1,6 @@
-Hi there 👋 and welcome to my repository.  It's mostly Home Assistant code that I'm slowly adding to.  Feel free to look around as I slowly add more to this Readme to describe my home automation setup.
+# Home Assistant Configuration
+
+Hi there 👋 and welcome to my [Home Assistant](https://www.home-assistant.io/) configuration.  I'm running Home Assistant on a RPi4 8GB with a 128GB SSD. I'll try to add content to the repository and this Readme when I can. Until then, feel free to browse and comment.
 
 <!--
 **Daverover66/Daverover66** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
