@@ -1,4 +1,4 @@
-### Hi there 👋 and welcome to my repository.  It's mostly Home Assistant code that I'm slowly adding to.  Feel free to look around as I slowly add more to this Readme to describe my home automation setup.
+Hi there 👋 and welcome to my repository.  It's mostly Home Assistant code that I'm slowly adding to.  Feel free to look around as I slowly add more to this Readme to describe my home automation setup.
 
 <!--
 **Daverover66/Daverover66** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
