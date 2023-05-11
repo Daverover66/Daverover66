@@ -1,0 +1,656 @@
+template:
+  - sensor:
+      - name: "Solar Selfconsumption Ratio"
+        unique_id: solar_selfconsumption_ratio
+        icon: mdi:percent-outline
+        state: >
+          {% set panel_to_house_daily = states('sensor.solar_panel_to_house_daily') | float(0) %}
+          {% set battery_in_daily = states('sensor.solar_battery_in_daily') | float(0) %}
+          {% set exported_power_daily = states('sensor.solar_exported_power_daily') | float(0) %}
+
+          {% if (panel_to_house_daily + battery_in_daily + exported_power_daily <= 0) %}
+            0
+          {% else %}
+            {{ ((panel_to_house_daily + battery_in_daily) / (panel_to_house_daily + battery_in_daily + exported_power_daily) * 100) | round (1) }}
+          {% endif %}
+
+      - name: "Inverter 1 Production"
+        unique_id: inverter_1_production
+        icon: mdi:solar-power
+        unit_of_measurement: "W"
+        state_class: "measurement"
+        device_class: "power"
+        state: >
+          {% set inverter_1_dc_output = states('sensor.solaredge_i1_dc_power') | float (0) %}
+          {% set battery_output = states('sensor.solaredge_b1_dc_power') | float (0) %}
+          {% set inverter_1_production_discharging = battery_output + inverter_1_dc_output %}
+          {% set inverter_1_production_charging = inverter_1_dc_output + battery_output %}
+
+          {% if (battery_output >=0) %}
+            {{ inverter_1_production_charging }}
+          {% else %}
+            {{ inverter_1_production_discharging }}
+          {% endif %}
+
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+          
+      - name: "Solar Selfsufficiency Ratio"
+        unique_id: solar_selfsufficiency_ratio
+        icon: mdi:percent-outline
+        state: >
+          {% set house_consumption_daily = states('sensor.solar_house_consumption_daily') | float(0) %}
+          {% set imported_power_daily = states('sensor.solar_imported_power_daily') | float(0) %}
+
+          {% if (house_consumption_daily <= 0) %}
+            0
+          {% else %}
+            {{ (1 - (imported_power_daily / house_consumption_daily) * 100) | round (1) }}
+          {% endif %}
+
+      - name: "Solar Inverter Efficiency"
+        unique_id: solar_inverter_efficiency
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float(0) %}
+          {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
+          {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float(0) %}
+          {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') %}
+
+          {% if (is_state('sensor.solar_inverter_efficiency', 'unknown')) %}
+            1
+          {% elif ((i1_dc_power + i2_dc_power) <= 100 or (i1_ac_power + i2_ac_power)  <= 100) %}
+            {{ inverter_efficiency }}
+          {% else %}
+            {{ (i1_ac_power + i2_ac_power ) / (i1_dc_power + i2_dc_power) }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number }}
+  
+      - name: "Inverter 1 Efficiency"
+        unique_id: inverter_1_efficiency
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {% set i1_dc_output = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          {% set i1_ac_output = states('sensor.solaredge_i1_ac_power') | float(0) %}
+          {% set inverter_1_efficiency = states('sensor.inverter_1_efficiency') %}
+
+          {% if (is_state('sensor.inverter_1_efficiency', 'unknown')) %}
+            1
+          {% elif (i1_dc_output < 100 or i1_ac_output  < 100) %}
+            {{ inverter_1_efficiency }}
+          {% else %}
+            {{ (i1_ac_output ) / (i1_dc_output) }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number }}
+
+      - name: "Inverter 2 Efficiency"
+        unique_id: inverter_2_efficiency
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {% set i2_dc_output = states('sensor.solaredge_i2_dc_power') | float (0) %}
+          {% set i2_ac_output = states('sensor.solaredge_i2_ac_power') | float (0) %}
+          {% set inverter_2_efficiency = states('sensor.inverter_2_efficiency') %}
+
+          {% if (is_state('sensor.inverter_2_efficiency', 'unknown' )) %}    
+            1
+          {% elif (i2_dc_output < 100 or i2_ac_output < 100) %} 
+            {{ inverter_2_efficiency }} 
+          {% else %}  
+            {{ (i2_ac_output) / (i2_dc_output) }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
+
+      - name: "Solar Battery Efficiency"
+        unique_id: solar_battery_efficiency
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+          {% set battery_efficiency = states('sensor.solar_battery_efficiency') %}
+          
+          {% if (is_state('sensor.solar_battery_efficiency', 'unknown') or ('sensor.solar_battery_efficiency' == 0)) %}
+            1
+          {% elif (i1_dc_power + b1_dc_power <= 0) %}
+            {% if (b1_dc_power >= 0 or i1_dc_power <= 0) %}
+              {{ battery_efficiency }}
+            {% else %}
+              {{ (1 - ((b1_dc_power * -1 - (i1_dc_power)) / b1_dc_power * -1)) }}
+            {% endif %} 
+          {% else %}
+            {{ battery_efficiency }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number 
+          and states('sensor.solaredge_i1_ac_power') | is_number 
+          and states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      - name: "Solar Panel Production W"
+        unique_id: solar_panel_production_w
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float (0)%}
+          {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float (0)%}
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float (0)%}
+
+          {% if (is_state ('sensor.solaredge_i1_dc_power' + 'sensor.solaredge_i2_dc_power', 'unknown') or is_state ('sensor.solaredge_b1_dc_power','unknown')) %}
+            0
+          {% elif (i1_dc_power + i2_dc_power + b1_dc_power <= 0) %}
+            0
+          {% else %}
+            {{ i1_dc_power + i2_dc_power + b1_dc_power }}
+          {%  endif %}
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      - name: "Solar Panel To House W"
+        unique_id: solar_panel_to_house_w
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float(0) %}
+          {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
+          {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
+          {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float(0) %}
+          {% set i_total_ac_power = (i1_ac_power + i2_ac_power) | float(0) %}
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+          {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
+          {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') | float(0) %}
+
+          {% if (b1_dc_power >= 0 and m1_ac_power > 0) %}
+            {% if (i_total_dc_power < 0 and i_total_ac_power <= 0) %}
+              {{ (i_total_dc_power - m1_ac_power) }}
+            {% else %}
+              {{ (i_total_ac_power - m1_ac_power) }}
+            {% endif %}
+          {% elif (b1_dc_power >= 0 and m1_ac_power <= 0) %}
+            {% if (i_total_dc_power < 0 and i_total_ac_power  <= 0) %}
+              {{ i_total_dc_power }}
+            {% else %}
+              {{ i_total_ac_power }}
+            {% endif %}
+          {% elif (b1_dc_power < 0) %}
+            {% if (i_total_dc_power + b1_dc_power < 0) %}
+              0
+            {% else %}
+              {{ ((i_total_dc_power  + b1_dc_power) * inverter_efficiency) }}
+            {% endif %}   
+          {% else %}
+            0
+          {% endif %}  
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number and states('sensor.solaredge_m1_ac_power') | is_number }}
+
+      - name: "Solar Panel To Battery W"
+        unique_id: solar_panel_to_battery_w
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+          {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float(0) %}
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          
+          {% if i1_dc_power < 0 %}
+            {% set i1_dc_power = (states('sensor.solaredge_i1_dc_power') | float (0) * -1) %}
+          {% else %}
+            {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
+          {% endif %}
+
+          {% if (b1_dc_power > 0) %}
+            {% if (grid_to_battery_w > 0) %}
+              0
+            {% else %}
+              {{ b1_dc_power }}
+            {% endif %} 
+          {% else %}
+            0
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
+        
+      - name: "Solar Panel To Grid W"
+        unique_id: solar_panel_to_grid_w
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set panel_production_w = states('sensor.solar_panel_production_w') | float(0) %}
+          {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
+
+          {% if (exported_power_w > 0 and panel_production_w > 0) %}
+            {% if (exported_power_w > panel_production_w) %}
+              {{ panel_production_w }}
+            {% else %}
+              {{ exported_power_w }}
+            {% endif %}
+          {% else %}
+            0
+          {% endif %}
+          
+      - name: "Solar Battery To House W"
+        unique_id: solar_battery_to_house_w
+        unit_of_measurement: "W"
+        icon: mdi:battery-negative
+        state: >
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+          {% set battery_efficiency = states('sensor.solar_battery_efficiency') | float(0) %}
+          {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') | float(0) %}
+
+          {% if (b1_dc_power < 0) %}
+            {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
+          {% else %}
+            0
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
+          
+      - name: "Solar Battery To Grid W"
+        unique_id: solar_battery_to_grid_w
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
+          {% set panel_to_grid_w = states('sensor.solar_panel_to_grid_w') | float(0) %}
+
+          {% if (exported_power_w > panel_to_grid_w) %}
+            {{ exported_power_w - panel_to_grid_w }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: "Solar Grid To House W"
+        unique_id: solar_grid_to_house_w
+        unit_of_measurement: "W"
+        icon: mdi:transmission-tower-export
+        state: >
+          {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
+
+          {% if (m1_ac_power <= 0) %}
+            {{ (m1_ac_power * -1) }}
+          {% else %}
+            0
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_m1_ac_power') | is_number }}
+          
+      - name: "Solar Grid To Battery W"
+        unique_id: solar_grid_to_battery_w
+        unit_of_measurement: "W"
+        icon: mdi:battery-positive
+        state: >
+          {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
+          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+
+          {% if i1_ac_power < 0 %}
+            {% set i1_ac_power = (i1_ac_power * -1) %}
+            {% else %}  
+              {% set i1_ac_power = (states('sensor.solaredge_i1_ac_power') | float(0)) %}
+              {% endif %}  
+              {% if (i1_ac_power <= 0 and b1_dc_power > 0 ) %}
+                {{ b1_dc_power }}
+                {% else %}
+                  0
+                  {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number}}
+
+      - name: "Solar Battery In W"
+        unique_id: solar_battery_in_w
+        unit_of_measurement: "W"
+        icon: mdi:battery-positive
+        state: >
+          {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float(0) %}
+          {% set panel_to_battery_w = states('sensor.solar_panel_to_battery_w') | float(0) %}
+
+          {{ (grid_to_battery_w + panel_to_battery_w) }}
+
+      - name: "Solar House Consumption W"
+        unique_id: solar_house_consumption_w
+        unit_of_measurement: "W"
+        icon: mdi:home
+        state: >
+          {% set panel_to_house_w = states('sensor.solar_panel_to_house_w') | float(0) %}
+          {% set battery_to_house_w = states('sensor.solar_battery_to_house_w') | float(0) %}
+          {% set grid_to_house_w = states('sensor.solar_grid_to_house_w') | float(0) %}
+
+          {{ (panel_to_house_w + battery_to_house_w + grid_to_house_w) }}
+
+      - name: "Solar Imported Power W"
+        unique_id: solar_imported_power_w
+        unit_of_measurement: "W"
+        icon: mdi:transmission-tower-export
+        state: >
+          {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
+
+          {% if (m1_ac_power < 0) %}
+            {{ (m1_ac_power * -1) }}
+          {% else %}
+            0
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_m1_ac_power') | is_number}}
+
+      - name: "Solar Exported Power W"
+        unique_id: solar_exported_power_w
+        unit_of_measurement: "W"
+        icon: mdi:transmission-tower-import
+        state: >
+          {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
+
+          {% if (m1_ac_power > 0) %}
+            {{ (m1_ac_power) }}
+          {% else %}
+            0
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_m1_ac_power') | is_number }}
+          
+      - name: "Solar Lifetime Production"
+        unique_id: solar_lifetime_production
+        unit_of_measurement: "MWh"
+        icon: mdi:solar-power
+        state: >
+          {% set ac_energy_i1_kwh = states('sensor.solaredge_i1_ac_energy_kwh') | float(0) %}
+          {% set ac_energy_i2_kwh = states('sensor.solaredge_i2_ac_energy_kwh') | float(0) %}
+          {{ (((ac_energy_i1_kwh + ac_energy_i2_kwh) / 1000) | round (2)) }}
+        availability: >
+          {{ states('sensor.solaredge_i1_ac_energy_kwh') | is_number }}
+
+      - name: "Solar Accounting Cost Rate"
+        unique_id: solar_accounting_cost_rate
+        icon: mdi:cash-plus
+        unit_of_measurement: "£/kWh"
+        state: >
+          0.12
+
+      - name: "Solar Accounting Compensation Rate"
+        unique_id: solar_accounting_compensation_rate
+        icon: mdi:cash-minus
+        unit_of_measurement: "£/kWh"
+        state: >
+          0.041
+
+      - name: "Solar Accounting Total Daily"
+        unique_id: solar_accounting_total_daily
+        icon: mdi:currency-gbp
+        unit_of_measurement: "£"
+        state: >
+          {% set cost = (states('sensor.solar_imported_power_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate') | float(0)) %}
+          {% set compensation = (states('sensor.solar_exported_power_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate') | float(0)) %}
+          {{ (cost - compensation) | round(2) }}
+
+      - name: "Solar Accounting Total Weekly"
+        unique_id: solar_accounting_total_weekly
+        icon: mdi:currency-gbp
+        unit_of_measurement: "£"
+        state: >
+          {% set cost = (states('sensor.solar_imported_power_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate') | float(0)) %}
+          {% set compensation = (states('sensor.solar_exported_power_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate') | float(0)) %}
+          {{ (cost - compensation) | round(2) }}
+
+      - name: "Solar Accounting Total Monthly"
+        unique_id: solar_accounting_total_monthly
+        icon: mdi:currency-gbp
+        unit_of_measurement: "£"
+        state: >
+          {% set cost = (states('sensor.solar_imported_power_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate') | float(0)) %}
+          {% set compensation = (states('sensor.solar_exported_power_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate') | float(0)) %}
+          {{ (cost - compensation) | round(2) }}
+
+      - name: "Solar Accounting Total Yearly"
+        unique_id: solar_accounting_total_yearly
+        icon: mdi:currency-gbp
+        unit_of_measurement: "£"
+        state: >
+          {% set cost = (states('sensor.solar_imported_power_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate') | float(0)) %}
+          {% set compensation = (states('sensor.solar_exported_power_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate') | float(0)) %}
+          {{ (cost - compensation) | round(2) }}
+		  
+	  - name: "Gas Accounting Total"
+        unique_id: gas_accounting_total
+        icon: mdi:currency-gbp
+        unit_of_measurement: "£"
+        state: >
+          {% set gas_usage = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_previous_accumulative_consumption_kwh') | float (0) %}
+          {% set gas_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_rate') | float (0) %}
+          {% set gas_standing_charge_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_standing_charge') | float (0) %}
+
+          {{ (gas_usage * gas_rate) + gas_standing_charge_rate }}
+		  
+	
+
+      - name: "Solar Inverter Efficiency Int"
+        unique_id: solar_inverter_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_inverter_efficiency') | float(0)) * 100) | round(2) }}
+
+      - name: "Inverter 1 Production Int"
+        unique_id: inverter_1_production_int
+        icon: mdi:solar-power
+        unit_of_measurement: "W"
+        state: >
+          {{ (states('sensor.inverter_1_production') | float(0)) | round(2) }}
+
+      - name: "Inverter 1 Efficiency Int"
+        unique_id: inverter_1_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.inverter_1_efficiency') | float(0)) * 100) | round (2) }}
+
+      - name: "Inverter 2 Efficiency Int"
+        unique_id: inverter_2_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.inverter_2_efficiency') | float(0)) * 100) | round (2) }}
+
+
+      - name: "Solar Battery Efficiency Int"
+        unique_id: solar_battery_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_battery_efficiency')| float(0)) * 100) | round(2) }}
+
+      - name: "Solar Inverter Efficiency Average Int"
+        unique_id: solar_inverter_efficiency_average_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_inverter_efficiency_average') | float(0)) * 100) | round(2) }}
+
+      - name: "Solar Battery Efficiency Average Int"
+        unique_id: solar_battery_efficiency_average_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_battery_efficiency_average')| float(0)) * 100) | round(2) }}
+
+sensor:
+  - platform: integration
+    source: sensor.solar_panel_production_w
+    method: left
+    unit_prefix: k
+    name: solar_panel_production_kwh
+  - platform: integration
+    source: sensor.solar_battery_to_house_w
+    method: left
+    unit_prefix: k
+    name: solar_battery_out_kwh
+  - platform: integration
+    source: sensor.solar_battery_in_w
+    method: left
+    unit_prefix: k
+    name: solar_battery_in_kwh
+  - platform: integration
+    source: sensor.solar_house_consumption_w
+    method: left
+    unit_prefix: k
+    name: solar_house_consumption_kwh
+  - platform: integration
+    source: sensor.solar_imported_power_w
+    method: left
+    unit_prefix: k
+    name: solar_imported_power_kwh
+  - platform: integration
+    source: sensor.solar_exported_power_w
+    method: left
+    unit_prefix: k
+    name: solar_exported_power_kwh
+  - platform: integration
+    source: sensor.solar_panel_to_house_w
+    method: left
+    unit_prefix: k
+    name: solar_panel_to_house_kwh
+
+  - platform: statistics
+    name: "Solar Battery Efficiency Average"
+    unique_id: solar_battery_efficiency_average
+    state_characteristic: mean
+    sampling_size: 1200
+    max_age:
+      hours: 24
+    entity_id: sensor.solar_battery_efficiency
+
+  - platform: statistics
+    name: "Solar Inverter Efficiency Average"
+    unique_id: solar_inverter_efficiency_average
+    state_characteristic: mean
+    sampling_size: 1200
+    max_age:
+      hours: 24
+    entity_id: sensor.solar_inverter_efficiency
+
+utility_meter:
+  solar_panel_production_daily:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Daily
+    cycle: daily
+  solar_battery_in_daily:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Daily
+    cycle: daily
+  solar_battery_out_daily:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Daily
+    cycle: daily
+  solar_house_consumption_daily:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Daily
+    cycle: daily
+  solar_imported_power_daily:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Daily
+    cycle: daily
+  solar_imported_power_daily_solaredge:
+    source: sensor.solaredge_m1_imported_kwh
+    name: Solar Imported Power Daily Solar Edge
+    cycle: daily
+  solar_exported_power_daily:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Daily
+    cycle: daily
+  solar_panel_to_house_daily:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Daily
+    cycle: daily
+
+  solar_panel_to_house_weekly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Weekly
+    cycle: weekly
+  solar_imported_power_weekly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Weekly
+    cycle: weekly
+  solar_house_consumption_weekly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Weekly
+    cycle: weekly
+  solar_panel_production_weekly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Weekly
+    cycle: weekly
+  solar_battery_in_weekly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Weekly
+    cycle: weekly
+  solar_battery_out_weekly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Weekly
+    cycle: weekly
+  solar_exported_power_weekly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Weekly
+    cycle: weekly
+
+  solar_panel_to_house_monthly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Monthly
+    cycle: monthly
+  solar_imported_power_monthly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Monthly
+    cycle: monthly
+  solar_house_consumption_monthly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Monthly
+    cycle: monthly
+  solar_panel_production_monthly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Monthly
+    cycle: monthly
+  solar_battery_in_monthly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Monthly
+    cycle: monthly
+  solar_battery_out_monthly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Monthly
+    cycle: monthly
+  solar_exported_power_monthly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Monthly
+    cycle: monthly
+
+  solar_panel_to_house_yearly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Yearly
+    cycle: yearly
+  solar_imported_power_yearly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Yearly
+    cycle: yearly
+  solar_house_consumption_yearly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Yearly
+    cycle: yearly
+  solar_panel_production_yearly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Yearly
+    cycle: yearly
+  solar_battery_in_yearly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Yearly
+    cycle: yearly
+  solar_battery_out_yearly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Yearly
+    cycle: yearly
+  solar_exported_power_yearly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Yearly
+    cycle: yearly
+    
+      
