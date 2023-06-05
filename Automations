@@ -403,4 +403,1508 @@ action:
             alias: Set Storage Discharge Limit to Input Number Helper Value
 mode: single
 
+### Actionable notification to ask if battery output is to be limited overnight during EV charging
+
+alias: Get Battery Output Limit
+description: Send a notification asking if the battery output should be limited overnight
+trigger:
+  - platform: time
+    at: "22:05:00"
+condition: []
+action:
+  - alias: Send notification
+    service: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: |
+        Do you want to limit the battery output overnight?
+      title: Battery Output Limit
+      data:
+        actions:
+          - action: "YES"
+            title: "Yes"
+          - action: "NO"
+            title: "No"
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "YES"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "NO"
+    timeout:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') | float
+                }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 500
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 5000
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+mode: single
+
+### Limit battery output overnight during EV charging 
+
+alias: Limit Battery Output
+description: Limit the output of the battery during overnight EV charging window
+trigger:
+  - platform: time
+    at: input_datetime.start_battery_output_limit
+    id: Start of Flux Period
+  - platform: time
+    at: input_datetime.end_battery_output_limit
+    id: End of Flux Period
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of Flux Period
+            alias: When triggered by start of limit period
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+      - conditions:
+          - condition: trigger
+            id: End of Flux Period
+            alias: When triggered by end of limit period
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+mode: single
+
+### Check Battery Settings
+
+alias: Battery Settings Confirm
+description: checks to see if battery settings are correct and sets an input boolean toggle
+trigger:
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_default_mode
+    from: Maximize Self Consumption
+    id: Storage Default Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_default_mode
+    id: Storage Default Mode Correct
+    to: Maximize Self Consumption
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_command_mode
+    from: Maximize Self Consumption
+    id: Storage Cmd Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_command_mode
+    id: Storage Cmd Mode Correct
+    to: Maximize Self Consumption
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_control_mode
+    from: Remote Control
+    id: Storage Control Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_control_mode
+    id: Storage Control Mode Correct
+    to: Remote Control
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
+mode: single
+
+### All Heating Automations
+
+alias: HEATING - All Automations
+description: >-
+  Detects when a window is open or closed and sets heating on or off in that
+  room. Detects when no-one is home and turns heating off.
+trigger:
+  - platform: state
+    entity_id:
+      - person.david_forrester
+    from: home
+    to: not_home
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Dave Away
+  - platform: state
+    entity_id:
+      - person.david_forrester
+    from: not_home
+    to: home
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Dave Home
+  - platform: state
+    entity_id:
+      - person.gem_forrester
+    from: home
+    to: not_home
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Gem Away
+  - platform: state
+    entity_id:
+      - person.gem_forrester
+    from: not_home
+    to: home
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Gem Home
+  - platform: state
+    entity_id:
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.hallway_window_contact
+    to: "on"
+    id: Downstairs Door or Window Open
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  - platform: state
+    entity_id:
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.hallway_window_contact
+    to: "off"
+    id: Downstairs Door or Window Closed
+  - type: opened
+    platform: device
+    device_id: e6ba853c7dec9cf8415d6881aa429444
+    entity_id: binary_sensor.dining_room_window_right_contact
+    domain: binary_sensor
+    id: Dining Room Window Right Open
+  - type: not_opened
+    platform: device
+    device_id: e6ba853c7dec9cf8415d6881aa429444
+    entity_id: binary_sensor.dining_room_window_right_contact
+    domain: binary_sensor
+    id: Dining Room Window Right Closed
+  - type: opened
+    platform: device
+    device_id: f9aaa501ddaeabde9538648caab6c975
+    entity_id: binary_sensor.cloakroom_window_contact
+    domain: binary_sensor
+    id: Cloakroom Window Open
+  - type: not_opened
+    platform: device
+    device_id: f9aaa501ddaeabde9538648caab6c975
+    entity_id: binary_sensor.cloakroom_window_contact
+    domain: binary_sensor
+    id: Cloakroom Window Closed
+  - type: opened
+    platform: device
+    device_id: 5af72a1353a555c5830dcba725c7cf23
+    entity_id: binary_sensor.en_suite_window_sensor_contact
+    domain: binary_sensor
+    id: En-Suite Window Open
+  - type: not_opened
+    platform: device
+    device_id: 5af72a1353a555c5830dcba725c7cf23
+    entity_id: binary_sensor.en_suite_window_sensor_contact
+    domain: binary_sensor
+    id: En-Suite Window Closed
+  - type: opened
+    platform: device
+    device_id: 13a27670b56ff35704df9339e2a668a1
+    entity_id: binary_sensor.office_window_sensor_contact
+    domain: binary_sensor
+    id: Office Window Open
+  - type: not_opened
+    platform: device
+    device_id: 13a27670b56ff35704df9339e2a668a1
+    entity_id: binary_sensor.office_window_sensor_contact
+    domain: binary_sensor
+    id: Office Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+    to: "on"
+    id: Bedroom Window Open
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+    to: "off"
+    id: Bedroom Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+    id: Guest Bedroom Window Open
+    to: "on"
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+    to: "off"
+    id: Guest Bedroom Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+    to: "on"
+    id: Upstairs Windows Open
+  - platform: state
+    entity_id:
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+    to: "off"
+    id: Upstairs Windows Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "on"
+    id: Kids Bathroom Window Open
+  - platform: state
+    entity_id:
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "off"
+    id: Kids Bathroom Window Closed
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Dave Away
+          - condition: state
+            entity_id: person.gem_forrester
+            state: not_home
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: "On"
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+        sequence:
+          - service: script.heating_turn_off_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Gem Away
+          - condition: state
+            entity_id: person.david_forrester
+            state: not_home
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: "On"
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+        sequence:
+          - service: script.heating_turn_off_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Dave Home
+          - condition: state
+            entity_id: person.gem_forrester
+            state: not_home
+          - condition: state
+            entity_id: input_select.desired_heating_mode
+            state: Auto
+        sequence:
+          - service: script.heating_resume_schedule_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Gem Home
+          - condition: state
+            entity_id: person.david_forrester
+            state: not_home
+          - condition: state
+            entity_id: input_select.desired_heating_mode
+            state: Auto
+        sequence:
+          - service: script.heating_resume_schedule_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Downstairs Door or Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 84daad158322931a2b14ee69a6a9c8f5
+                domain: climate
+                entity_id: climate.downstairs
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 84daad158322931a2b14ee69a6a9c8f5
+                domain: climate
+                entity_id: climate.downstairs
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            alias: Turn off heating downstairs
+            target:
+              entity_id: climate.downstairs
+      - conditions:
+          - condition: trigger
+            id: Downstairs Door or Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.downstairs
+      - conditions:
+          - condition: trigger
+            id: Cloakroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 2fe808a84c082db3968a4d856fe6e8ef
+                domain: climate
+                entity_id: climate.cloakroom
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 2fe808a84c082db3968a4d856fe6e8ef
+                domain: climate
+                entity_id: climate.cloakroom
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.cloakroom
+      - conditions:
+          - condition: trigger
+            id: Cloakroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.cloakroom
+      - conditions:
+          - condition: trigger
+            id: En-Suite Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 2912cee70e19436c9d6795287d1cf8c9
+                domain: climate
+                entity_id: climate.en_suite_bathroom
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 2912cee70e19436c9d6795287d1cf8c9
+                domain: climate
+                entity_id: climate.en_suite_bathroom
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.en_suite_bathroom
+      - conditions:
+          - condition: trigger
+            id: En-Suite Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.en_suite_bathroom
+      - conditions:
+          - condition: trigger
+            id: Office Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 71a6edc5565513cdbe48f2b5c45189fa
+                domain: climate
+                entity_id: climate.office
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 71a6edc5565513cdbe48f2b5c45189fa
+                domain: climate
+                entity_id: climate.office
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.office
+      - conditions:
+          - condition: trigger
+            id: Office Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.office
+      - conditions:
+          - condition: trigger
+            id: Bedroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 5b51bb0d00f12ec04c45d29296b6b9ee
+                domain: climate
+                entity_id: climate.master_bedroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 5b51bb0d00f12ec04c45d29296b6b9ee
+                domain: climate
+                entity_id: climate.master_bedroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.master_bedroom
+      - conditions:
+          - condition: trigger
+            id: Bedroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.master_bedroom
+      - conditions:
+          - condition: trigger
+            id: Guest Bedroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: bc71698349b1224d4f591b0d87542cb5
+                domain: climate
+                entity_id: climate.guest_bedroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: bc71698349b1224d4f591b0d87542cb5
+                domain: climate
+                entity_id: climate.guest_bedroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id:
+                - climate.guest_bedroom
+      - conditions:
+          - condition: trigger
+            id: Guest Bedroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.guest_bedroom
+      - conditions:
+          - condition: trigger
+            id: Upstairs Windows Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.upstairs
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.upstairs
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id:
+                - climate.upstairs
+      - conditions:
+          - condition: trigger
+            id: Upstairs Windows Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.upstairs
+      - conditions:
+          - condition: trigger
+            id: Kids Bathroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.kids_bathroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.kids_bathroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.kids_bathroom
+      - conditions:
+          - condition: trigger
+            id: Kids Bathroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.kids_bathroom
+mode: single
+
+### Security System Automation 
+
+alias: Security System
+description: A door or window is open and sentry mode is active.
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.cloakroom_window_contact
+      - binary_sensor.hallway_window_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.dining_room_window_left_contact
+      - binary_sensor.dining_room_window_right_contact
+      - binary_sensor.en_suite_window_sensor_contact
+      - binary_sensor.office_window_sensor_contact
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "on"
+    id: Activate
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.cloakroom_window_contact
+      - binary_sensor.hallway_window_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.dining_room_window_left_contact
+      - binary_sensor.dining_room_window_right_contact
+      - binary_sensor.en_suite_window_sensor_contact
+      - binary_sensor.office_window_sensor_contact
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "off"
+    id: Clear
+  - platform: state
+    entity_id:
+      - person.gem_forrester
+    to: home
+    id: Gem Home
+  - platform: state
+    entity_id:
+      - person.david_forrester
+    to: home
+    id: Dave Home
+    enabled: true
+  - platform: state
+    entity_id:
+      - group.residents
+    from: home
+    to: not_home
+    id: We've all gone out
+  - platform: state
+    entity_id:
+      - group.residents
+    from: not_home
+    to: home
+    id: We're all home again
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Activate
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.security_issue
+      - conditions:
+          - condition: trigger
+            id: Clear
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.security_issue
+      - conditions:
+          - condition: trigger
+            id: We've all gone out
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "off"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+      - conditions:
+          - condition: trigger
+            id: Gem Home
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: person.david_forrester
+                state: home
+            alias: Confirm Dave is not home
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+      - conditions:
+          - condition: trigger
+            id: Dave Home
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: person.gem_forrester
+                state: home
+            alias: Confirm Gem is not home
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+mode: single
+
+### Home Announcements
+
+alias: Home Announcements
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.school_night
+    alias: School Night bedtime for the boys
+    id: School Night Bedtime Boys
+  - platform: time
+    at: input_datetime.non_school_night
+    alias: Non-School Night bedtime for boys
+    id: Non School Bedtime
+  - platform: time
+    at: input_datetime.school_pick_up_time_mon_to_thurs
+    id: School pick up
+    alias: School Pick Up Time
+  - platform: time
+    at: input_datetime.school_pick_up_time_friday
+    id: Friday School Pick Up Time
+    alias: "School Pick Up - Friday "
+  - platform: time
+    at: input_datetime.get_ready_for_school_at
+    id: Get ready for school
+    alias: Get ready for school
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: School Night Bedtime Boys
+          - condition: state
+            entity_id: binary_sensor.schoolnight
+            state: "on"
+            alias: Confirm School Night
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: Set volume everywhere
+            target:
+              area_id: everywhere
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere
+            data:
+              message: >-
+                Sean and Jamie, it's time for bed. Upstairs and brush your
+                teeth.
+              title: Time for bed
+              data:
+                type: announce
+                method: all
+            alias: Bedtime announcement
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            enabled: false
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: "Set volume everywhere "
+            enabled: false
+            target:
+              area_id: everywhere
+      - conditions:
+          - condition: trigger
+            id: Non School Bedtime
+          - condition: state
+            entity_id: binary_sensor.schoolnight
+            state: "off"
+            alias: Confirm Not School Night
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: "Set volume everywhere "
+            target:
+              area_id: everywhere
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere
+            data:
+              message: Sean and Jamie, it's bedtime.  Upstairs and brush your teeth.
+              title: Boys Bedtime
+              data:
+                type: announce
+                method: all
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            enabled: false
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: "Set volume everywhere "
+            target:
+              area_id: everywhere
+            enabled: false
+      - conditions:
+          - condition: trigger
+            id: Get ready for school
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.schoolday
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.fridayschool
+                state: "on"
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: Set volume everywhere
+            target:
+              area_id: everywhere
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+            alias: Wait 2s
+          - service: notify.alexa_media_everywhere
+            data:
+              message: Sean and Jamie, it's time to get dressed.
+              title: Get dressed.
+              data:
+                type: announce
+                method: all
+            alias: Time to get dressed announcement.
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+            alias: 10 minutes later.
+          - service: notify.alexa_media_everywhere
+            data:
+              message: Sean and Jamie, it's time to brush your teeth.
+              title: Brush teeth.
+              data:
+                type: announce
+                method: all
+            alias: Time to brush teeth announcement.
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            alias: 10s later
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.living_room_tv
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.sky_q_main
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+            alias: 10 minutes later.
+          - service: notify.alexa_media_everywhere
+            data:
+              message: Sean and Jamie, it's time for school.
+              title: Time for school
+              data:
+                type: announce
+                method: all
+            alias: Time to go to school announcement.
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            alias: 10s later
+            enabled: false
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: Set volume everywhere
+            target:
+              area_id: everywhere
+      - conditions:
+          - condition: trigger
+            id: School pick up
+          - condition: state
+            entity_id: binary_sensor.schoolday
+            state: "on"
+            alias: Check it's a school day
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: "Set volume everywhere "
+            target:
+              area_id: everywhere
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere
+            data:
+              message: School pick up in 5 minutes
+              title: School Pick Up
+              data:
+                type: announce
+                method: all
+            alias: School pick announcement
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            enabled: false
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            alias: "Set volume everywhere "
+            target:
+              area_id: everywhere
+      - conditions:
+          - condition: trigger
+            id: Friday School Pick Up Time
+          - condition: state
+            entity_id: binary_sensor.fridayschool
+            state: "on"
+            alias: Confirm it's a Friday School Day
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            target:
+              area_id: everywhere
+            alias: "Set volume everywhere "
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere
+            data:
+              message: School pick up in 5 minutes
+              title: SCHOOL PICK UP
+              data:
+                type: announce
+                method: all
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            enabled: false
+          - service: media_player.volume_set
+            data:
+              volume_level: 0.3
+            target:
+              area_id: everywhere
+            alias: "Set volume everywhere "
+            enabled: false
+mode: single
+
+### Washing Machine All Automations 
+
+alias: Washing Machine - All Automations
+description: >-
+  Set the value of input boolean "washing machine on/off" based on power
+  consumption. Announce when the washing has finished and check the washing has
+  been removed.
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.shelly1pm_e89f6d84a584_power
+    above: 10
+    id: Washing Machine On
+    alias: Washing machine drawing more than 10W power
+  - platform: numeric_state
+    entity_id: sensor.shelly1pm_e89f6d84a584_power
+    below: 5
+    id: Washing machine off
+    alias: Washing machine drawing less than 5W power for 30s.
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  - platform: state
+    entity_id:
+      - binary_sensor.washing_machine_door_battery_low
+    from: "off"
+    to: "on"
+    id: Door Sensor Battery Low
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.washing_machine_door_open
+    id: Washing machine door not open
+    alias: Washing done notification repeat with timer
+  - type: opened
+    platform: device
+    device_id: 3d59452e68f6f274a7d4ee5c1c408410
+    entity_id: binary_sensor.washing_machine_door_contact
+    domain: binary_sensor
+    id: Washing removed from machine
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Washing Machine On
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_on_off
+      - conditions:
+          - condition: trigger
+            id: Washing machine off
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_on_off
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_on_off
+                state: "off"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere
+                data:
+                  message: That's the washing done. Better get it hung up.
+                  title: WASHING DONE
+                  data:
+                    type: announce
+                    method: all
+              - service: notify.mobile_app_daves_samsung_galaxy
+                data:
+                  message: That's the washing done. Better get it hung up.
+                  title: WASHING MACHINE
+              - service: notify.mobile_app_sm_s901b
+                data:
+                  message: That's the washing done. Better get it hung up.
+                  title: WASHING MACHINE
+              - service: timer.start
+                data: {}
+                target:
+                  entity_id: timer.washing_machine_door_open
+      - conditions:
+          - condition: trigger
+            id: Door Sensor Battery Low
+        sequence:
+          - service: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: Washing machine door sensor battery low
+              title: WASHING MACHINE
+      - conditions:
+          - condition: trigger
+            id: Washing machine door not open
+          - condition: state
+            entity_id: binary_sensor.washing_machine_door_contact
+            state: "off"
+        sequence:
+          - service: notify.alexa_media_everywhere
+            data:
+              message: >-
+                The washing is still in the machine. Better hang it up before it
+                starts to smell.
+              title: WASHING MACHINE
+              data:
+                type: announce
+                method: all
+          - service: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: >-
+                The washing is still in the machine. Better hang it up before it
+                starts to smell.
+              title: WASHING MACHINE
+          - service: notify.mobile_app_sm_s901b
+            data:
+              message: >-
+                The washing is still in the machine. Better hang it up before it
+                starts to smell.
+              title: WASHING MACHINE
+      - conditions:
+          - condition: trigger
+            id: Washing removed from machine
+          - condition: state
+            entity_id: timer.washing_machine_door_open
+            state: active
+        sequence:
+          - service: timer.cancel
+            data: {}
+            target:
+              entity_id: timer.washing_machine_door_open
+mode: single
+
+
+### Travel Announcements 
+
+alias: Travel Automations
+description: Checks waze travel time entity for Gem being closer than 5 minutes away
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.waze_travel_time
+    below: 5
+    alias: When Gem is less than 5 minutes away
+    id: Gem almost home
+  - platform: numeric_state
+    entity_id: zone.gem_work
+    id: Gem at work
+    alias: Gem is at work
+    above: 0
+  - platform: numeric_state
+    entity_id: zone.gem_work
+    alias: Gem left work
+    id: Gem left work
+    below: 1
+  - platform: numeric_state
+    entity_id: sensor.waze_travel_time_2
+    below: 5
+    alias: When Dave is less than 5 minutes away
+    id: Dave almost home
+  - platform: numeric_state
+    entity_id: zone.dave_s_mum_and_dad
+    id: Dave is at his mum and dad's
+    alias: "Dave is at his mum and dad's "
+    above: 0
+  - platform: numeric_state
+    entity_id: zone.dave_s_mum_and_dad
+    alias: "Dave left his mum and dad's "
+    id: "Dave left his mum and dad's "
+    below: 1
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Gem at work
+        sequence:
+          - service: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: Gem's got to work
+              title: GEM AT WORK
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere
+                data:
+                  message: Gem is at work
+                  title: GEM AT WORK
+                  data:
+                    type: announce
+                    method: all
+            alias: If quiet time off, announce on Alexa everywhere group
+      - conditions:
+          - condition: trigger
+            id: Gem almost home
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+        sequence:
+          - service: notify.alexa_media_everywhere
+            data:
+              message: Mummy is nearly home. Best get the kettle on.
+              title: MUMMY NEARLY HOME
+              data:
+                type: announce
+                method: all
+      - conditions:
+          - condition: trigger
+            id: Gem left work
+        sequence:
+          - service: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: Gem has left work
+              title: GEM LEFT WORK
+          - service: notify.alexa_media_everywhere
+            data:
+              message: >-
+                Mummy has left the office and is on her way home. She'll be home
+                in {{ state_attr('sensor.gem_at_work' , 'duration') | round(0)}}
+                minutes.
+              title: MUMMY LEFT OFFICE
+              data:
+                type: announce
+                method: all
+      - conditions:
+          - condition: trigger
+            id: Dave is at his mum and dad's
+        sequence:
+          - service: notify.alexa_media_everywhere
+            data:
+              message: "Dave is at his mum and dad's "
+              title: DAVE IN DUNDEE
+              data:
+                type: announce
+                method: all
+          - service: notify.mobile_app_sm_s901b
+            data:
+              message: "Dave is at his mum and dad's "
+              title: DAVE IS IN DUNDEE
+      - conditions:
+          - condition: trigger
+            id: Dave almost home
+        sequence:
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere
+                data:
+                  message: >-
+                    Daddy will be home in 5 minutes. Make sure his dinner is on
+                    the table.
+                  title: DADDY ALMOST HOME
+                  data:
+                    type: announce
+                    method: all
+            alias: If quiet time is off, announce on Alexa everywhere group.
+          - service: notify.mobile_app_sm_s901b
+            data:
+              message: Dave is almost home
+              title: DAVE 5 MINS AWAY
+            alias: Notify Gem's phone
+      - conditions:
+          - condition: trigger
+            id: "Dave left his mum and dad's "
+        sequence:
+          - service: notify.alexa_media_everywhere
+            data:
+              message: >-
+                Daddy is on his way home. He'll be home in {{
+                state_attr('sensor.dave_in_dundee' , 'duration') | round(0)}}
+                minutes.
+              title: DADDY LEFT DUNDEE
+              data:
+                type: announce
+                method: all
+          - service: notify.mobile_app_sm_s901b
+            data:
+              message: Dave has left Dundee
+              title: DAVE LEFT
+            alias: Notify Gem's phone
+mode: single
+
 
