@@ -137,22 +137,22 @@ template:
         unit_of_measurement: "W"
         icon: mdi:solar-power
         state: >
-          {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float (0)%}
-          {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float (0)%}
-	  {% set i_total_ac_power = (i1_ac_power + i2_ac_power) | float(0) %}
+          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float (0)%}
+          {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float (0)%}
+	  {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
           {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float (0)%}
 
-          {% if (is_state ('sensor.solaredge_i1_ac_power' + 'sensor.solaredge_i2_ac_power', 'unknown') or is_state ('sensor.solaredge_b1_dc_power','unknown')) %}
+          {% if (is_state ('sensor.solaredge_i1_dc_power' + 'sensor.solaredge_i2_dc_power', 'unknown') or is_state ('sensor.solaredge_b1_dc_power','unknown')) %}
             0
-          {% elif (i_total_ac_power + b1_dc_power <= 0) %}
+          {% elif (i_total_dc_power + b1_dc_power <= 0) %}
             0
-          {% elif (i_total_ac_power + b1_dc_power < 10) %}
+          {% elif (i_total_dc_power + b1_dc_power < 10) %}
             0
           {% else %}
-            {{ i_total_ac_power  + b1_dc_power }}
+            {{ i_total_dc_power  + b1_dc_power }}
           {%  endif %}
         availability: >
-          {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
 
       - name: "Solar Panel To House W"
         unique_id: solar_panel_to_house_w
