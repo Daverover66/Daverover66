@@ -4,7 +4,7 @@ alias: Get desired battery %
 description: Send a notification asking for desired battery percentage
 trigger:
   - platform: time
-    at: "22:00:00"
+    at: input_datetime.get_desired_charge_notification_at
 condition: []
 action:
   - alias: Send notification
@@ -12,11 +12,7 @@ action:
     data:
       message: >
         What battery % do you want to charge to? (default {{
-        states('input_number.default_battery_percentage')|int }}%) Estimated
-        Production Tomorrow: {{ states('sensor.energy_production_tomorrow_3')
-        }}kWh Estimated Peak Power At: {{
-        as_timestamp(states('sensor.power_highest_peak_time_tomorrow_3')) |
-        timestamp_custom("%H:%M", local=True, default="ERROR") }}
+        states('input_number.default_battery_percentage')|int }}%)
       title: Set battery charge %
       data:
         actions:
