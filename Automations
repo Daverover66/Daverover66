@@ -84,6 +84,7 @@ mode: single
 
 ### Charge battery to desired level from the grid during off-peak
 
+
 alias: "Charge Battery to Desired % "
 description: Charge the Home Battery to the desired % from the grid during off-peak time
 trigger:
@@ -93,11 +94,11 @@ trigger:
     enabled: true
     id: Battery State of Energy
   - platform: time
-    at: "02:00:00"
+    at: input_datetime.start_battery_grid_charge
     id: Start of off peak
     alias: When off-peak period has started
   - platform: time
-    at: "05:00:00"
+    at: input_datetime.end_battery_grid_charge
     id: End of off peak
     alias: When off-peak period has ended
 condition: []
@@ -110,12 +111,15 @@ action:
             entity_id: sensor.solaredge_b1_state_of_energy
             below: input_number.desired_battery_percentage
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 10800
-            alias: Set Storage Command Timeout to 10800s (3hrs for Flux period)
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.storage_command_timeout_for_discharge_to_grid')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Input Number Helper Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
@@ -141,12 +145,14 @@ action:
                 entity_id: sensor.solaredge_b1_state_of_energy
                 above: 99.5
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 3600
-            alias: Set Storage Command Timeout to 3600s (default)
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
@@ -172,12 +178,14 @@ action:
                 option: Maximize Self Consumption
             alias: Test if Storage Command Mode is MSC
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 3600
-            alias: Set Storage Command Timeout to 3600s (default)
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
@@ -192,7 +200,7 @@ alias: Get Desired Battery Discharge %
 description: Send a notification asking for desired battery discharge percentage
 trigger:
   - platform: time
-    at: "15:45:00"
+    at: input_datetime.get_desired_discharge_notification_at 
 condition: []
 action:
   - alias: Send notification
@@ -283,13 +291,13 @@ trigger:
     enabled: true
     id: Battery State of Energy
   - platform: time
-    at: "16:00:00"
     id: Start of peak
-    alias: When peak period has started
+    alias: At Start Discharge Helper Time
+    at: input_datetime.start_battery_discharge
   - platform: time
-    at: "19:00:00"
+    at: input_datetime.end_battery_discharge
     id: End of peak
-    alias: When peak period has ended
+    alias: At End Discharge Helper Time
 condition: []
 action:
   - choose:
@@ -299,13 +307,23 @@ action:
           - condition: numeric_state
             entity_id: sensor.solaredge_b1_state_of_energy
             above: input_number.desired_battery_discharge_percentage
+            alias: Confirm Battery State of Charge is above desired discharge %
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 6300
-            alias: Set Storage Command Timeout to 6300s (last 1 hr 45 mns of Flux period)
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.storage_command_timeout_for_discharge_to_grid')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Input Number Helper Value
+          - service: number.set_value
+            data:
+              value: "{{ states('input_number.battery_output_limit') | float(0) }}"
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
@@ -326,18 +344,28 @@ action:
             entity_id: sensor.solaredge_b1_state_of_energy
             below: input_number.desired_battery_discharge_percentage
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 3600
-            alias: Set Storage Command Timeout to 3600s (default)
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
             type: select_option
             option: Maximize Self Consumption
             alias: Set Storage Command Mode to MSC
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
       - conditions:
           - condition: trigger
             id: End of peak
@@ -351,18 +379,28 @@ action:
                 option: Maximize Self Consumption
             alias: Test if Storage Command Mode is MSC
         sequence:
-          - device_id: 952193e87f675ba7f7e32eda5500c572
-            domain: number
-            entity_id: number.solaredge_i1_storage_command_timeout
-            type: set_value
-            value: 3600
-            alias: Set Storage Command Timeout to 3600s (default)
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float (0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
           - device_id: 952193e87f675ba7f7e32eda5500c572
             domain: select
             entity_id: select.solaredge_i1_storage_command_mode
             type: select_option
             option: Maximize Self Consumption
             alias: Set Storage Command Mode to MSC
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
 mode: single
 
 
