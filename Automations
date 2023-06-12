@@ -214,10 +214,10 @@ action:
       title: Set battery discharge %
       data:
         actions:
-          - action: FIFTYFIVE
-            title: 55%
-          - action: FORTYFIVE
-            title: 45%
+          - action: FORTY
+            title: 40%
+          - action: THIRTY
+            title: 30%
           - action: REPLY
             title: Custom
   - alias: Wait for a response
@@ -225,7 +225,7 @@ action:
       - platform: event
         event_type: mobile_app_notification_action
         event_data:
-          action: FIFTYFIVE
+          action: FORTY 
       - platform: event
         event_type: mobile_app_notification_action
         event_data:
@@ -233,7 +233,7 @@ action:
       - platform: event
         event_type: mobile_app_notification_action
         event_data:
-          action: FORTYFIVE
+          action: THIRTY 
     timeout:
       hours: 1
       minutes: 0
@@ -256,7 +256,7 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: 55
+              value: 40
             target:
               entity_id: input_number.desired_battery_discharge_percentage
       - conditions:
@@ -275,7 +275,7 @@ action:
         sequence:
           - service: input_number.set_value
             data:
-              value: 45
+              value: 30
             target:
               entity_id: input_number.desired_battery_discharge_percentage
 mode: single
