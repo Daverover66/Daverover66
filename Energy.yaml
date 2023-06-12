@@ -270,15 +270,15 @@ template:
           {% set battery_to_grid_w = states('sensor.solar_battery_to_grid_w') | float (0) %}
           {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
 
-          {% if b1_dc_power < 0 %} 
-            {% if battery_to_grid_w > 0 and exported_power_w > 0 %}
+          {% if b1_dc_power < 0 %}  
+            {% if battery_to_grid_w > 0 and exported_power_w > 0 %} 
               {{ (b1_dc_power * -1) - battery_to_grid_w }}
-            {% elif exported_power_w > 0 %}
+            {% elif exported_power_w > 0 %} 
+              {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
+            {% else %} 
               0
-            {% else %}
-             {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}} 
-            {% endif %}
-          {% else %}
+            {% endif %} 
+          {% else %} 
             0
           {% endif %}
         availability: >
