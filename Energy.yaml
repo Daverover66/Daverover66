@@ -276,7 +276,7 @@ template:
             {% elif exported_power_w > 0 %} 
               {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
             {% else %} 
-              0
+              {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
             {% endif %} 
           {% else %} 
             0
