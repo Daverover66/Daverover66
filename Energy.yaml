@@ -292,7 +292,8 @@ template:
           {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
           {% set panel_to_grid_w = states('sensor.solar_panel_to_grid_w') | float(0) %}
 
-          {% if ((exported_power_w + 1) > panel_to_grid_w) %} #when exported power = panel to grid#
+          {% if ((exported_power_w + 1) > panel_to_grid_w) %} 
+           #added 1 to exported power for when exported power = panel to grid#
             {{ exported_power_w - panel_to_grid_w }}
           {% else %}
             0
