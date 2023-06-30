@@ -487,49 +487,49 @@ template:
         icon: mdi:cash-plus
         unit_of_measurement: "£/kWh"
         state: >
-          0.4607
+          0.41534
 
       - name: "Solar Accounting Cost Rate Cheap"
         unique_id: solar_accounting_cost_rate_cheap
         icon: mdi:cash-plus
         unit_of_measurement: "£/kWh"
         state: >
-          0.1975
+          0.1780
           
       - name: "Solar Accounting Cost Rate Standard"
         unique_id: solar_accounting_cost_rate_standard
         icon: mdi:cash-plus
         unit_of_measurement: "£/kWh"
         state: >
-          0.3291
+          0.29667
 
       - name: "Solar Accounting Compensation Rate Peak"
         unique_id: solar_accounting_compensation_rate_peak
         icon: mdi:cash-minus
         unit_of_measurement: "£/kWh"
         state: >
-          0.3507
+          0.30534
 
       - name: "Solar Accounting Compensation Rate Cheap"
         unique_id: solar_accounting_compensation_rate_cheap
         icon: mdi:cash-minus
         unit_of_measurement: "£/kWh"
         state: >
-          0.0875
+          0.0680
 
       - name: "Solar Accounting Compensation Rate Standard"
         unique_id: solar_accounting_compensation_rate_standard
         icon: mdi:cash-minus
         unit_of_measurement: "£/kWh"
         state: >
-          0.2191
+          0.18667
 
       - name: "Solar Accounting Cost Standing Charge"
         unique_id: solar_accounting_cost_standing_charge
         icon: mdi:cash-plus
         unit_of_measurement: "£"
         state: >
-          0.6002
+          0.60024
 
       - name: "Solar Accounting Total Daily"
         unique_id: solar_accounting_total_daily
