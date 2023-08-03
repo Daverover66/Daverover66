@@ -297,7 +297,7 @@ template:
             {{ exported_power_w - panel_to_grid_w }}
           {% else %}
             0
-          {% endif %}}
+          {% endif %}
 
       - name: "Solar Grid To House W"
         unique_id: solar_grid_to_house_w
