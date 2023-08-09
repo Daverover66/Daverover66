@@ -9,7 +9,7 @@
  ############################################################################### 
   
  recorder: 
-   db_url: !secret database 
+   db_url: !secret mariadb_url
    purge_keep_days: 30 
    exclude: 
      domains: 
