@@ -23,6 +23,8 @@
        - sensor.date_time_iso
        - sensor.date_time_utc
        - sensor.moon # Don't record moon data
+       - weather.forecast_home
+       - water_heater.hot_water
        
  logbook: 
    include: 
