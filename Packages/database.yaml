@@ -2,7 +2,7 @@
  #   @author         :   Jeffrey Stone 
  #   @date           :   06/10/2020 
  #   @package        :   Database 
- #   @description    :   Recorder and Logger Configurations 
+ #   @description    :   Recorder and Logger and History Configurations 
  # 
  #   @modified by    :   Dave Forrester (@Daverover66)
  #   @date           :   08/08/2023 
@@ -17,16 +17,13 @@
        - updater 
        - script 
      entities: 
-       - sun.sun # Don't record sun data 
-       - sensor.last_boot # Comes from 'systemmonitor' sensor platform 
+       - sun.sun # Don't record sun data
        - sensor.date 
-       - sensor.time 
-       - sensor.today_is 
-       - sensor.time_utc 
-       - sensor.time_date 
-       - sensor.time_online 
-       - sensor.moon 
-       - sensor.month_is  
+       - sensor.date_time
+       - sensor.date_time_iso
+       - sensor.date_time_utc
+       - sensor.moon # Don't record moon data
+       
  logbook: 
    include: 
      domains: 
@@ -52,7 +49,6 @@
      homeassistant.helpers.entity: critical 
      homeassistant.components.automation: error 
      homeassistant.components.statistics.sensor: critical 
-     homeassistant.components.nws: error 
      homeassistant.helpers.event: critical
   
  history: 
@@ -64,3 +60,4 @@
        - light 
        - scene 
        - automation
+       - binary_sensor
