@@ -1,4 +1,16 @@
+###############################################################################
+#   @author         :   Rueben
+#   @date           :   
+#   @package        :   Home Battery Automations
+#   @description    :   Daily charge and discharge of home battery. 
+# 
+#   @modified by    :   Dave Forrester(@) 
+#   @date           :    
+############################################################################### 
+  
+###############################################################################
 ### Actionable notification to request charge level of battery overnight
+###############################################################################
 
 alias: Get desired battery %
 description: Send a notification asking for desired battery percentage
