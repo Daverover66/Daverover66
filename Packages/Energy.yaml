@@ -1,4 +1,12 @@
-template:
+###############################################################################
+#   @author         :   Remko van der Veer (@Remko76)
+#   @date           :   March 2023
+#   @package        :   Energy.yaml
+#   @description    :   This one powers the energy dashboard
+# 
+#   @modified by    :   Dave Forrester(@Daverover66) 
+#   @date           :   April 2023
+############################################################################### template:
   - sensor:
       - name: "Solar Selfconsumption Ratio"
         unique_id: solar_selfconsumption_ratio
