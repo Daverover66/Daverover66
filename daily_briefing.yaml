@@ -1,0 +1,52 @@
+>
+  {# DAily Briefing #} 
+   {%- macro getReport() -%} 
+         {% if now().strftime('%H')|int < 12 %} 
+           Good morning. 
+         {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %} 
+           Good afternoon. 
+         {% else %} 
+           Good evening. 
+         {% endif %} 
+
+        {% if is_state('binary_sensor.morning','on') %} 
+             Today is {{states.sensor.today_is.state }}, {{ as_timestamp(now()) | timestamp_custom('%B %d %Y') }}.
+         {% else %} 
+             It is {{ now().strftime("%I:%M %p") }} 
+         {% endif %}
+
+          The Temperature in Clovenfords is {{states('sensor.outside_temperature')|round}} degrees  
+         {% if is_state('sensor.weather.forecast_home', 'rainy') %} 
+           {{ [ 
+           'with rain.',  
+           'with showers.' 
+           ] | random }} 
+         {% elif is_state('sensor.weather.forecast_home', 'cloudy') %} 
+           {{ [ 
+           'with clouds.',  
+           'with cloudy skies.' 
+           ] | random }} 
+         {% elif is_state('sensor.weather.forecast_home', 'partlycloudy') %} 
+           {{ [ 
+           'with some clouds.',  
+           'with partly cloudy skies.', 
+           'with scattered clouds' 
+           ] | random }} 
+         {% elif is_state('sensor.weather.forecast_home', 'sunny') %} 
+           {% if is_state('sun.sun', 'above_horizon') %} 
+             {{ [ 
+             'and sunny.',  
+             'with sun.' 
+             ] | random }} 
+           {% else %} 
+             {{ [ 
+             'and clear.',  
+             'with clear skies.' 
+             ] | random }} 
+           {% endif %} 
+         {% else %} 
+           and {{ states.weather.forecast_home.state }} 
+         {% endif %}
+            {%- endmacro-%}
+            
+   {{ getReport()}}
