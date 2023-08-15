@@ -16,23 +16,23 @@
          {% endif %}
 
           The Temperature in Clovenfords is {{states('sensor.outside_temperature')|round}} degrees  
-         {% if is_state('sensor.weather.forecast_home', 'rainy') %} 
+         {% if is_state('weather.forecast_home', 'rainy') %} 
            {{ [ 
            'with rain.',  
            'with showers.' 
            ] | random }} 
-         {% elif is_state('sensor.weather.forecast_home', 'cloudy') %} 
+         {% elif is_state('weather.forecast_home', 'cloudy') %} 
            {{ [ 
            'with clouds.',  
            'with cloudy skies.' 
            ] | random }} 
-         {% elif is_state('sensor.weather.forecast_home', 'partlycloudy') %} 
+         {% elif is_state('weather.forecast_home', 'partlycloudy') %} 
            {{ [ 
            'with some clouds.',  
            'with partly cloudy skies.', 
            'with scattered clouds' 
            ] | random }} 
-         {% elif is_state('sensor.weather.forecast_home', 'sunny') %} 
+         {% elif is_state('weather.forecast_home', 'sunny') %} 
            {% if is_state('sun.sun', 'above_horizon') %} 
              {{ [ 
              'and sunny.',  
@@ -47,6 +47,37 @@
          {% else %} 
            and {{ states.weather.forecast_home.state }} 
          {% endif %}
+
+        {% if is_state('sun.sun', 'below_horizon') %} 
+           You have 
+           {% set seconds = as_timestamp(states.sun.sun.attributes.next_rising)-now().timestamp() %} 
+           {% set hours = seconds / 60 %} 
+           {% if seconds / ( 60 * 60 ) > 1 %} 
+             {{ (seconds //  ( 60 * 60 )) | int }} hours 
+           {% else %} 
+             {{ (seconds // 60) | int }} minutes 
+           {% endif %} 
+           {{ [ 
+             'until the sun rises.', 
+             'until the sun is up.', 
+             'before the sun officially rises. ' 
+           ]|random }} 
+         {% else %} 
+           You have 
+           {% set seconds = as_timestamp(states.sun.sun.attributes.next_setting)-now().timestamp() %} 
+           {% set hours = seconds / 60 %} 
+           {% if seconds / ( 60 * 60 ) > 1 %} 
+             {{ (seconds //  ( 60 * 60 )) | int }} hours 
+           {% else %} 
+             {{ (seconds // 60) | int }} minutes 
+           {% endif %} 
+           {{ [ 
+             'until the sun sets for the day.', 
+             'until the sun slips below the horizon.', 
+             'before the sun officially sets. ' 
+           ]|random }} 
+         {% endif %} 
+ 
             {%- endmacro-%}
             
       {# a macro that removes all newline characters, empty spaces, and returns formatted text  #} 
