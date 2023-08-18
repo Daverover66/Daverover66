@@ -1,0 +1,231 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Smart Button 1 Downstairs           #
+#   @description    :   All controls for Aqara smart switch #
+#                       in Living Room                      #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
+alias: Smart Button Downstairs 1 Automations
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.smart_button_downstairs_1_action
+    attribute: action
+    to: release
+    id: Good Night
+  - platform: state
+    entity_id:
+      - sensor.smart_button_downstairs_1_action
+    to: single
+    id: TV & Sky on
+  - platform: state
+    entity_id:
+      - sensor.smart_button_downstairs_1_action
+    to: double
+    id: TV & Sky off
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: 30
+    alias: Low Light
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: 50
+    id: High Light
+    alias: High Light
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Night
+          - condition: state
+            entity_id: binary_sensor.overnight
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.living_room_tv
+          - service: media_player.turn_off
+            data: {}
+            target:
+              device_id: 4aa503b5c01d5c68b0ad4341bdc9dd65
+            enabled: true
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.dreamview_g1_pro
+          - type: turn_off
+            device_id: 23629338a1f8b2487860c2b962ce2a4b
+            entity_id: switch.under_shelf_lights_local
+            domain: switch
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.kids_bedtime_announcement_played
+                - input_boolean.school_pick_up_announcement_played
+                - input_boolean.school_morning_announcement_played
+                - input_boolean.morning_briefing_played
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.guest_bedroom_camera_privacy
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.jamie_s_room_cam_privacy
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.seans_room_camera_privacy
+          - service: script.bed_lamps_dim_at_bedtime
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - TV & Sky on
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.living_room_tv
+          - service: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.sky_q_main
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_dave_s_2nd_echo_pop
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Pardon me sir</prosody>. The Living room media
+                    system has been activated','<prosody pitch="high">Hailing
+                    frequencies</prosody><break time="1s"/> open','<prosody
+                    pitch="high">Pardon me sir</prosody>. The living room
+                    televisual devices have been turned on','<prosody
+                    pitch="high">Pardon me sir</prosody>. I thought it might be
+                    time to see what is on the goggle box','<prosody
+                    pitch="high">Pardon me sir</prosody>. Do you wish to see
+                    what is on the telly today?']|random }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+          - if:
+              - condition: numeric_state
+                entity_id: sensor.living_room_fp2_light_sensor_light_level
+                below: 50
+            then:
+              - service: light.turn_on
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id: TV & Sky off
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.living_room_tv
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.sky_q_main
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_dave_s_2nd_echo_pop
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Pardon me sir</prosody>. The living room media
+                    system has been deactivated','<prosody pitch="high">Hailing
+                    frequencies</prosody><break time="2s"/> closed','<prosody
+                    pitch="high">Pardon me sir</prosody>. The living room
+                    televisual devices have been turned off','<prosody
+                    pitch="high">Pardon me sir</prosody>. Shall we see what is
+                    going on in the real world?','<prosody pitch="high">Pardon
+                    me sir</prosody>. I see that you have had your fill of tv.
+                    Its good to see that you have returned to reality']|random
+                    }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+          - if:
+              - condition: state
+                entity_id: light.dreamview_g1_pro
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id:
+              - TV & Sky on
+          - condition: numeric_state
+            entity_id: sensor.living_room_fp2_light_sensor_light_level
+            below: 30
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id:
+              - TV & Sky off
+              - High Light
+          - condition: state
+            entity_id: light.dreamview_g1_pro
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+        sequence:
+          - if:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "on"
+            then:
+              - service: light.turn_on
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+mode: parallel
+max: 10
