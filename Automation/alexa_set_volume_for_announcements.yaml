@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Set volume forannouncements        #
+#   @description    :   Set volume for announcments via    #
+#                       number sliders.                    #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################ 
+
 alias: Alexa Set Volume for Announcements
 description: ""
 trigger:
