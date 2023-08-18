@@ -1,0 +1,754 @@
+alias: All Lights Automation
+description: Turns on/off lights with presence, light level, door or time
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+      - binary_sensor.dining_room_presence_sensor_occupancy
+      - binary_sensor.hallway_camera_cell_motion_detection
+      - binary_sensor.lower_landing_motion_occupancy
+      - binary_sensor.seans_room_camera_cell_motion_detection
+      - binary_sensor.jamie_s_room_cam_cell_motion_detection
+      - binary_sensor.guest_bedroom_camera_cell_motion_detection
+      - binary_sensor.guest_bedroom_motion_occupancy
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+      - binary_sensor.main_bedroom_fp2_presence_sensor_3
+      - binary_sensor.main_bedroom_fp2_presence_sensor_4
+      - binary_sensor.office_presence_sensor_occupancy
+      - binary_sensor.cloakroom_presence_occupancy
+      - binary_sensor.jack_and_jill_presence_occupancy
+      - binary_sensor.upper_landing_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Motion
+  - platform: state
+    entity_id:
+      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+      - binary_sensor.dining_room_presence_sensor_occupancy
+      - binary_sensor.hallway_camera_cell_motion_detection
+      - binary_sensor.lower_landing_motion_occupancy
+      - binary_sensor.seans_room_camera_cell_motion_detection
+      - binary_sensor.jamie_s_room_cam_cell_motion_detection
+      - binary_sensor.guest_bedroom_camera_cell_motion_detection
+      - binary_sensor.guest_bedroom_motion_occupancy
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+      - binary_sensor.main_bedroom_fp2_presence_sensor_3
+      - binary_sensor.main_bedroom_fp2_presence_sensor_4
+      - binary_sensor.office_presence_sensor_occupancy
+      - binary_sensor.cloakroom_presence_occupancy
+      - binary_sensor.jack_and_jill_presence_occupancy
+      - binary_sensor.upper_landing_presence_occupancy
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    from: "on"
+    to: "off"
+    id: No Motion
+  - platform: numeric_state
+    entity_id:
+      - sensor.living_room_fp2_light_sensor_light_level
+      - sensor.main_bedroom_fp2_light_sensor_light_level
+      - sensor.average_light_level_downstairs
+      - sensor.average_light_level_upstairs
+      - sensor.average_indoor_light_level
+      - sensor.dining_room_presence_sensor_illuminance
+      - sensor.office_presence_sensor_illuminance_lux
+      - sensor.upper_landing_presence_illuminance_lux
+      - sensor.jack_and_jill_presence_illuminance_lux
+    below: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id:
+      - sensor.living_room_fp2_light_sensor_light_level
+      - sensor.main_bedroom_fp2_light_sensor_light_level
+      - sensor.average_light_level_downstairs
+      - sensor.average_light_level_upstairs
+      - sensor.average_indoor_light_level
+      - sensor.dining_room_presence_sensor_illuminance
+      - sensor.office_presence_sensor_illuminance_lux
+      - sensor.upper_landing_presence_illuminance_lux
+      - sensor.jack_and_jill_presence_illuminance_lux
+    above: 80
+    id: Good Light
+  - platform: state
+    entity_id:
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.loft_hatch_sensor_contact
+      - binary_sensor.back_door_sensor_contact
+    from: "off"
+    to: "on"
+    id: Door Open
+  - platform: state
+    entity_id:
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.loft_hatch_sensor_contact
+      - binary_sensor.back_door_sensor_contact
+    from: "on"
+    to: "off"
+    id: Door Closed
+  - platform: device
+    type: turned_on
+    device_id: 621f8db4e2d03a6d1cb101ec3be46e7a
+    entity_id: switch.cloakroom_light
+    domain: switch
+    id: Cloakroom light on
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.cloakroom_light
+    id: Cloakroom Light off
+    alias: Cloakroom Light off with Timer
+  - platform: state
+    entity_id:
+      - binary_sensor.lights_out
+    from: "off"
+    to: "on"
+    id: Lights Out
+  - platform: sun
+    event: sunset
+    offset: "-00:30:00"
+    id: Dusk
+condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Open
+          - condition: template
+            value_template: "{{ \"Loft\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Loft Hatch
+          - condition: state
+            entity_id: light.loft_light
+            state: "off"
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.loft_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Closed
+          - condition: template
+            value_template: "{{ \"Loft\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Loft Hatch
+          - condition: state
+            entity_id: light.loft_light
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.loft_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Cloakroom light on
+        sequence:
+          - service: timer.start
+            data: {}
+            target:
+              entity_id: timer.cloakroom_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Cloakroom Light off
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Open
+          - condition: template
+            value_template: "{{\"Garage\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Garage Doors
+          - condition: state
+            entity_id: light.garage_lights
+            state: "off"
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.garage_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Closed
+          - condition: template
+            value_template: >-
+              {{"Garage Door Right" in trigger.to_state.attributes.friendly_name
+              }}
+            alias: Filter Garage Door Right
+          - condition: state
+            entity_id: binary_sensor.garage_door_left_contact
+            state: "off"
+          - condition: state
+            entity_id: light.garage_lights
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.garage_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Closed
+          - condition: template
+            value_template: >-
+              {{"Garage Door Left" in trigger.to_state.attributes.friendly_name
+              }}
+            alias: Filter Garage Door Left
+          - condition: state
+            entity_id: binary_sensor.garage_door_right_contact
+            state: "off"
+          - condition: state
+            entity_id: light.garage_lights
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.garage_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Open
+          - condition: template
+            value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Back Door
+          - condition: sun
+            after: sunset
+            before: sunrise
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 75
+            target:
+              entity_id: light.back_door_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Closed
+          - condition: template
+            value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Back Door
+          - condition: state
+            entity_id: light.back_door_light
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data:
+              transition: 300
+            target:
+              entity_id: light.back_door_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Guest\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter Guest Bedroom "
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: numeric_state
+            entity_id: sensor.average_light_level_upstairs
+            below: 20
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
+            target:
+              entity_id: light.guest_bedroom_bedside_lamp_left
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
+            target:
+              entity_id: light.guest_bedroom_bedside_lamp_right
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Guest\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Guest Bedroom
+          - condition: state
+            entity_id: light.guest_bedroom_bedside_lamp_left
+            state: "on"
+          - condition: state
+            entity_id: light.guest_bedroom_bedside_lamp_right
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.room_occupied_guest_bedroom
+            state: "off"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+                - light.guest_bedroom_bedside_lamp_right
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: "{{\"Lower\" in trigger.to_state.attributes.friendly_name }}"
+              - condition: template
+                value_template: "{{\"Upper\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Upper or Lower Landing
+          - condition: numeric_state
+            entity_id: sensor.average_light_level_upstairs
+            below: 20
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: state
+            entity_id: light.landing_lights
+            state: "off"
+          - condition: time
+            after: "07:00:00"
+            before: "22:00:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 15
+            target:
+              entity_id: light.landing_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: "{{\"Lower\" in trigger.to_state.attributes.friendly_name }}"
+              - condition: template
+                value_template: "{{\"Upper\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter Upper or Lower Landing "
+          - condition: state
+            entity_id: light.landing_lights
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.lower_landing_occupancy
+            state: "off"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.landing_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's Side of Bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: 20
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.daddys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's Side of Bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: 20
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.mummys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's Side of Bed
+          - condition: state
+            entity_id: switch.daddys_bedside_lamp_socket_1
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.dad_s_side_of_bed_occupied
+            state: "off"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.daddys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's Side of Bed
+          - condition: state
+            entity_id: switch.mummys_bedside_lamp_socket_1
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.mum_s_side_of_bed_occupied
+            state: "off"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.mummys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Dusk
+          - condition: state
+            entity_id: input_boolean.holiday_mode
+            state: "off"
+        sequence:
+          - if:
+              - condition: state
+                entity_id: switch.corner_lamp_local
+                state: "off"
+            then:
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.corner_lamp_local
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.stair_lights
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.under_shelf_lights_local
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.bed_lamps
+          - if:
+              - condition: state
+                entity_id: switch.standard_lamp_socket_1
+                state: "off"
+            then:
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.standard_lamp_socket_1
+          - if:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "on"
+            then:
+              - service: light.turn_on
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Out
+        sequence:
+          - if:
+              - condition: state
+                entity_id: light.corner_lamp
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.living_room_occupied
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.corner_lamp
+          - if:
+              - condition: state
+                entity_id: light.standard_lamp
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.room_occupied_hallway
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.standard_lamp
+          - if:
+              - condition: state
+                entity_id: switch.under_shelf_lights_local
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.room_occupied_kitchen
+                state: "off"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.under_shelf_lights_local
+          - if:
+              - condition: state
+                entity_id: light.dreamview_g1_pro
+                state: "on"
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.living_room_occupied
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+          - if:
+              - condition: state
+                entity_id: light.back_door_light
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.back_door_sensor_contact
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.room_occupied_kitchen
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.back_door_light
+          - if:
+              - condition: state
+                entity_id: light.landing_lights
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.lower_landing_occupancy
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.landing_lights
+          - if:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_left
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.room_occupied_guest_bedroom
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - light.guest_bedroom_bedside_lamp_left
+                    - light.guest_bedroom_bedside_lamp_right
+          - if:
+              - condition: state
+                entity_id: switch.daddys_bedside_lamp_socket_1
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.main_bedroom_fp2_presence_sensor_2
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.daddys_bedside_lamp_socket_1
+          - if:
+              - condition: state
+                entity_id: switch.mummys_bedside_lamp_socket_1
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.main_bedroom_fp2_presence_sensor_3
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - switch.mummys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: template
+            value_template: "{{\"Living\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Living Room
+          - condition: state
+            entity_id: light.corner_lamp
+            state: "on"
+          - condition: state
+            entity_id: light.standard_lamp
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: template
+            value_template: "{{\"Main\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter Main Bedroom "
+        sequence:
+          - if:
+              - condition: state
+                entity_id: switch.daddys_bedside_lamp_socket_1
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.daddys_bedside_lamp_socket_1
+            alias: If Daddy's Bedside Lamp is on, turn it off
+          - if:
+              - condition: state
+                entity_id: switch.mummys_bedside_lamp_socket_1
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.mummys_bedside_lamp_socket_1
+            alias: If mummy's Bedside Lamp is on, turn it off
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: template
+            value_template: "{{\"Upstairs\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter upstairs "
+        sequence:
+          - if:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_left
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.guest_bedroom_bedside_lamp_left
+            alias: If Bedside Lamp Left is on, turn it off
+          - if:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_right
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - light.guest_bedroom_bedside_lamp_right
+            alias: If Bedside Lamp Right is on, turn it off
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: template
+            value_template: "{{\"Upstairs\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Upstairs
+          - condition: state
+            entity_id: light.landing_lights
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.landing_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Cloakroom\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter Cloakroom "
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "off"
+          - condition: numeric_state
+            entity_id: sensor.average_light_level_downstairs
+            below: 20
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Cloakroom\" in trigger.to_state.attributes.friendly_name }}"
+            alias: "Filter Cloakroom "
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: template
+            value_template: "{{\"Living\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Living Room
+          - condition: state
+            entity_id: light.corner_lamp
+            state: "off"
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+mode: restart
