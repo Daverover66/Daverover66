@@ -1,0 +1,8 @@
+alias: Stair Lights with level
+sequence:
+  - service: light.turn_on
+    entity_id: light.stair_lights
+    data:
+      brightness: |
+        {{ level | int }} 
+mode: single
