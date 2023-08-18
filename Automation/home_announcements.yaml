@@ -178,6 +178,19 @@ action:
             id: Get ready for school
           - condition: and
             conditions:
+            - condition: or
+              conditions:
+              - condition: state
+                entity_id: binary_sensor.schoolday
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.fridayschool
+                state: "on"
+           alias: Schoolday or Friday Schoolday on
+  - condition: state
+    entity_id: calendar.school_holidays
+    state: "off"
+    alias: Confirm School Holiday is offconditions:
               - condition: state
                 entity_id: binary_sensor.schoolday
                 state: "on"
