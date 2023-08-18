@@ -1,0 +1,13 @@
+alias: Lights Fade at Bedtime
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - switch.main_bedroom_dot_do_not_disturb_switch
+    from: "off"
+    to: "on"
+condition: []
+action:
+  - service: script.stair_lights_fade_at_bedtime
+    data: {}
+mode: single
