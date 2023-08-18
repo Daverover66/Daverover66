@@ -1,0 +1,47 @@
+alias: Morning Get up Set up
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.hallway_camera_cell_motion_detection
+    from: "off"
+    to: "on"
+    id: Someone is up
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Someone is up
+          - condition: time
+            after: "06:30:00"
+            before: "08:00:00"
+        sequence:
+          - if:
+              - condition: state
+                entity_id: switch.guest_bedroom_camera_privacy
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.guest_bedroom_camera_privacy
+          - if:
+              - condition: state
+                entity_id: switch.jamie_s_room_cam_privacy
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.jamie_s_room_cam_privacy
+          - if:
+              - condition: state
+                entity_id: switch.seans_room_camera_privacy
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.seans_room_camera_privacy
