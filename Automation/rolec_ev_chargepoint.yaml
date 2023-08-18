@@ -1,0 +1,76 @@
+alias: Rolec EV Chargepoint schedule
+description: Keeps trying in case Shelly switch becomes unavailable
+trigger:
+  - platform: time
+    at: input_datetime.rolec_wallbox_on
+    id: Rolec On
+  - platform: time
+    at: input_datetime.rolec_wallbox_off
+    id: Rolec Off
+  - platform: state
+    entity_id:
+      - switch.shelly1_c45bbe7867c7
+    from: unavailable
+    id: Rolec Available
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Rolec On
+        sequence:
+          - type: turn_on
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Rolec Off
+        sequence:
+          - type: turn_off
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Rolec Available
+          - condition: time
+            after: input_datetime.rolec_wallbox_on
+            before: input_datetime.rolec_wallbox_off
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "off"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: >-
+                The Rolec was turned on because it became available during off
+                peak
+              title: ROLEC ON
+            alias: Send a notification based on an input text helper
+      - conditions:
+          - condition: trigger
+            id: Rolec Available
+          - condition: time
+            after: input_datetime.rolec_wallbox_off
+            before: input_datetime.rolec_wallbox_on
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: The Rolec was turned off because it was on outside off peak
+              title: ROLEC OFF
+            alias: Send a notification based on an input text helper
+      - conditions: []
+        sequence: []
+mode: single
