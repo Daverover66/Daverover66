@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Lights Fade at Bedtime             #
+#   @description    :   Uses a script with variables to    #
+#                       fade out bed lights                #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Lights Fade at Bedtime
 description: ""
 trigger:
