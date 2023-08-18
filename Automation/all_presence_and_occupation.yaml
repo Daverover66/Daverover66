@@ -1,3 +1,9 @@
+##############################################################################
+#      
+
+
+
+
 alias: All Presence and Occupancy
 description: Set room presence and room occupancy based on motion and presence.
 trigger:
