@@ -1,0 +1,19 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @script         :   Main Bedroom bed lights with level #
+#   @description    :   Dims lights manually over 30mins   #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
+alias: Main Bedroom bed lights with level
+sequence:
+  - service: light.turn_on
+    entity_id: light.bed_lamps
+    data:
+      brightness: |
+        {{ level | int }} 
+mode: single
