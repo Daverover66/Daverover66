@@ -1,1 +1,437 @@
-
+alias: Home Announcements
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.school_night
+    alias: School Night bedtime for the boys
+    id: School Night Bedtime Boys
+  - platform: time
+    at: input_datetime.non_school_night
+    alias: Non-School Night bedtime for boys
+    id: Non School Bedtime
+  - platform: time
+    at: input_datetime.school_pick_up_time_mon_to_thurs
+    id: School pick up
+    alias: School Pick Up Time
+  - platform: time
+    at: input_datetime.school_pick_up_time_friday
+    id: Friday School Pick Up Time
+    alias: "School Pick Up - Friday "
+  - platform: time
+    at: input_datetime.get_ready_for_school_at
+    id: Get ready for school
+    alias: Get ready for school
+  - platform: state
+    entity_id:
+      - binary_sensor.office_hours
+    from: "off"
+    to: "on"
+    id: Office in use
+  - platform: state
+    entity_id:
+      - binary_sensor.office_hours
+    from: "on"
+    to: "off"
+    id: Office not in use
+  - platform: time
+    at: "07:30:00"
+    id: Briefing
+  - platform: state
+    entity_id:
+      - sensor.last_alexa_called
+    id: Last Alexa Called
+condition:
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: School Night Bedtime Boys
+          - condition: state
+            entity_id: binary_sensor.schoolnight
+            state: "on"
+            alias: Confirm School Night
+          - condition: state
+            entity_id: calendar.school_holidays
+            state: "off"
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{
+                states('input_number.alexa_volume_level_announcements')|float(0)}}
+            alias: Set volume everywhere based on an input number helper
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><amazon:auto-breaths><prosody rate="105%">{{
+                ['Sean and Jamie. Its time for bed.  <prosody
+                pitch="high">Upstairs and brush yourteeth</prosody>',           
+                      'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',           
+                      'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',                    
+                      'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                      'Sean and Jamie. <prosody pitch="x-high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                    ]|random }}</prosody></amazon:auto-breaths></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            alias: Set volume everywhere to default
+            enabled: true
+            target:
+              entity_id: media_player.everywhere_2
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.kids_bedtime_announcement_played
+      - conditions:
+          - condition: trigger
+            id: Non School Bedtime
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_datetime.non_school_night
+                state: "on"
+              - condition: state
+                entity_id: calendar.school_holidays
+                state: "on"
+                alias: Confirm School Holiday is on
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            alias: Set volume everywhere based on an input number helper
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><amazon:auto-breaths><prosody rate="105%">{{
+                ['Excuse me master Sean and master Jamie. It is time for bed.
+                Please make your way upstairs to the bathroom and brush your
+                teeth','Excuse me master Sean and master Jamie. The time has
+                come to say goodnight. To say sleep tight till the morning
+                light.  The time has come to say goodnight at the end of a
+                lovely day','Excuse me master Sean and master Jamie. <prosody
+                pitch="high">If you are still downstairs then you are in the
+                wrong place.</prosody> Please make your way upstairs to the
+                bathroom to brush your teeth for bed','Excuse me boys, but that
+                appears to be the end of another day for you both. Please head
+                to the bathroom and brush your teeth before bed' ]|random
+                }}</prosody></amazon:auto-breaths></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            alias: Set volume everywhere to default
+            target:
+              entity_id: media_player.everywhere_2
+            enabled: true
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.kids_bedtime_announcement_played
+      - conditions:
+          - condition: trigger
+            id: Get ready for school
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.schoolday
+                state: "on"
+              - condition: state
+                entity_id: calendar.school_holidays
+                state: "off"
+                alias: Confirm School Holiday is off
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            alias: Set volume everywhere based on an input number helper
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+            alias: Wait 2s
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="110%">{{ ['<prosody
+                pitch="high">Attention master Sean and master Jamie.</prosody>
+                Its time to get dressed. You first, master Sean',           
+                      '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Jamie',           
+                   ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+            alias: 10 minutes later.
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="110%">{{ [  '<prosody
+                pitch="high">Attention master Sean and master Jamie.</prosody>
+                Its time to go upstairs and brush your teeth.  No pushing and no
+                running, remember <prosody pitch="high">its not a
+                race</prosody>',           
+                      'Excuse me master Sean and master Jamie. Its time to brush your teeth. Please go upstairs in an orderly fashion and <prosody pitch="high">no pushing or running</prosody>',           
+                   ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+            alias: 10s later
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.living_room_tv
+            enabled: true
+          - service: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.sky_q_main
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+            alias: 10 minutes later.
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="110%">{{ [  '<prosody
+                pitch="x-high">Attention master Sean and master Jamie. If you
+                are still here, you are late for school</prosody>',           
+                      'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for school yet, <prosody pitch="x-high">why not</prosody>', 
+                      '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. School will not wait for you</prosody>'
+                   ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+            alias: 20s later
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            alias: Set volume everywhere to default
+            target:
+              entity_id: media_player.everywhere_2
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.school_morning_announcement_played
+      - conditions:
+          - condition: trigger
+            id: School pick up
+          - condition: state
+            entity_id: binary_sensor.schoolday
+            state: "on"
+            alias: Check it's a school day
+          - condition: state
+            entity_id: calendar.school_holidays
+            state: "off"
+            alias: Confirm School Holiday is off
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            alias: Set volume everywhere based on an input number helper
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ [  '<prosody
+                pitch="high">Information.</prosody> It is almost time for the
+                school pickup.  Please prepare to pick up master Sean and master
+                Jamie',           
+                      '<prosody pitch="high">Pardon my interruption Mummy. I know you are in the middle of something, but it is almost time to pick up the boys from school</prosody>',
+                      '<prosody pitch="high">Attention. This is an urgent announcement for Mummy.</prosody> Its time to clock out and get the boys from School.  <prosody pitch="x-high">Chop chop!</prosody>',
+                      '<prosody pitch="los">Breaking news!</prosody> I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up the boys.'
+                   ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            alias: Set volume everywhere to default
+            target:
+              entity_id: media_player.everywhere_2
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.school_pick_up_announcement_played
+      - conditions:
+          - condition: trigger
+            id: Friday School Pick Up Time
+          - condition: state
+            entity_id: binary_sensor.fridayschool
+            state: "on"
+            alias: Confirm it's a Friday School Day
+          - condition: state
+            entity_id: calendar.school_holidays
+            state: "off"
+            alias: Confirm School Holiday is off
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+            alias: Set volume everywhere based on an input number helper
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ [  '<prosody
+                pitch="high">Information.</prosody> It is almost time for the
+                schools out pickup.  Please prepare to pick up master Sean and
+                master Jamie',           
+                      '<prosody pitch="high">Pardon my interruption Mummy. I know you are in the middle of something, but it is almost time to pick up the boys from schools out</prosody>',
+                      '<prosody pitch="high">Attention. This is an urgent announcement for Mummy.</prosody> Its time to clock out and get the boys from Schools out.  <prosody pitch="x-high">Chop, chop!</prosody>',
+                      '<prosody pitch="low">Breaking news!</prosody> I have received a message from the schools out pick up fairies telling me they are on strike. I guess that means you will have to go and pick up the boys.'
+                   ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+            alias: Set volume everywhere to default
+            enabled: true
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.school_pick_up_announcement_played
+      - conditions:
+          - condition: trigger
+            id: Office in use
+          - condition: state
+            entity_id: binary_sensor.workday_sensor
+            state: "on"
+          - condition: state
+            entity_id: calendar.gem_holidays
+            state: "off"
+        sequence:
+          - type: turn_off
+            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+            entity_id: switch.office_echo_pop_socket_1
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Office not in use
+          - condition: state
+            entity_id: binary_sensor.workday_sensor
+            state: "on"
+          - condition: state
+            entity_id: calendar.gem_holidays
+            state: "off"
+        sequence:
+          - type: turn_on
+            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+            entity_id: switch.office_echo_pop_socket_1
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id:
+              - Briefing
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.room_occupied_kitchen
+            state: "on"
+        sequence:
+          - service: script.alexa_morning_briefing
+            data: {}
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.morning_briefing_played
+      - conditions:
+          - condition: trigger
+            id:
+              - Last Alexa Called
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              datetime: >-
+                {{ states.sensor.last_alexa_called.last_changed | as_timestamp 
+                | timestamp_custom('%Y-%m-%d %H:%M:%S.%f')}}
+            target:
+              entity_id: input_datetime.last_time_alexa_called
+mode: queued
+max: 10
