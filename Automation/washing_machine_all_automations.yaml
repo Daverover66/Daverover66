@@ -1,3 +1,14 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Washing Machine Automations         #
+#   @description    :   Lets us know when the washing       #
+#                       has finished                        #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Washing Machine - All Automations
 description: >-
   Set the value of input boolean "washing machine on/off" based on power
