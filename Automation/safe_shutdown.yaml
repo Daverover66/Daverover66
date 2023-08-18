@@ -1,0 +1,11 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Safe Shutdown on power loss        #
+#   @description    :   Monitors UPS and shuts down HA     #
+#                       safely if power below 5%           #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
