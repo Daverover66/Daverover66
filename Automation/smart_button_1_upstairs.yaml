@@ -1,3 +1,14 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Smart Button 1 Upstairs             #
+#   @description    :   All controls for Aqara smart switch #
+#                       in Guest Bedroom                    #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Smart Button Upstairs 1 Automations
 description: ""
 trigger:
