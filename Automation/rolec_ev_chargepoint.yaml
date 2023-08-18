@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Rolec EV Chargepoint Schedule      #
+#   @description    :   Turns on chargepoint at cheap rate #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Rolec EV Chargepoint schedule
 description: Keeps trying in case Shelly switch becomes unavailable
 trigger:
