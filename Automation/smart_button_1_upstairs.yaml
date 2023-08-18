@@ -1,0 +1,90 @@
+alias: Smart Button Upstairs 1 Automations
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.smart_button_upstairs_1_action
+    id: Casper & Sky on
+    to: single
+  - platform: state
+    entity_id:
+      - sensor.smart_button_upstairs_1_action
+    to: double
+    id: Casper & Sky off
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Casper & Sky on
+        sequence:
+          - type: turn_on
+            device_id: 9dfd3af87398f6ec9234e9f143e3219a
+            entity_id: switch.casper_switch_0
+            domain: switch
+          - service: media_player.turn_on
+            data: {}
+            target:
+              device_id: 0a8861677f7178f1330be03664c30080
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_guest_bedroom_echo_dot
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Pardon me madam.</prosody> The bedroom media
+                    system has been activated','<prosody pitch="high">Hailing
+                    frequencies</prosody><break time="2s"/> open','<prosody
+                    pitch="high">Pardon me madam.</prosody> The bedroom
+                    televisual devices have been turned on','<prosody
+                    pitch="high">Pardon me madam.</prosody> I thought it might
+                    be time to see what is on the goggle box','<prosody
+                    pitch="high">Pardon me madam.</prosody> Do you wish to see
+                    what is on the telly today?']|random }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+      - conditions:
+          - condition: trigger
+            id: Casper & Sky off
+        sequence:
+          - type: turn_off
+            device_id: 9dfd3af87398f6ec9234e9f143e3219a
+            entity_id: switch.casper_switch_0
+            domain: switch
+          - service: media_player.turn_off
+            data: {}
+            target:
+              device_id: 0a8861677f7178f1330be03664c30080
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_guest_bedroom_echo_dot
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Pardon me madam.</prosody> The bedroom media
+                    system has been deactivated','<prosody pitch="high">Hailing
+                    frequencies</prosody><break time="2s"/> closed','<prosody
+                    pitch="high">Pardon me madam.</prosody> The bedroom
+                    televisual devices have been turned off','<prosody
+                    pitch="high">Pardon me madam.</prosody> Shall we see what is
+                    going on in the real world?','<prosody pitch="high">Pardon
+                    me madam.</> I see that you have had your fill of tv. Its
+                    good to see that you have returned to reality']|random
+                    }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+mode: single
