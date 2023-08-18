@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Octopus Flux Switch Rates          #
+#   @description    :   Switches tariff rates              #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: "Octopus Flux Rates Switch for Utility Meter "
 description: ""
 trigger:
