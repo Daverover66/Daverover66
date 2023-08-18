@@ -1,0 +1,48 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Ad-Hoc Charging                    #
+#   @description    :   For charging devices overnight     #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
+alias: Ad-Hoc Charging
+description: ""
+trigger:
+  - platform: time
+    at: "02:00:00"
+    id: Start charge
+  - platform: time
+    at: "05:00:00"
+    id: Stop charge
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start charge
+        sequence:
+          - type: turn_on
+            device_id: 86f6f7b8b3ba67d124acc8138c2a4a3c
+            entity_id: switch.ad_hoc_charging_local
+            domain: switch
+          - type: turn_on
+            device_id: 66e96b541c8c8cdaf67194ef989264ae
+            entity_id: switch.ad_hoc_tou_charging_2_socket_1
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Stop charge
+        sequence:
+          - type: turn_off
+            device_id: 86f6f7b8b3ba67d124acc8138c2a4a3c
+            entity_id: switch.ad_hoc_charging_local
+            domain: switch
+          - type: turn_off
+            device_id: 66e96b541c8c8cdaf67194ef989264ae
+            entity_id: switch.ad_hoc_tou_charging_2_socket_1
+            domain: switch
+mode: single
