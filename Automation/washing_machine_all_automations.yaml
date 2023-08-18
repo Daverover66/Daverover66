@@ -1,0 +1,190 @@
+alias: Washing Machine - All Automations
+description: >-
+  Set the value of input boolean "washing machine on/off" based on power
+  consumption. Announce when the washing has finished and check the washing has
+  been removed.
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.shelly1pm_e89f6d84a584_power
+    above: 10
+    id: Washing Machine On
+    alias: Washing machine drawing more than 10W power
+  - platform: numeric_state
+    entity_id: sensor.shelly1pm_e89f6d84a584_power
+    below: 5
+    id: Washing machine off
+    alias: Washing machine drawing less than 5W power for 30s.
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.washing_machine_door_open
+    id: Washing machine door not open
+    alias: Washing done notification repeat with timer
+  - type: opened
+    platform: device
+    device_id: 3d59452e68f6f274a7d4ee5c1c408410
+    entity_id: binary_sensor.washing_machine_door_contact
+    domain: binary_sensor
+    id: Washing removed from machine
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Washing Machine On
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_on_off
+      - conditions:
+          - condition: trigger
+            id: Washing machine off
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_on_off
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_on_off
+                state: "off"
+            then:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                then:
+                  - service: notify.alexa_media_everywhere_2
+                    data:
+                      message: >-
+                        <voice name="Brian"><prosody rate="110%"><prosody
+                        pitch="high">{{ ['Information. The washing machine has
+                        completed its cycle. Better get the washing hung up to
+                        dry',   
+                          'Information, I have detected a reduction in the power consumption of the washing machine.  My fuzzy logic circuit has determined that means its finished',   
+                          'Information. My sensors have detected a reduction in the rotational velocity of the washing machine. My artificially intuitive logic system has determined that now might be the optimal time to hang it up to dry',   
+                          'Information. The washing machine has finished its cycle. It has cycled quite a long way and is quite tired after its exertions. I would hang the washing out to dry, but I dont have any arms. Or legs.  So I guess its up to you'     
+                        ]|random }}</prosody></prosody></voice>
+                      data:
+                        type: announce
+              - if:
+                  - condition: and
+                    conditions:
+                      - condition: state
+                        entity_id: input_boolean.text_notifications
+                        state: "on"
+                      - condition: state
+                        entity_id: input_boolean.text_notifications_dave
+                        state: "on"
+                then:
+                  - service: >-
+                      notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                    data:
+                      message: That's the washing done. Better get it hung up.
+                      title: WASHING MACHINE
+              - if:
+                  - condition: and
+                    conditions:
+                      - condition: state
+                        entity_id: input_boolean.text_notifications
+                        state: "on"
+                      - condition: state
+                        entity_id: input_boolean.text_notifications_gem
+                        state: "on"
+                then:
+                  - service: >-
+                      notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+                    data:
+                      message: That's the washing done. Better get it hung up.
+                      title: WASHING MACHINE
+              - service: timer.start
+                data: {}
+                target:
+                  entity_id: timer.washing_machine_door_open
+      - conditions:
+          - condition: trigger
+            id: Washing machine door not open
+          - condition: state
+            entity_id: binary_sensor.washing_machine_door_contact
+            state: "off"
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="110%"><prosody
+                    pitch="x-high">{{ ['Pardon me for intruding on your
+                    relaxation once more. The washing is still in the machine.
+                    Better get it out before it starts to smell, and I am sure
+                    you do not want that',   
+                      'Excuse me for once again breaking the silence. My motion sensors have detected zero activity since I last informed you that the washing was done. Please engage your glutes and get off your backside as the washing wont hang itself up',   
+                      'Right, listen up humans, heres the deal. I tell you the washing is done, and you hang it up.  Someone, is not keeping their side of the deal',   
+                      'There is a lovely breeze blowing through the garden right now and I should be hearing the pleasant flap flap of washing in the breeze. Unfortunately my auditory sensors appear to be malfunctioning and I hear nothing. Perhaps the washing line has not been deployed.'     
+                    ]|random }}</prosody></prosody></voice>
+                  data:
+                    type: announce
+          - if:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.text_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.text_notifications_dave
+                    state: "on"
+            then:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: >-
+                    The washing is still in the machine. Better hang it up
+                    before it starts to smell.
+                  title: SMELLY WASHING!
+          - if:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.text_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.text_notifications_gem
+                    state: "on"
+            then:
+              - service: >-
+                  notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+                data:
+                  message: >-
+                    The washing is still in the machine. Better hang it up
+                    before it starts to smell.
+                  title: SMELLY WASHING!
+      - conditions:
+          - condition: trigger
+            id: Washing removed from machine
+          - condition: state
+            entity_id: timer.washing_machine_door_open
+            state: active
+        sequence:
+          - service: timer.cancel
+            data: {}
+            target:
+              entity_id: timer.washing_machine_door_open
+mode: single
