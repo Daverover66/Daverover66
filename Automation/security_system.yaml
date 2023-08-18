@@ -1,3 +1,14 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Security System                     #
+#   @description    :   Basic security for the house when   #
+#                       we are away. Uses Alert integration #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Security System
 description: A door or window is open and sentry mode is active.
 trigger:
