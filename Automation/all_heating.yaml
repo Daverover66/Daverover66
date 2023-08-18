@@ -1,11 +1,13 @@
-
-
-
-
-
-
-
-
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   All Heating                        #
+#   @description    :   Controls heating on/off if         #
+#                       windows/doors are opened/closed    #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################   
 
 alias: HEATING - All Automations
 description: >-
