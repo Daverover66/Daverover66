@@ -1,8 +1,12 @@
-##############################################################################
-#      
-
-
-
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   All Presence and Occupation        #
+#   @description    :   Room and area occupation           #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################      
 
 alias: All Presence and Occupancy
 description: Set room presence and room occupancy based on motion and presence.
