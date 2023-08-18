@@ -1,0 +1,208 @@
+################################################################ 
+#   @author         :   Dave Forrester                         #
+#   @date           :   17/08/2023                             #
+#   @automation     :   Water Leak Detection                   #
+#   @description    :   Alerts us if a leak is detected        #
+#                       under the washing machine, dishwasher  #
+#                       or bathroom sinks                      #
+#   @version        :   1.0                                    #
+#   @modified       :                                          #
+################################################################
+
+alias: Water Leak Detection and Alarm
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.leak_detector_dishwasher_water_leak
+      - binary_sensor.leak_detector_washing_machine_water_leak
+      - binary_sensor.kids_bathroom_leak_detector_water_leak
+      - binary_sensor.main_bathroom_leak_detector_water_leak
+    to: "on"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+condition: []
+action:
+  - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+    data:
+      message: Water leak detected in {{ trigger.to_state.attributes.friendly_name}}
+      title: WATER LEAK DETECTED!
+    alias: Notify Dave's Mobile based on an input text helper
+  - if:
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: "on"
+    then:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.6
+        target:
+          entity_id: media_player.everywhere_2
+      - service: notify.alexa_media_everywhere_2
+        data:
+          message: >-
+            <voice name="Brian">Alert! Alert! There is a water leak in the
+            {{trigger.to_state.attributes.friendly_name}} </voice>
+          data:
+            type: announce
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.alexa_volume_level_default_all')|float(0)}}"
+        target:
+          entity_id: media_player.everywhere_2
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+  - if:
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.leak_detector_dishwasher_water_leak
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.leak_detector_washing_machine_water_leak
+            state: "on"
+    then:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.6
+        target:
+          area_id: everywhere
+      - service: notify.alexa_media_everywhere_2
+        data:
+          message: >-
+            <voice name="Brian"><amazon:emotion name="excited"
+            intensity="high"><prosody pitch="high"><prosody
+            rate="x-fast"><prosody volume="x-loud">Alert! Alert! There is a
+            water leak in the {{trigger.to_state.attributes.friendly_name}}.
+            </prosody></prosody></prosody></amazon:emotion></voice>
+          data:
+            type: announce
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.alexa_volume_level_default_all')|float(0)}}"
+        target:
+          area_id: everywhere
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+  - if:
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.leak_detector_dishwasher_water_leak
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.leak_detector_washing_machine_water_leak
+            state: "on"
+    then:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.6
+        target:
+          area_id: everywhere
+      - service: notify.alexa_media_everywhere_2
+        data:
+          message: >-
+            <amazon:emotion name="excited" intensity="medium">Alert! Alert!
+            There is a water leak in the {{
+            trigger.to_state.attributes.friendly_name }}.</amazon:emotion>
+          data:
+            type: announce
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.alexa_volume_level_default_all')|float(0)}}"
+        target:
+          area_id: everywhere
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+  - if:
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.leak_detector_dishwasher_water_leak
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.leak_detector_washing_machine_water_leak
+            state: "on"
+    then:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.6
+        target:
+          area_id: everywhere
+      - service: notify.alexa_media_everywhere_2
+        data:
+          message: >-
+            <amazon:emotion name="excited" intensity="high">Alert! Alert! There
+            is a water leak in the
+            {{trigger.to_state.attributes.friendly_name}}.</amazon:emotion>
+          data:
+            type: announce
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.alexa_volume_level_default_all')|float(0)}}"
+        target:
+          area_id: everywhere
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+  - if:
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.leak_detector_dishwasher_water_leak
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.leak_detector_washing_machine_water_leak
+            state: "on"
+    then:
+      - service: media_player.volume_set
+        data:
+          volume_level: 0.6
+        target:
+          area_id: everywhere
+      - service: notify.alexa_media_everywhere_2
+        data:
+          message: >-
+            Alert! Alert! There is a water leak in the
+            {{trigger.to_state.attributes.friendly_name}}.
+          data:
+            type: announce
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.alexa_volume_level_default_all')|float(0)}}"
+        target:
+          area_id: everywhere
+      - delay:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+mode: single
