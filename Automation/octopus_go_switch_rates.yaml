@@ -1,0 +1,29 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Octopus Go Switch Rates            #
+#   @description    :   Switches tariffs                   #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
+alias: Peak/Cheap rate select for Go Utility meter
+description: ""
+trigger:
+  - platform: time
+    at: "00:30:00"
+    variables:
+      tariff: Off Peak
+  - platform: time
+    at: "04:30:00"
+    variables:
+      tariff: Peak
+action:
+  - service: select.select_option
+    target:
+      entity_id: select.octopus_go
+    data:
+      option: "{{ tariff }}"
+mode: single
