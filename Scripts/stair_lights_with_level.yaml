@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @script         :   Stair lights with level            #
+#   @description    :   Apply variable set brightness      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Stair Lights with level
 sequence:
   - service: light.turn_on
