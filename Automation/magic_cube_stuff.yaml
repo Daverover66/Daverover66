@@ -8,3 +8,326 @@
 #   @version        :   1.0                                #
 #   @modified       :                                      #
 ############################################################
+
+alias: Magic Cube Stuff
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "1"
+    id: Side 1
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "2"
+    id: Side 2
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "3"
+    id: Side 3
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "4"
+    id: Side 4
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "5"
+    id: Side 5
+  - platform: state
+    entity_id:
+      - sensor.magic_cube_side
+    to: "6"
+    id: Side 6
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 1
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.ingrid_socket_1
+          - service: media_player.turn_on
+            data: {}
+            target:
+              device_id: 2285e887e55f34f8b3cfd7d7e8e58f6a
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_kitchen_echo_show
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Information</prosody>. The kitchen media system
+                    has been activated', '<prosody pitch="high">Hailing
+                    frequencies</prosody> <break time="1s"/>open', '<prosody
+                    pitch="high">Information</prosody>. The kitchen televisual
+                    devices have been turned on', '<prosody pitch="high">Pardon
+                    me sir</prosody>. I have turned on the goggle box for your
+                    televisual viewing experience', '<prosody
+                    pitch="high">Pardon me madam</prosody>. I have activated the
+                    multimedia viewing apparatus, to help while away the
+                    time?']|random }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 2
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.ingrid_socket_1
+          - service: media_player.turn_off
+            data: {}
+            target:
+              device_id: 2285e887e55f34f8b3cfd7d7e8e58f6a
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_kitchen_echo_show
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                    pitch="high">Excuse me madam</prosody>, but are you aware
+                    that the kitchen media system has been
+                    deactivated?','<prosody pitch="high">Hailing
+                    frequencies</prosody><break time="1s"/> closed','<prosody
+                    pitch="high">Information</prosody>. The kitchen televisual
+                    devices have been turned off','<prosody pitch="high">Pardon
+                    me sir</prosody>, but I believe it might be time to see what
+                    is going on in the real world','<prosody pitch="high">Excuse
+                    me madam</prosody>, now that you have had your fill of tv,
+                    might I suggest a return to reality']|random
+                    }}</prosody></voice>
+                  data:
+                    type: tts
+                    method: speak
+      - conditions:
+          - condition: trigger
+            id: Side 3
+        sequence:
+          - service: notify.alexa_media_kitchen_echo_show
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ ['I have started a 4
+                minute coffee timer. It starts, now','I have begun counting to
+                240. <prosody pitch="high">When I am done, your coffee will be
+                ready</prosody>','<prosody pitch="high">Ready, steady, 4 minute
+                coffee timer.</prosody> <break time="2s"/><prosody
+                pitch="x-high">Go</prosody>','When the Earth has rotated by 1
+                degree, <prosody pitch="high">your coffee will be
+                ready</prosody>','In 4 minutes time, <prosody pitch="high">your
+                caffiene fix for today will be <break
+                time="2s"/>ready.</prosody>']|random }}</prosody></voice>
+              data:
+                type: tts
+                method: speak
+          - delay:
+              hours: 0
+              minutes: 4
+              seconds: 0
+              milliseconds: 0
+            alias: Wait 4 minutes
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+            alias: Set volume everywhere based on an input number helper
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+            alias: Wait 2s
+            enabled: true
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ [  '<prosody
+                pitch="high">Information</prosody>. Your coffee is ready. How
+                would you like it?',          
+                      '<prosody pitch="low">Ah</prosody>, smell that coffee. Get it while its hot',
+                      '<prosody pitch="high">Information</prosody>. Your coffee is ready for pouring.',                    
+                      '<prosody pitch="x-high">Bing bong</prosody>. Coffee time!',          
+                      'Coffee, coffee everywhere and not a drop to drink. <prosody pitch="high">Only kidding</prosody>. Your coffee is ready',    
+                   ]|random
+                }}</prosody></voice>
+              data:
+                type: announce
+                method: speak
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+            alias: Set volume everywhere to default
+            enabled: true
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            target:
+              device_id: 49841004268921a9f26338df9c24c561
+            alias: Set volume of kitchen echo show to default
+            enabled: true
+      - conditions:
+          - condition: trigger
+            id: Side 6
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{
+                states('input_number.alexa_volume_level_announcements')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                pitch="high">Excuse my interruption everyone</prosody>. Would
+                you please head to the kitchen where mummy has prepared a
+                delicious meal', 
+                     '<prosody pitch="high">Pardon me everyone</prosody>. Food is now being served in the kitchen. Get it while it is hot', 
+                     '<prosody pitch="high">If I might interrupt your evening deliberations</prosody>. If you are hungry, the wait is over. Dinner is on the kitchen table', 
+                     '<prosody pitch="high">Excuse me everyone</prosody>. I thought you might be interested to hear that it is time to head to the kitchen. When you get there, you might just find some food on the table',
+                     '<prosody pitch="high">Pardon me everyone</prosody>. My tummy is rumbly. If your tummy is rumbly,  then rumble on to the kitchen for some, <prosody pitch="high">yummy</prosody> food'
+                      ]|random }}</prosody></voice>
+              data:
+                type: announce
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{
+                states('input_number.alexa_volume_level_default_all')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+      - conditions:
+          - condition: trigger
+            id: Side 5
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{
+                states('input_number.alexa_volume_level_announcements')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                pitch="high">Excuse
+
+                me</prosody>. Would you mind please making your way to the
+                Dining Room where
+
+                <prosody pitch="high">Gemma</prosody> has prepared a delicious
+                Sunday
+
+                dinner', 
+                     '<prosody pitch="high">Information</prosody>. I thought you might be interested to hear that dinner is now being served in the Dining Room. Get it while it is hot', 
+                     '<prosody pitch="high">Excuse me</prosody>. I dont know about you, but <prosody pitch="high">I am hungry</prosody>. If you are hungry, the wait is over. Dinner is on the Dining Room table', 
+                     '<prosody pitch="high">Your attention please</prosody>. I have been informed by our head chef that it is time to head to the Dining Room. When you get there, you might just find that dinner is on the table',
+                     '<prosody pitch="high">Excuse me</prosody>. My tummy feels a bit rumbly. If your tummy is rumbly too, then rumble on to the Dining Room for some <prosody pitch="high">yummy</prosody> dinner'
+                      ]|random }}</prosody></voice>
+              data:
+                type: announce
+                method: all
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{
+                states('input_number.alexa_volume_level_default_all')|float(0)}}
+            target:
+              entity_id: media_player.everywhere_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 4
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+        sequence:
+          - service: notify.alexa_media_kitchen_echo_show
+            data:
+              message: >-
+                <voice name="Brian"><prosody rate="105%">{{ ['<prosody
+                pitch="high">Excuse me madam</prosody>, I regret to inform you
+                that this side of the magic cube has not yet been programmed.
+                Perhaps you should try a different side', '<prosody
+                pitch="high">Information</prosody>. Please try another side as
+                this one appears to do nothing',  '<prosody pitch="high">Pardon
+                me sir</prosody>, but I believe you may have inadvertently
+                selected side 4, and that side does nothing, for now', 
+                '<prosody pitch="x-high">Warning</prosody>. <prosody
+                pitch="high">This cube will self destruct in 5 seconds <break
+                time="1s"/>, 5 <break time="1s"/>, 4 <break time="1s"/>,
+                3</prosody>, <break time="1s"/>2<break time="1s"/>, <prosody
+                pitch="low">1 <break time="1s"/>.</prosody> <prosody
+                pitch="x-high">Ha ha, <break time="1s"/>only
+                kidding</prosody>']|random }}</prosody></voice>
+              data:
+                type: tts
+                method: speak
+mode: queued
+max: 10
