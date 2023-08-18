@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @script         :   Speech Engine for TTS              #
+#   @description    :                                      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Speech Engine for TTS
 sequence:
   - service: notify.alexa_media
