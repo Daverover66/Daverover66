@@ -1,0 +1,157 @@
+alias: Security System
+description: A door or window is open and sentry mode is active.
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.cloakroom_window_contact
+      - binary_sensor.hallway_window_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.dining_room_window_left_contact
+      - binary_sensor.dining_room_window_right_contact
+      - binary_sensor.en_suite_window_sensor_contact
+      - binary_sensor.office_window_sensor_contact
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "on"
+    id: Activate
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.cloakroom_window_contact
+      - binary_sensor.hallway_window_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.dining_room_window_left_contact
+      - binary_sensor.dining_room_window_right_contact
+      - binary_sensor.en_suite_window_sensor_contact
+      - binary_sensor.office_window_sensor_contact
+      - binary_sensor.garage_door_left_contact
+      - binary_sensor.garage_door_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "off"
+    id: Clear
+  - platform: state
+    entity_id:
+      - person.gem_forrester
+    to: home
+    id: Gem Home
+  - platform: state
+    entity_id:
+      - person.david_forrester
+    to: home
+    id: Dave Home
+    enabled: true
+  - platform: state
+    entity_id:
+      - group.residents
+    from: home
+    to: not_home
+    id: We've all gone out
+  - platform: state
+    entity_id:
+      - group.residents
+    from: not_home
+    to: home
+    id: We're all home again
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Activate
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.security_issue
+      - conditions:
+          - condition: trigger
+            id: Clear
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.security_issue
+      - conditions:
+          - condition: trigger
+            id: We've all gone out
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "off"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+      - conditions:
+          - condition: trigger
+            id: Gem Home
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: person.david_forrester
+                state: home
+            alias: Confirm Dave is not home
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+      - conditions:
+          - condition: trigger
+            id: Dave Home
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: person.gem_forrester
+                state: home
+            alias: Confirm Gem is not home
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+mode: single
