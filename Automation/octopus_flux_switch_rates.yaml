@@ -1,0 +1,81 @@
+alias: "Octopus Flux Rates Switch for Utility Meter "
+description: ""
+trigger:
+  - platform: time
+    at: "02:00:00"
+    variables:
+      tariff: Off Peak
+    id: Cheap Rate
+  - platform: time
+    at: "05:00:00"
+    id: Standard Rate
+  - platform: time
+    at: "16:00:00"
+    variables:
+      tariff: Peak
+    id: Peak Rate
+  - platform: time
+    at: "19:00:00"
+    variables:
+      tariff: Peak
+    id: Standard Rate Again
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Cheap Rate
+        sequence:
+          - service: select.select_option
+            data:
+              option: Flux Cheap Import
+            target:
+              entity_id: select.octopus_flux_import_rate
+          - service: select.select_option
+            data:
+              option: Flux Cheap Export Rate
+            target:
+              entity_id: select.octopus_flux_export_rates
+      - conditions:
+          - condition: trigger
+            id: Standard Rate
+        sequence:
+          - service: select.select_option
+            data:
+              option: Flux Standard Import
+            target:
+              entity_id: select.octopus_flux_import_rate
+          - service: select.select_option
+            data:
+              option: Flux Standard Export Rate
+            target:
+              entity_id: select.octopus_flux_export_rates
+      - conditions:
+          - condition: trigger
+            id: Peak Rate
+        sequence:
+          - service: select.select_option
+            data:
+              option: Flux Peak Import
+            target:
+              entity_id: select.octopus_flux_import_rate
+          - service: select.select_option
+            data:
+              option: Flux Peak Export Rate
+            target:
+              entity_id: select.octopus_flux_export_rates
+      - conditions:
+          - condition: trigger
+            id: Standard Rate Again
+        sequence:
+          - service: select.select_option
+            data:
+              option: Flux Standard Import
+            target:
+              entity_id: select.octopus_flux_import_rate
+          - service: select.select_option
+            data:
+              option: Flux Standard Export Rate
+            target:
+              entity_id: select.octopus_flux_export_rates
+mode: single
