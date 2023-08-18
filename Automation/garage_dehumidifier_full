@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Garage Dehumidifier Water Tray     #
+#   @description    :   Lets me know when it's full        #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Garage Dehumdifier Water Tray Full
 description: ""
 trigger:
