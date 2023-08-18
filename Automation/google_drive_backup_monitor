@@ -1,0 +1,16 @@
+alias: Google Drive Backup Monitor
+description: Send a notification to Dave's phone if the Google Drive Backup fails
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.backups_stale
+    from: "off"
+    to: "on"
+condition: []
+action:
+  - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+    data:
+      message: Access the Home Assistant Google Drive Backup add-on for details
+      title: There is an issue with the backups
+    alias: Send a notification based on an input text helper
+mode: single
