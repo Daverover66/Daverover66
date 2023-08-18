@@ -1,0 +1,90 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   Automations Control                #
+#   @description    :   Controls when automations are      #
+#                       enabled                            #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################ 
+
+alias: Automations Control Automation
+description: Turn on automations and activation toggles when needed
+trigger:
+  - platform: time
+    at: "15:30:00"
+    id: Enable
+  - platform: time
+    at: "19:30:00"
+    id: Disable
+  - platform: state
+    entity_id:
+      - input_boolean.kids_bedtime_announcement_played
+      - input_boolean.school_morning_announcement_played
+      - input_boolean.school_pick_up_announcement_played
+      - input_boolean.morning_briefing_played
+    from: "off"
+    to: "on"
+    id: Toggle On
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Enable
+        sequence:
+          - service: automation.turn_on
+            data: {}
+            target:
+              entity_id: automation.get_desired_battery_discharge
+          - service: automation.turn_on
+            data: {}
+            target:
+              entity_id: automation.discharge_battery_to_desired
+      - conditions:
+          - condition: trigger
+            id:
+              - Disable
+        sequence:
+          - service: automation.turn_off
+            data:
+              stop_actions: true
+            target:
+              entity_id: automation.get_desired_battery_discharge
+          - service: automation.turn_off
+            data:
+              stop_actions: true
+            target:
+              entity_id: automation.discharge_battery_to_desired
+      - conditions:
+          - condition: trigger
+            id:
+              - Toggle On
+          - condition: template
+            value_template: "{{\"Bedtime\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Filter Bedtime Announcement
+        sequence:
+          - if:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: switch.daddys_bedside_lamp_socket_1
+                    state: "on"
+                  - condition: state
+                    entity_id: switch.mummys_bedside_lamp_socket_1
+                    state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - switch.mummys_bedside_lamp_socket_1
+                    - switch.daddys_bedside_lamp_socket_1
+            alias: Turn off the lamps if they are on.
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.main_bedroom_bedside_lamps_active
+mode: single
