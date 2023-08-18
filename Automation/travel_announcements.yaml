@@ -1,0 +1,213 @@
+alias: Travel Automations
+description: Checks waze travel time
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.waze_travel_time
+    below: 5
+    alias: When Gem is less than 5 minutes away
+    id: Gem almost home
+  - platform: numeric_state
+    entity_id: zone.gem_work
+    id: Gem at work
+    alias: Gem is at work
+    above: 0
+  - platform: numeric_state
+    entity_id: zone.gem_work
+    alias: Gem left work
+    id: Gem left work
+    below: 1
+  - platform: numeric_state
+    entity_id: sensor.waze_travel_time_2
+    below: 5
+    alias: When Dave is less than 5 minutes away
+    id: Dave almost home
+  - platform: numeric_state
+    entity_id: zone.dave_s_mum_and_dad
+    id: Dave is at his mum and dad's
+    alias: "Dave is at his mum and dad's "
+    above: 0
+  - platform: numeric_state
+    entity_id: zone.dave_s_mum_and_dad
+    alias: "Dave left his mum and dad's "
+    id: "Dave left his mum and dad's "
+    below: 1
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Gem at work
+        sequence:
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: Gem's got to work
+              title: GEM AT WORK
+            alias: Send a notification based on an input text helper
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody rate="110%"><prosody
+                    pitch="high">{{ ['Pardon me sir. Your good lady has arrived
+                    at work. Let the party begin', 'Attention, Gemma has arrived
+                    at work. Better get those jobs done now.', 'Information. My
+                    tracking system has detected the presence of Gemma at her
+                    work location']|random }}</prosody></prosody></voice>
+                  data:
+                    type: announce
+            alias: >-
+              If quiet time off and audible notificationsis on, announce on
+              Alexa everywhere group
+      - conditions:
+          - condition: trigger
+            id: Gem almost home
+          - condition: state
+            entity_id: binary_sensor.quiet_time
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - service: notify.alexa_media_everywhere_2
+            data:
+              message: >-
+                <voice name="Brian"><prosody pitch="high"><prosody
+                rate="110%">{{ ['Attention in the house. Mummy will be home
+                soon.  
+
+                Shes had a hard day and will probably need some wine.','<prosody
+                pitch="x-high">Proximity Alert.</prosody> My
+
+                tracking sensors have detected the presence of movement in the
+                area. Logic
+
+                circuits have determined that Mummy will be home soon.',
+                'Information.
+
+                Sensors have reported movement at a range of 1 mile from the
+                property. Logic
+
+                circuits surmise that Mummy will be home soon.']|random
+                }}</prosody></prosody></voice>
+              data:
+                type: announce
+      - conditions:
+          - condition: trigger
+            id: Gem left work
+        sequence:
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: Gem has left work
+              title: GEM LEFT WORK
+            alias: Send a notification based on an input text helper
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody pitch="high"><prosody
+                    rate="110%"> Information. Sensors have detected that Mummy
+                    has left the office and is on her way home. She will be home
+                    in {{ state_attr('sensor.gem_at_work' , 'duration') |
+                    round(0)}} minutes. </prosody></prosody></voice>
+                  data:
+                    type: announce
+      - conditions:
+          - condition: trigger
+            id: Dave is at his mum and dad's
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody pitch="high"><prosody
+                    rate="110%"> Information. Dave has arrived in
+                    Dundee.</prosody></prosody></voice>
+                  data:
+                    type: announce
+          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+            data:
+              message: "Dave is at his mum and dad's "
+              title: DAVE IS IN DUNDEE
+            alias: Send a notification based on an input text helper
+      - conditions:
+          - condition: trigger
+            id: Dave almost home
+        sequence:
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody pitch="high"><prosody
+                    rate="110%">{{ ['Attention in the house. Daddy will be home
+                    soon.  He has had a long journey and will probably need some
+                    beer.' ,'Proximity Alert. My tracking sensors have detected
+                    the presence of movement in the area. Logic circuits have
+                    determined that Daddy will be home soon.' ,'Information.
+                    Sensors have reported movement at a range of 1 mile from the
+                    property. Logic circuits surmise that Daddy will be home
+                    soon.']|random }}</prosody></prosody></voice>
+                  data:
+                    type: announce
+            alias: >-
+              If quiet time is off and audible notifications is on, announce on
+              Alexa everywhere group.
+          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+            data:
+              message: Dave is almost home
+              title: DAVE 5 MINS AWAY
+            alias: Notify Gem's phone
+      - conditions:
+          - condition: trigger
+            id: "Dave left his mum and dad's "
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            then:
+              - service: notify.alexa_media_everywhere_2
+                data:
+                  message: >-
+                    <voice name="Brian"><prosody pitch="high"><prosody
+                    rate="110%"> Daddy is on his way home. He'll be home in {{
+                    state_attr('sensor.dave_in_dundee' , 'duration') |
+                    round(0)}} minutes.</prosody></prosody></voice>
+                  data:
+                    type: announce
+          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+            data:
+              message: Dave has left Dundee
+              title: DAVE LEFT
+            alias: Notify Gem's phone
+mode: single
