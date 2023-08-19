@@ -1,0 +1,184 @@
+alias: Nighttime lights
+description: Turns on lights at dusk. Turn off all lights at bedtime
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.lights_out
+    from: "off"
+    to: "on"
+    id: Lights Out
+  - platform: sun
+    event: sunset
+    offset: "-00:30:00"
+    id: Dusk
+condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Dusk
+          - condition: state
+            entity_id: input_boolean.holiday_mode
+            state: "off"
+        sequence:
+          - if:
+              - condition: state
+                entity_id: light.corner_lamp
+                state: "off"
+            then:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness: 76
+                target:
+                  entity_id: light.corner_lamp
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.stair_lights
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.under_shelf_lights_local
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.bed_lamps
+          - if:
+              - condition: state
+                entity_id: light.standard_lamp
+                state: "off"
+            then:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness: 76
+                target:
+                  entity_id: light.standard_lamp
+          - if:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "on"
+            then:
+              - service: light.turn_on
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Out
+        sequence:
+          - if:
+              - condition: state
+                entity_id: light.corner_lamp
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.corner_lamp
+            alias: If corner lamp is on, turn it off
+          - if:
+              - condition: state
+                entity_id: light.standard_lamp
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.standard_lamp
+            alias: If standard lamp is on, turn it off
+          - if:
+              - condition: state
+                entity_id: switch.under_shelf_lights_local
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.under_shelf_lights_local
+            alias: If undershelf lights are on, turn them off
+          - if:
+              - condition: state
+                entity_id: light.dreamview_g1_pro
+                state: "on"
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+            alias: If TV mood lights are on, turn them off
+          - if:
+              - condition: state
+                entity_id: light.back_door_light
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.back_door_sensor_contact
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.back_door_light
+            alias: If back door light is on, turn it off
+          - if:
+              - condition: state
+                entity_id: light.landing_lights
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.landing_lights
+            alias: "If landing lights are on, turn them off "
+          - if:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_left
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.room_occupied_guest_bedroom
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - light.guest_bedroom_bedside_lamp_left
+                    - light.guest_bedroom_bedside_lamp_right
+            alias: If guest bedroom bedside lamps are on, turn them off
+          - if:
+              - condition: state
+                entity_id: switch.daddys_bedside_lamp_socket_1
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.daddys_bedside_lamp_socket_1
+            alias: If Daddy's bedside lamp is on, turn it off
+          - if:
+              - condition: state
+                entity_id: switch.mummys_bedside_lamp_socket_1
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - switch.mummys_bedside_lamp_socket_1
+            alias: If Mummy's bedside lamp is on, turn it off
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.main_bedroom_bedside_lamps_active
+                - input_boolean.guest_bedroom_bedside_lamps_active
+mode: restart
