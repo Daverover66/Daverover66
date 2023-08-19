@@ -1,0 +1,37 @@
+alias: Loft Lights on with hatch
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.loft_hatch_sensor_contact
+    from: "off"
+    to: "on"
+    id: Open
+  - platform: state
+    entity_id:
+      - binary_sensor.loft_hatch_sensor_contact
+    from: "on"
+    to: "off"
+    id: Closed
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Open
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.loft_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Closed
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.loft_light
+mode: single
