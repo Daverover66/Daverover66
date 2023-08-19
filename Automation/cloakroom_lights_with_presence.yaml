@@ -1,0 +1,118 @@
+alias: Cloakroom Lights on with Presence
+description: Lights on and off with presence and timer
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.cloakroom_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Light On
+  - platform: state
+    entity_id:
+      - binary_sensor.cloakroom_presence_occupancy
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Light Off
+  - platform: device
+    type: turned_on
+    device_id: 621f8db4e2d03a6d1cb101ec3be46e7a
+    entity_id: switch.cloakroom_light
+    domain: switch
+    id: Light turned on
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.cloakroom_light
+    id: Cloakroom Light off
+    alias: Cloakroom Light off with Timer
+  - platform: numeric_state
+    entity_id: sensor.downstairs_light_level
+    below: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.downstairs_light_level
+    id: Good Light
+    above: 80
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Light turned on
+            alias: Start timer when light turns on
+        sequence:
+          - service: timer.start
+            data: {}
+            target:
+              entity_id: timer.cloakroom_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Cloakroom Light off
+            alias: Turn light off when timer runs down
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On
+            alias: Turn on light with presence
+          - condition: numeric_state
+            entity_id: sensor.downstairs_light_level
+            below: 20
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.room_occupied_cloakroom
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.room_occupied_cloakroom
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.cloakroom_light_2
+mode: restart
