@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   19/08/2023                         #
+#   @automation     :   Nighttime Lights                   #
+#   @description    :   Lights on at dusk                  #
+#                       and off at bedtime                 #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Nighttime lights
 description: Turns on lights at dusk. Turn off all lights at bedtime
 trigger:
