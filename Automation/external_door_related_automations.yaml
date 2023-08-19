@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   19/08/2023                         #
+#   @automation     :   External Door Related Automations  #
+#   @description    :                                      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: External Door Related Automations
 description: Lights and announcements etc
 trigger:
