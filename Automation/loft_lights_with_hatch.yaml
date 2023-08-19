@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   19/08/2023                         #
+#   @automation     :   Loft Lights with Hatch             #
+#   @description    :                                      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Loft Lights on with hatch
 description: ""
 trigger:
