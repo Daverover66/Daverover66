@@ -44,9 +44,12 @@ trigger:
     from: "on"
     to: "off"
     id: Office not in use
-  - platform: time
-    at: "07:30:00"
-    id: Briefing
+  - platform: state
+    entity_id:
+      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+    from: "off"
+    to: "on"
+    id: Kitchen Motion
   - platform: state
     entity_id:
       - sensor.last_alexa_called
@@ -431,13 +434,13 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - Briefing
+              - Kitchen Motion
+          - condition: time
+            after: "08:00"
+            before: "09:30"
           - condition: state
-            entity_id: binary_sensor.quiet_time
+            entity_id: input_boolean.morning_briefing_played
             state: "off"
-          - condition: state
-            entity_id: input_boolean.room_occupied_kitchen
-            state: "on"
         sequence:
           - service: script.alexa_morning_briefing
             data: {}
