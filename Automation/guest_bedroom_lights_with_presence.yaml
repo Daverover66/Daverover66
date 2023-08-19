@@ -1,0 +1,125 @@
+alias: Guest Bedroom Lights with presence
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_motion_occupancy
+    from: "off"
+    to: "on"
+    id: Light on
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_motion_occupancy
+    from: "on"
+    to: "off"
+    id: Light off
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  - platform: numeric_state
+    entity_id: sensor.upstairs_light_level
+    below: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.upstairs_light_level
+    id: Good Light
+    above: 80
+condition:
+  - condition: state
+    entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+  - condition: state
+    entity_id: binary_sensor.lights_out
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Light on
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: numeric_state
+            entity_id: sensor.average_light_level_upstairs
+            below: 20
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
+            target:
+              entity_id: light.guest_bedroom_bedside_lamp_left
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_right
+      - conditions:
+          - condition: trigger
+            id: Light off
+          - condition: state
+            entity_id: light.guest_bedroom_bedside_lamp_left
+            state: "on"
+          - condition: state
+            entity_id: light.guest_bedroom_bedside_lamp_right
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+                - light.guest_bedroom_bedside_lamp_right
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_left
+                state: "off"
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_right
+                state: "off"
+          - condition: state
+            entity_id: input_boolean.room_occupied_guest_bedroom
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 50
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+                - light.guest_bedroom_bedside_lamp_right
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: state
+            entity_id: input_boolean.room_occupied_guest_bedroom
+            state: "on"
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_left
+                state: "on"
+              - condition: state
+                entity_id: light.guest_bedroom_bedside_lamp_right
+                state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+                - light.guest_bedroom_bedside_lamp_right
+mode: restart
