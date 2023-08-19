@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   19/08/2023                         #
+#   @automation     :   Cloakroom Lights with Presence     #
+#   @description    :                                      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Cloakroom Lights on with Presence
 description: Lights on and off with presence and timer
 trigger:
