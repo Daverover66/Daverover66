@@ -1,0 +1,139 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   19/08/2023                         #
+#   @automation     :   Main Bedroom Lights with Presence  #
+#   @description    :                                      #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
+alias: Main Bedroom Lights with Presence
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+      - binary_sensor.main_bedroom_fp2_presence_sensor_3
+    id: Lights On
+    from: "off"
+    to: "on"
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+      - binary_sensor.main_bedroom_fp2_presence_sensor_3
+    id: Lights Off
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  - platform: numeric_state
+    entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+    below: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+    id: Good Light
+    above: 80
+condition:
+  - condition: state
+    entity_id: input_boolean.main_bedroom_bedside_lamps_active
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+  - condition: state
+    entity_id: binary_sensor.lights_out
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's side of bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: 20
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.daddys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: template
+            value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's side of bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: 20
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.mummys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's side of bed
+          - condition: state
+            entity_id: switch.daddys_bedside_lamp_socket_1
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.daddys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: template
+            value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's side of bed
+          - condition: state
+            entity_id: switch.mummys_bedside_lamp_socket_1
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.mummys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: input_boolean.room_occupied_main_bedroom
+            state: "on"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.mummys_bedside_lamp_socket_1
+                - switch.daddys_bedside_lamp_socket_1
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+                - switch.mummys_bedside_lamp_socket_1
+                - switch.daddys_bedside_lamp_socket_1
+mode: restart
