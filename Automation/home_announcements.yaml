@@ -5,8 +5,8 @@
 #   @description    :   Broadcast various announcments on  #
 #                       our Amazon Echos                   #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   19/08/2023                         #
 ############################################################ 
 
 alias: Home Announcements
