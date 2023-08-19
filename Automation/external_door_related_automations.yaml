@@ -1,0 +1,68 @@
+alias: External Door Related Automations
+description: Lights and announcements etc
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.side_door_sensor_contact
+    to: "on"
+    id: Chime
+    from: "off"
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Door still open
+  - platform: state
+    entity_id:
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.front_door_sense_contact
+    from: "on"
+    to: "off"
+    id: Chime Off
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Chime
+          - condition: template
+            value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Back Door
+          - condition: sun
+            after: sunset
+            before: sunrise
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 75
+            target:
+              entity_id: light.back_door_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Chime Off
+          - condition: template
+            value_template: "{{\"Back\"  in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Back Door
+          - condition: state
+            entity_id: light.back_door_light
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data:
+              transition: 300
+            target:
+              entity_id: light.back_door_light
+mode: restart
