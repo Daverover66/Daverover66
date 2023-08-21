@@ -1,0 +1,209 @@
+alias: Kitchen Lights with Presence
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Lights On
+  - platform: state
+    entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "on"
+    to: "off"
+    id: Lights Off
+  - platform: numeric_state
+    entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+    below: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+    above: 80
+    id: Good Light
+condition:
+  - condition: state
+    entity_id: binary_sensor.lights_out
+    state: "off"
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: time
+            after: "07:00:00"
+            before: "11:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: time
+            after: "11:30:00"
+            before: "13:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: time
+            after: "13:30:00"
+            before: "17:00:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: time
+            after: "17:00:00"
+            before: "18:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: time
+            after: "18:30:00"
+            before: "22:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: time
+            after: "07:00:00"
+            before: "11:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: time
+            after: "11:30:00"
+            before: "13:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: time
+            after: "13:30:00"
+            before: "17:00:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: time
+            after: "17:00:00"
+            before: "18:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: time
+            after: "18:30:00"
+            before: "22:30:00"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 20
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+mode: single
