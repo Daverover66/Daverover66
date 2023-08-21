@@ -48,6 +48,9 @@ action:
           - condition: time
             after: "07:00:00"
             before: "11:30:00"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 20
         sequence:
           - service: light.turn_on
             data:
@@ -62,6 +65,9 @@ action:
           - condition: time
             after: "11:30:00"
             before: "13:30:00"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 20
         sequence:
           - service: light.turn_on
             data:
@@ -76,6 +82,9 @@ action:
           - condition: time
             after: "13:30:00"
             before: "17:00:00"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 20
         sequence:
           - service: light.turn_on
             data:
@@ -90,6 +99,9 @@ action:
           - condition: time
             after: "17:00:00"
             before: "18:30:00"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 20
         sequence:
           - service: light.turn_on
             data:
@@ -104,6 +116,9 @@ action:
           - condition: time
             after: "18:30:00"
             before: "22:30:00"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 20
         sequence:
           - service: light.turn_on
             data:
@@ -217,4 +232,5 @@ action:
             data: {}
             target:
               entity_id: light.kitchen_lights_2
-mode: single
+mode: restart
+
