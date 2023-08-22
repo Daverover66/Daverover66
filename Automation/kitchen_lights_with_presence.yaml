@@ -5,8 +5,8 @@
 #   @description    :                                      #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   22/08/2023                         #
 ############################################################ 
 
 alias: Kitchen Lights with Presence
@@ -32,6 +32,28 @@ trigger:
     entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
     above: 80
     id: Good Light
+  - platform: state
+    entity_id:
+      - binary_sensor.lunchtime
+    from: "off"
+    to: "on"
+    id: Lunchtime starts
+  - platform: state
+    entity_id:
+      - binary_sensor.lunchtime
+    id: lunchtime ends
+  - platform: state
+    entity_id:
+      - binary_sensor.dinner_time
+    from: "off"
+    to: "on"
+    id: Dinner Time Starts
+  - platform: state
+    entity_id:
+      - binary_sensor.dinner_time
+    from: "on"
+    to: "off"
+    id: Dinner Time Ends
 condition:
   - condition: state
     entity_id: binary_sensor.lights_out
@@ -45,26 +67,26 @@ action:
           - condition: trigger
             id:
               - Lights On
-          - condition: time
-            after: "07:00:00"
-            before: "11:30:00"
+          - condition: state
+            entity_id: binary_sensor.morning
+            state: "on"
           - condition: numeric_state
             entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
             below: 20
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
           - condition: trigger
             id:
               - Lights On
-          - condition: time
-            after: "11:30:00"
-            before: "13:30:00"
+          - condition: state
+            entity_id: binary_sensor.lunchtime
+            state: "on"
           - condition: numeric_state
             entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
             below: 20
@@ -79,26 +101,26 @@ action:
           - condition: trigger
             id:
               - Lights On
-          - condition: time
-            after: "13:30:00"
-            before: "17:00:00"
+          - condition: state
+            entity_id: binary_sensor.afternoon
+            state: "on"
           - condition: numeric_state
             entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
             below: 20
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
           - condition: trigger
             id:
               - Lights On
-          - condition: time
-            after: "17:00:00"
-            before: "18:30:00"
+          - condition: state
+            entity_id: binary_sensor.dinner_time
+            state: "on"
           - condition: numeric_state
             entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
             below: 20
@@ -113,17 +135,17 @@ action:
           - condition: trigger
             id:
               - Lights On
-          - condition: time
-            after: "18:30:00"
-            before: "22:30:00"
+          - condition: state
+            entity_id: binary_sensor.evening
+            state: "on"
           - condition: numeric_state
             entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
             below: 20
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
@@ -138,6 +160,25 @@ action:
             data: {}
             target:
               entity_id: light.kitchen_lights_2
+          - if:
+              - condition: state
+                entity_id: input_boolean.garage_dehumidifier_full
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_on_off
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id:
+                    - scene.kitchen_light_indicator_washing_machine_finished
       - conditions:
           - condition: trigger
             id:
@@ -145,14 +186,14 @@ action:
           - condition: state
             entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
             state: "on"
-          - condition: time
-            after: "07:00:00"
-            before: "11:30:00"
+          - condition: state
+            entity_id: binary_sensor.morning
+            state: "on"
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
@@ -162,9 +203,9 @@ action:
           - condition: state
             entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
             state: "on"
-          - condition: time
-            after: "11:30:00"
-            before: "13:30:00"
+          - condition: state
+            entity_id: binary_sensor.lunchtime
+            state: "on"
         sequence:
           - service: light.turn_on
             data:
@@ -179,14 +220,14 @@ action:
           - condition: state
             entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
             state: "on"
-          - condition: time
-            after: "13:30:00"
-            before: "17:00:00"
+          - condition: state
+            entity_id: binary_sensor.afternoon
+            state: "on"
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
@@ -196,9 +237,9 @@ action:
           - condition: state
             entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
             state: "on"
-          - condition: time
-            after: "17:00:00"
-            before: "18:30:00"
+          - condition: state
+            entity_id: binary_sensor.dinner_time
+            state: "on"
         sequence:
           - service: light.turn_on
             data:
@@ -213,14 +254,14 @@ action:
           - condition: state
             entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
             state: "on"
-          - condition: time
-            after: "18:30:00"
-            before: "22:30:00"
+          - condition: state
+            entity_id: binary_sensor.evening
+            state: "on"
         sequence:
           - service: light.turn_on
             data:
-              color_temp: 500
-              brightness_pct: 20
+              color_temp: 367
+              brightness: 28
             target:
               entity_id: light.kitchen_lights_2
       - conditions:
@@ -232,5 +273,81 @@ action:
             data: {}
             target:
               entity_id: light.kitchen_lights_2
+          - if:
+              - condition: state
+                entity_id: input_boolean.garage_dehumidifier_full
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_on_off
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id:
+                    - scene.kitchen_light_indicator_washing_machine_finished
+      - conditions:
+          - condition: trigger
+            id:
+              - Lunchtime starts
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - lunchtime ends
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 367
+              brightness: 28
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinner Time Starts
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 200
+              brightness_pct: 100
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinner Time Ends
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 367
+              brightness: 28
+            target:
+              entity_id: light.kitchen_lights_2
 mode: restart
+
 
