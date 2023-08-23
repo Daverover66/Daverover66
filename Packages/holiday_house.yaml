@@ -1,0 +1,43 @@
+automation:
+alias: Run Holiday Lights
+description: ""
+trigger:
+  - platform: sun
+    event: sunset
+    id: sundown
+  - platform: sun
+    event: sunrise
+    id: sunup
+  - platform: state
+    entity_id: input_boolean.holiday_mode
+    id: cancel
+    from: "off"
+    to: "on"
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: sundown
+          - condition: state
+            entity_id: input_boolean.holiday_mode
+            state: "on"
+        sequence:
+          - service: script.turn_on
+            target:
+              entity_id: script.randomised_holiday_lighting
+            data: {}
+      - conditions:
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: sunup
+              - condition: trigger
+                id: cancel
+        sequence:
+          - service: script.turn_off
+            target:
+              entity_id: script.randomised_holiday_lighting
+            data: {}
+    default: []
+mode: single
