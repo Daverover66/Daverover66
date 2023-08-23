@@ -12,6 +12,20 @@
 #   Randomised Lights                                                         #
 ###############################################################################
 
+### Helpers ###
+
+input_boolean:
+  holiday_mode:
+    name: Holiday Mode
+    icon: mdi:airplane
+
+input_text:
+  current_random_light:
+    name: Current Random Light
+    icon: mdi:lightbulb
+    
+### Automations ###
+
 automation:
   - alias: Run Holiday Lights
     description: ""
@@ -84,6 +98,7 @@ automation:
         data: {}
     mode: single
 
+### scripts ###
 
 script:
   - alias: Randomised Holiday Lighting
