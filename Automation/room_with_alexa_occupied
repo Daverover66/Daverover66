@@ -1,0 +1,135 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   24/08/2023                         #
+#   @automation     :   Room with Alexa Occupied           #
+#   @description    :   Gives current room with Alexa      #
+#                       for audible notifications          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################ 
+
+alias: Room with Alexa Occupied
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.living_room_fp2_presence_sensor_1
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+      - binary_sensor.dining_room_presence_sensor_occupancy
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.guest_bedroom_motion_occupancy
+      - binary_sensor.jamie_s_room_cam_cell_motion_detection
+      - binary_sensor.seans_room_camera_cell_motion_detection
+    from: "off"
+    to: "on"
+    id: Room Occupied
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "on"
+              - condition: template
+                value_template: "{{\"Living\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Living room TV on or Filter Living Room
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Living Room
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: switch.ingrid_socket_1
+                state: "on"
+              - condition: template
+                value_template: "{{\"Kitchen\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Kitchen TV on or Filter Kitchen
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Kitchen
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: switch.casper_switch_0
+                state: "on"
+              - condition: template
+                value_template: "{{\"Guest\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Casper on or Filter Guest Bedroom
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Guest Bedroom
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: template
+            value_template: "{{\"Dining\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Filter Dining Room
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Dining Room
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: template
+            value_template: "{{\"Jamie\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Filter Jamies Room
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Jamies Room
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: template
+            value_template: "{{\"Sean\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Filter Seans Room
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Seans Room
+            target:
+              entity_id: input_text.room_with_alexa_presence
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Occupied
+          - condition: template
+            value_template: "{{\"Main\" in trigger.to_state.attributes.friendly_name}}"
+            alias: Filter Main Bedroom
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: Main Bedroom
+            target:
+              entity_id: input_text.room_with_alexa_presence
+mode: restart
