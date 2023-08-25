@@ -37,23 +37,23 @@
                {%- endif %}
              {% else %} 
             {% if sensor.name == 'Room Occupied Main Bedroom' %}
-          main_bedroom
-        {% elif sensor.name in ('Room Occupied Kitchen' ) %}
-          kitchen
-        {% elif sensor.name in ('Room Occupied Living Room' ) %}
-          living_room
-        {% elif sensor.name in ('Room Occupied Dining Room' ) %}
-          dining_room
-        {% elif sensor.name in ('Room Occupied Guest Bedroom') %}
-          guest_bedroom
-        {% elif sensor.name in ('Room Occupied Jamies Room') %}
-          jamies_room
-        {% elif sensor.name in ('Room Occupied Seans Room') %}
-          seans_room
-        {%- endif %}
-    {%- endif %}
-      {% elif is_state('media_player.sky_q_main', 'on') %}
+              main_bedroom
+            {% elif sensor.name in ('Room Occupied Kitchen' ) %}
+              kitchen
+            {% elif sensor.name in ('Room Occupied Living Room' ) %}
+              living_room
+            {% elif sensor.name in ('Room Occupied Dining Room' ) %}
+              dining_room
+            {% elif sensor.name in ('Room Occupied Guest Bedroom') %}
+              guest_bedroom
+            {% elif sensor.name in ('Room Occupied Jamies Room') %}
+              jamies_room
+            {% elif sensor.name in ('Room Occupied Seans Room') %}
+              seans_room
+            {%- endif %}
+          {%- endif %}
+        {% elif is_state('media_player.sky_q_main', 'on') %}
          living_room
-      {% else %}
-        {{ states('sensor.room_presence') }}
+        {% else %}
+          {{ states('sensor.room_presence') }}
       {% endif %}  
