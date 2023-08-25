@@ -1,13 +1,21 @@
  ############################################################################### 
  #   @author         :   Jeffrey Stone                                         #
- #   @date           :   06/10/2020                                            #
+ #   @date           :   11/4/2020                                            #
  #   @package        :   audio.yaml                                            #
  #   @description    :   Sends audible notifications to the right Alexa        # 
  #                                                                             #
  #   @modified by    :   Dave Forrester (@Daverover66)                         #
  #   @date           :   24/08/2023                                            #
  ###############################################################################
- 
+
+
+#################################################################################
+# Media Player section for any media players you want to define. Most of these are setup via the integrations flow in the UI, 
+# but if not you may need to modify the following section. 
+# For more info on Media Players visit https://www.home-assistant.io/integrations/media_player/
+# MODIFY this section as needed or comment it out completely if not needed.
+#################################################################################
+  
  sensor:
   - platform: mqtt
     name: "Room Presence"
