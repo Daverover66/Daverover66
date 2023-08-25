@@ -1,4 +1,14 @@
-sensor:
+ ############################################################################### 
+ #   @author         :   Jeffrey Stone                                         #
+ #   @date           :   06/10/2020                                            #
+ #   @package        :   audio.yaml                                            #
+ #   @description    :   Sends audible notifications to the right Alexa        # 
+ #                                                                             #
+ #   @modified by    :   Dave Forrester (@Daverover66)                         #
+ #   @date           :   24/08/2023                                            #
+ ###############################################################################
+ 
+ sensor:
   - platform: mqtt
     name: "Room Presence"
     state_topic: "house/presence/current_room"
