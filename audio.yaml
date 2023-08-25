@@ -16,27 +16,27 @@
 #################################################################################
   
   sensor:
-  - platform: mqtt
-    name: "Room Presence"
-    state_topic: "house/presence/current_room"
-  - platform: template
-    sensors:
-      room_audio:
-        friendly_name: "Room Audio"
-        value_template: >-
-      {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
-  {%- if last_alexa_called_seconds <= 60 %} 
-    {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
-  {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
-    {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-      {% if is_state('input_boolean.audible_notifications', 'off') %}
-        {% if sensor.name == 'Room Occupied Living Room' %}
-          living_room
-        {% else %}
-          kitchen      
-        {%- endif %}
-      {% else %} 
-        {% if sensor.name == 'Room Occupied Main Bedroom' %}
+   - platform: mqtt
+     name: "Room Presence"
+     state_topic: "house/presence/current_room"
+   - platform: template
+     sensors:
+       room_audio:
+         friendly_name: "Room Audio"
+         value_template: >-
+           {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
+           {%- if last_alexa_called_seconds <= 60 %} 
+             {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
+           {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+           {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
+             {% if is_state('input_boolean.audible_notifications', 'off') %}
+               {% if sensor.name == 'Room Occupied Living Room' %}
+                 living_room
+               {% else %}
+                 kitchen      
+               {%- endif %}
+             {% else %} 
+            {% if sensor.name == 'Room Occupied Main Bedroom' %}
           main_bedroom
         {% elif sensor.name in ('Room Occupied Kitchen' ) %}
           kitchen
