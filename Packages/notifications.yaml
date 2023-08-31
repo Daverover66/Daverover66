@@ -9,44 +9,29 @@
  ############################################################################### 
 
 # Sensors to grab data from MQTT for use in scripts
-sensor:
-  - platform: mqtt
-    name: "Jarvis Last Msg"
-    state_topic: "house/polly/lastmsg"
-  - platform: mqtt
-    name: "Jarvis Last Location"
-    state_topic: "house/polly/lastloc"
-  - platform: mqtt
-    name: "Jarvis Last Msg Time"
-    state_topic: "house/polly/msgtime"
 
-# For those of you Wathcing this after the 2022.6 release use this:
-# mqtt:
-#   sensor:
-#   - name: "Jarvis Last Msg"
-#     state_topic: "house/polly/lastmsg"
-#   - name: "Jarvis Last Location"
-#     state_topic: "house/polly/lastloc"
-#   - name: "Jarvis Last Msg Time"
-#     state_topic: "house/polly/msgtime"  
+ mqtt:
+   sensor:
+   - name: "Jarvis Last Msg"
+     state_topic: "house/polly/lastmsg"
+   - name: "Jarvis Last Location"
+     state_topic: "house/polly/lastloc"
+   - name: "Jarvis Last Msg Time"
+     state_topic: "house/polly/msgtime"  
 
+# To call the speech engine script below use the following as a guide:
 
-
-
-
-# # To call the speech engine script below use the following as a guide:
-
-# - service: script.speech_engine_simplified
-#   data: 
-#     who: '{{ states(''sensor.room_audio'') }}'
-#     message: >
-#       At {{ states('sensor.jarvis_last_msg_time') }} in the {{ states('sensor.jarvis_last_location') }} I said. {{ states('sensor.jarvis_last_msg') }}
-#     msg_summary: "recall"
+ - service: script.speech_engine_simplified
+   data: 
+     where: '{{ states(''sensor.room_audio'') }}'
+     message: >
+       At {{ states('sensor.jarvis_last_msg_time') }} in the {{ states('sensor.jarvis_last_location') }} I said. {{ states('sensor.jarvis_last_msg') }}
+     msg_summary: "recall"
 
 script:
   # A simplified Speech Engine that for your text to speech notifications.
-  speech_engine_simplified:
-    sequence:
+ # speech_engine_simplified:
+   # sequence:
       # Any conditions you want to include.
 
       # - condition: state
@@ -54,15 +39,12 @@ script:
       #   state: 'on'
 
       # Call your TTS Service
-      - service: tts.amazon_polly_say
+      - service: tts.speech_engine_for_tts
         data_template:
           entity_id: >-
-            {{ who }}
+            {{ where }}
           message: >-
-            <speak>
-            <break time="1s"/>
             {{ message }}
-            </speak>
           cache: true
 
       # Save your message for recall
