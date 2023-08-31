@@ -1,0 +1,12 @@
+alias: Play Last Message
+sequence:
+  - service: script.speech_engine_for_tts
+    data:
+      voice: Brian
+      where: "{{ states('sensor.room_audio') }}"
+      message: |-
+        At {{ states('sensor.jarvis_last_msg_time') }} 
+        in the {{ states('sensor.jarvis_last_location') }} 
+        I said. {{ states('sensor.jarvis_last_msg') }}
+      msg_summary: recall
+mode: single
