@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   31/08/2023                         #
+#   @script         :   Play Last Message                  #
+#   @description    :   Repeat last tts announcement       #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Play Last Message
 sequence:
   - service: script.speech_engine_for_tts
