@@ -88,53 +88,54 @@ mqtt:
 
 template:
   - sensor:
-      - name: last_alexa
+      - name: "Last Alexa Called
+        unique_id: last_alexa_called
         state: >
           {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
         availability: >
           {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | first is defined }}
 
 input_boolean:
-  text_notify_chris:
-    name: Send Texts to Chris
-    icon: mdi:cellphone-message
-  text_notify_steven:
-    name: Send Texts to Steven
-    icon: mdi:cellphone-message
   text_notifications:
     name: Text Notifications
     icon: mdi:cellphone-message
-  presence_text_notifications:
-    name: Presence Texts
+  text_notifications_dave:
+    name: Text Notifications Dave
     icon: mdi:cellphone-message
-  notifications_audio:
-    name: Audio Notifications
-    icon: mdi:text-to-speech
-  presence_audio_notifications:
-    name: Presence Audio
-    icon: mdi:text-to-speech
+  text_notifications_gem:
+    name: Texts Notifications Gem
+    icon: mdi:cellphone-message
+  #presence_text_notifications:
+  #  name: Presence Texts
+  #  icon: mdi:cellphone-message
+  #notifications_audio:
+  #  name: Audio Notifications
+  #  icon: mdi:text-to-speech
+  #presence_audio_notifications:
+  #  name: Presence Audio
+  #  icon: mdi:text-to-speech
   audible_notifications:
     name: Audible Notifications
     icon: mdi:text-to-speech
-  presence_notifications_chris:
-    name: Send Chris Presence Texts
-    icon: mdi:cellphone-message
-  presence_notifications_steven:
-    name: Send Steven Presence Texts
-    icon: mdi:cellphone-message
-  lockdown_notification:
-    name: Lockdown Notifications
-    icon: mdi:text-to-speech
-  trash_notification:
-    name: Trash Notification
-    icon: mdi:cellphone-message
-  welcome_home:
-    name: Welcome Home
-  welcome_greeting:
-    name: Welcome Greeting
-    icon: mdi:speaker-wireless
-  debug_texts:
-    name: Debug Texts
+  #presence_notifications_chris:
+  #  name: Send Chris Presence Texts
+  #  icon: mdi:cellphone-message
+  #presence_notifications_steven:
+  #  name: Send Steven Presence Texts
+  #  icon: mdi:cellphone-message
+  #lockdown_notification:
+  #  name: Lockdown Notifications
+  #  icon: mdi:text-to-speech
+  #trash_notification:
+  #  name: Trash Notification
+  #  icon: mdi:cellphone-message
+  #welcome_home:
+  #  name: Welcome Home
+  #welcome_greeting:
+  #  name: Welcome Greeting
+  #  icon: mdi:speaker-wireless
+  #debug_texts:
+  #  name: Debug Texts
 
 input_select:
   echo_voice:
@@ -153,21 +154,29 @@ notify:
   - name: all_devices
     platform: group
     services:
-      - service: mobile_app_chriss_iphone
-      - service: mobile_app_chriss_ipad
-      - service: mobile_app_stevens_iphone_12
-      - service: living_room_tv
-      - service: lab_tv
-  - name: chris
+      - service: mobile_app_daves_samsung_galaxy
+        # Dave Phone #
+      - service: mobile_app_sm_s901b
+        # Gem Phone #
+      - service: mobile_app_sean_s_samsung_galaxy
+        # Sean Tablet #
+      - service: mobile_app_jamie_s_samsung_tablet
+        # Jamie Tablet #
+      - service: mobile_app_sm_t736b
+        # Dave Tablet #
+      - service: mobile_app_sm_t220
+        # Kitchen Tablet #
+      
+  - name: dave
     platform: group
     services:
-      - service: mobile_app_chriss_iphone_12_pro
-      - service: mobile_app_chriss_ipad
-  - name: steven
+      - service: mobile_app_daves_samsung_galaxy
+      - service: mobile_app_sm_t736b
+  - name: gem
     platform: group
     services:
-      - service: mobile_app_stevens_iphone_12
-  - name: all_ios
+      - service: mobile_app_sm_s901b
+  - name: all_android
     platform: group
     services:
       - service: mobile_app_chriss_iphone
