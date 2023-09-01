@@ -179,14 +179,23 @@ notify:
   - name: all_android
     platform: group
     services:
-      - service: mobile_app_chriss_iphone
-      - service: mobile_app_chriss_ipad
-      - service: mobile_app_stevens_iphone_12
-  - name: tvs
+      - service: mobile_app_daves_samsung_galaxy
+        # Dave Phone #
+      - service: mobile_app_sm_s901b
+        # Gem Phone #
+      - service: mobile_app_sean_s_samsung_galaxy
+        # Sean Tablet #
+      - service: mobile_app_jamie_s_samsung_tablet
+        # Jamie Tablet #
+      - service: mobile_app_sm_t736b
+        # Dave Tablet #
+      - service: mobile_app_sm_t220
+        # Kitchen Tablet #
+  - name: other devices
     platform: group
     services:
-      - service: living_room_tv
-      - service: lab_tv
+      - service: media_player.kfmuwi
+      
 
 script:
   ###############################################################################
@@ -201,24 +210,24 @@ script:
           message: >
             {{ message }}
 
-  text_notify_chris:
+  text_notify_dave:
     sequence:
       - condition: state
-        entity_id: input_boolean.text_notify_chris
+        entity_id: input_boolean.text_notifications_dave
         state: "on"
-      - service: notify.chris
+      - service: notify.dave
         data:
           title: >
             {{ title }}
           message: >
             {{ message }}
 
-  text_notify_steven:
+  text_notify_gem:
     sequence:
       - condition: state
-        entity_id: input_boolean.text_notify_steven
+        entity_id: input_boolean.text_notifications_gem
         state: "on"
-      - service: notify.steven
+      - service: notify.gem
         data:
           title: >
             {{ title }}
@@ -230,7 +239,7 @@ script:
       - condition: state
         entity_id: input_boolean.text_notifications
         state: "on"
-      - service: notify.all_ios
+      - service: notify.all_android
         data:
           title: >
             {{ title }}
@@ -245,31 +254,31 @@ script:
       - choose:
           - conditions:
               - condition: template
-                value_template: '{{ who == "chris"}}'
+                value_template: '{{ who == "dave"}}'
               - condition: state
-                entity_id: input_boolean.text_notify_chris
+                entity_id: input_boolean.text_notifications_dave
                 state: "on"
             sequence:
-              - service: notify.chris
+              - service: notify.dave
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
           - conditions:
               - condition: template
-                value_template: '{{ who == "steven"}}'
+                value_template: '{{ who == "gem"}}'
               - condition: state
-                entity_id: input_boolean.text_notify_steven
+                entity_id: input_boolean.text_notifications_gem
                 state: "on"
             sequence:
-              - service: notify.steven
+              - service: notify.gem
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
           - conditions:
               - condition: template
-                value_template: '{{ who == "all_ios"}}'
+                value_template: '{{ who == "all_android"}}'
             sequence:
-              - service: notify.all_ios
+              - service: notify.all_android
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
@@ -282,10 +291,10 @@ script:
   text_alert:
     sequence:
       - service: >
-          {% if who == 'chris' %}
-            notify.chris
-          {% elif who == 'steven' %}
-            notify.steven
+          {% if who == 'dave' %}
+            notify.dave
+          {% elif who == 'gem' %}
+            notify.gem
           {% else %}
             notify.all_devices
           {% endif %}
@@ -306,12 +315,12 @@ script:
   text_alert_image:
     sequence:
       - service: >
-          {% if who == 'chris' %}
-            notify.chris
-          {% elif who == 'steven' %}
-            notify.steven
+          {% if who == 'dave' %}
+            notify.dave
+          {% elif who == 'gem' %}
+            notify.gem
           {% else %}
-            notify.all_ios
+            notify.all_android
           {% endif %}
         data:
           title: "{{ title }}"
@@ -330,12 +339,12 @@ script:
   text_urgent_alert:
     sequence:
       - service: >
-          {% if who == 'chris' %}
-            notify.chris
-          {% elif who == 'steven' %}
-            notify.steven
+          {% if who == 'dave' %}
+            notify.dave
+          {% elif who == 'gem' %}
+            notify.gem
           {% else %}
-            notify.all_ios
+            notify.all_android
           {% endif %}
         data:
           title: "{{ title }}"
@@ -359,49 +368,51 @@ script:
       - condition: state
         entity_id: input_boolean.audible_notifications
         state: "on"
-      #  - condition: state
-      #    entity_id: group.family
-      #    state: "home"
       - condition: state
-        entity_id: input_boolean.vacation_mode
+        entity_id: binary_sensor.family_home
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.holiday_mode
         state: "off"
       - service: script.alexa_voice
         data:
-          who: "{{ who }}"
+          where: "{{ where }}"
           message: >
             {{ message }}
 
-  # Called wheh notification needs to play on echos
+  # Called when notification needs to play on echos
   alexa_voice:
     sequence:
       - variables:
           echo: >
-            {% set loc = states('sensor.room_presence') if who in ['presence','room_presence','current','current_room'] else who %}
-            {% if loc in ['kitchen_echo_dot','media_player.kitchen_echo_dot','kitchen'] %}
-              kitchen_echo_dot
-            {% elif loc in ['chris_s_echo_show','media_player.chris_s_echo_show','bedroom'] %}
-              chris_s_echo_show
-            {% elif loc in ['living_room_echo','media_player.living_room_echo','living_room','dining_room'] %}
-              living_room_echo
-            {% elif loc in ['lab_echo_dot','media_player.lab_echo_dot','lab'] %}
-              lab_echo_dot
-            {% elif loc in ['chris_s_echo_flex','media_player.chris_s_echo_flex','garage'] %}
-              chris_s_echo_flex
-            {% elif loc in ['_chris_s_ecobee4','media_player._chris_s_ecobee4','ecobee','hallway'] %}
-              chris_s_ecobee4
-            {% elif loc in ['chris_s_fire','media_player.chris_s_fire','fire','tablet','wall_tablet'] %}
-              chris_s_fire
-            {% elif loc in ['chris_s_echo_auto','media_player.chris_s_echo_auto','truck'] %}
-              chris_s_echo_auto
-            {% elif loc in ['chris_s_sonos_roam','chriss_sonos_roam','media_player.chris_s_sonos_roam','media_player.chriss_sonos_roam','sonos_roam','sonos'] %}
-              chris_s_sonos_roam
+            {% set loc = states('sensor.room_presence') if where in ['presence','room_presence','current','current_room'] else where %}
+            {% if loc in ['kitchen_echo_show','media_player.kitchen_echo_show','kitchen'] %}
+              kitchen_echo_show
+            {% elif loc in ['dave_s_2nd_echo_pop','media_player.dave_s_2nd_echo_pop','living_room'] %}
+              dave_s_2nd_echo_pop
+            {% elif loc in ['dave_s_echo_pop','media_player.dave_s_echo_pop','dining_room'] %}
+              dave_s_echo_pop
+            {% elif loc in ['main_bedroom_dot','media_player.main_bedroom_dot','main_bedroom'] %}
+              main_bedroom_dot
+            {% elif loc in ['guest_bedroom_echo_dot','media_player.guest_bedroom_echo_dot','guest_bedroom'] %}
+              guest_bedroom_echo_dot
+            {% elif loc in ['living_room_dot','media_player.living_room_dot','jamies_room','jamie'] %}
+              living_room_dot
+            {% elif loc in ['seans_room_dot','media_player.seans_room_dot','seans_room','sean'] %}
+              seans_room_dot
+            {% elif loc in ['dave_s_2nd_echo_pop_2','media_player.dave_s_2nd_echo_pop_2','office'] %}
+              dave_s_2nd_echo_pop_2
             {% elif loc in ['everywhere'] %}
-              everywhere
+              everywhere_2
+            {% elif loc in ['upstairs'] %}
+              upstairs
+            {% elif loc in ['downstairs'] %}
+              downstairs
             {% else %}
               living_room_echo
             {% endif %}
           volume: >
-            {%- set default = '0.6' if states('input_boolean.audible_notifications') == 'on' else '0.3' -%}
+            {%- set default = {{ states('input_number.alexa_volume_level_announcements')|float(0) } if states('input_boolean.audible_notifications') == 'on' else {{ states('input_number.alexa_volume_level_default_all')|float(0)}} -%}
             {%- if volume_override is float -%}
               {{ volume_override }}
             {%- else -%}
@@ -410,7 +421,7 @@ script:
       - alias: Save your message for recall
         service: mqtt.publish
         data_template:
-          topic: "house/speech/lastmsg"
+          topic: "house/alexa/lastmsg"
           payload: >
             {% if msg_summary == 'recall' %}
               {{- states('sensor.jarvis_last_msg') -}}
@@ -427,14 +438,14 @@ script:
       - alias: Save time of last message
         service: mqtt.publish
         data_template:
-          topic: "house/speech/msgtime"
+          topic: "house/alexa/msgtime"
           payload: >
             {{ now().strftime("%-I") }}:{{ now().strftime("%M") }} {{ now().strftime("%p") }}
           retain: true
       - alias: Save location
         service: mqtt.publish
         data_template:
-          topic: "house/speech/lastloc"
+          topic: "house/alexa/lastloc"
           payload: "{{ echo }}"
           retain: true
       - alias: Set echo volume if needed
@@ -462,11 +473,11 @@ script:
             </amazon:auto-breaths>
             </voice>
           target: >
-            {% if echo == 'everywhere' %}
-              group.echos_main
-            {% else %}
+           # {% if echo == 'everywhere' %}
+           #   group.echos_main
+           # {% else %}
               media_player.{{ echo }}
-            {% endif %}
+           # {% endif %}
           data:
             type: tts
 
@@ -475,12 +486,12 @@ script:
     sequence:
       - service: script.alexa_voice
         data:
-          who: >
-            {{ who or 'presence' }}
+          where: >
+            {{ where or 'presence' }}
           message: >
             At {{ states('sensor.jarvis_last_msg_time') }} 
             {% if states('sensor.jarvis_last_location') == 'everywhere' %}
-              I announced. {{ states('sensor.jarvis_last_msg') }}
+              I said. {{ states('sensor.jarvis_last_msg') }}
             {% else %}
               from the {{ states('sensor.jarvis_last_location') }} 
               I said. {{ states('sensor.jarvis_last_msg') }}
@@ -494,7 +505,7 @@ script:
     sequence:
       - service: script.speech_engine
         data:
-          who: "{{ who }}"
+          where: "{{ where }}"
           message: >-
             {% macro greeting() %}
               <p>
