@@ -117,12 +117,12 @@ automation:
                 state: "off"
               - stop: "Half Toll Disabled"
         default: []
-      - wait_template: '{{ not is_state("media_player.living_room_echo", "playing") }}'
+      - wait_template: '{{ not is_state("media_player.dave_s_echo_pop", "playing") }}'
         continue_on_timeout: false
         timeout: "00:02:00" # Only give it two minutes then give up, otherwise what's the point?
-      - service: script.alexa_voice
+      - service: script.speech_engine_for_tts
         data:
-          who: living_room
+          where: Dining Room
           message: > # Use the trigger ID to specify which sound to play.
             {% if states("input_select.clock_chime_sound") == "Cuckoo Clock" %}
               {% if trigger.id == "30" %}
@@ -141,3 +141,6 @@ automation:
                 <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/{{now().strftime("%I")}}-hour.mp3'/>
               {% endif %}
             {% endif %}
+            
+            
+
