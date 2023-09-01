@@ -1,13 +1,16 @@
 ###############################################################################
-#   @author         :   Jeffrey Stone
-#   @date           :   02/19/2019
-#   @package        :   Notify
-#   @description    :   A Collection of Notification Scripts and Configs.
-#                       Package modified from https://github.com/skalavala/smarthome/blob/master/packages/notify.yaml with inspiration
-#                       from https://github.com/CCOSTAN/Home-AssistantConfig/blob/master/config/script/speech_engine.yaml
+#   @author                 :   Jeffrey Stone
+#   @date                   :   02/19/2019
+#   @package                :   Notify
+#   @description            :   A Collection of Notification Scripts and Configs.
+#                               Package modified from https://github.com/skalavala/smarthome/blob/master/packages/notify.yaml with inspiration
+#                               from https://github.com/CCOSTAN/Home-AssistantConfig/blob/master/config/script/speech_engine.yaml
 #
-#   @modified by    :   Chris Heder (@chrisron95)
-#   @date           :   05/12/2022
+#   @modified by            :   Chris Heder (@chrisron95)
+#   @date                   :   05/12/2022
+#
+#   @further modified by    :   Dave Forrester (@Daverover66)
+#   @date                   :   01/09/2023
 ###############################################################################
 
 ###############################################################################
@@ -51,34 +54,37 @@ group:
   echos:
     name: All Echos
     entities:
-      - media_player.living_room_echo
-      - media_player.lab_echo_dot
-      - media_player.kitchen_echo_dot
-      - media_player.chris_s_echo_flex
-      - media_player.chris_s_ecobee4
-      - media_player.chris_s_sonos_roam
-      - media_player.chriss_sonos_roam
-      - media_player.chris_s_fire
-      - media_player.chris_s_echo_auto
-      - media_player.chris_s_echo_show
+      - media_player.dave_s_echo_pop
+      - media_player.dave_s_2nd_echo_pop
+      - media_player.dave_s_2nd_echo_pop_2
+      - media_player.kitchen_echo_show
+      - media_player.living_room_dot
+      - media_player.main_bedroom_dot
+      - media_player.guest_bedroom_echo_dot
+      - media_player.seans_room_dot
 
   echos_main:
     name: All Main Echos
     entities:
-      - media_player.living_room_echo
-      - media_player.lab_echo_dot
-      - media_player.kitchen_echo_dot
-      - media_player.chris_s_echo_flex
-      - media_player.chris_s_echo_show
+      - media_player.dave_s_2nd_echo_pop
+      - media_player.kitchen_echo_show
+      - media_player.main_bedroom_dot
+      
+ echo_groups:
+   name: Echo Groups
+   entities:
+     - media_player.downstairs
+     - media_player.upstairs
+     - media_player.everywhere_2
 
 mqtt:
   sensor:
     - name: "Jarvis Last Msg"
-      state_topic: "house/speech/lastmsg"
+      state_topic: "house/alexa/lastmsg"
     - name: "Jarvis Last Location"
-      state_topic: "house/speech/lastloc"
+      state_topic: "house/alexa/lastloc"
     - name: "Jarvis Last Msg Time"
-      state_topic: "house/speech/msgtime"
+      state_topic: "house/alexa/msgtime"
 
 template:
   - sensor:
