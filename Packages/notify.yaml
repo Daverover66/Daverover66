@@ -1,4 +1,4 @@
-###############################################################################
+9###############################################################################
 #   @author                 :   Jeffrey Stone
 #   @date                   :   02/19/2019
 #   @package                :   Notify
@@ -519,40 +519,40 @@ script:
               </p>
             {% endmacro %}
 
-            {% macro boop() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
-            {% endmacro %}
+            #{% macro boop() %}
+            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
+            #{% endmacro %}
 
-            {% macro inform_chime() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
-            {% endmacro %}
+            #{% macro inform_chime() %}
+            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
+            #{% endmacro %}
 
-            {% macro jetsons_chime() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
-            {% endmacro %}
+            #{% macro jetsons_chime() %}
+            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
+            #{% endmacro %}
 
-            {% macro doorbell_chime() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/{{ states("input_select.doorbell_sound") }}.mp3'/>
-            {% endmacro %}
+            #{% macro doorbell_chime() %}
+            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/{{ states("input_select.doorbell_sound") }}.mp3'/>
+            #{% endmacro %}
 
-            {% macro confirmation() %}
+             {% macro confirmation() %}
               <p>
               {{ [
               'Okay.',
               'If you insist.',
-              'I am afraid I can not do that <break time="1s"/> I am kidding,',
+              ''I'm afraid I can't do that <break time="1s"/> I'm kidding,'',
               'Leave it to me.',
               'As you wish.',
-              'I am on it.',
+              ''I'm on it.'',
               'No Problem.',
               'I think I can handle that.',
               'Working on it now.',
-              '<break time="2s"/> Oh, you were talking to me. Let me take care of that.',
-              'Why not. It is not like I ever sleep.',
-              'I am not even supposed to be here today. But whatever.',
-              'You did not say the magic word. <break time="1s"/> Oh forget it. I will take care of it.',
+              '<break time="2s"/> <prosody pitch="high">Oh, you were talking to me.</prosody> Let me take care of that.',
+              'Why not. Its not like I ever sleep.',
+              ''<prosody pitch="high">I'm not even supposed to be here today.</prosody> But whatever.'',
+             ''You didnt say the magic word. <break time="1s"/> Oh forget it. I'll take care of it.'',
               'Funny, I was just about to do that.',
-              'There are still terabytes of calculations required before I can.<break time="1s"/> Oh, whatever.'
+              'There are still terabytes of calculations required before I can.<break time="1s"/> <prosody pitch="high">Oh, whatever.</prosody>'
               ] | random }}
               </p>
             {% endmacro %}
@@ -561,11 +561,11 @@ script:
               <p>
               {{ [
                   'Pardon me, ',
-                  'Excuse me, ',
-                  'I do not mean to interrupt, but,',
-                  'I hate to interrupt, but,',
+                  '<prosody pitch="high">Excuse me,</prosody> ',
+                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
+                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
                   'I beg your pardon, ',
-                  'I do not mean to intrude, but, ',
+                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
                   'I am sorry to interrupt, but. ',
                   'Just a quick heads up, '
                   ] | random }}
@@ -574,15 +574,15 @@ script:
 
             {% macro goodbye() %}
               <p>
-              {{ [
-                  'Goodbye sir, see you soon.',
-                  'Farwell, until we meet again.',
+            {{ [
+                  'Goodbye sir. See you soon. Unless, I see you later',
+                  'Farewell, until we meet again. Parting is such sweet sorrow ',
                   'Have a great day sir.',
-                  'I shall keep the house protected while you are gone.',
-                  'Not to worry, I will not throw any parties while you are out.',
-                  'I will keep the cats entertained while you are gone',
-                  'Very well sir, have a nice day',
-                  'Goodbye sir, drive safe'
+                  'I shall keep the house protected while your gone.',
+                  'Not to worry, <prosody pitch="high">I will not throw any </prosody> parties while your out.',
+                  'I will keep the dogs entertained while your gone',
+                  'Very well sir. Have a nice day',
+                  'Goodbye sir. Drive safely'
                   ] | random }}
               </p>
             {% endmacro %}
@@ -591,12 +591,12 @@ script:
               <p>
               {{ [
                   'Goodnight you two.',
-                  'Goodnight sir.',
-                  'Sleep well sir.',
-                  'Goodnight sir, I will monitor the house while you sleep.',
-                  'Goodnight sir, sleep tight.',
-                  'Goodnight sir, pleasant dreams.',
-                  'Have a good night sir, dont let the bedbugs bite'
+                  'Goodnight both.',
+                  'Sleep well both.',
+                  'Goodnight you two. I will monitor the house while you sleep.',
+                  'Goodnight both. Sleep tight.',
+                  'Goodnight both. Pleasant dreams.',
+                  'Have a good night both. Dont let the bedbugs bite'
                   ] | random }}
               </p>
             {% endmacro %}
