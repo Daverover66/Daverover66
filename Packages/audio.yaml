@@ -44,6 +44,10 @@ input_datetime:
     has_date: false
     has_time: true
 
+input_text:
+  room_with_alexa_presence:
+    name: Room With Alexa Presence
+
 automation:
   - id: a3739bb0-632d-4526-bf82-ee4e27b80882
     alias: Set Room With Alexa Presence
