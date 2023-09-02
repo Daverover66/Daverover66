@@ -10,7 +10,7 @@
 #   @date                   :   05/12/2022
 #
 #   @further modified by    :   Dave Forrester (@Daverover66)
-#   @date                   :   01/09/2023
+#   @date                   :   02/09/2023
 ###############################################################################
 
 ###############################################################################
@@ -604,11 +604,11 @@ script:
             {% macro good_morning() %}
               <p>
               {{ [
-                  'Good morning sir.',
-                  'Good morning.',
-                  'Rise and shine!',
+                  '<prosody pitch="high">Good morning sir.</prosody>',
+                  '<prosody pitch="high">Good morning.</prosody>',
+                  '<prosody pitch="high">Rise and shine!</prosody>',
                   'Good morning, sleepy head.',
-                  'Wakey wakey, sleepy head.',
+                  '<prosody pitch="high">Wakey wakey, sleepy head.</prosody>',
                   'Good day to you!',
                   'Good morning sir, time to wipe the crust from your eyes.',
                   'Good morning sir, time to start the day.'
@@ -645,10 +645,10 @@ script:
             {% macro issue() %}
               <p>
               {{ [
-                  'Header House Emergency Alert!',
-                  'Header House, We have a problem!',
-                  'You might not like this.',
-                  'There is something that needs your attention.'
+                  '<prosody pitch="high">Forrester House Emergency Alert!</prosody>',
+                  '<prosody pitch="high">Forrester House, We have a problem!</prosody>',
+                  '<prosody pitch="high">You might not like this.</prosody>',
+                  '<prosody pitch="high">There is something that needs your attention.</prosody>'
                   ] | random }}
               </p>
             {% endmacro %}
@@ -661,11 +661,11 @@ script:
 
             {% macro lightning_alert() %}
                 {{ [
-                  'I have detected lightning withing 20 miles of Header House.',
+                  'I have detected lightning withing 20 miles of the house.',
                   'Did you see that flash? I did. Lightning is near.',
                   'If you didnt hear the thunder you will soon. '
                 ]|random }}
-                  If anyone is outside they shoudld seek shelter inside.
+                  If anyone is outside they should seek immediate shelter inside.
             {% endmacro %}
 
             {% macro lightning_clear() %}
@@ -674,48 +674,48 @@ script:
                   'No more lightning appears to be occuring.',
                   'Lightning is gone.'
               ]|random }}
-                It is safe to resume normal activities.
+                It is safe to resume normal outdoor activities.
             {% endmacro %}
 
-            {% macro chris_location() %}
-              {% if is_state('input_boolean.chris_travel_monitor', 'on') %}
-                Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
-              {% else %}
-                {%- if states('sensor.chriss_iphone_activity') == 'automotive' %}
-                  Chris is currenly moving, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-                {% else %}
-                  {% if is_state('sensor.chris_location', 'home') %}
+            #{% macro dave_location() %}
+            #  {% if is_state('input_boolean.chris_travel_monitor', 'on') %}
+            #    Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
+            #  {% else %}
+            #    {%- if states('sensor.chriss_iphone_activity') == 'automotive' %}
+            #      Chris is currenly moving, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #    {% else %}
+            #      {% if is_state('sensor.chris_location', 'home') %}
 
-                  {% elif is_state('sensor.chris_location', 'Lost') %}
-                    Chris is lost, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-                  {% else %}
-                    Chris is currently at {{ states('sensor.chris_location') }}, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            {% endmacro %}
+            #      {% elif is_state('sensor.chris_location', 'Lost') %}
+            #        Chris is lost, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #      {% else %}
+            #        Chris is currently at {{ states('sensor.chris_location') }}, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #      {% endif %}
+            #    {% endif %}
+            #  {% endif %}
+            #{% endmacro %}
 
-            {% macro steven_location() %}
-              {% if is_state('input_boolean.steven_travel_monitor', 'on') %}
-                {%- if states('sensor.stevens_iphone_activity') == 'automotive' %}
-                  Steven is currenly moving, and At last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-                {% else %}
-                  {% if is_state('sensor.steven_location', 'Lost') %}
-                    I cannot determine Stevens exact location, but at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-                  {% else %}
-                    Steven is currently at {{ states('sensor.steven_location') }}, and at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            {% endmacro %}
+            #{% macro steven_location() %}
+            #  {% if is_state('input_boolean.steven_travel_monitor', 'on') %}
+            #    {%- if states('sensor.stevens_iphone_activity') == 'automotive' %}
+            #      Steven is currenly moving, and At last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #    {% else %}
+            #      {% if is_state('sensor.steven_location', 'Lost') %}
+            #        I cannot determine Stevens exact location, but at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #      {% else %}
+            #        Steven is currently at {{ states('sensor.steven_location') }}, and at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #      {% endif %}
+            #    {% endif %}
+            #  {% endif %}
+            #{% endmacro %}
 
-            {% macro chris_headed_home() %}
-              Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
-            {% endmacro %}
+            #{% macro chris_headed_home() %}
+            #  Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
+            #{% endmacro %}
 
-            {% macro steven_headed_home() %}
-              Steven appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes.
-            {% endmacro %}
+            #{% macro steven_headed_home() %}
+            #  Steven appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes.
+            #{% endmacro %}
 
             {% macro iss() %}
               {{ [
@@ -727,14 +727,14 @@ script:
 
             {%- macro house_party_protocol_enabled() -%}
               {{ [
-                'Header House has been configured for a House Party.',
+                'Forrester House has been configured for a House Party.',
                 'I have enabled house party protocol.'
                 ] | random }}
             {%- endmacro -%}
 
             {%- macro house_party_protocol_disabled() -%}
               {{ [
-                'The House Party has been canceled.',
+                'The House Party has been cancelled.',
                 'I have disabled house party protocol.'
                 ] | random }}
             {%- endmacro -%}
@@ -768,17 +768,6 @@ script:
                 'The air quality in this house has actually improved.',
                 'Closing the door would improve the security of the house.',
                 'Hey. The door was just opened and this is crazy. But now you know, So Close it maybe.'
-                ] | random }}
-            {%- endmacro -%}
-
-            {%- macro print_complete() -%}
-              {{ [
-                'Well, its <emphasis level="strong">about time</emphasis>. Your 3 d print has completed.',
-                'Your 3 d print has completed. You should go check it, I know you wanna.',
-                'Your wait is <emphasis level="strong">finally</emphasis> over. The 3d print has completed.',
-                'Your 3 d print is done. I am sure this one will be <emphasis level="strong">very</emphasis> useful.',
-                'Your totally useful 3d print is complete. You should go get it.',
-                'Pardon me, but your 3d print is complete. I would retrieve it for you myself, but you have yet to give me arms.'
                 ] | random }}
             {%- endmacro -%}
 
@@ -916,102 +905,102 @@ script:
   ###############################################################################
   # Alarm Notifications
   ###############################################################################
-  alarm_text_actionable_alert:
-    mode: restart
-    sequence:
-      - alias: "Set up variables for the actions"
-        variables:
-          # Including an id in the action allows us to identify this script run
-          # and not accidentally trigger for other notification actions
-          action_disarm: "{{ 'DISARM_' ~ context.id }}"
-          action_trigger: "{{ 'TRIGGER_' ~ context.id }}"
-          notify: >
-            {% if who == 'chris' %}
-              notify.chris
-            {% elif who == 'steven' %}
-              notify.steven
-            {% else %}
-              notify.all_ios
-            {% endif %}
-      - alias: Send the actionable notification
-        service: "{{ notify }}"
-        data:
-          title: "{{ title }}"
-          message: "{{ message }}"
-          data:
-            tag: "alarm-noncritical-notification"
-            actions:
-              - action: "{{ action_disarm }}"
-                title: Disarm the alarm
-                authenticationRequired: true
-                icon: sfsymbols:shield.slash.fill
-              - action: "{{ action_trigger }}"
-                title: Trigger the alarm now
-                authenticationRequired: true
-                destructive: true
-                icon: sfsymbols:exclamationmark.shield.fill
-      - alias: "Wait for a response"
-        wait_for_trigger:
-          - platform: event
-            event_type: mobile_app_notification_action
-            event_data:
-              # waiting for the specific action avoids accidentally continuing
-              # for another script/automation's notification action
-              action: "{{ action_disarm }}"
-          - platform: event
-            event_type: mobile_app_notification_action
-            event_data:
-              action: "{{ action_trigger }}"
-          - platform: state
-            entity_id: alarm_control_panel.sentry_network
-            id: alarm_state_change
-        timeout: "00:03:00"
-        continue_on_timeout: false
-      - alias: "Perform the action"
-        choose:
-          - alias: Alarm state changed
-            conditions:
-              - condition: trigger
-                id: "alarm_state_change"
-            sequence:
-              - service: "{{ notify }}"
-                data:
-                  message: "clear_notification"
-                  data:
-                    tag: "alarm-noncritical-notification"
-          - alias: Disarm button pressed
-            conditions: "{{ wait.trigger.event.data.action == action_disarm }}"
-            sequence:
-              - service: alarm_control_panel.alarm_disarm
-                data:
-                  entity_id: alarm_control_panel.sentry_network
-                  code: !secret alarm_code
-          - alias: Trigger button pressed
-            conditions: "{{ wait.trigger.event.data.action == action_trigger }}"
-            sequence:
-              - service: input_boolean.turn_on
-                entity_id: input_boolean.security_alarm
+  #alarm_text_actionable_alert:
+  #  mode: restart
+  #  sequence:
+  #    - alias: "Set up variables for the actions"
+  #      variables:
+  #        # Including an id in the action allows us to identify this script run
+  #        # and not accidentally trigger for other notification actions
+  #        action_disarm: "{{ 'DISARM_' ~ context.id }}"
+  #        action_trigger: "{{ 'TRIGGER_' ~ context.id }}"
+  #        notify: >
+  #          {% if who == 'chris' %}
+  #            notify.chris
+  #          {% elif who == 'steven' %}
+  #            notify.steven
+  #          {% else %}
+  #            notify.all_ios
+  #          {% endif %}
+  #    - alias: Send the actionable notification
+  #      service: "{{ notify }}"
+  #      data:
+  #        title: "{{ title }}"
+  #        message: "{{ message }}"
+  #        data:
+  #          tag: "alarm-noncritical-notification"
+  #          actions:
+  #            - action: "{{ action_disarm }}"
+  #              title: Disarm the alarm
+  #              authenticationRequired: true
+  #              icon: sfsymbols:shield.slash.fill
+  #            - action: "{{ action_trigger }}"
+  #              title: Trigger the alarm now
+  #              authenticationRequired: true
+  #              destructive: true
+  #              icon: sfsymbols:exclamationmark.shield.fill
+  #    - alias: "Wait for a response"
+  #      wait_for_trigger:
+  #        - platform: event
+  #          event_type: mobile_app_notification_action
+  #          event_data:
+  #            # waiting for the specific action avoids accidentally continuing
+  #            # for another script/automation's notification action
+  #            action: "{{ action_disarm }}"
+  #        - platform: event
+  #          event_type: mobile_app_notification_action
+  #          event_data:
+  #            action: "{{ action_trigger }}"
+  #        - platform: state
+  #          entity_id: alarm_control_panel.sentry_network
+  #          id: alarm_state_change
+  #      timeout: "00:03:00"
+  #      continue_on_timeout: false
+  #    - alias: "Perform the action"
+  #      choose:
+  #        - alias: Alarm state changed
+  #          conditions:
+  #            - condition: trigger
+  #              id: "alarm_state_change"
+  #          sequence:
+  #            - service: "{{ notify }}"
+  #              data:
+  #                message: "clear_notification"
+  #                data:
+  #                  tag: "alarm-noncritical-notification"
+  #        - alias: Disarm button pressed
+  #          conditions: "{{ wait.trigger.event.data.action == action_disarm }}"
+  #          sequence:
+  #            - service: alarm_control_panel.alarm_disarm
+  #              data:
+  #                entity_id: alarm_control_panel.sentry_network
+  #                code: !secret alarm_code
+  #        - alias: Trigger button pressed
+  #          conditions: "{{ wait.trigger.event.data.action == action_trigger }}"
+  #          sequence:
+  #            - service: input_boolean.turn_on
+  #              entity_id: input_boolean.security_alarm
 
-  alarm_alert_engine:
-    mode: restart
-    sequence:
-      - alias: Alexa Notification
-        if:
-          - condition: template
-            value_template: "{{ vocal }}"
-        then:
-          - service: script.alexa_voice
-            data:
-              who: "{{ who }}"
-              volume_override: >
-                {{ volume_override or false }}
-              message: "{{ voice_message }}"
-      - alias: iOS Notification
-        if:
-          - condition: template
-            value_template: "{{ ios }}"
-        then:
-          - service: "{% if critical %}script.text_urgent_alert{% elif actionable %}script.alarm_text_actionable_alert{% else %}script.text_alert{% endif %}"
-            data:
-              title: Sentry Network
-              message: "{{ message }}"
+  #alarm_alert_engine:
+  #  mode: restart
+  #  sequence:
+  #    - alias: Alexa Notification
+  #      if:
+  #        - condition: template
+  #          value_template: "{{ vocal }}"
+  #      then:
+  #        - service: script.alexa_voice
+  #          data:
+  #            who: "{{ who }}"
+  #            volume_override: >
+  #              {{ volume_override or false }}
+  #            message: "{{ voice_message }}"
+  #    - alias: iOS Notification
+  #      if:
+  #        - condition: template
+  #          value_template: "{{ ios }}"
+  #      then:
+  #        - service: "{% if critical %}script.text_urgent_alert{% elif actionable %}script.alarm_text_actionable_alert{% else %}script.text_alert{% endif %}"
+  #          data:
+  #            title: Sentry Network
+  #            message: "{{ message }}"
