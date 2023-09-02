@@ -37,8 +37,7 @@ sequence:
           media_player.guest_bedroom_echo_dot
         {% elif where in ['Living Room','media_player.dave_s_2nd_echo_pop'] %}
           media_player.dave_s_2nd_echo_pop
-        {% elif where in ['Dining Room','media_player.dave_s_echo_pop'] ==
-        "Dining Room"%}
+        {% elif where in ['Dining Room','media_player.dave_s_echo_pop'] %}
           media_player.dave_s_echo_pop
         {% elif where in ['Office','media_player.dave_s_2nd_echo_pop_2'] %}
           media_player.dave_s_2nd_echo_pop_2
