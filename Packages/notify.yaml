@@ -81,12 +81,12 @@ mqtt:
 
 template:
   - sensor:
-    - name: "Last Alexa Called
-      unique_id: last_alexa_called
-      state: |-
-        {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
-      availability: >
-        {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | first is defined }}
+      - name: "Last Alexa Called
+        unique_id: last_alexa_called
+        state: |-
+          {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
+        availability: >
+          {{ expand('group.echos') | selectattr('attributes.last_called','eq',True) | first is defined }}
 
 input_boolean:
   text_notifications:
