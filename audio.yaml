@@ -1,12 +1,15 @@
-############################################################################### 
-#   @author         :   Jeffrey Stone                                         #
-#   @date           :   11/4/2020                                            #
-#   @package        :   audio.yaml                                            #
-#   @description    :   Sends audible notifications to the right Alexa        # 
-#                                                                             #
-#   @modified by    :   Dave Forrester (@Daverover66)                         #
-#   @date           :   31/08/2023                                            #
-###############################################################################
+################################################################################## 
+#   @author                 :   Jeffrey Stone                                    #
+#   @date                   :   11/4/2020                                        #
+#   @package                :   audio.yaml                                       #
+#   @description            :   Sends audible notifications to the right Alexa   # 
+#                                                                                #
+#   @modified by            :   Chris Heder (@chrisron95)                        #
+#   @date                   :   05/12/2022                                       #    
+#                                                                                #
+#   @further modified by    :   Dave Forrester (@Daverover66)                    #
+#   @date                   :   31/08/2023                                       #
+##################################################################################
 
 #################################################################################
 # Media Player section for any media players you want to define. Most of these are setup via the integrations flow in the UI, 
@@ -15,97 +18,146 @@
 # MODIFY this section as needed or comment it out completely if not needed.
 #################################################################################
   
+############################
+# input_datetime (https://www.home-assistant.io/integrations/input_datetime/)
+#
+# This is simply so we can track last called alexa.
+input_datetime:
+  last_time_alexa_called:
+    name: Last Time Alexa Called
+    has_date: true
+    has_time: true
+  announcement_delay:
+    name: Announcement Delay
+    has_date: false
+    has_time: true
+  good_morning:
+    name: Good Morning
+    has_date: false
+    has_time: true
+  good_night_routine:
+    name: Good Night Routine
+    has_date: false
+    has_time: true
+  morning_standby:
+    name: Morning Standby
+    has_date: false
+    has_time: true
+
+automation:
+  - id: a3739bb0-632d-4526-bf82-ee4e27b80882
+    alias: Set Room Presence
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.room_audio
+    action:
+      - service: input_text.set_value
+        data:
+          entity_id: input_text.room_presence
+          value: "{{ states('sensor.room_audio') }}"
+      - service: mqtt.publish
+        data:
+          topic: house/presence/current_room
+          payload: "{{ states('sensor.room_audio') }}"
+          retain: true
+
+  - id: 8a2711f5-a034-4df0-ba67-4b8f85ceaaee
+    alias: Notification Volume Dim
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: input_boolean.audible_notifications
+        to: "off"
+    action:
+      - service: media_player.volume_set
+        data:
+          entity_id:
+            - media_player.kitchen_echo_dot
+            - media_player.living_room_echo
+            - media_player.chris_s_echo_flex
+            - media_player.chris_s_echo_show
+            - media_player.lab_echo_dot
+          volume_level: .3
+
+  - id: d5fe0a64-9012-4446-b946-cbcafb2c0728
+    alias: Notification Volume Normal
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: input_boolean.audible_notifications
+        to: "on"
+    action:
+      - service: media_player.volume_set
+        data:
+          entity_id:
+            - media_player.kitchen_echo_dot
+            - media_player.living_room_echo
+            - media_player.chris_s_echo_flex
+            - media_player.chris_s_echo_show
+            - media_player.lab_echo_dot
+          volume_level: .5
+
+  - id: 28c0e7a6-4024-48c9-a422-8b8ffc3a86d1
+    alias: Set Last Alexa Called Time
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.kitchen_echo_dot
+          - media_player.living_room_echo
+          - media_player.chris_s_echo_flex
+          - media_player.chris_s_echo_show
+          - media_player.lab_echo_dot
+    condition:
+      - condition: template
+        value_template: "{{ trigger.to_state.attributes.last_called_timestamp | float > trigger.from_state.attributes.last_called_timestamp | float }}" # Alexa has been triggered
+    action:
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.last_time_alexa_called
+        data:
+          datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+mqtt:
   sensor:
-   - platform: mqtt
-     name: "Room Presence"
-     state_topic: "house/presence/current_room"
-   - platform: template
-     sensors:
-       room_audio:
-         friendly_name: "Room Audio"
-         value_template: >-
-           {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
-           {% if last_alexa_called_seconds <= 60 %}         
-           {% set media_player = (states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')| selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first) %}
-             {% if is_state('binary_sensor.quiet_time_boys','off') %}
-               {{media_player}}
-             {% elif media_player == 'media_player.living_room_dot' or media_player == 'media_player.seans_room_dot' %}
-                Living Room
-             {% endif %}
-        
-           {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
-           {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-             {% if is_state('binary_sensor.quiet_time_boys','off') %}
-               {% if sensor.name == 'Kitchen Presence Sensor all areas' %}
-                  Kitchen
-               {% elif sensor.name == 'Living Room All Areas' %}
-                  Living Room
-               {% elif sensor.name == 'Main Bedroom All Areas' %}
-                  Main Bedroom
-               {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-                  Dining Room
-               {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-                  Guest Bedroom
-               {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-                 {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
-                   Guest Bedroom
-                 {% else %}
-                   Office
-                 {% endif %}
-               {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-                 Seans Room
-               {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-                 Jamies Room
-               {% endif %}
-            {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
-               Kitchen
-            {% elif sensor.name == 'Living Room All Areas' %}
-               Living Room
-            {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-               Living Room
-            {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-               Living Room     
-            {% elif sensor.name == 'Main Bedroom All Areas' %}
-               Main Bedroom
-            {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-               Dining Room
-            {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-               Guest Bedroom
-            {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-               Office        
-            {% endif %}
+    - name: "Room Presence"
+      state_topic: "house/presence/current_room"
+
+sensor:
+  - platform: template
+    sensors:
+      room_audio:
+        friendly_name: "Room Audio"
+        value_template: >-
+          {%- set last_alexa_called_seconds = (now() - as_local(states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds -%}
+          {%- if last_alexa_called_seconds <= 60 %}  
+            {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
+          {% elif expand('group.occupancy') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+            {% set sensor = expand('group.occupancy') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
+              {% if is_state('input_boolean.audible_notifications', 'off') %}
+                {% if sensor.name == 'Bedroom Motion' %}
+                  bedroom
+                {% else %}
+                  kitchen
+                {%- endif %}
+              {% else %} 
+                {% if sensor.name == 'Bedroom Motion' %}
+                  bedroom
+                {% elif sensor.name == 'Kitchen Motion' %}
+                  kitchen
+                {% elif sensor.name in ('Living Room Motion' ) %}
+                  living_room
+                {% elif sensor.name in ('Dining Room Motion' ) %}
+                  dining_room
+                {% elif sensor.name in ('Lab Motion' ) %}
+                  lab
+                {% else %}
+                  main
+                {%- endif %}
+            {%- endif %}
+          {% elif is_state('media_player.living_room_tv', 'on') %}
+            living_room
+          {% else %}
+            {{ states('sensor.room_presence') }}
           {% endif %}
-      
-#         {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
-#         {%- if last_alexa_called_seconds <= 60 %} 
-#           {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
-#         {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
-#           {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-#             {% if is_state('input_boolean.audible_notifications', 'off') %}
-#               {% if sensor.name == 'Room Occupied Living Room' %}
-#                 living_room
-#               {% else %}
-#                 kitchen      
-#               {%- endif %}
-#             {% else %} 
-#            {% if sensor.name == 'Room Occupied Main Bedroom' %}
-#              main_bedroom
-#            {% elif sensor.name in ('Room Occupied Kitchen' ) %}
-#              kitchen
-#            {% elif sensor.name in ('Room Occupied Living Room' ) %}
-#              living_room
-#            {% elif sensor.name in ('Room Occupied Dining Room' ) %}
-#              dining_room
-#            {% elif sensor.name in ('Room Occupied Guest Bedroom') %}
-#              guest_bedroom
-#            {% elif sensor.name in ('Room Occupied Jamies Room') %}
-#              jamies_room
-#            {% elif sensor.name in ('Room Occupied Seans Room') %}
-#              seans_room
-#            {%- endif %}
-#          {%- endif %}
-#        {% elif is_state('media_player.sky_q_main', 'on') %}
-#         living_room
-#        {% else %}
-#          {{ states('sensor.room_presence') }}
-#      {% endif %}  
