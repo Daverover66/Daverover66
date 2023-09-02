@@ -147,60 +147,60 @@ mqtt:
 
 template:
   ### Room audio for Alexa ###
-  sensor:
-    - name: "Room Audio"
-      unique_id: room_audio
-      state: |-
-        {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
-        {% if last_alexa_called_seconds <= 60 %} 
-          {% set media_player = (states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')| selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first) %}
-          {% if is_state('binary_sensor.quiet_time_boys','off') %}
-            {{media_player}}
-          {% elif media_player == 'media_player.living_room_dot' or media_player == 'media_player.seans_room_dot' %}
-              Living Room
-          {% endif %}
-        
-        {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
-          {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-          {% if is_state('binary_sensor.quiet_time_boys','off') %}
-            {% if sensor.name == 'Kitchen Presence Sensor all areas' %}
-              Kitchen
-            {% elif sensor.name == 'Living Room All Areas' %}
-              Living Room
-            {% elif sensor.name == 'Main Bedroom All Areas' %}
-              Main Bedroom
-            {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-              Dining Room
-            {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-              Guest Bedroom
-            {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-              {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
-                Guest Bedroom
-              {% else %}
-                Office
-              {% endif %}
-            {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-              Seans Room
-            {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-              Jamies Room
+  - sensor:
+      - name: "Room Audio"
+        unique_id: room_audio  
+        state: |-
+          {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
+          {% if last_alexa_called_seconds <= 60 %} 
+            {% set media_player = (states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')| selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first) %}
+            {% if is_state('binary_sensor.quiet_time_boys','off') %}
+              {{media_player}}
+            {% elif media_player == 'media_player.living_room_dot' or media_player == 'media_player.seans_room_dot' %}
+                Living Room
             {% endif %}
-          {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
-              Kitchen
-          {% elif sensor.name == 'Living Room All Areas' %}
-              Living Room
-          {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-              Living Room
-          {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-              Living Room     
-          {% elif sensor.name == 'Main Bedroom All Areas' %}
-              Main Bedroom
-          {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-              Dining Room
-          {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-              Guest Bedroom
-          {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-              Office        
+        
+          {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+            {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
+            {% if is_state('binary_sensor.quiet_time_boys','off') %}
+              {% if sensor.name == 'Kitchen Presence Sensor all areas' %}
+                Kitchen
+              {% elif sensor.name == 'Living Room All Areas' %}
+                Living Room
+              {% elif sensor.name == 'Main Bedroom All Areas' %}
+                Main Bedroom
+              {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
+                Dining Room
+              {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
+                Guest Bedroom
+              {% elif sensor.name == 'Office Presence Sensor occupancy' %}
+                {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
+                  Guest Bedroom
+                {% else %}
+                  Office
+                {% endif %}
+              {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
+                Seans Room
+              {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
+                Jamies Room
+              {% endif %}
+            {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
+                Kitchen
+            {% elif sensor.name == 'Living Room All Areas' %}
+                Living Room
+            {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
+                Living Room
+            {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
+                Living Room     
+            {% elif sensor.name == 'Main Bedroom All Areas' %}
+                Main Bedroom
+            {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
+                Dining Room
+            {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
+                Guest Bedroom
+            {% elif sensor.name == 'Office Presence Sensor occupancy' %}
+                Office        
+            {% endif %}
+          {% else %}
+            {{ states('sensor.room_with_alexa_presence') }}        
           {% endif %}
-        {% else %}
-          {{ states('sensor.room_with_alexa_presence') }}        
-        {% endif %}
