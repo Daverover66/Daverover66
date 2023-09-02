@@ -80,7 +80,7 @@ automation:
     action:
       - service: script.status_annc
         data:
-          who: everywhere
+          where: everywhere
           call_time_for_bed: 1
       # - service: script.status_annc
       #   data:
@@ -105,11 +105,11 @@ script:
     sequence:
       - service: script.speech_engine
         data:
-          where: "{{ states('sensor.room_presence') }}"
+          where: "{{ states('sensor.room__audio') }}"
           message: !include ../templates/speech/sundown_briefing.yaml
       - service: script.text_notify
         data:
-          who: "all_android"
+          where: "all_android"
           message: "Sun is almost down. Time to call it a day."
 
   morning_briefing:
@@ -123,7 +123,7 @@ script:
     sequence:
       - service: script.speech_engine
         data:
-          where: "{{ states('sensor.room_presence') }}"
+          where: "{{ states('sensor.room_audio') }}"
           message: !include ../templates/speech/daily_briefing.yaml
 
   morning_wakeup_report:
