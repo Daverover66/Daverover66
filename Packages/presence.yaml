@@ -88,142 +88,99 @@ mqtt:
       payload_available: "online"
       payload_not_available: "offline"
 
-sensor:
-  - platform: template
-    sensors:
-      chris_location:
-        friendly_name: "Chris"
-        unit_of_measurement: ""
-        value_template: >-
-          {% set person = states('person.chris') %}
-          {%- if person in ['Publix - Pine Island','Publix - Coral Ridge'] %}
-            Publix
-          {% elif person in ['HomeDepot'] %}
-            Home Depot
-          {% elif person in ['Walmart','Target'] %}
-            Super Store
-          {% elif person in ['Sawgrass Mills','Coral Square Mall'] %}
-            The Mall
+template:
+  - sensor:
+      - name: "Dave"
+        unique_id: dave_location
+        state: >-
+          {% set person = states('person.david_forrester') %}
+          {%- if person in ['abbotsford','abbotsford_house'] %}
+            Abbotsford House
+          {% elif person in ['Asda'] %}
+            Asda
+          {% elif person in ['dave_s_mum_and_dad'] %}
+            Daves Mum and Dad
+          {% elif person in ['dawn','john','dawn_john'] %}
+            The Winpennys
+          {% elif person in ['dentist'] %}
+            Penicuik Dentist
+          {% elif person in ['doctors','surgery','doctors_surgery'] %}
+            St Ronans Health Centre
+          {% elif person in ['galashiels','playpark','galashiels_playpark'] %} 
+            Galashiels Playpark
+          {% elif person in ['gem_s_mum_and_dad'] %}
+            Moxo and Poxo
+          {% elif person in ['gem_work'] %}
+            Gems Work
+          {% elif person in ['harestanes'] %}
+            Harestanes Adventure Park
+          {% elif person in ['tesco'] %} 
+            Tesco
+          {% elif person in ['karen'] %}
+            Karens Place
+          {% elif person in ['swimming'] %}
+            Galashiels Swimming Pool
           {% else %}
             {% if person in ['not_home','away'] %}
-              {{ states('sensor.chriss_iphone_geocoded_location') }} 
+              {{ states('sensor.daves_samsung_galaxy_geocoded_location') }} 
             {% else %}
-              {{ states('person.chris') }}
+              {{ states('person.david_forrester') }}
             {%- endif %}
           {%- endif %}
-  - platform: template
-    sensors:
-      steven_location:
-        friendly_name: "Steven"
-        unit_of_measurement: ""
-        value_template: >-
-          {% set person = states('person.steven') %}
-          {%- if person in ['Publix - Pine Island','Publix - Coral Ridge'] %}
-            Publix
-          {% elif person in ['HomeDepot'] %}
-            Home Depot
-          {% elif person in ['Walmart','Target'] %}
-            Super Store
-          {% elif person in ['Sawgrass Mills','Coral Square Mall'] %}
-            The Mall
+ 
+  - sensor:
+      - name: "Gem"
+        unique_id: gem_location
+        state: >-
+          {% set person = states('person.gem_forrester') %}
+          {%- if person in ['abbotsford','abbotsford_house'] %}
+            Abbotsford House
+          {% elif person in ['Asda'] %}
+            Asda
+          {% elif person in ['dave_s_mum_and_dad'] %}
+            Daves Mum and Dad
+          {% elif person in ['dawn','john','dawn_john'] %}
+            The Winpennys
+          {% elif person in ['dentist'] %}
+            Penicuik Dentist
+          {% elif person in ['doctors','surgery','doctors_surgery'] %}
+            St Ronans Health Centre
+          {% elif person in ['galashiels','playpark','galashiels_playpark'] %} 
+            Galashiels Playpark
+          {% elif person in ['gem_s_mum_and_dad'] %}
+            Moxo and Poxo
+          {% elif person in ['gem_work'] %}
+            Gems Work
+          {% elif person in ['harestanes'] %}
+            Harestanes Adventure Park
+          {% elif person in ['tesco'] %} 
+            Tesco
+          {% elif person in ['karen'] %}
+            Karens Place
+          {% elif person in ['swimming'] %}
+            Galashiels Swimming Pool
           {% else %}
             {% if person in ['not_home','away'] %}
-              {{ states('sensor.stevens_iphone_geocoded_location') }} 
+              {{ states('sensor.sm_s901b_geocoded_location') }} 
             {% else %}
-              {{ states('person.steven') }}
+              {{ states('person.gem_forrester') }}
             {%- endif %}
           {%- endif %}
-  - platform: template
-    sensors:
-      chris_home:
-        value_template: >-
-          {{ is_state('person.chris', 'home') }}
-  - platform: template
-    sensors:
-      steven_home:
-        value_template: >-
-          {{ is_state('person.steven', 'home') }}
-
-  # MQTT Room using Espresense
-  - name: "Chris's Apple Watch Presence"
-    platform: mqtt_room
-    device_id: !secret chris_apple_watch_irk
-    state_topic: "espresense/rooms"
-    timeout: 5
-    away_timeout: 120
-  - name: "Chris's iPhone 12 Pro Presence"
-    platform: mqtt_room
-    device_id: !secret chris_iphone_irk
-    state_topic: "espresense/rooms"
-    timeout: 5
-    away_timeout: 120
-  - name: "Chris's iPad Air 3 Presence"
-    platform: mqtt_room
-    device_id: !secret chris_ipad_irk
-    state_topic: "espresense/rooms"
-    timeout: 5
-    away_timeout: 120
-  - name: "Kaitlyn's iPhone 12 Pro Presence"
-    platform: mqtt_room
-    device_id: !secret kaitlyn_iphone_irk
-    state_topic: "espresense/rooms"
-    timeout: 5
-    away_timeout: 120
-  - name: "Steven's iPhone 12 Presence"
-    platform: mqtt_room
-    device_id: !secret steven_iphone_irk
-    state_topic: "espresense/rooms"
-    timeout: 5
-    away_timeout: 120
-  # - platform: mqtt_room
-  #   device_id: !secret steven_apple_watch_irk
-  #   name: "Steven's Apple Watch Presence"
-  #   state_topic: "espresense/rooms"
-  #   timeout: 5
-  #   away_timeout: 120
-
-  - platform: template
-    sensors:
-      room_presence_chris:
-        friendly_name: "Chris's Room Presence"
-        value_template: >-
-          {% set weight_values = {
-            'sensor.chris_s_iphone_12_pro_presence': 0.8,
-            'sensor.chris_s_apple_watch_presence': 1.0
-          } %}
-          {% set presence = {} %}
-          {% for entity_id, weight in weight_values.items() %}
-            {% if states(entity_id) not in presence %}
-              {% set presence = presence | merge({(states(entity_id)): weight}) %}
-            {% else %}
-              {% set presence = presence | merge({(states(entity_id)): presence[states(entity_id)] + weight}) %}
-            {% endif %}
-          {% endfor %}
-          {% if presence|length > 0 %}
-            {% set highest_presence = presence|max %}
-            {% for room, value in presence.items() %}
-              {% if value == highest_presence %}
-                {{ room }}
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            unknown
-          {% endif %}
-
+ 
 automation:
   - id: family_has_arrived
     alias: Family Has arrived
     trigger:
       - platform: zone
-        entity_id: person.chris
+        entity_id: person.david_forrester
         zone: zone.home
         event: enter
-        id: chris
-      - entity_id: person.steven
+        id: dave
+      - entity_id: person.gem_forrester
         from: not_home
         platform: state
         to: home
-        id: steven
+        id: gem
       - entity_id: group.family
         platform: state
         to: home
