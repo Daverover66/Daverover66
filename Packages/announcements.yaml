@@ -114,7 +114,7 @@ script:
 
   morning_briefing:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: kitchen
           message: !include ../templates/speech/morning_briefing.yaml
