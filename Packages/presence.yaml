@@ -33,63 +33,49 @@ group:
   family:
     name: Family
     entities:
-      - person.chris
-      - person.steven
+      - person.david_forrester
+      - person.gem_forrester
+      - sensor.dave_is_in_da_hoose
+      - sensor.gem_is_in_da_hoose
 
-  friends:
-    name: Friends
-    entities:
-      - person.kaitlyn
-      - person.ronald
-      - person.mari
-      - person.rheena
-      - person.danielle
-      - person.daniel
-      - person.brian
-      - person.rathnam
-      - person.nico
+ # friends:
+ #   name: Friends
+ #   entities:
+ #     - person.kaitlyn
+ #     - person.ronald
 
-  people:
-    name: People
-    entities:
-      - person.chris
-      - person.steven
-      - person.kaitlyn
-      - person.ronald
-      - person.mari
-      - person.rheena
-      - person.danielle
-      - person.daniel
-      - person.brian
-      - person.rathnam
-      - person.nico
+ # people:
+ #   name: People
+ #   entities:
+ #     - person.chris
+ #     - person.steven
 
-  chris:
-    name: Chris
-    entities:
-      - device_tracker.chriss_iphone_4 # iCloud integration
-      - device_tracker.christophers_apple_watch # iCloud integration
-      - device_tracker.chriss_ipad_2 # iCloud integration
-      - device_tracker.chriss_iphone_3 # HA Mobile App
-      - device_tracker.chriss_ipad # HA Mobile App
+ # chris:
+ #   name: Chris
+ #   entities:
+ #     - device_tracker.chriss_iphone_4 # iCloud integration
+ #     - device_tracker.christophers_apple_watch # iCloud integration
+ #     - device_tracker.chriss_ipad_2 # iCloud integration
+ #     - device_tracker.chriss_iphone_3 # HA Mobile App
+ #     - device_tracker.chriss_ipad # HA Mobile App
 
-  steven:
-    name: Steven
-    entities:
-      - device_tracker.stevens_iphone_3 # HA Mobile App
+ # steven:
+ #   name: Steven
+ #   entities:
+ #     - device_tracker.stevens_iphone_3 # HA Mobile App
 
-  occupancy:
-    name: Occupancy
-    entities:
-      - binary_sensor.espresense_bedroom_motion
-      - binary_sensor.espresense_lab_motion
-      - binary_sensor.espresense_kitchen_motion
-      - binary_sensor.espresense_dining_room_motion
-      - binary_sensor.espresense_living_room_motion
+ # occupancy:
+ #   name: Occupancy
+ #   entities:
+ #     - binary_sensor.espresense_bedroom_motion
+ #     - binary_sensor.espresense_lab_motion
+ #     - binary_sensor.espresense_kitchen_motion
+ #     - binary_sensor.espresense_dining_room_motion
+ #     - binary_sensor.espresense_living_room_motion
 
-  arriving:
-    name: Arriving
-    entities: []
+ # arriving:
+ #   name: Arriving
+ #   entities: []
 
 mqtt:
   sensor:
