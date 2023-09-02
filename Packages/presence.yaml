@@ -12,18 +12,18 @@
 ###############################################################################    
 
 input_datetime:
-  last_time_home_chris:
+  last_time_home_dave:
     name: Chris Last Seen
     has_date: true
     has_time: true
-  last_time_home_steven:
+  last_time_home_gem:
     name: Steven Last Seen
     has_date: true
     has_time: true
-  last_time_home_kaitlyn:
-    name: Kaitlyn Last Seen
-    has_date: true
-    has_time: true
+#  last_time_home_kaitlyn:
+#    name: Kaitlyn Last Seen
+#    has_date: true
+#    has_time: true
 
 input_text:
   room_presence:
