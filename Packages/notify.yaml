@@ -287,17 +287,7 @@ script:
         data:
           title: "{{ title }}"
           message: "{{ message }}"
-          data:
-            attachment:
-              url: "{{ url }}"
-              content-type: "{{ content_type }}"
-              hide-thumbnail: false
-          #  push:
-          #     sound: '{{ ios_sound }}'
-          #    badge: 0
-          #     category: '{{ ios_category }}'
-          #   entity_id: '{{ camera_entity }}'
-
+          
   text_urgent_alert:
     sequence:
       - service: >
