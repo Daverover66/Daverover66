@@ -105,37 +105,9 @@ input_boolean:
   text_notifications_gem:
     name: Texts Notifications Gem
     icon: mdi:cellphone-message
-  #presence_text_notifications:
-  #  name: Presence Texts
-  #  icon: mdi:cellphone-message
-  #notifications_audio:
-  #  name: Audio Notifications
-  #  icon: mdi:text-to-speech
-  #presence_audio_notifications:
-  #  name: Presence Audio
-  #  icon: mdi:text-to-speech
   audible_notifications:
     name: Audible Notifications
     icon: mdi:text-to-speech
-  #presence_notifications_chris:
-  #  name: Send Chris Presence Texts
-  #  icon: mdi:cellphone-message
-  #presence_notifications_steven:
-  #  name: Send Steven Presence Texts
-  #  icon: mdi:cellphone-message
-  #lockdown_notification:
-  #  name: Lockdown Notifications
-  #  icon: mdi:text-to-speech
-  #trash_notification:
-  #  name: Trash Notification
-  #  icon: mdi:cellphone-message
-  #welcome_home:
-  #  name: Welcome Home
-  #welcome_greeting:
-  #  name: Welcome Greeting
-  #  icon: mdi:speaker-wireless
-  #debug_texts:
-  #  name: Debug Texts
 
 input_select:
   echo_voice:
@@ -301,16 +273,6 @@ script:
         data:
           title: "{{ title }}"
           message: "{{ message }}"
-          #data:
-          #   attachment:
-          #     url: '{{ url }}'
-          #     content-type: '{{ content_type }}'
-          #     hide-thumbnail: false
-          #  push:
-          #     sound: '{{ ios_sound }}'
-          #    badge: 0
-          #     category: '{{ ios_category }}'
-          #   entity_id: '{{ camera_entity }}'
 
   text_alert_image:
     sequence:
