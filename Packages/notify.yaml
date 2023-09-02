@@ -41,13 +41,6 @@
 #   expletive: "Beeps out" the content included within the tag.
 ################################################################################
 
-# Text to speech
-tts:
-  - platform: google_translate
-    cache: true
-    cache_dir: /tmp/tts
-    time_memory: 300
-
 # alert:
 
 group:
@@ -419,7 +412,7 @@ script:
           message: >
             <voice name="{{ states('input_select.echo_voice') }}">
             <amazon:auto-breaths>
-            <prosody rate="fast">
+            <prosody rate="105%">
             {{ message }}
             </prosody>
             </amazon:auto-breaths>
@@ -455,7 +448,7 @@ script:
   ###############################################################################
   status_annc:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: "{{ where }}"
           message: >-
