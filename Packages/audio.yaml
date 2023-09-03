@@ -146,7 +146,7 @@ automation:
 
 mqtt:
   sensor:
-    - name: "Room Presence for Alexa"
+    - name: "Room With Alexa Presence"
       state_topic: "house/presence/current_room"
 
 template:
