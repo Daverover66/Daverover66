@@ -339,7 +339,7 @@ script:
     sequence:
       - variables:
           echo: >
-            {% set loc = states('sensor.room_presence') if where in ['presence','room_presence','current','current_room'] else where %}
+            {% set loc = states('sensor.room_with_alexa_presence') if where in ['presence','room_with_alexa_presence','current','current_room'] else where %}
             {% if loc in ['kitchen_echo_show','media_player.kitchen_echo_show','kitchen'] %}
               kitchen_echo_show
             {% elif loc in ['dave_s_2nd_echo_pop','media_player.dave_s_2nd_echo_pop','living_room'] %}
