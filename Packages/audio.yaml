@@ -146,7 +146,7 @@ automation:
 
 mqtt:
   sensor:
-    - name: "Room With Alexa Presence"
+    - name: "Room Presence for Alexa"
       state_topic: "house/presence/current_room"
 
 template:
@@ -206,5 +206,5 @@ template:
                 dave_s_2nd_echo_pop_2        
             {% endif %}
           {% else %}
-            {{ states('sensor.room_with_alexa_presence') }}        
+            {{ states('sensor.room_presence_for_alexa') }}        
           {% endif %}
