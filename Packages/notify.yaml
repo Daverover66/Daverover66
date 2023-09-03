@@ -22,7 +22,7 @@
 ###############################################################################
 # prosody
 # <prosody voice="voice name">text to speak</prosody> changes name for this text only
-# <prosody rate="rate(can be %)">text to speak</prosody> changes rate at which voice speaks
+# <prosody rate="rate(can be %)">text to speak</prosody> changes rate at which voice speaks. I use "105%"
 # <prosody pitch="high/low">text to speak</prosody> changes pitch of voice.  Good for excitement and relief
  # pause:
 #   <break time="3s"/>
