@@ -92,21 +92,5 @@ sequence:
       retain: true
 mode: single
 icon: mdi:account-tie-voice
-# alias: Speech Engine for TTS
-# sequence:
-#   - service: notify.alexa_media
-#     data:
-#       message: |
-#         <voice name="Brian">
-#         <prosody rate="105%> 
-#         <prosody pitch="high">
-#         {{ message }} 
-#         </prosody>
-#         </prosody>
-#         </voice>
-#       target: "{{ where }}"
-#       data:
-#         type: tts
-# mode: single
-# icon: mdi:account-tie-voice
+
 
