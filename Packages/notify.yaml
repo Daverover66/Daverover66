@@ -317,7 +317,7 @@ script:
   #   => Only Announce when Audible Notifications are on
   ###############################################################################
 
-  speech_engine_for_tts:
+  speech_engine:
     sequence:
       - condition: state
         entity_id: input_boolean.audible_notifications
@@ -457,7 +457,7 @@ script:
   ###############################################################################
   status_annc:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: "{{ where }}"
           message: >-
