@@ -161,18 +161,18 @@ template:
             {% if is_state('binary_sensor.quiet_time_boys','off') %}
               {{media_player}}
             {% elif media_player == 'media_player.living_room_dot' or media_player == 'media_player.seans_room_dot' %}
-                living_room
+                dave_s_2nd_echo_pop
             {% endif %}
         
           {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
             {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
             {% if is_state('binary_sensor.quiet_time_boys','off') %}
               {% if sensor.name == 'Kitchen Presence Sensor all areas' %}
-                kitchen
+                kitchen_echo_show
               {% elif sensor.name == 'Living Room All Areas' %}
-                living_room
+                dave_s_2nd_echo_pop
               {% elif sensor.name == 'Main Bedroom All Areas' %}
-                main_bedroom
+                main_bedroom_dot
               {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
                 dave_s_echo_pop
               {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
