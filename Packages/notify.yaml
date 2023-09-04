@@ -363,7 +363,7 @@ script:
             {% elif loc in ['downstairs'] %}
               downstairs
             {% else %}
-              living_room_echo
+              dave_s_2nd_echo_pop
             {% endif %}
           volume: >
             {%- set default = '0.5' if states('input_boolean.audible_notifications') == 'on' else '0.3' -%}
