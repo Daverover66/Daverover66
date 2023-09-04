@@ -93,7 +93,7 @@ script:
       - condition: state
         entity_id: input_boolean.welcome_home
         state: "on"
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: {{ states('sensor.room_audio') }}
           message: !include ../templates/speech/welcome_briefing.yaml
@@ -103,7 +103,7 @@ script:
 
   sundown_briefing:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: "{{ states('sensor.room__audio') }}"
           message: !include ../templates/speech/sundown_briefing.yaml
@@ -114,14 +114,14 @@ script:
 
   morning_briefing:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: kitchen
           message: !include ../templates/speech/morning_briefing.yaml
 
   daily_briefing:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: "{{ states('sensor.room_audio') }}"
           message: !include ../templates/speech/daily_briefing.yaml
@@ -134,14 +134,14 @@ script:
         data:
           media_content_type: sound
           media_content_id: amzn_sfx_rooster_crow_01
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: main_bedroom
           message: !include ../templates/speech/morning_wakeup_report.yaml
 
   test_template_messages:
     sequence:
-      - service: script.speech_engine_for_tts
+      - service: script.speech_engine
         data:
           where: "{{ where }}"
           message: !include ../templates/speech/sundown_briefing.yaml
