@@ -69,15 +69,15 @@ automation:
   #  action:
   #    - service: input_boolean.turn_off
   #      entity_id: input_boolean.audible_notifications
-  
-  - id: 1d8f396a-f6ec-460d-97e3-d11900418f95
+
+  - id: play_morning_briefing_annc
     alias: Play Morning Briefing
-    platform: state
-    entity_id:
-      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-    from: "off"
-    to: "on"
-    id: Kitchen Motion
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+        from: "off"
+        to: "on"
     condition:
       - condition: time
         after: '09:15:00'
@@ -89,7 +89,7 @@ automation:
     - service: script.morning_briefing
     - service: input_boolean.turn_on
       entity_id: input_boolean.morning_briefing_played
-      
+
   - id: time_for_bed_annc
     alias: Time For Bed Announcement
     mode: single
@@ -101,6 +101,7 @@ automation:
       - service: script.status_annc
         data:
           where: living_room
+          call_time_is: 1
           call_time_for_bed: 1
       # - service: script.status_annc
       #   data:
@@ -108,18 +109,18 @@ automation:
       #     speech_message: <p> {{ states('sensor.current_conditions')}} </p>
 
 script:
- # welcome_briefing:
- #   sequence:
- #     - condition: state
- #       entity_id: input_boolean.welcome_home
- #       state: "on"
- #     - service: script.speech_engine
- #       data:
- #         where: "{{ states('sensor.room_audio') }}"
- #         message: !include ../templates/speech/welcome_briefing.yaml
- #     - delay: 00:02:00
- #     - service: input_boolean.turn_off
- #       entity_id: input_boolean.welcome_home
+  # welcome_briefing:
+  #   sequence:
+  #     - condition: state
+  #       entity_id: input_boolean.welcome_home
+  #       state: "on"
+  #     - service: script.speech_engine
+  #       data:
+  #         where: "{{ states('sensor.room_audio') }}"
+  #         message: !include ../templates/speech/welcome_briefing.yaml
+  #     - delay: 00:02:00
+  #     - service: input_boolean.turn_off
+  #       entity_id: input_boolean.welcome_home
 
   #sundown_briefing:
   #  sequence:
