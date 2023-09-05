@@ -69,7 +69,27 @@ automation:
   #  action:
   #    - service: input_boolean.turn_off
   #      entity_id: input_boolean.audible_notifications
-
+  
+  - id: 1d8f396a-f6ec-460d-97e3-d11900418f95
+    alias: Play Morning Briefing
+    platform: state
+    entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Kitchen Motion
+    condition:
+      - condition: time
+        after: '09:15:00'
+        before: '10:15:00'
+      - condition: state
+        entity_id: input_boolean.morning_briefing_played
+        state: 'off'
+    action:
+    - service: script.morning_briefing
+    - service: input_boolean.turn_on
+      entity_id: input_boolean.morning_briefing_played
+      
   - id: time_for_bed_annc
     alias: Time For Bed Announcement
     mode: single
