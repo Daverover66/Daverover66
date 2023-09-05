@@ -473,17 +473,17 @@ script:
               </p>
             {% endmacro %}
 
-            #{% macro boop() %}
-            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
-            #{% endmacro %}
+            {% macro boop() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
+            {% endmacro %}
 
-            #{% macro inform_chime() %}
-            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
-            #{% endmacro %}
+            {% macro inform_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
+            {% endmacro %}
 
-            #{% macro jetsons_chime() %}
-            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
-            #{% endmacro %}
+            {% macro jetsons_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
+            {% endmacro %}
 
             #{% macro doorbell_chime() %}
             #  <audio src='https://heder-homeassistant.s3.amazonaws.com/{{ states("input_select.doorbell_sound") }}.mp3'/>
