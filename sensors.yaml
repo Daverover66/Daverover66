@@ -1,3 +1,15 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   sensors                            #
+#   @description    :   not in a package file              #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
+
 - platform: time_date
   display_options:
     - 'time'
