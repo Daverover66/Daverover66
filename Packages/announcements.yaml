@@ -80,7 +80,7 @@ automation:
     action:
       - service: script.status_annc
         data:
-          where: everywhere
+          where: living_room
           call_time_for_bed: 1
       # - service: script.status_annc
       #   data:
@@ -88,29 +88,29 @@ automation:
       #     speech_message: <p> {{ states('sensor.current_conditions')}} </p>
 
 script:
-  welcome_briefing:
-    sequence:
-      - condition: state
-        entity_id: input_boolean.welcome_home
-        state: "on"
-      - service: script.speech_engine
-        data:
-          where: {{ states('sensor.room_audio') }}
-          message: !include ../templates/speech/welcome_briefing.yaml
-      - delay: 00:02:00
-      - service: input_boolean.turn_off
-        entity_id: input_boolean.welcome_home
+ # welcome_briefing:
+ #   sequence:
+ #     - condition: state
+ #       entity_id: input_boolean.welcome_home
+ #       state: "on"
+ #     - service: script.speech_engine
+ #       data:
+ #         where: "{{ states('sensor.room_audio') }}"
+ #         message: !include ../templates/speech/welcome_briefing.yaml
+ #     - delay: 00:02:00
+ #     - service: input_boolean.turn_off
+ #       entity_id: input_boolean.welcome_home
 
-  sundown_briefing:
-    sequence:
-      - service: script.speech_engine
-        data:
-          where: "{{ states('sensor.room__audio') }}"
-          message: !include ../templates/speech/sundown_briefing.yaml
-      - service: script.text_notify
-        data:
-          where: "all_android"
-          message: "Sun is almost down. Time to call it a day."
+  #sundown_briefing:
+  #  sequence:
+  #    - service: script.speech_engine
+  #      data:
+  #        where: "{{ states('sensor.room__audio') }}"
+  #        message: !include ../templates/speech/sundown_briefing.yaml
+  #    - service: script.text_notify
+  #      data:
+  #        where: "all_android"
+  #        message: "Sun is almost down. Time to call it a day."
 
   morning_briefing:
     sequence:
@@ -119,29 +119,29 @@ script:
           where: kitchen
           message: !include ../templates/speech/morning_briefing.yaml
 
-  daily_briefing:
-    sequence:
-      - service: script.speech_engine
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          message: !include ../templates/speech/daily_briefing.yaml
+  #daily_briefing:
+  #  sequence:
+  #    - service: script.speech_engine
+  #      data:
+  #        where: "{{ states('sensor.room_audio') }}"
+  #        message: !include ../templates/speech/daily_briefing.yaml
 
-  morning_wakeup_report:
-    sequence:
-      - service: media_player.play_media
-        target:
-          entity_id: media_player.main_bedroom_dot
-        data:
-          media_content_type: sound
-          media_content_id: amzn_sfx_rooster_crow_01
-      - service: script.speech_engine
-        data:
-          where: main_bedroom
-          message: !include ../templates/speech/morning_wakeup_report.yaml
+  #morning_wakeup_report:
+  #  sequence:
+  #    - service: media_player.play_media
+  #      target:
+  #        entity_id: media_player.main_bedroom_dot
+  #      data:
+  #       media_content_type: sound
+  #        media_content_id: amzn_sfx_rooster_crow_01
+  #    - service: script.speech_engine
+  #      data:
+  #        where: main_bedroom
+  #        message: !include ../templates/speech/morning_wakeup_report.yaml
 
-  test_template_messages:
-    sequence:
-      - service: script.speech_engine
-        data:
-          where: "{{ where }}"
-          message: !include ../templates/speech/sundown_briefing.yaml
+  #test_template_messages:
+  # sequence:
+  #    - service: script.speech_engine
+  #      data:
+  #        where: "{{ where }}"
+  #        message: !include ../templates/speech/sundown_briefing.yaml
