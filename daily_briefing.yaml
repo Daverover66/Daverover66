@@ -1,95 +1,129 @@
 >
-  {# DAily Briefing #} 
-   {%- macro getReport() -%} 
-         {% if now().strftime('%H')|int < 12 %} 
-           Good morning. 
-         {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %} 
-           Good afternoon. 
-         {% else %} 
-           Good evening. 
-         {% endif %} 
+  {%- macro getReport() -%} 
+    <p>
+      {% if now().strftime('%H')|int < 12 %} 
+        Good morning. 
+      {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %} 
+        Good afternoon. 
+      {% else %}  
+        Good evening. 
+      {% endif %} 
+    </p>
+    <p>
+      {% if is_state('binary_sensor.morning','on') %} 
+        {{ [
+            'Today is ',
+            'In case you have not been keeping track today is',
+            'Do you know what day of the week it is? No? Well today is',
+            'This may or may not be good news, but today is'
+              ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }}. The time is {{ now().strftime("%I:%M %p") }}.
+      {% else %} 
+        {{ [
+            'You have missed half of',
+            'In case you have not been keeping track today is',
+            'Do you know what day of the week it is? No? Well today is',
+            'Now that you are awake I can tell you that today is'
+              ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }} and it is now {{ now().strftime("%I:%M %p") }}.
+      {% endif %}
+    </p>
+    <p>
+      The Temperature in Clovenfords is {{states('sensor.outside_temperature')|round}} degrees  
+      {% if is_state('weather.forecast_home', 'rainy') %} 
+        {{ [ 
+            'with rain.',  
+            'with showers.' 
+              ] | random }} 
+      {% elif is_state('weather.forecast_home', 'cloudy') %} 
+        {{ [ 
+            'with clouds.',  
+            'with cloudy skies.' 
+              ] | random }} 
+      {% elif is_state('weather.forecast_home', 'partlycloudy') %} 
+        {{ [ 
+            'with some clouds.',  
+            'with partly cloudy skies.', 
+            'with scattered clouds' 
+              ] | random }} 
+      {% elif is_state('weather.forecast_home', 'sunny') %} 
+        {% if is_state('sun.sun', 'above_horizon') %} 
+          {{ [ 
+              'and sunny.',  
+              'with sun.' 
+              ] | random }} 
+        {% else %} 
+          {{ [ 
+              'and clear.',  
+              'with clear skies.' 
+                ] | random }} 
+        {% endif %} 
+      {% else %} 
+        and {{ states.weather.forecast_home.state }} 
+      {% endif %}
+    </p>
+    <p>
+      {% if is_state('binary_sensor.evening','on') %}
+        The overnight forecast says we can expect {{ states('weather.forecast_home') }} weather. With a low of {{ states('sensor.overnight_low_temp')}} degrees celsius.
+      {% else %}
+        The current forecast says we should expect {{ states('weather.forecast_home') }} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
+      {% endif %}
+    </p>
+    <p>
+      {% if is_state('sun.sun', 'below_horizon') %} 
+        You have 
+        {% set seconds = as_timestamp(states.sun.sun.attributes.next_rising)-now().timestamp() %} 
+        {% set hours = seconds / 60 %} 
+          {% if seconds / ( 60 * 60 ) > 1 %} 
+            {{ (seconds //  ( 60 * 60 )) | int }} hours 
+          {% else %} 
+            {{ (seconds // 60) | int }} minutes 
+          {% endif %} 
+            {{ [ 
+                'until the sun rises.', 
+                'until the sun is up.', 
+                'before the sun officially rises. ' 
+                ]|random }} 
+      {% else %} 
+        You have 
+        {% set seconds = as_timestamp(states.sun.sun.attributes.next_setting)-now().timestamp() %} 
+        {% set hours = seconds / 60 %} 
+          {% if seconds / ( 60 * 60 ) > 1 %} 
+            {{ (seconds //  ( 60 * 60 )) | int }} hours 
+          {% else %} 
+            {{ (seconds // 60) | int }} minutes 
+          {% endif %} 
+            {{ [ 
+                'until the sun sets for the day.', 
+                'until the sun slips below the horizon.', 
+                'before the sun officially sets. ' 
+                ]|random }} 
+      {% endif %} 
+    </p>
+    <p>
+        {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
+          You have {{ e_list | count }}
+        {% if (e_list | count) >1 %} 
+          events in your calendar today 
+        {% else %} 
+          event in your calendar today. 
+        {% endif %}
+        {%- for e in e_list %}
+          {{ ['Then you have ','Next is ', 'Followed by ']|random if not loop.first else ['First up is ', 'First is ']|random}}
+          {{- e.summary }} at {{ (e.start|as_datetime).hour}}:{{ (e.start|as_datetime).minute}} {{-[' for ', '  and lasting for ', ' which lasts ']|random}}{{- ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round }} hour.
+        {%- endfor %}
+    </p>
 
-        {% if is_state('binary_sensor.morning','on') %} 
-             Today is {{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A') }}.
-         {% else %} 
-             It is {{ now().strftime("%I:%M %p") }} 
-         {% endif %}
-
-          The Temperature in Clovenfords is {{states('sensor.outside_temperature')|round}} degrees  
-         {% if is_state('weather.forecast_home', 'rainy') %} 
-           {{ [ 
-           'with rain.',  
-           'with showers.' 
-           ] | random }} 
-         {% elif is_state('weather.forecast_home', 'cloudy') %} 
-           {{ [ 
-           'with clouds.',  
-           'with cloudy skies.' 
-           ] | random }} 
-         {% elif is_state('weather.forecast_home', 'partlycloudy') %} 
-           {{ [ 
-           'with some clouds.',  
-           'with partly cloudy skies.', 
-           'with scattered clouds' 
-           ] | random }} 
-         {% elif is_state('weather.forecast_home', 'sunny') %} 
-           {% if is_state('sun.sun', 'above_horizon') %} 
-             {{ [ 
-             'and sunny.',  
-             'with sun.' 
-             ] | random }} 
-           {% else %} 
-             {{ [ 
-             'and clear.',  
-             'with clear skies.' 
-             ] | random }} 
-           {% endif %} 
-         {% else %} 
-           and {{ states.weather.forecast_home.state }} 
-         {% endif %}
-
-        {% if is_state('sun.sun', 'below_horizon') %} 
-           You have 
-           {% set seconds = as_timestamp(states.sun.sun.attributes.next_rising)-now().timestamp() %} 
-           {% set hours = seconds / 60 %} 
-           {% if seconds / ( 60 * 60 ) > 1 %} 
-             {{ (seconds //  ( 60 * 60 )) | int }} hours 
-           {% else %} 
-             {{ (seconds // 60) | int }} minutes 
-           {% endif %} 
-           {{ [ 
-             'until the sun rises.', 
-             'until the sun is up.', 
-             'before the sun officially rises. ' 
-           ]|random }} 
-         {% else %} 
-           You have 
-           {% set seconds = as_timestamp(states.sun.sun.attributes.next_setting)-now().timestamp() %} 
-           {% set hours = seconds / 60 %} 
-           {% if seconds / ( 60 * 60 ) > 1 %} 
-             {{ (seconds //  ( 60 * 60 )) | int }} hours 
-           {% else %} 
-             {{ (seconds // 60) | int }} minutes 
-           {% endif %} 
-           {{ [ 
-             'until the sun sets for the day.', 
-             'until the sun slips below the horizon.', 
-             'before the sun officially sets. ' 
-           ]|random }} 
-         {% endif %} 
- 
-            {%- endmacro-%}
+      {%- endmacro-%}
             
       {# a macro that removes all newline characters, empty spaces, and returns formatted text  #} 
-       {%- macro cleanup(data) -%} 
-         {%- for item in data.split("\n")  if item | trim != "" -%} 
-           {{ item | trim }} {% endfor -%} 
-       {%- endmacro -%} 
-  
+      {%- macro cleanup(data) -%} 
+        {%- for item in data.split("\n")  if item | trim != "" -%} 
+          {{ item | trim }} {% endfor -%} 
+      {%- endmacro -%} 
+
       {# a macro to call all macros :)  #} 
-       {%- macro mother_of_all_macros() -%} 
-         {{ getReport() }} 
-       {%- endmacro -%} 
-  
+      {%- macro mother_of_all_macros() -%} 
+        {{ getReport() }} 
+      {%- endmacro -%} 
+
       {# Call the macro  #} 
-         {{- cleanup(mother_of_all_macros()) -}}
+        {{- cleanup(mother_of_all_macros()) -}}
