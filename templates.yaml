@@ -1,4 +1,13 @@
-- binary_sensor:
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   17/08/2023                         #
+#   @automation     :   template sensors                   #
+#   @description    :   not in a package file              #
+#                                                          #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################- binary_sensor:
   - name: "Daves Samsung Galaxy Home"
     unique_id: daves_samsung_galaxy_home
     state: >
