@@ -7,7 +7,10 @@
 #                                                          #
 #   @version        :   1.0                                #
 #   @modified       :                                      #
-############################################################- binary_sensor:
+############################################################
+
+
+- binary_sensor:
   - name: "Daves Samsung Galaxy Home"
     unique_id: daves_samsung_galaxy_home
     state: >
