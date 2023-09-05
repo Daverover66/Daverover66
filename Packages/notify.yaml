@@ -24,7 +24,7 @@
 # <prosody voice="voice name">text to speak</prosody> changes name for this text only
 # <prosody rate="rate(can be %)">text to speak</prosody> changes rate at which voice speaks. I use "105%"
 # <prosody pitch="high/low">text to speak</prosody> changes pitch of voice.  Good for excitement and relief
- # pause:
+# pause:
 #   <break time="3s"/>
 # emphasis:
 #   <emphasis level="strong">really like</emphasis>
@@ -71,13 +71,13 @@ group:
       - media_player.dave_s_2nd_echo_pop
       - media_player.kitchen_echo_show
       - media_player.main_bedroom_dot
-      
- echo_groups:
-   name: Echo Groups
-   entities:
-     - media_player.downstairs
-     - media_player.upstairs
-     - media_player.everywhere_2
+
+  echo_groups:
+    name: Echo Groups
+    entities:
+      - media_player.downstairs
+      - media_player.upstairs
+      - media_player.everywhere_2
 
 mqtt:
   sensor:
@@ -140,7 +140,7 @@ notify:
         # Dave Tablet #
       - service: mobile_app_sm_t220
         # Kitchen Tablet #
-      
+
   - name: dave
     platform: group
     services:
@@ -168,8 +168,7 @@ notify:
   - name: other devices
     platform: group
     services:
-      - service: media_player.kfmuwi
-      
+      - service: kfmuwi
 
 script:
   ###############################################################################
@@ -289,7 +288,7 @@ script:
         data:
           title: "{{ title }}"
           message: "{{ message }}"
-          
+
   text_urgent_alert:
     sequence:
       - service: >
@@ -338,8 +337,8 @@ script:
   alexa_voice:
     sequence:
       - variables:
-          echo: >
-            {% set loc = states('sensor.room_with_alexa_presence') if where in ['presence','room_with_alexa_presence','current','current_room'] else where %}
+          echo: |-
+            {% set loc = states('sensor.room_with_alexa_presence') if where in  ['presence','room_with_alexa_presence','current','current_room']  else where %}
             {% if loc in ['kitchen_echo_show','media_player.kitchen_echo_show','kitchen'] %}
               kitchen_echo_show
             {% elif loc in ['dave_s_2nd_echo_pop','media_player.dave_s_2nd_echo_pop','living_room'] %}
@@ -366,7 +365,7 @@ script:
               dave_s_2nd_echo_pop
             {% endif %}
           volume: >
-            {%- set default = '0.5' if states('input_boolean.audible_notifications') == 'on' else '0.3' -%}
+            {%- set default = '0.5' if states('binary_sensor.quiet_time_boys') == 'off' else '0.3' -%}
             {%- if volume_override is float -%}
               {{ volume_override }}
             {%- else -%}
@@ -427,11 +426,7 @@ script:
             </amazon:auto-breaths>
             </voice>
           target: >
-           # {% if echo == 'everywhere' %}
-           #   group.echos_main
-           # {% else %}
-              media_player.{{ echo }}
-           # {% endif %}
+            media_player.{{ echo }}
           data:
             type: tts
 
@@ -459,17 +454,36 @@ script:
     sequence:
       - service: script.speech_engine
         data:
-          where: "{{ where }}"
-          message: >-
+          where: |-
+            {% if where %}
+              {{ where }}
+            {% else %}
+              {{ states('sensor.room_audio') }}
+            {% endif %}
+          message: |-
             {% macro greeting() %}
+
+            {% if now().strftime('%H')|int < 12%}
+              Good morning.
+            {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
+              Good afternoon.
+            {% else %}
+              Good evening.
+            {% endif %}
+
+            {% endmacro %}
+
+            {% macro time_for_bed() %}
               <p>
-              {% if now().strftime('%H')|int < 12%}
-                Good morning.
-              {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
-                Good afternoon.
-              {% else %}
-                Good evening.
-              {% endif %}
+              {{ [
+                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed sir. ',
+                  'Its time for bed sir. ',
+                  'Its that time again sir. ',
+                  'Its time for bed. ',
+                  'Its time for bed. <break time="2s"/> Yup, this is my job now. ',
+                  'Its time for bed sir <break time="2s"/> I like this job. ',
+                  'Its time for bed sir <break time="2s"/> or just stay up forever. What do I care? '
+                  ] | random }}
               </p>
             {% endmacro %}
 
@@ -485,33 +499,29 @@ script:
               <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
             {% endmacro %}
 
-            #{% macro doorbell_chime() %}
-            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/{{ states("input_select.doorbell_sound") }}.mp3'/>
-            #{% endmacro %}
-
-             {% macro confirmation() %}
+            {% macro confirmation() %}
               <p>
               {{ [
               'Okay.',
               'If you insist.',
-              ''I'm afraid I can't do that <break time="1s"/> I'm kidding,'',
+              'I am afraid I cannot do that <break time="1s"/> I am kidding,',
               'Leave it to me.',
               'As you wish.',
-              ''I'm on it.'',
+              'I am on it.',
               'No Problem.',
               'I think I can handle that.',
               'Working on it now.',
               '<break time="2s"/> <prosody pitch="high">Oh, you were talking to me.</prosody> Let me take care of that.',
               'Why not. Its not like I ever sleep.',
-              ''<prosody pitch="high">I'm not even supposed to be here today.</prosody> But whatever.'',
-             ''You didnt say the magic word. <break time="1s"/> Oh forget it. I'll take care of it.'',
+              '<prosody pitch="high">I am not even supposed to be here today.</prosody> But whatever.',
+              'You did not say the magic word. <break time="1s"/> Oh forget it. I will take care of it.',
               'Funny, I was just about to do that.',
               'There are still terabytes of calculations required before I can.<break time="1s"/> <prosody pitch="high">Oh, whatever.</prosody>'
               ] | random }}
               </p>
             {% endmacro %}
 
-            {% macro interuption() %}
+            {% macro interruption() %}
               <p>
               {{ [
                   'Pardon me, ',
@@ -573,13 +583,13 @@ script:
             {% macro time_for_bed() %}
               <p>
               {{ [
-                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed sir. ',
-                  'Its time for bed sir. ',
-                  'Its that time again sir. ',
-                  'Its time for bed. ',
-                  'Its time for bed. <break time="2s"/> Yup, this is my job now. ',
-                  'Its time for bed sir <break time="2s"/> I like this job. ',
-                  'Its time for bed sir <break time="2s"/> or just stay up forever. What do I care? '
+                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed both of you.  Off you go ',
+                  'Its time for bed both. Dont forget to put the dishwasher on',
+                  'Its that time again both. Remember to check the doors',
+                  'Its time for bed. Check the doors and put the dishwasher on',
+                  'Its time for bed. <break time="1s"/> Yup, this is my job now. ',
+                  'Its time for bed both <break time="1s"/> <prosody pitch="x-high">I like this job.</prosody> ',
+                  'Its time for bed both <break time="1s"/> or just stay up forever. <prosody pitch="low">What do I care?</prosody> '
                   ] | random }}
               </p>
             {% endmacro %}
@@ -630,46 +640,6 @@ script:
               ]|random }}
                 It is safe to resume normal outdoor activities.
             {% endmacro %}
-
-            #{% macro dave_location() %}
-            #  {% if is_state('input_boolean.chris_travel_monitor', 'on') %}
-            #    Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
-            #  {% else %}
-            #    {%- if states('sensor.chriss_iphone_activity') == 'automotive' %}
-            #      Chris is currenly moving, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-            #    {% else %}
-            #      {% if is_state('sensor.chris_location', 'home') %}
-
-            #      {% elif is_state('sensor.chris_location', 'Lost') %}
-            #        Chris is lost, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-            #      {% else %}
-            #        Chris is currently at {{ states('sensor.chris_location') }}, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
-            #      {% endif %}
-            #    {% endif %}
-            #  {% endif %}
-            #{% endmacro %}
-
-            #{% macro steven_location() %}
-            #  {% if is_state('input_boolean.steven_travel_monitor', 'on') %}
-            #    {%- if states('sensor.stevens_iphone_activity') == 'automotive' %}
-            #      Steven is currenly moving, and At last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-            #    {% else %}
-            #      {% if is_state('sensor.steven_location', 'Lost') %}
-            #        I cannot determine Stevens exact location, but at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-            #      {% else %}
-            #        Steven is currently at {{ states('sensor.steven_location') }}, and at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
-            #      {% endif %}
-            #    {% endif %}
-            #  {% endif %}
-            #{% endmacro %}
-
-            #{% macro chris_headed_home() %}
-            #  Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
-            #{% endmacro %}
-
-            #{% macro steven_headed_home() %}
-            #  Steven appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes.
-            #{% endmacro %}
 
             {% macro iss() %}
               {{ [
@@ -724,6 +694,7 @@ script:
                 ] | random }}
             {%- endmacro -%}
 
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -735,6 +706,7 @@ script:
             {# ********************************************* #}
             {# a macro to call all macros :)  #}
             {%- macro mother_of_all_macros() -%}
+              
               {% if call_boop == 1 %}
                 {{ boop() }}
               {% endif %}
@@ -747,9 +719,9 @@ script:
                 {{ jetsons_chime() }}
               {% endif %}
 
-              {% if call_doorbell_chime == 1 %}
-                {{ doorbell_chime() }}
-              {% endif %}
+              #{% if call_doorbell_chime == 1 %}
+              #  {{ doorbell_chime() }}
+              #{% endif %}
 
               {% if call_greeting == 1 %}
                 {{ greeting() }}
@@ -759,8 +731,8 @@ script:
                 {{ confirmation() }}
               {% endif %}
 
-              {% if call_interuption == 1 %}
-                {{ interuption() }}
+              {% if call_interruption == 1 %}
+                {{ interruption() }}
               {% endif %}
 
               {% if call_goodbye == 1 %}
@@ -799,26 +771,6 @@ script:
                 {{ lightning_clear() }}
               {% endif %}
 
-              {% if call_chris_location == 1 %}
-                {{ chris_location() }}
-              {% endif %}
-
-              {% if call_steven_location == 1 %}
-                {{ steven_location() }}
-              {% endif %}
-
-              {% if call_chris_headed_home == 1 %}
-                {{ chris_headed_home() }}
-              {% endif %}
-
-              {% if call_steven_headed_home == 1 %}
-                {{ steven_headed_home() }}
-              {% endif %}
-
-              {% if call_traffic_conditions == 1 %}
-                {{ traffic_conditions() }}
-              {% endif %}
-
               {% if call_iss == 1 %}
                 {{ iss() }}
               {% endif %}
@@ -854,106 +806,3 @@ script:
             {%- endmacro -%}
 
             {{- cleanup(mother_of_all_macros()) -}}
-
-  ###############################################################################
-  # Alarm Notifications
-  ###############################################################################
-  #alarm_text_actionable_alert:
-  #  mode: restart
-  #  sequence:
-  #    - alias: "Set up variables for the actions"
-  #      variables:
-  #        # Including an id in the action allows us to identify this script run
-  #        # and not accidentally trigger for other notification actions
-  #        action_disarm: "{{ 'DISARM_' ~ context.id }}"
-  #        action_trigger: "{{ 'TRIGGER_' ~ context.id }}"
-  #        notify: >
-  #          {% if who == 'chris' %}
-  #            notify.chris
-  #          {% elif who == 'steven' %}
-  #            notify.steven
-  #          {% else %}
-  #            notify.all_ios
-  #          {% endif %}
-  #    - alias: Send the actionable notification
-  #      service: "{{ notify }}"
-  #      data:
-  #        title: "{{ title }}"
-  #        message: "{{ message }}"
-  #        data:
-  #          tag: "alarm-noncritical-notification"
-  #          actions:
-  #            - action: "{{ action_disarm }}"
-  #              title: Disarm the alarm
-  #              authenticationRequired: true
-  #              icon: sfsymbols:shield.slash.fill
-  #            - action: "{{ action_trigger }}"
-  #              title: Trigger the alarm now
-  #              authenticationRequired: true
-  #              destructive: true
-  #              icon: sfsymbols:exclamationmark.shield.fill
-  #    - alias: "Wait for a response"
-  #      wait_for_trigger:
-  #        - platform: event
-  #          event_type: mobile_app_notification_action
-  #          event_data:
-  #            # waiting for the specific action avoids accidentally continuing
-  #            # for another script/automation's notification action
-  #            action: "{{ action_disarm }}"
-  #        - platform: event
-  #          event_type: mobile_app_notification_action
-  #          event_data:
-  #            action: "{{ action_trigger }}"
-  #        - platform: state
-  #          entity_id: alarm_control_panel.sentry_network
-  #          id: alarm_state_change
-  #      timeout: "00:03:00"
-  #      continue_on_timeout: false
-  #    - alias: "Perform the action"
-  #      choose:
-  #        - alias: Alarm state changed
-  #          conditions:
-  #            - condition: trigger
-  #              id: "alarm_state_change"
-  #          sequence:
-  #            - service: "{{ notify }}"
-  #              data:
-  #                message: "clear_notification"
-  #                data:
-  #                  tag: "alarm-noncritical-notification"
-  #        - alias: Disarm button pressed
-  #          conditions: "{{ wait.trigger.event.data.action == action_disarm }}"
-  #          sequence:
-  #            - service: alarm_control_panel.alarm_disarm
-  #              data:
-  #                entity_id: alarm_control_panel.sentry_network
-  #                code: !secret alarm_code
-  #        - alias: Trigger button pressed
-  #          conditions: "{{ wait.trigger.event.data.action == action_trigger }}"
-  #          sequence:
-  #            - service: input_boolean.turn_on
-  #              entity_id: input_boolean.security_alarm
-
-  #alarm_alert_engine:
-  #  mode: restart
-  #  sequence:
-  #    - alias: Alexa Notification
-  #      if:
-  #        - condition: template
-  #          value_template: "{{ vocal }}"
-  #      then:
-  #        - service: script.alexa_voice
-  #          data:
-  #            who: "{{ who }}"
-  #            volume_override: >
-  #              {{ volume_override or false }}
-  #            message: "{{ voice_message }}"
-  #    - alias: iOS Notification
-  #      if:
-  #        - condition: template
-  #          value_template: "{{ ios }}"
-  #      then:
-  #        - service: "{% if critical %}script.text_urgent_alert{% elif actionable %}script.alarm_text_actionable_alert{% else %}script.text_alert{% endif %}"
-  #          data:
-  #            title: Sentry Network
-  #            message: "{{ message }}"
