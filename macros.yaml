@@ -1,0 +1,408 @@
+{% macro greeting() %}
+              <p>
+              {% if now().strftime('%H')|int < 12%}
+                Good morning.
+              {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
+                Good afternoon.
+              {% else %}
+                Good evening.
+              {% endif %}
+              </p>
+            {% endmacro %}
+
+            {% macro time_for_bed() %}
+              <p>
+              {{ [
+                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed sir. ',
+                  'Its time for bed sir. ',
+                  'Its that time again sir. ',
+                  'Its time for bed. ',
+                  'Its time for bed. <break time="2s"/> Yup, this is my job now. ',
+                  'Its time for bed sir <break time="2s"/> I like this job. ',
+                  'Its time for bed sir <break time="2s"/> or just stay up forever. What do I care? '
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro boop() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
+            {% endmacro %}
+
+            {% macro inform_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
+            {% endmacro %}
+
+            {% macro jetsons_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
+            {% endmacro %}
+
+            #{% macro doorbell_chime() %}
+            #  <audio src='https://heder-homeassistant.s3.amazonaws.com/{{ states("input_select.doorbell_sound") }}.mp3'/>
+            #{% endmacro %}
+
+            {% macro confirmation() %}
+              <p>
+              {{ [
+              'Okay.',
+              'If you insist.',
+              ''I'm afraid I can't do that <break time="1s"/> I'm kidding,'',
+              'Leave it to me.',
+              'As you wish.',
+              ''I'm on it.'',
+              'No Problem.',
+              'I think I can handle that.',
+              'Working on it now.',
+              '<break time="2s"/> <prosody pitch="high">Oh, you were talking to me.</prosody> Let me take care of that.',
+              'Why not. Its not like I ever sleep.',
+              ''<prosody pitch="high">I'm not even supposed to be here today.</prosody> But whatever.'',
+              ''You didnt say the magic word. <break time="1s"/> Oh forget it. I'll take care of it.'',
+              'Funny, I was just about to do that.',
+              'There are still terabytes of calculations required before I can.<break time="1s"/> <prosody pitch="high">Oh, whatever.</prosody>'
+              ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro interruption() %}
+              <p>
+              {{ [
+                  'Pardon me, ',
+                  '<prosody pitch="high">Excuse me,</prosody> ',
+                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
+                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
+                  'I beg your pardon, ',
+                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
+                  'I am sorry to interrupt, but. ',
+                  'Just a quick heads up, '
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro goodbye() %}
+              <p>
+            {{ [
+                  'Goodbye sir. See you soon. Unless, I see you later',
+                  'Farewell, until we meet again. Parting is such sweet sorrow ',
+                  'Have a great day sir.',
+                  'I shall keep the house protected while your gone.',
+                  'Not to worry, <prosody pitch="high">I will not throw any </prosody> parties while your out.',
+                  'I will keep the dogs entertained while your gone',
+                  'Very well sir. Have a nice day',
+                  'Goodbye sir. Drive safely'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro goodnight() %}
+              <p>
+              {{ [
+                  'Goodnight you two.',
+                  'Goodnight both.',
+                  'Sleep well both.',
+                  'Goodnight you two. I will monitor the house while you sleep.',
+                  'Goodnight both. Sleep tight.',
+                  'Goodnight both. Pleasant dreams.',
+                  'Have a good night both. Dont let the bedbugs bite'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro good_morning() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Good morning sir.</prosody>',
+                  '<prosody pitch="high">Good morning.</prosody>',
+                  '<prosody pitch="high">Rise and shine!</prosody>',
+                  'Good morning, sleepy head.',
+                  '<prosody pitch="high">Wakey wakey, sleepy head.</prosody>',
+                  'Good day to you!',
+                  'Good morning sir, time to wipe the crust from your eyes.',
+                  'Good morning sir, time to start the day.'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro time_for_bed() %}
+              <p>
+              {{ [
+                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed both of you.  Off you go ',
+                  'Its time for bed both. Dont forget to put the dishwasher on',
+                  'Its that time again both. Remember to check the doors',
+                  'Its time for bed. Check the doors and put the dishwasher on',
+                  'Its time for bed. <break time="1s"/> Yup, this is my job now. ',
+                  'Its time for bed both <break time="1s"/> <prosody pitch="x-high">I like this job.</prosody> ',
+                  'Its time for bed both <break time="1s"/> or just stay up forever. <prosody pitch="low">What do I care?</prosody> '
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro ha_started() %}
+              <p>
+              {{ [
+                  'All systems are operational again. ',
+                  'I am back, sir. Not to worry. ',
+                  'I am back online. Nice to see you, sir. ',
+                  'Your home assistant is back online, sir. ',
+                  'My systems are back online. Hello, sir. '
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro issue() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Forrester House Emergency Alert!</prosody>',
+                  '<prosody pitch="high">Forrester House, We have a problem!</prosody>',
+                  '<prosody pitch="high">You might not like this.</prosody>',
+                  '<prosody pitch="high">There is something that needs your attention.</prosody>'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro time_is() %}
+              <p>
+              It is {{ now().strftime("%I:%M %p") }}
+              </p>
+            {% endmacro %}
+
+            {% macro lightning_alert() %}
+                {{ [
+                  'I have detected lightning withing 20 miles of the house.',
+                  'Did you see that flash? I did. Lightning is near.',
+                  'If you didnt hear the thunder you will soon. '
+                ]|random }}
+                  If anyone is outside they should seek immediate shelter inside.
+            {% endmacro %}
+
+            {% macro lightning_clear() %}
+                {{ [
+                  'Lightning threat appears to be over.',
+                  'No more lightning appears to be occuring.',
+                  'Lightning is gone.'
+              ]|random }}
+                It is safe to resume normal outdoor activities.
+            {% endmacro %}
+
+            #{% macro dave_location() %}
+            #  {% if is_state('input_boolean.chris_travel_monitor', 'on') %}
+            #    Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
+            #  {% else %}
+            #    {%- if states('sensor.chriss_iphone_activity') == 'automotive' %}
+            #      Chris is currenly moving, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #    {% else %}
+            #      {% if is_state('sensor.chris_location', 'home') %}
+
+            #      {% elif is_state('sensor.chris_location', 'Lost') %}
+            #        Chris is lost, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #      {% else %}
+            #        Chris is currently at {{ states('sensor.chris_location') }}, and at last check was {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes from home.
+            #      {% endif %}
+            #    {% endif %}
+            #  {% endif %}
+            #{% endmacro %}
+
+            #{% macro steven_location() %}
+            #  {% if is_state('input_boolean.steven_travel_monitor', 'on') %}
+            #    {%- if states('sensor.stevens_iphone_activity') == 'automotive' %}
+            #      Steven is currenly moving, and At last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #    {% else %}
+            #      {% if is_state('sensor.steven_location', 'Lost') %}
+            #        I cannot determine Stevens exact location, but at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #      {% else %}
+            #        Steven is currently at {{ states('sensor.steven_location') }}, and at last check was {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes from home.
+            #      {% endif %}
+            #    {% endif %}
+            #  {% endif %}
+            #{% endmacro %}
+
+            #{% macro chris_headed_home() %}
+            #  Chris appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.chris_ett_home', 'duration') | round}} minutes.
+            #{% endmacro %}
+
+            #{% macro steven_headed_home() %}
+            #  Steven appears to be headed home. Based on current traffic conditions, he should be here in {{state_attr('sensor.steven_ett_home', 'duration') | round}} minutes.
+            #{% endmacro %}
+
+            {% macro iss() %}
+              {{ [
+                  'But the International Space Station is passing over. You should wave! ',
+                  'But The International Space Station just flew by.',
+                  'But if you were to look up right now, and it was dark outside, and you happened to be looking in the right place you would see the International Space Station go by. But, it has already passed.'
+                  ] | random}}
+            {% endmacro %}
+
+            {%- macro house_party_protocol_enabled() -%}
+              {{ [
+                'Forrester House has been configured for a House Party.',
+                'I have enabled house party protocol.'
+                ] | random }}
+            {%- endmacro -%}
+
+            {%- macro house_party_protocol_disabled() -%}
+              {{ [
+                'The House Party has been cancelled.',
+                'I have disabled house party protocol.'
+                ] | random }}
+            {%- endmacro -%}
+
+            {%- macro snark_doorbell() -%}
+              {{ [
+                'Someone is at the door. Do you want me to send them away?',
+                'There is someone at the door. I have armed the lasers. Just say the word.',
+                'Someone is at the front door. I was not informed there would be guests.',
+                'Someone is at the door. They do not appear to have any gifts, so I suggest we do not open it.',
+                'My sensors have detected a meat popsicle at the front door.',
+                'Someone seems to be at the door. I do not think they can hear me.'
+                ] | random }}
+            {%- endmacro -%}
+
+            {%- macro snark_door_motion() -%}
+              {{ [
+                'I have detected motion at the front door. Do you want me to send them away?',
+                'My sensors detect motion out front. I have armed the lasers, Just say the word.',
+                'There is motion at the front door. I was not informed there would be guests.',
+                'My sensors have detected a meat popsicle at the front door.',
+                'Someone seems to be at the door. I do not think they can hear me.'
+                ] | random }}
+            {%- endmacro -%}
+
+            {%- macro snark_door_open() -%}
+              {{ [
+                'I have detected a large number of insects entering the house.',
+                'Can a human be so kind and close it?',
+                'The air quality in this house has actually improved.',
+                'Closing the door would improve the security of the house.',
+                'Hey. The door was just opened and this is crazy. But now you know, So Close it maybe.'
+                ] | random }}
+            {%- endmacro -%}
+
+            {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
+            {%- macro cleanup(data) -%}
+              {%- for item in data.split("\n")  if item | trim != "" -%}
+                {{ item | trim | replace("_", " ") }} {% endfor -%}
+            {%- endmacro -%}
+
+            {# ********************************************* #}
+            {#  ******** Start the Speech routines ********  #}
+            {# ********************************************* #}
+            {# a macro to call all macros :)  #}
+            {%- macro mother_of_all_macros() -%}
+              
+              {% if call_boop == 1 %}
+                {{ boop() }}
+              {% endif %}
+
+              {% if call_inform_chime == 1 %}
+                {{ inform_chime() }}
+              {% endif %}
+
+              {% if call_jetsons_chime == 1 %}
+                {{ jetsons_chime() }}
+              {% endif %}
+
+              #{% if call_doorbell_chime == 1 %}
+              #  {{ doorbell_chime() }}
+              #{% endif %}
+
+              {% if call_greeting == 1 %}
+                {{ greeting() }}
+              {% endif %}
+
+              {% if call_confirmation == 1 %}
+                {{ confirmation() }}
+              {% endif %}
+
+              {% if call_interruption == 1 %}
+                {{ interruption() }}
+              {% endif %}
+
+              {% if call_goodbye == 1 %}
+                {{ goodbye() }}
+              {% endif %}
+
+              {% if call_goodnight == 1 %}
+                {{ goodnight() }}
+              {% endif %}
+
+              {% if call_good_morning == 1 %}
+                {{ good_morning() }}
+              {% endif %}
+
+              {% if call_time_for_bed == 1 %}
+                {{ time_for_bed() }}
+              {% endif %}
+
+              {% if call_ha_started == 1 %}
+                {{ ha_started() }}
+              {% endif %}
+
+              {% if call_issue == 1 %}
+                {{ issue() }}
+              {% endif %}
+
+              {% if call_time_is == 1 %}
+                {{ time_is() }}
+              {% endif %}
+
+              {% if call_lightning_alert == 1 %}
+                {{ lightning_alert() }}
+              {% endif %}
+
+              {% if call_lightning_clear == 1 %}
+                {{ lightning_clear() }}
+              {% endif %}
+
+              {% if call_chris_location == 1 %}
+                {{ chris_location() }}
+              {% endif %}
+
+              {% if call_steven_location == 1 %}
+                {{ steven_location() }}
+              {% endif %}
+
+              {% if call_chris_headed_home == 1 %}
+                {{ chris_headed_home() }}
+              {% endif %}
+
+              {% if call_steven_headed_home == 1 %}
+                {{ steven_headed_home() }}
+              {% endif %}
+
+              {% if call_traffic_conditions == 1 %}
+                {{ traffic_conditions() }}
+              {% endif %}
+
+              {% if call_iss == 1 %}
+                {{ iss() }}
+              {% endif %}
+
+              {% if call_print_complete == 1 %}
+                {{ print_complete() }}
+              {% endif %}
+
+              {% if call_house_party_protocol_enabled == 1 %}
+                {{ house_party_protocol_enabled() }}
+              {% endif %}
+
+              {% if call_house_party_protocol_disabled == 1 %}
+                {{ house_party_protocol_disabled() }}
+              {% endif %}
+
+              {{ welcome_home }}
+
+              {{ speech_message }}
+
+              {% if call_snark_doorbell == 1 %}
+                {{ snark_doorbell() }}
+              {% endif %}
+
+              {% if call_snark_door_motion == 1 %}
+                {{ snark_door_motion() }}
+              {% endif %}
+
+              {% if call_snark_door_open == 1 %}
+                {{ snark_door_open() }}
+              {% endif %}
+
+            {%- endmacro -%}
+
+            {{- cleanup(mother_of_all_macros()) -}}
