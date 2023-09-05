@@ -1,0 +1,239 @@
+- binary_sensor:
+  - name: "Daves Samsung Galaxy Home"
+    unique_id: daves_samsung_galaxy_home
+    state: >
+      {{ states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+
+- binary_sensor:
+  - name: "Gems Samsung Galaxy Home"
+    unique_id: gems_samsung_galaxy_home
+    state: >
+      {{ states('sensor.sm_s901b_wifi_connection') == "ForresterQ5G" or states('sensor.sm_s901b_wifi_connection') == "ForresterQ" }}
+
+- binary_sensor:
+  - name: "Seans Samsung Tablet Home"
+    unique_id: seans_samsung_galaxy_home
+    state: >
+      {{ states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+
+- binary_sensor:
+  - name: "Jamies Samsung Tablet Home"
+    unique_id: jamies_samsung_galaxy_home
+    state: >
+      {{ states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ5G" or states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ"}}
+
+- binary_sensor: 
+  - name: "Dave Home"
+    unique_id: dave_home 
+    state: >-
+      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_s22fe5g', 'home')}}
+
+- binary_sensor: 
+  - name: "Gem Home"
+    unique_id: gem_home 
+    state: >- 
+      {{ is_state('device_tracker.sm_s901b', 'home') }} 
+      
+- binary_sensor: 
+  - name: "Family Home"
+    unique_id: family_home 
+    state: >- 
+      {{ is_state('binary_sensor.daves_samsung_galaxy_home','on') or  
+        is_state('binary_sensor.gems_samsung_galaxy_home','on') }}
+
+- sensor:
+  ##### Low Battery List ######
+  - name: "Low Battery Devices"
+    unique_id: low_battery_devices_list
+    icon: mdi:battery-low
+    state: >
+      {% set threshold = states('input_number.battery_threshold') | int%}
+      {%- set ns = namespace(sensors=[]) -%}
+      {%- for state in states.sensor
+        | selectattr('attributes.device_class','defined')
+        | selectattr('attributes.state_class','defined')
+        | selectattr('attributes.device_class','==','battery')
+        | selectattr('attributes.state_class','==','measurement')
+        | selectattr('state','is_number') -%}
+        {%- if state.state | int <= threshold -%}
+          {% set ns.sensors = ns.sensors + [dict(name = state.name | replace(' battery', '') | replace(' Battery', ''), state = state.state | int)]%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- set batt = ns.sensors | sort(attribute = 'state') %}
+      {%- set ns = namespace(batt = '')-%}
+      {%- for state in batt -%}
+          {% set ns.batt = ns.batt + (state.name ~ ' (' ~ state.state ~'%)' ~ "\n")%}
+      {%- endfor -%}
+
+      {% if ns.batt | count > 0 %}
+        {{ ns.batt | truncate(255, true, '...') }}
+      {% else %}
+        {{ 'unavailable' }}
+      {% endif %}    
+
+- sensor:
+  ##### day of week #####
+  - name: "Day of Week"
+    unique_id: day_of_week
+    state: >
+      {{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A') }}
+
+
+- sensor:
+  #### Lights On Counter ######
+  - name: "Lights On Count"
+    unique_id: lights_on_count
+    state: >
+      {{ states.light
+          | rejectattr('attributes.friendly_name','eq','Valkyrie Backlight')
+          | rejectattr('attributes.friendly_name','eq','Upstairs Landing Lights')
+          | rejectattr('attributes.friendly_name','eq','Kitchen Light 1')
+          | rejectattr('attributes.friendly_name','eq','Kitchen Light 2')
+          | rejectattr('attributes.friendly_name','eq','Kitchen Light 3')
+          | rejectattr('attributes.friendly_name','eq','Kitchen Light 4')
+          | rejectattr('attributes.friendly_name','eq','Kitchen Light 5')
+          | rejectattr('attributes.friendly_name','eq','Living Room Light 1')
+          | rejectattr('attributes.friendly_name','eq','Living Room Light 2')
+          | rejectattr('attributes.friendly_name','eq','Living Room Light 3')
+          | rejectattr('attributes.friendly_name','eq','Living Room Light 4')
+          | rejectattr('attributes.friendly_name','eq','Living Room Light 5')
+          | rejectattr('attributes.entity_id','defined')
+          | selectattr('state', 'eq', 'on')
+          | list | count }}
+
+
+- sensor:
+  ### Garage Dehumidifier Water Tray Status ###
+  - name: "Garage Dehumidifier Water Tray Status"
+    unique_id: garage_dehumidifier_water_tray_status
+    state: >
+      {{ state_attr('humidifier.garage_dehumidifier_2' , 'unknown_11') }}
+
+- sensor:
+  ### Garage Dehumidifier Water Tray Full ###
+  - name: "Garage Dehumidifier Water Tray Full"
+    unique_id: garage_dehumidifier_water_tray_full
+    state: >
+      {% if states('sensor.garage_dehumidifier_water_tray_status') == "2" %}
+        {{"full"}}
+      {% else %}
+        {{"not_full"}}
+      {% endif %}
+    availability: >
+      {{ states('sensor.garage_dehumidifier_water_tray_status') == "0" 
+        or states('sensor.garage_dehumidifier_water_tray_status') == "2" }}
+
+- sensor:
+  ### Last Alexa Called ###
+  - name: "Last Alexa Called"
+    unique_id: last_alexa_called
+    state: |-
+      {% set last_called = (expand(integration_entities('alexa_media') | select('search', 'media_player'))
+      | selectattr('attributes.last_called', 'eq', True) | map(attribute='entity_id') | first )%}
+      {% if last_called == "media_player.dave_s_2nd_echo_pop" %}
+      Living Room
+      {% elif last_called == "media_player.dave_s_echo_pop" %}
+      Dining Room
+      {% elif last_called == "media_player.guest_bedroom_echo_dot" %}
+      Guest Bedroom
+      {% elif last_called == "media_player.kitchen_echo_show" %}
+      Kitchen
+      {% elif last_called == "media_player.living_room_dot" %}
+      Jamie's Room
+      {% elif last_called == "media_player.main_bedroom_dot" %}
+      Main Bedroom
+      {% elif last_called == "media_player.seans_room_dot" %}
+      Sean's Room
+      {% endif %}
+    availability: |-
+      {{ states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')
+      | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id')
+      | first is defined}}
+      
+
+      
+
+- sensor:
+  ### Room Presence for Alexa ###
+  - name: "Room Presence For Alexa"
+    unique_id: room_presence_for_alexa
+    state: |-
+      {% set room_presence = (expand('group.room_with_alexa_presence') | selectattr('state','eq','on') | map(attribute='name')) | list %}
+      {% if "living_room" in room_presence %}
+        Living Room
+      {% elif "kitchen" in room_presence %}
+        Kitchen
+      {% elif "dining_room" in room_presence %}
+        Dining Room
+      {% elif "main_bedroom" in room_presence %}
+        Main Bedroom
+      {% elif "guest_bedroom" in room_presence %}
+        Guest Bedroom
+      {% elif "Jamie" in room_presence %}
+        Jamies Room
+      {% elif "Sean" in room_presence %}
+        Seans Room
+      {% else %}
+        Living Room
+      {% endif %}
+
+
+- sensor:
+  ### determine overnight low temperature for daily briefing ###
+  - name: "Overnight Low Temp"
+    unique_id: overnight_temp_low
+    state: |-
+      {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
+      {% set end = (start + timedelta(days=1)) %}
+      {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+      {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+        {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | min }}
+
+- sensor:
+  ### determine overnight high temperature for daily briefing ###
+  - name: "Overnight High Temp"
+    unique_id: overnight_temp_high
+    state: |-
+      {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
+      {% set end = (start + timedelta(days=1)) %}
+      {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+      {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+        {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}
+
+
+  ### Trigger based sensor to store calendar events ###
+- trigger:
+  - platform: event
+    event_type: calendar_poll
+  sensor:
+    - name: "Calendar Events"
+      unique_id: calendar_events
+      state: "{{ trigger.event.data.calendar_response.events | count() }}"
+      attributes:
+        calendar_response: "{{ trigger.event.data.calendar_response }}"
+      icon: mdi:calendar
+
+
+- sensor:
+  ### another location based sensor ###
+  - name: "Dave is in da hoose"
+    unique_id: dave_is_in_da_hoose
+    state: |-
+      {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
+      {% if dave_location == "on" %}
+        home
+      {% else %}
+      not_home
+      {% endif %}
+
+- sensor:
+  ### yet another location based sensor ###
+  - name: "Gem is in da hoose"
+    unique_id: gem_is_in_da_hoose
+    state: |-
+      {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
+      {% if gem_location == "on" %}
+        home
+      {% else %}
+      not_home
+      {% endif %}
