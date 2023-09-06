@@ -74,6 +74,20 @@ automation:
     trigger:
       - platform: time
         at: input_datetime.get_ready_for_school_at
+    conditions:
+      - condition: and
+        conditions:
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.schoolday
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.fridayschool
+                state: "on"
+          - condition: state
+            entity_id: calendar.school_holidays
+            state: "off"
     action:
       - service: script.speech_engine
         data:
@@ -121,6 +135,16 @@ automation:
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_late_school: 1
+  - id: school_pick_up
+    alias: School Pick Up
+    trigger:
+      - platform: time
+        at: input_datetime.school_pick_up_time_mon_to_thurs
+    action:
+      - service: script.speech_engine
+        data:
+          where: "{{ states('sensor.room_audio') }}"
+          call_school_pick_up: 1
               
          
   - id: play_morning_briefing_annc
