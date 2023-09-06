@@ -471,6 +471,27 @@ script:
               Good evening.
             {% endif %}
 
+            {% macro good_morning() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Good morning sir.</prosody>',
+                  '<prosody pitch="high">Good morning.</prosody>',
+                  '<prosody pitch="high">Rise and shine!</prosody>',
+                  'Good morning, sleepy head.',
+                  '<prosody pitch="high">Wakey wakey, sleepy head.</prosody>',
+                  'Good day to you!',
+                  'Good morning sir, time to wipe the crust from your eyes.',
+                  'Good morning sir, time to start the day.'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% endmacro %}
+
+            {% macro time_is() %}
+              <p>
+              It is {{ now().strftime("%I:%M %p") }}
+              </p>
             {% endmacro %}
 
             {% macro boop() %}
@@ -537,6 +558,20 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro time_for_bed() %}
+              <p>
+              {{ [
+                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed sir. ',
+                  'Its time for bed sir. ',
+                  'Its that time again sir. ',
+                  'Its time for bed. ',
+                  'Its time for bed. <break time="2s"/> Yup, this is my job now. ',
+                  'Its time for bed sir <break time="2s"/> I like this job. ',
+                  'Its time for bed sir <break time="2s"/> or just stay up forever. What do I care? '
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
             {% macro goodnight() %}
               <p>
               {{ [
@@ -547,35 +582,6 @@ script:
                   'Goodnight both. Sleep tight.',
                   'Goodnight both. Pleasant dreams.',
                   'Have a good night both. Dont let the bedbugs bite'
-                  ] | random }}
-              </p>
-            {% endmacro %}
-
-            {% macro good_morning() %}
-              <p>
-              {{ [
-                  '<prosody pitch="high">Good morning sir.</prosody>',
-                  '<prosody pitch="high">Good morning.</prosody>',
-                  '<prosody pitch="high">Rise and shine!</prosody>',
-                  'Good morning, sleepy head.',
-                  '<prosody pitch="high">Wakey wakey, sleepy head.</prosody>',
-                  'Good day to you!',
-                  'Good morning sir, time to wipe the crust from your eyes.',
-                  'Good morning sir, time to start the day.'
-                  ] | random }}
-              </p>
-            {% endmacro %}
-
-            {% macro time_for_bed() %}
-              <p>
-              {{ [
-                  '<say-as interpret-as="interjection">ahem!</say-as> Its time for bed both of you.  Off you go ',
-                  'Its time for bed both. Dont forget to put the dishwasher on',
-                  'Its that time again both. Remember to check the doors',
-                  'Its time for bed. Check the doors and put the dishwasher on',
-                  'Its time for bed. <break time="1s"/> Yup, this is my job now. ',
-                  'Its time for bed both <break time="1s"/> <prosody pitch="x-high">I like this job.</prosody> ',
-                  'Its time for bed both <break time="1s"/> or just stay up forever. <prosody pitch="low">What do I care?</prosody> '
                   ] | random }}
               </p>
             {% endmacro %}
@@ -600,12 +606,6 @@ script:
                   '<prosody pitch="high">You might not like this.</prosody>',
                   '<prosody pitch="high">There is something that needs your attention.</prosody>'
                   ] | random }}
-              </p>
-            {% endmacro %}
-
-            {% macro time_is() %}
-              <p>
-              It is {{ now().strftime("%I:%M %p") }}
               </p>
             {% endmacro %}
 
