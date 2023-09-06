@@ -238,10 +238,63 @@ automation:
           call_jetsons_chime: 1
           call_time_is: 1
           call_time_for_bed: 1
-      # - service: script.status_annc
-      #   data:
-      #     who: presence
-      #     speech_message: <p> {{ states('sensor.current_conditions')}} </p>
+          
+  ###########################################
+  #    Boys Bedtime                         #
+  ########################################### 
+  - id: boys_bedtime_schoolnight
+    alias: Boys Bedtime Schoolnight
+    trigger:
+      - platform: time 
+        at: input_datetime.school_night
+        id: School Bedtime
+      - platform: time
+        at: input_datetime.non_school_night
+        id: Non School Bedtime
+    action:
+      - choose:
+        - conditions:
+          - condition: trigger
+            id: School Bedtime
+          - condition: state
+            entity_id: binary_sensor.schoolnight
+            state: "on"
+          - condition: state
+            entity_id: calendar.school_holidays
+            state: "off"
+         sequence:
+           - service: script.status_annc
+             data:
+               where: living_room
+               call_jetsons_chime: 1
+               call_boys_time_for_bed: 1
+           - service: input_boolean.turn_on
+             data: {}
+             target:
+               entity_id: input_boolean.kids_bedtime_announcement_played
+       - conditions:
+           - condition: trigger
+             id: Non School Bedtime
+           - condition: or
+             conditions:
+               - condition: state
+                 entity_id: binary_sensor.schoolnight
+                 state: "off"
+               - condition: state
+                 entity_id: calendar.school_holidays
+                 state: "on"
+                 alias: Confirm School Holiday is on
+          sequence:
+            - service: script.status_annc
+              data:
+                where: living_room
+                call_jetsons_chime: 1
+                call_boys_time_for_bed: 1
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.kids_bedtime_announcement_played
+      
 
 script:
   # welcome_briefing:
