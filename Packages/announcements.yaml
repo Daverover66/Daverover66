@@ -78,7 +78,7 @@ automation:
     trigger:
       - platform: time
         at: input_datetime.get_ready_for_school_at
-    conditions:
+    condition:
       - condition: and
         conditions:
           - condition: or
@@ -93,49 +93,50 @@ automation:
             entity_id: calendar.school_holidays
             state: "off"
     action:
-      - service: script.speech_engine
+      - service: script.status_annc
         data:
           where: living_room
+          call_jetsons_chime: 1
           call_get_dressed: 1
-       - delay:
-              hours: 0
-              minutes: 10
-              seconds: 0
-              milliseconds: 0
-       - service: script.speech_engine
-         data:
-           where: living_room
-           call_brush_teeth: 1
-       - delay:
-              hours: 0
-              minutes: 0
-              seconds: 10
-              milliseconds: 0
-       - service: switch.turn_off
-         data: {}
-         target:
-           entity_id: switch.living_room_tv
-         enabled: true
-       - service: media_player.turn_off
-         data: {}
-         target:
-           entity_id: media_player.sky_q_main
-         enabled: true
-       - if:
-           - condition: state
-             entity_id: light.dreamview_g1_pro
-             state: "on"
-         then:
-           - service: light.turn_off
-             data: {}
-             target:
-               entity_id: light.dreamview_g1_pro
-       - delay:
-           hours: 0
-           minutes: 10
-           seconds: 0
-           milliseconds: 0 
-      - service: script.speech_engine
+      - delay:
+          hours: 0
+          minutes: 10
+          seconds: 0
+          milliseconds: 0
+      - service: script.status_annc
+        data:
+          where: living_room
+          call_brush_teeth: 1
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.living_room_tv
+        enabled: true
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: media_player.sky_q_main
+        enabled: true
+      - if:
+          - condition: state
+            entity_id: light.dreamview_g1_pro
+            state: "on"
+        then:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.dreamview_g1_pro
+      - delay:
+          hours: 0
+          minutes: 10
+          seconds: 0
+          milliseconds: 0 
+      - service: script.status_annc
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_late_school: 1
@@ -152,7 +153,7 @@ automation:
     trigger:
       - platform: time
         at: input_datetime.school_pick_up_time_mon_to_thurs
-    conditions:
+    condition:
       - condition: state
         entity_id: binary_sensor.schoolday
         state: "on"
@@ -160,7 +161,7 @@ automation:
         entity_id: calendar.school_holidays
         state: "off"
     action:
-      - service: script.speech_engine
+      - service: script.status_annc
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_school_pick_up: 1
@@ -172,27 +173,27 @@ automation:
   ###################################################
   #    School Morning Routine Friday                #
   ###################################################
-  -id: school_pick_up_friday
-   alias: School Pick Up Friday
-   trigger:
-     platform: state
-     at: input_datetime.school_pick_up_time_friday
-   conditions:
+  - id: school_pick_up_friday
+    alias: School Pick Up Friday
+    trigger:
+      platform: time
+      at: input_datetime.school_pick_up_time_friday
+    condition:
     - condition: state
       entity_id: binary_sensor.fridayschool
       state: "on"
     - condition: state
       entity_id: calendar.school_holidays
       state: "off"
-   action:
-      - service: script.speech_engine
+    action:
+      - service: script.status_annc
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_school_pick_up: 1 
-     - service: input_boolean.turn_on
-       data: {}
-       target:
-         entity_id: input_boolean.school_pick_up_announcement_played 
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.school_pick_up_announcement_played 
 
   ###################################################
   #    Morning Briefing with Presence               #
@@ -234,6 +235,7 @@ automation:
       - service: script.status_annc
         data:
           where: living_room
+          call_jetsons_chime: 1
           call_time_is: 1
           call_time_for_bed: 1
       # - service: script.status_annc
