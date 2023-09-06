@@ -712,6 +712,18 @@ script:
                 {{ school_pick_up() }}
               {% endif %}
 
-            {%- endmacro -%}
+              {% if call_fridge_warning == 1 %}
+                {{ fridge_warning() }}
+              {% endif %}
+
+              {% if call_fridge_warning_again == 1 %}
+                {{ fridge_warning_again() }}
+              {% endif %}
+
+              {% if call_fridge_closed == 1 %}
+                {{ fridge_closed() }}
+              {% endif %} 
+
+              {%- endmacro -%}
 
             {{- cleanup(mother_of_all_macros()) -}}
