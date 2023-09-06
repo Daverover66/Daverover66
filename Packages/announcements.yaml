@@ -69,6 +69,10 @@ automation:
   #  action:
   #    - service: input_boolean.turn_off
   #      entity_id: input_boolean.audible_notifications
+
+  #################################
+  #    School Morning Routine     #
+  #################################
   - id: schoolday_morning_routine
     alias: School Morning Routine
     trigger:
@@ -135,18 +139,64 @@ automation:
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_late_school: 1
-  - id: school_pick_up
-    alias: School Pick Up
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.school_morning_announcement_played
+
+  ###########################################
+  #    School Pick Up Monday to Thursday    #
+  ########################################### 
+  - id: school_pick_up_mon_to_thurs
+    alias: School Pick Up Monday to Thursday
     trigger:
       - platform: time
         at: input_datetime.school_pick_up_time_mon_to_thurs
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.schoolday
+        state: "on"
+      - condition: state
+        entity_id: calendar.school_holidays
+        state: "off"
     action:
       - service: script.speech_engine
         data:
           where: "{{ states('sensor.room_audio') }}"
           call_school_pick_up: 1
-              
-         
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.school_pick_up_announcement_played
+
+  ###################################################
+  #    School Morning Routine Friday                #
+  ###################################################
+  -id: school_pick_up_friday
+   alias: School Pick Up Friday
+   trigger:
+     platform: state
+     at: input_datetime.school_pick_up_time_friday
+   conditions:
+    - condition: state
+      entity_id: binary_sensor.fridayschool
+      state: "on"
+    - condition: state
+      entity_id: calendar.school_holidays
+      state: "off"
+   action:
+      - service: script.speech_engine
+        data:
+          where: "{{ states('sensor.room_audio') }}"
+          call_school_pick_up: 1 
+     - service: input_boolean.turn_on
+       data: {}
+       target:
+         entity_id: input_boolean.school_pick_up_announcement_played 
+
+  ###################################################
+  #    Morning Briefing with Presence               #
+  ###################################################
   - id: play_morning_briefing_annc
     alias: Play Morning Briefing
     trigger:
@@ -170,6 +220,9 @@ automation:
     - service: input_boolean.turn_on
       entity_id: input_boolean.morning_briefing_played
 
+  ###################################################
+  #    Bedtime                                      #
+  ###################################################
   - id: time_for_bed_annc
     alias: Time For Bed Announcement
     mode: single
