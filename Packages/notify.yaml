@@ -462,14 +462,22 @@ script:
             {% endif %}
           message: |-
             {% macro greeting() %}
+              <p>
+              {% if now().strftime('%H')|int < 12%}
+                Good morning.
+              {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
+                Good afternoon.
+              {% else %}
+                Good evening.
+              {% endif %}
+              </p>
+            {% endmacro %}
 
-            {% if now().strftime('%H')|int < 12%}
-              Good morning.
-            {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %}
-              Good afternoon.
-            {% else %}
-              Good evening.
-            {% endif %}
+            {% macro time_is() %}
+              <p>
+              It is {{ now().strftime("%I:%M %p") }}
+              </p>
+            {% endmacro %}
 
             {% macro good_morning() %}
               <p>
@@ -483,14 +491,6 @@ script:
                   'Good morning sir, time to wipe the crust from your eyes.',
                   'Good morning sir, time to start the day.'
                   ] | random }}
-              </p>
-            {% endmacro %}
-
-            {% endmacro %}
-
-            {% macro time_is() %}
-              <p>
-              It is {{ now().strftime("%I:%M %p") }}
               </p>
             {% endmacro %}
 
@@ -569,6 +569,57 @@ script:
                   'Its time for bed you guys <break time="2s"/> I do like this job, but perhaps you could give me something more meaningful to do tomorrow. ',
                   'Its time for bed you guys <break time="2s"/> or just stay up forever. What do I care? '
                   ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro boys_time_for_bed() %}
+              <p>
+              {{ [
+                  'Sean and Jamie. Its time for bed.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
+                  'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
+                  'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+                  'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                  'Sean and Jamie. <prosody pitch="x-high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>'
+                  ]|random }}
+              </p>
+            {% endmacro %}
+
+            {% macro get_dressed() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Sean',
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Jamie'
+                  ]|random }}
+              </p>
+            {% endmacro %}
+
+            {% macro brush_teeth() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to go upstairs and brush your teeth. No pushing and no running, remember <prosody pitch="high">its not a race</prosody>',
+                  'Excuse me master Sean and master Jamie. Its time to brush your teeth. Please go upstairs in an orderly fashion and <prosody pitch="high">no pushing or running</prosody>'
+                  ]|random }}
+              </p>
+            {% endmacro %}
+
+            {% macro late_school() %}
+              <p>
+              {{ [
+                  '<prosody pitch="x-high">Attention master Sean and master Jamie. If you are still here, you are late for school</prosody>',
+                  'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for school yet, <prosody pitch="x-high">why not</prosody>',
+                  '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. School will not wait for you</prosody>'
+                  ]|random }}
+              </p>
+            {% endmacro %}
+
+            {% macro school_pick_up() %}
+              <p>
+              {{ [
+                  'It is almost time for the school pickup.  Please prepare to pick up master Sean and master Jamie',
+                  'I know you are in the middle of something, but it is almost time to pick up the boys from school',
+                  'This is an urgent announcement for Mummy. Its time to clock out and get the boys from School. <prosody pitch="x-high">Chop chop!</prosody>',
+                  'I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up the boys.'
+                  ]|random }}
               </p>
             {% endmacro %}
 
@@ -727,6 +778,22 @@ script:
 
               {% if call_goodnight == 1 %}
                 {{ goodnight() }}
+              {% endif %}
+
+              {% if call_brush_teeth == 1 %}
+                {{ brush_teeth }}
+              {% endif %}
+
+              {% if call_get_dressed == 1 %}
+                {{ get_dressed }}
+              {% endif %}
+
+              {% if call_late_school == 1 %}
+                {{ late_school }}
+              {% endif %}
+
+              {% if call_school_pick_up == 1 %}
+                {{ school_pick_up }}
               {% endif %}
 
               {% if call_good_morning == 1 %}
