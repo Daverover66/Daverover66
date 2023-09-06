@@ -69,7 +69,60 @@ automation:
   #  action:
   #    - service: input_boolean.turn_off
   #      entity_id: input_boolean.audible_notifications
-
+  - id: schoolday_morning_routine
+    alias: School Morning Routine
+    trigger:
+      - platform: time
+        at: input_datetime.get_ready_for_school_at
+    action:
+      - service: script.speech_engine
+        data:
+          where: living_room
+          call_get_dressed: 1
+       - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+       - service: script.speech_engine
+         data:
+           where: living_room
+           call_brush_teeth: 1
+       - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+       - service: switch.turn_off
+         data: {}
+         target:
+           entity_id: switch.living_room_tv
+         enabled: true
+       - service: media_player.turn_off
+         data: {}
+         target:
+           entity_id: media_player.sky_q_main
+         enabled: true
+       - if:
+           - condition: state
+             entity_id: light.dreamview_g1_pro
+             state: "on"
+         then:
+           - service: light.turn_off
+             data: {}
+             target:
+               entity_id: light.dreamview_g1_pro
+       - delay:
+           hours: 0
+           minutes: 10
+           seconds: 0
+           milliseconds: 0 
+      - service: script.speech_engine
+        data:
+          where: "{{ states('sensor.room_audio') }}"
+          call_late_school: 1
+              
+         
   - id: play_morning_briefing_annc
     alias: Play Morning Briefing
     trigger:
