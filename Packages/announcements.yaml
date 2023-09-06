@@ -75,6 +75,8 @@ automation:
   #################################
   - id: schoolday_morning_routine
     alias: School Morning Routine
+    initial_state: true
+    mode: single
     trigger:
       - platform: time
         at: input_datetime.get_ready_for_school_at
@@ -150,6 +152,8 @@ automation:
   ########################################### 
   - id: school_pick_up_mon_to_thurs
     alias: School Pick Up Monday to Thursday
+    initial_state: true
+    mode: single
     trigger:
       - platform: time
         at: input_datetime.school_pick_up_time_mon_to_thurs
@@ -175,6 +179,8 @@ automation:
   ###################################################
   - id: school_pick_up_friday
     alias: School Pick Up Friday
+    initial_state: true
+    mode: single
     trigger:
       platform: time
       at: input_datetime.school_pick_up_time_friday
@@ -200,6 +206,8 @@ automation:
   ###################################################
   - id: play_morning_briefing_annc
     alias: Play Morning Briefing
+    initial_state: true
+    mode: single
     trigger:
       - platform: state
         entity_id:
@@ -226,6 +234,7 @@ automation:
   ###################################################
   - id: time_for_bed_annc
     alias: Time For Bed Announcement
+    initial_state: true
     mode: single
     trigger:
       - platform: time
@@ -244,6 +253,8 @@ automation:
   ########################################### 
   - id: boys_bedtime
     alias: Boys Bedtime
+    initial_state: true
+    mode: single
     trigger:
       - platform: time 
         at: input_datetime.school_night
@@ -298,115 +309,117 @@ automation:
   ########################################### 
   - id: office_echo
     alias: Office Echo
+    initial_state: true
+    mode: restart
     trigger:
-  - platform: state
-    entity_id:
-      - binary_sensor.office_hours
-    from: "off"
-    to: "on"
-    id: Office in use
-  - platform: state
-    entity_id:
-      - binary_sensor.office_hours
-    from: "on"
-    to: "off"
-    id: Office not in use
-  - platform: state
-    entity_id:
-      - binary_sensor.gems_samsung_galaxy_home
-    from: "on"
-    to: "off"
-    id: Gem out of office
-  - platform: state
-    entity_id:
-      - binary_sensor.gems_samsung_galaxy_home
-    from: "off"
-    to: "on"
-    id: Gem in office
-condition:
-  - condition: state
-    entity_id: input_boolean.audible_notifications
-    state: "on"
-  - condition: state
-    entity_id: input_boolean.holiday_mode
-    state: "off"
-  - condition: state
-    entity_id: binary_sensor.quiet_time
-    state: "off"
-action:
-  - choose:
-      - conditions:
-          - condition: trigger
-            id: Office in use
-          - condition: state
-            entity_id: binary_sensor.workday_sensor
-            state: "on"
-          - condition: state
-            entity_id: calendar.gem_holidays
-            state: "off"
-          - condition: state
-            entity_id: person.gem_forrester
-            state: home
-        sequence:
-          - type: turn_off
-            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-            entity_id: switch.office_echo_pop_socket_1
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id: Office not in use
-          - condition: state
-            entity_id: binary_sensor.workday_sensor
-            state: "on"
-          - condition: state
-            entity_id: calendar.gem_holidays
-            state: "off"
-          - condition: state
-            entity_id: switch.office_echo_pop_socket_1
-            state: "off"
-        sequence:
-          - type: turn_on
-            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-            entity_id: switch.office_echo_pop_socket_1
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id:
-              - Gem out of office
-          - condition: state
-            entity_id: binary_sensor.workday_sensor
-            state: "on"
-          - condition: state
-            entity_id: switch.office_echo_pop_socket_1
-            state: "off"
-        sequence:
-          - type: turn_on
-            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-            entity_id: c87e83074cbfccb86ac70e0749a1f23f
-            domain: switch
-          - service: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id: input_boolean.gem_gone_out_to_office
-      - conditions:
-          - condition: trigger
-            id:
-              - Gem in office
-          - condition: state
-            entity_id: binary_sensor.workday_sensor
-            state: "on"
-          - condition: state
-            entity_id: switch.office_echo_pop_socket_1
-            state: "on"
-        sequence:
-          - service: input_boolean.turn_off
-            data: {}
-            target:
-              entity_id: input_boolean.gem_gone_out_to_office
-          - type: turn_off
-            device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-            entity_id: c87e83074cbfccb86ac70e0749a1f23f
-            domain: switch      
+      - platform: state
+        entity_id:
+          - binary_sensor.office_hours
+        from: "off"
+        to: "on"
+        id: Office in use
+      - platform: state
+        entity_id:
+          - binary_sensor.office_hours
+        from: "on"
+        to: "off"
+        id: Office not in use
+      - platform: state
+        entity_id:
+          - binary_sensor.gems_samsung_galaxy_home
+        from: "on"
+        to: "off"
+        id: Gem out of office
+      - platform: state
+        entity_id:
+          - binary_sensor.gems_samsung_galaxy_home
+        from: "off"
+        to: "on"
+        id: Gem in office
+    condition:
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.holiday_mode
+        state: "off"
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Office in use
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "on"
+              - condition: state
+                entity_id: calendar.gem_holidays
+                state: "off"
+              - condition: state
+                entity_id: person.gem_forrester
+                state: home
+            sequence:
+              - type: turn_off
+                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+                entity_id: switch.office_echo_pop_socket_1
+                domain: switch
+          - conditions:
+              - condition: trigger
+                id: Office not in use
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "on"
+              - condition: state
+                entity_id: calendar.gem_holidays
+                state: "off"
+              - condition: state
+                entity_id: switch.office_echo_pop_socket_1
+                state: "off"
+            sequence:
+              - type: turn_on
+                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+                entity_id: switch.office_echo_pop_socket_1
+                domain: switch
+          - conditions:
+              - condition: trigger
+                id:
+                  - Gem out of office
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "on"
+              - condition: state
+                entity_id: switch.office_echo_pop_socket_1
+                state: "off"
+            sequence:
+              - type: turn_on
+                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+                entity_id: c87e83074cbfccb86ac70e0749a1f23f
+                domain: switch
+              - service: input_boolean.turn_on
+                data: {}
+                target:
+                  entity_id: input_boolean.gem_gone_out_to_office
+          - conditions:
+              - condition: trigger
+                id:
+                  - Gem in office
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "on"
+              - condition: state
+                entity_id: switch.office_echo_pop_socket_1
+                state: "on"
+            sequence:
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.gem_gone_out_to_office
+              - type: turn_off
+                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
+                entity_id: c87e83074cbfccb86ac70e0749a1f23f
+                domain: switch      
 
 script:
   # welcome_briefing:
