@@ -122,7 +122,7 @@ automation:
         timeout: "00:02:00" # Only give it two minutes then give up, otherwise what's the point?
       - service: script.alexa_voice
         data:
-          where: living_room
+          where: living room
           message: > # Use the trigger ID to specify which sound to play.
             {% if states("input_select.clock_chime_sound") == "Cuckoo Clock" %}
               {% if trigger.id == "30" %}
