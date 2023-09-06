@@ -460,7 +460,7 @@ script:
             {% else %}
               {{ states('sensor.room_audio') }}
             {% endif %}
-          message: |-
+          message: >-
             {% macro greeting() %}
               <p>
               {% if now().strftime('%H')|int < 12%}
@@ -470,12 +470,6 @@ script:
               {% else %}
                 Good evening.
               {% endif %}
-              </p>
-            {% endmacro %}
-
-            {% macro time_is() %}
-              <p>
-              It is {{ now().strftime("%I:%M %p") }}
               </p>
             {% endmacro %}
 
@@ -491,6 +485,12 @@ script:
                   'Good morning sir, time to wipe the crust from your eyes.',
                   'Good morning sir, time to start the day.'
                   ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro time_is() %}
+              <p>
+              It is {{ now().strftime("%I:%M %p") }}
               </p>
             {% endmacro %}
 
@@ -572,57 +572,6 @@ script:
               </p>
             {% endmacro %}
 
-            {% macro boys_time_for_bed() %}
-              <p>
-              {{ [
-                  'Sean and Jamie. Its time for bed.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
-                  'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
-                  'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
-                  'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
-                  'Sean and Jamie. <prosody pitch="x-high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>'
-                  ]|random }}
-              </p>
-            {% endmacro %}
-
-            {% macro get_dressed() %}
-              <p>
-              {{ [
-                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Sean',
-                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Jamie'
-                  ]|random }}
-              </p>
-            {% endmacro %}
-
-            {% macro brush_teeth() %}
-              <p>
-              {{ [
-                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to go upstairs and brush your teeth. No pushing and no running, remember <prosody pitch="high">its not a race</prosody>',
-                  'Excuse me master Sean and master Jamie. Its time to brush your teeth. Please go upstairs in an orderly fashion and <prosody pitch="high">no pushing or running</prosody>'
-                  ]|random }}
-              </p>
-            {% endmacro %}
-
-            {% macro late_school() %}
-              <p>
-              {{ [
-                  '<prosody pitch="x-high">Attention master Sean and master Jamie. If you are still here, you are late for school</prosody>',
-                  'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for school yet, <prosody pitch="x-high">why not</prosody>',
-                  '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. School will not wait for you</prosody>'
-                  ]|random }}
-              </p>
-            {% endmacro %}
-
-            {% macro school_pick_up() %}
-              <p>
-              {{ [
-                  'It is almost time for the school pickup.  Please prepare to pick up master Sean and master Jamie',
-                  'I know you are in the middle of something, but it is almost time to pick up the boys from school',
-                  'This is an urgent announcement for Mummy. Its time to clock out and get the boys from School. <prosody pitch="x-high">Chop chop!</prosody>',
-                  'I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up the boys.'
-                  ]|random }}
-              </p>
-            {% endmacro %}
-
             {% macro goodnight() %}
               <p>
               {{ [
@@ -637,100 +586,56 @@ script:
               </p>
             {% endmacro %}
 
-            {% macro ha_started() %}
+            {% macro boys_time_for_bed() %}
               <p>
               {{ [
-                  'All systems are operational again. ',
-                  'I am back, sir. Not to worry. ',
-                  'I am back online. Nice to see you, sir. ',
-                  'Your home assistant is back online, sir. ',
-                  'My systems are back online. Hello, sir. '
+                  'Sean and Jamie. Its time for bed.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
+                  'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
+                  'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+                  'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                  'Sean and Jamie. <prosody pitch="x-high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
                   ] | random }}
               </p>
             {% endmacro %}
 
-            {% macro issue() %}
+            {% macro get_dressed() %}
               <p>
               {{ [
-                  '<prosody pitch="high">Forrester House Emergency Alert!</prosody>',
-                  '<prosody pitch="high">Forrester House, We have a problem!</prosody>',
-                  '<prosody pitch="high">You might not like this.</prosody>',
-                  '<prosody pitch="high">There is something that needs your attention.</prosody>'
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Sean',
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Jamie',
                   ] | random }}
               </p>
             {% endmacro %}
 
-            {% macro lightning_alert() %}
-                {{ [
-                  'I have detected lightning withing 20 miles of the house.',
-                  'Did you see that flash? I did. Lightning is near.',
-                  'If you didnt hear the thunder you will soon. '
-                ]|random }}
-                  If anyone is outside they should seek immediate shelter inside.
+            {% macro brush_teeth() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to go upstairs and brush your teeth. No pushing and no running, remember <prosody pitch="high">its not a race</prosody>',
+                  'Excuse me master Sean and master Jamie. Its time to brush your teeth. Please go upstairs in an orderly fashion and <prosody pitch="high">no pushing or running</prosody>',
+                  ] | random }}
+              </p>
             {% endmacro %}
 
-            {% macro lightning_clear() %}
-                {{ [
-                  'Lightning threat appears to be over.',
-                  'No more lightning appears to be occuring.',
-                  'Lightning is gone.'
-              ]|random }}
-                It is safe to resume normal outdoor activities.
+            {% macro late_school() %}
+              <p>
+              {{ [ 
+                  '<prosody pitch="x-high">Attention master Sean and master Jamie. If you are still here, you are late for school</prosody>',
+                  'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for school yet, <prosody pitch="x-high">why not</prosody>',
+                  '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. School will not wait for you</prosody>'
+                  ] | random }}
+              </p>
             {% endmacro %}
 
-            {% macro iss() %}
-              {{ [
-                  'But the International Space Station is passing over. You should wave! ',
-                  'But The International Space Station just flew by.',
-                  'But if you were to look up right now, and it was dark outside, and you happened to be looking in the right place you would see the International Space Station go by. But, it has already passed.'
-                  ] | random}}
+            {% macro school_pick_up() %}
+              <p>
+              {{ [ 
+                  '<prosody pitch="high">Information.</prosody> It is almost time for the school pickup. Please prepare to pick up master Sean and master Jamie',
+                  '<prosody pitch="high">Pardon my interruption Mummy. I know you are in the middle of something, but it is almost time to pick up the boys from school</prosody>',
+                  '<prosody pitch="high">Attention. This is an urgent announcement for Mummy.</prosody> Its time to clock out and get the boys from School.  <prosody pitch="x-high">Chop chop!</prosody>',
+                  '<prosody pitch="los">Breaking news!</prosody> I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up the boys.'
+                  ] | random }}
+              </p>
             {% endmacro %}
-
-            {%- macro house_party_protocol_enabled() -%}
-              {{ [
-                'Forrester House has been configured for a House Party.',
-                'I have enabled house party protocol.'
-                ] | random }}
-            {%- endmacro -%}
-
-            {%- macro house_party_protocol_disabled() -%}
-              {{ [
-                'The House Party has been cancelled.',
-                'I have disabled house party protocol.'
-                ] | random }}
-            {%- endmacro -%}
-
-            {%- macro snark_doorbell() -%}
-              {{ [
-                'Someone is at the door. Do you want me to send them away?',
-                'There is someone at the door. I have armed the lasers. Just say the word.',
-                'Someone is at the front door. I was not informed there would be guests.',
-                'Someone is at the door. They do not appear to have any gifts, so I suggest we do not open it.',
-                'My sensors have detected a meat popsicle at the front door.',
-                'Someone seems to be at the door. I do not think they can hear me.'
-                ] | random }}
-            {%- endmacro -%}
-
-            {%- macro snark_door_motion() -%}
-              {{ [
-                'I have detected motion at the front door. Do you want me to send them away?',
-                'My sensors detect motion out front. I have armed the lasers, Just say the word.',
-                'There is motion at the front door. I was not informed there would be guests.',
-                'My sensors have detected a meat popsicle at the front door.',
-                'Someone seems to be at the door. I do not think they can hear me.'
-                ] | random }}
-            {%- endmacro -%}
-
-            {%- macro snark_door_open() -%}
-              {{ [
-                'I have detected a large number of insects entering the house.',
-                'Can a human be so kind and close it?',
-                'The air quality in this house has actually improved.',
-                'Closing the door would improve the security of the house.',
-                'Hey. The door was just opened and this is crazy. But now you know, So Close it maybe.'
-                ] | random }}
-            {%- endmacro -%}
-
 
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
@@ -743,7 +648,18 @@ script:
             {# ********************************************* #}
             {# a macro to call all macros :)  #}
             {%- macro mother_of_all_macros() -%}
-              
+              {% if call_greeting == 1 %}
+                {{ greeting() }}
+              {% endif %}
+
+              {% if call_good_morning == 1 %}
+                {{ good_morning() }}
+              {% endif %}
+
+              {% if call_time_is == 1 %}
+                {{ time_is() }}
+              {% endif %}
+
               {% if call_boop == 1 %}
                 {{ boop() }}
               {% endif %}
@@ -754,14 +670,6 @@ script:
 
               {% if call_jetsons_chime == 1 %}
                 {{ jetsons_chime() }}
-              {% endif %}
-
-              #{% if call_doorbell_chime == 1 %}
-              #  {{ doorbell_chime() }}
-              #{% endif %}
-
-              {% if call_greeting == 1 %}
-                {{ greeting() }}
               {% endif %}
 
               {% if call_confirmation == 1 %}
@@ -776,84 +684,32 @@ script:
                 {{ goodbye() }}
               {% endif %}
 
-              {% if call_goodnight == 1 %}
-                {{ goodnight() }}
-              {% endif %}
-
-              {% if call_brush_teeth == 1 %}
-                {{ brush_teeth }}
-              {% endif %}
-
-              {% if call_get_dressed == 1 %}
-                {{ get_dressed }}
-              {% endif %}
-
-              {% if call_late_school == 1 %}
-                {{ late_school }}
-              {% endif %}
-
-              {% if call_school_pick_up == 1 %}
-                {{ school_pick_up }}
-              {% endif %}
-
-              {% if call_good_morning == 1 %}
-                {{ good_morning() }}
-              {% endif %}
-
               {% if call_time_for_bed == 1 %}
                 {{ time_for_bed() }}
               {% endif %}
 
-              {% if call_ha_started == 1 %}
-                {{ ha_started() }}
+              {% if call_goodnight == 1 %}
+                {{ goodnight() }}
               {% endif %}
 
-              {% if call_issue == 1 %}
-                {{ issue() }}
+              {% if call_boys_time_for_bed == 1 %}
+                {{ boys_time_for_bed() }}
               {% endif %}
 
-              {% if call_time_is == 1 %}
-                {{ time_is() }}
+              {% if call_get_dressed == 1 %}
+                {{ get_dressed() }}
               {% endif %}
 
-              {% if call_lightning_alert == 1 %}
-                {{ lightning_alert() }}
+              {% if call_brush_teeth == 1 %}
+                {{ brush_teeth() }}
               {% endif %}
 
-              {% if call_lightning_clear == 1 %}
-                {{ lightning_clear() }}
+              {% if call_late_school == 1 %}
+                {{ late_school() }}
               {% endif %}
 
-              {% if call_iss == 1 %}
-                {{ iss() }}
-              {% endif %}
-
-              {% if call_print_complete == 1 %}
-                {{ print_complete() }}
-              {% endif %}
-
-              {% if call_house_party_protocol_enabled == 1 %}
-                {{ house_party_protocol_enabled() }}
-              {% endif %}
-
-              {% if call_house_party_protocol_disabled == 1 %}
-                {{ house_party_protocol_disabled() }}
-              {% endif %}
-
-              {{ welcome_home }}
-
-              {{ speech_message }}
-
-              {% if call_snark_doorbell == 1 %}
-                {{ snark_doorbell() }}
-              {% endif %}
-
-              {% if call_snark_door_motion == 1 %}
-                {{ snark_door_motion() }}
-              {% endif %}
-
-              {% if call_snark_door_open == 1 %}
-                {{ snark_door_open() }}
+              {% if call_school_pick_up == 1 %}
+                {{ school_pick_up() }}
               {% endif %}
 
             {%- endmacro -%}
