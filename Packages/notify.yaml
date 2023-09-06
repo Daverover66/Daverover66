@@ -637,6 +637,39 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro fridge_warning() %}
+              <p>
+              {{ [ 
+                  '<prosody pitch="high">Pardon me, sir.</prosody> The fridge appears to be open. Did someone forget to close it?',
+                  '<prosody pitch="high">Excuse me, sir.</prosody> Has anyone noticed that it is getting colder? Perhaps it is something to do with the fridge door being open',    
+                  '<prosody pitch="high">Pardon me, madam.</prosody> Would whoever was last in the fridge please check the door. It appears to be open',      
+                  '<prosody pitch="high">Pardon me, madam.</prosody> The automatic fridge door closing system seems to have failed. Manual operation has been enabled, which means you need to close it yourself'      
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro fridge_warning_again() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Pardon my continued interruptions, but the fridge door is still open. Someone needs to close it before the food starts to go off?</prosody>', 
+                  '<prosody pitch="high">Pardon me interrupting again. Has anyone noticed that it is still getting colder? Perhaps it is something to do with the fridge door still being open</prosody>', 
+                  '<prosody pitch="high">Sorry to harp on about this, but whoever was last in the fridge needs to check the door. It appears to be still open</prosody>', 
+                  '<prosody pitch="x-high">Alert, Alert, Alert. Having informed you once that the automatic fridge door closing system seems to have failed, manual operation also seems to have failed. Unless you want a very smelly fridge, you need to close it yourself</prosody>', 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro fridge_closed() %}
+              <p>
+              {{ [
+                  '<prosody pitch="low">Thank you for closing the fridge door. You saved all the food</prosody>',
+                  '<prosody pitch="low">Well, that was close, but the fridge door is secure once more. I can already feel it getting warmer</prosody>',
+                  '<prosody pitch="low">Attention! Thank goodness the automatic fridge door closing systems self repair mechanism stepped in to save the food in the fridge</prosody>',
+                  '<prosody pitch="low">Pardon me. You will be pleased to know that we can all relax again, safe in the knowledge that the fridge is a place of cold once more</prosody>'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
