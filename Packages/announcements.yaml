@@ -42,7 +42,7 @@ input_datetime:
   #  has_time: true
 
 ################################
-# Announcment Automation - fires at the time of the above input_datetimes
+# Announcement Automation - fires at the time of the above input_datetimes
 ################################
 automation:
   #- id: 81bee5ee-6820-4626-aebf-3deb8de69e4d
@@ -242,8 +242,8 @@ automation:
   ###########################################
   #    Boys Bedtime                         #
   ########################################### 
-  - id: boys_bedtime_schoolnight
-    alias: Boys Bedtime Schoolnight
+  - id: boys_bedtime
+    alias: Boys Bedtime
     trigger:
       - platform: time 
         at: input_datetime.school_night
@@ -262,28 +262,27 @@ automation:
           - condition: state
             entity_id: calendar.school_holidays
             state: "off"
-         sequence:
-           - service: script.status_annc
-             data:
-               where: living_room
-               call_jetsons_chime: 1
-               call_boys_time_for_bed: 1
-           - service: input_boolean.turn_on
-             data: {}
-             target:
-               entity_id: input_boolean.kids_bedtime_announcement_played
-       - conditions:
-           - condition: trigger
-             id: Non School Bedtime
-           - condition: or
-             conditions:
-               - condition: state
-                 entity_id: binary_sensor.schoolnight
-                 state: "off"
-               - condition: state
-                 entity_id: calendar.school_holidays
-                 state: "on"
-                 alias: Confirm School Holiday is on
+          sequence:
+            - service: script.status_annc
+              data:
+                where: living_room
+                call_jetsons_chime: 1
+                call_boys_time_for_bed: 1
+            - service: input_boolean.turn_on
+              data: {}
+              target:
+                entity_id: input_boolean.kids_bedtime_announcement_played
+        - conditions:
+            - condition: trigger
+              id: Non School Bedtime
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: binary_sensor.schoolnight
+                  state: "off"
+                - condition: state
+                  entity_id: calendar.school_holidays
+                  state: "on"
           sequence:
             - service: script.status_annc
               data:
