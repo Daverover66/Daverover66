@@ -704,7 +704,27 @@ script:
               </p>
             {% endmacro %}
 
-             
+            {% macro garage_dehumidifier_full() %}
+              <p> 
+              {{ [
+                  '<prosody pitch="high">Excuse me. This is an important announcement for the man of the house</prosody>. The garage dehumidifier water tray is full. <prosody pitch="x-high">Please empty it</prosody>',   
+                  '<prosody pitch="high">Pardon my interruption</prosody>. I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
+                  '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
+                  '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
+                  ] | random }} 
+              </p>
+            {% endmacro %}
+
+            {% macro garage_dehumidifier_emptied() %}
+              <p> 
+               {{ [  
+                   '<prosody pitch="low">Well now. Whoever emptied the garage dehumidifier, thank you.</prosody>',   
+                   '<prosody pitch="low">I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.</prosody>',   
+                   '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
+                   '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
+                   ] | random }}
+              </p>
+            {% endmacro %}
 
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
@@ -805,8 +825,12 @@ script:
                 {{ freezer_closed() }}
               {% endif %}
 
-               {% if call_calendar_event == 1 %}
-                {{ calendar_event() }}
+              {% if call_garage_dehumidifier_full == 1 %}
+                {{ garage_dehumidifier_full() }}
+              {% endif %}
+
+              {% if call_garage_dehumidifier_emptied == 1 %}
+                {{ garage_dehumidifier_emptied() }}
               {% endif %}
 
               {%- endmacro -%}
