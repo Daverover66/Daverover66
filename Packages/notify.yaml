@@ -704,6 +704,8 @@ script:
               </p>
             {% endmacro %}
 
+             
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -801,6 +803,10 @@ script:
 
               {% if call_freezer_closed == 1 %}
                 {{ freezer_closed() }}
+              {% endif %}
+
+               {% if call_calendar_event == 1 %}
+                {{ calendar_event() }}
               {% endif %}
 
               {%- endmacro -%}
