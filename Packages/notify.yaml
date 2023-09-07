@@ -10,7 +10,7 @@ oo##############################################################################
 #   @date                   :   05/12/2022
 #
 #   @further modified by    :   Dave Forrester (@Daverover66)
-#   @date                   :   02/09/2023
+#   @date                   :   07/09/2023
 ###############################################################################
 
 ###############################################################################
@@ -773,6 +773,30 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro dinner_weekday() %}
+              <p>
+              {{ [
+                  'Would you please head to the kitchen where mummy has prepared a delicious meal', 
+                  'Food is now being served in the kitchen. Get it while it is hot', 
+                  'If you are hungry, the wait is over. Dinner is on the kitchen table', 
+                  'I thought you might be interested to hear that it is time to head to the kitchen. When you get there, you might just find some food on the table',
+                  'My tummy is rumbly. Please rumble on to the kitchen for some, <prosody pitch="high">yummy</prosody> food'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro dinner_sunday() %}
+              <p>
+              {{ [
+                  'Would you mind please making your way to the Dining Room where <prosody pitch="high">Gemma</prosody> has prepared a delicious Sunday dinner', 
+                  'I thought you might be interested to hear that dinner is now being served in the Dining Room. Get it while it is hot', 
+                  'I dont know about you, but <prosody pitch="high">I am hungry</prosody>. If you are hungry, the wait is over. Dinner is on the Dining Room table', 
+                  'I have been informed by our head chef that it is time to head to the Dining Room. When you get there, you might just find that dinner is on the table',
+                  'My tummy feels a bit rumbly. Please rumble on to the Dining Room for some <prosody pitch="high">yummy</prosody> dinner'
+                  ] | random }}
+              </p>
+            {% endmacro %}  
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -894,6 +918,14 @@ script:
 
               {% if call_coffee_ready == 1 %}
                 {{ coffee_ready() }}
+              {% endif %}
+
+              {% if call_dinner_sunday == 1 %}
+                {{ dinner_sunday() }}
+              {% endif %}
+
+              {% if call_dinner_weekday == 1 %}
+                {{ dinner_weekday() }}
               {% endif %}
 
               {%- endmacro -%}
