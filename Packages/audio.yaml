@@ -71,7 +71,32 @@ automation:
     initial_state: true
     trigger:
       - platform: state
-        entity_id: input_boolean.audible_notifications
+        entity_id: binary_sensor.quiet_time_boys
+        to: "on"
+    action:
+      - service: media_player.volume_set
+        data:
+          entity_id:
+            - media_player.kitchen_echo_show
+            - media_player.dave_s_2nd_echo_pop
+               # living room #
+            - media_player.dave_s_echo_pop
+               # dining room #
+            - media_player.main_bedroom_dot
+            - media_player.guest_bedroom_echo_dot
+            - media_player.dave_s_2nd_echo_pop_2
+              # office #
+            - media_player.living_room_dot
+              # jamies room #
+            - media_player.seans_room_dot
+          volume_level: "{{ states('input_number.alexa_volume_level_low') | float(0) }}"
+
+  - id: d5fe0a64-9012-4446-b946-cbcafb2c0728
+    alias: Notification Volume Normal
+    initial_state: true
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.quiet_time_boys
         to: "off"
     action:
       - service: media_player.volume_set
@@ -90,31 +115,6 @@ automation:
               # jamies room #
             - media_player.seans_room_dot
           volume_level: "{{ states('input_number.alexa_volume_level_default_all') | float(0) }}"
-
-  - id: d5fe0a64-9012-4446-b946-cbcafb2c0728
-    alias: Notification Volume Normal
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: input_boolean.audible_notifications
-        to: "on"
-    action:
-      - service: media_player.volume_set
-        data:
-          entity_id:
-            - media_player.kitchen_echo_show
-            - media_player.dave_s_2nd_echo_pop
-               # living room #
-            - media_player.dave_s_echo_pop
-               # dining room #
-            - media_player.main_bedroom_dot
-            - media_player.guest_bedroom_echo_dot
-            - media_player.dave_s_2nd_echo_pop_2
-              # office #
-            - media_player.living_room_dot
-              # jamies room #
-            - media_player.seans_room_dot
-          volume_level: "{{ states('input_number.alexa_volume_level_announcements') | float(0) }}"
 
   - id: 28c0e7a6-4024-48c9-a422-8b8ffc3a86d1
     alias: Set Last Alexa Called Time
