@@ -749,6 +749,30 @@ script:
                </p>
             {% endmacro %}  
 
+            {% macro coffee_timer() %}
+              <p>
+              {{ [
+                  'I have started a 4 minute coffee timer. It starts, now',
+                  'I have begun counting to 240. <prosody pitch="high">When I am done, your coffee will be ready</prosody>',
+                  '<prosody pitch="high">Ready, steady, 4 minute coffee timer.</prosody><break time="2s"/><prosody pitch="x-high">Go</prosody>',
+                  'When the Earth has rotated by 1 degree, <prosody pitch="high">your coffee will be ready</prosody>',
+                  'In 4 minutes time, <prosody pitch="high">your caffiene fix for today will be <break time="2s"/>ready.</prosody>'
+                  ] | random  }}
+              </p>
+           {% endmacro %} 
+
+           {% macro coffee_ready() %}
+              <p>
+              {{ [  
+                  'Your coffee is ready. How would you like it?',          
+                  '<prosody pitch="low">Ah</prosody>, smell that coffee. Get it while its hot',
+                  'Your coffee is ready for pouring.',                    
+                  'Bing Bong! Coffee time!',          
+                  'Coffee, coffee everywhere and not a drop to drink. <prosody pitch="high">Only kidding</prosody>. Your coffee is ready',    
+                  ] | random  }}
+              </p>
+            {% endmacro %}
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -862,6 +886,14 @@ script:
 
               {% if call_mc_side_not_set == 1 %}
                 {{ mc_side_not_set() }}
+              {% endif %}
+
+              {% if call_coffee_timer == 1 %}
+                {{ coffee_timer() }}
+              {% endif %}
+
+              {% if call_coffee_ready == 1 %}
+                {{ coffee_ready() }}
               {% endif %}
 
               {%- endmacro -%}
