@@ -670,6 +670,40 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro freezer_warning() %}
+              <p>
+              {{ [  
+                  '<prosody pitch="high">Pardon me sir.</prosody> The freezer door appears to be open. Did someone forget to close it?',          
+                  '<prosody pitch="high">Excuse me madam. Has anyone noticed that it is getting colder? Perhaps it is something to do with the freezer door being open</prosody>',              
+                  '<prosody pitch="high">Pardon me sir. Would whomever was last in the freezer needs please check the door. It appears to be open</prosody>',    
+                  '<prosody pitch="high">Excuse me sir. The automatic freezer door clozing system seems to have failed. Manual operation has been enabled, which means you need to close it yourself</prosody>',     
+                  '<prosody pitch="high">Burururururururururur.</prosody> Is that ice creeping across the floor? Ah yes, the freezer door is open. Someone needs to close it please'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro freezer_warning_again() %}
+              <p>
+              {{ [
+                  '<prosody pitch="x-high">Alert, Alert, Alert.  The freezer door is still open, despite my previous notification. Will someone please close it before there is a puddle on the floor</prosody>',   
+                  '<prosody pitch="x-high">Pardon my continued interruptions. Has anyone noticed that it still feels like a summer day in antartica? Perhaps it is something to do with the freezer door still being open</prosody>',  
+                  '<prosody pitch="x-high">Excuse me. The automatic freezer door closing system seems to have failed in spectacular fashion. Manual operation has been engaged, which means you need to close it yourself</prosody>',  
+                  '<prosody pitch="x-high">Okay. Here is my honest assessment of our current predicament. The freezer is not going to close itself. Operation close the goddamn freezer door has commenced</prosody>'   
+                  ] | random }}
+              </p>
+             {% endmacro %}
+
+            {% macro freezer_closed() %}
+              <p> 
+              {{ [
+                  '<prosody pitch="low">Thank you for closing the freezer door. You saved all the food</prosody>',      
+                  '<prosody pitch="low">Well, that was close, but the feezer door is secure once more. I can already feel it getting warmer</prosody>',
+                  '<prosody pitch="low">Attention! Thank goodness the automatic freezer door closing systems self repair mechanism stepped in to prevent a massive puddle on the floor</prosody>',
+                  '<prosody pitch="low">Pardon me. You will be pleased to know that we can all relax again, safe in the knowledge that the freezer is the only sub zero place in the house</prosody>'     
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -756,6 +790,18 @@ script:
               {% if call_fridge_closed == 1 %}
                 {{ fridge_closed() }}
               {% endif %} 
+
+              {% if call_freezer_warning == 1 %}
+                {{ freezer_warning() }}
+              {% endif %}
+
+              {% if call_freezer_warning_again == 1 %}
+                {{ freezer_warning_again() }}
+              {% endif %}
+
+              {% if call_freezer_closed == 1 %}
+                {{ freezer_closed() }}
+              {% endif %}
 
               {%- endmacro -%}
 
