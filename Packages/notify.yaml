@@ -1,4 +1,4 @@
-###############################################################################
+oo###############################################################################
 #   @author                 :   Jeffrey Stone
 #   @date                   :   02/19/2019
 #   @package                :   Notify
@@ -726,6 +726,29 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro home_battery_problem() %}
+              <p> 
+              {{ [
+                  'There is a problem with the home battery. Quickly. To the garage to rectify it.',
+                  'Quickly. Unless you want to consume terrawatts of energy, I would suggest investigating why the home battery has gone to sleep.',
+                  'My monitoring systems have detected an issue with the home battery.  Please investigate immediately.',
+                  'Sensors have detected a reversing of the polarity of the neutron flow. My fuzzy logic is a tad fuzzy today, but I think there may be a problem with the home battery.'
+                  ] | random }}
+               </p>
+            {% endmacro %}
+
+            {% macro mc_side_not_set() %}
+              <p> 
+              {{ [
+                  'I regret to inform you that this side of the magic cube has not yet been programmed. Perhaps you should try a different side',
+                  'Please try another side as this one appears to do nothing',  
+                  'I believe you may have inadvertently selected a side does nothing, for now',  
+                  '<prosody pitch="x-high">Warning</prosody>. <prosody pitch="high">This cube will self destruct in 5 seconds 
+                   <break time="1s"/>, 5 <break time="1s"/>, 4 <break time="1s"/>, 3</prosody>, <break time="1s"/>2<break time="1s"/>, <prosody pitch="low">1 <break time="1s"/>.</prosody> <prosody pitch="x-high">Ha ha,<break time="1s"/>only kidding</prosody>'
+                  ] | random }}
+               </p>
+            {% endmacro %}  
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -831,6 +854,14 @@ script:
 
               {% if call_garage_dehumidifier_emptied == 1 %}
                 {{ garage_dehumidifier_emptied() }}
+              {% endif %}
+
+              {% if call_home_battery_problem == 1 %}
+                {{ home_battery_problem() }}
+              {% endif %}
+
+              {% if call_mc_side_not_set == 1 %}
+                {{ mc_side_not_set() }}
               {% endif %}
 
               {%- endmacro -%}
