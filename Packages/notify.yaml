@@ -538,7 +538,10 @@ script:
                   'I beg your pardon, ',
                   '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
                   'I am sorry to interrupt, but. ',
-                  'Just a quick heads up, '
+                  'Just a quick heads up, ',
+                  '<prosody pitch="high">Information, </prosody>',
+                  'Pardon me for intruding on your relaxation once more.',
+                  'Excuse me for once again breaking the silence.'
                   ] | random }}
               </p>
             {% endmacro %}
@@ -797,6 +800,53 @@ script:
               </p>
             {% endmacro %}  
 
+            {% macro media_system_on() %}
+              <p>
+              {{ [
+                  'media systems have been activated',
+                  '<prosody pitch="high">Hailing frequencies</prosody> <break time="1s"/>open',
+                  'The televisual devices have been turned on',
+                  'I have turned on the gogglebox for your televisual viewing experience',
+                  'I have activated the multimedia viewing apparatus, to help while away the time?'
+                  ] | random  }}
+              </p>
+            {% endmacro %}
+
+             {% macro media_system_off() %}
+              <p>
+              {{ [
+                  'media systems have been deactivated?',
+                  '<prosody pitch="high">Hailing frequencies</prosody><break time="1s"/>closed',
+                  'The kitchen televisual devices have been turned off',
+                  'I believe it might be time to see what is going on in the real world',
+                  'now that you have had your fill of tv, might I suggest a return to reality'
+                  ] | random   }}
+              </p>
+            {% endmacro %}
+
+             {% macro washing_machine_done() %}
+              <p>
+              {{ [
+                  'The washing machine has completed its cycle. Better get the washing hung up to dry',   
+                  'I have detected a reduction in the power consumption of the washing machine.  My fuzzy logic circuit has determined that means its finished',   
+                  'My sensors have detected a reduction in the rotational velocity of the washing machine. My artificially intuitive logic system has determined that now might be the optimal time to hang it up to dry',   
+                  'The washing machine has finished its cycle. It has cycled quite a long way and is quite tired after its exertions. I would hang the washing out to dry, but I dont have any arms. Or legs.  So I guess its up to you'     
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+             {% macro washing_machine_done_again() %}
+              <p>
+              {{ [
+                  'The washing is still in the machine. Better get it out before it starts to smell, and I am sure you do not want that',   
+                  'My motion sensors have detected zero activity since I last informed you that the washing was done. Please engage your glutes and get off your backside as the washing wont hang itself up',   
+                  'Right, listen up humans, heres the deal. I tell you the washing is done, and you hang it up.  Someone, is not keeping their side of the deal',   
+                  'There is a lovely breeze blowing through the garden right now and I should be hearing the pleasant flap flap of washing in the breeze. Unfortunately my auditory sensors appear to be malfunctioning and I hear nothing. Perhaps the washing line has not been deployed.'     
+                  ] | random }}
+              </p>
+            {% endmacro %}
+            
+
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
               {%- for item in data.split("\n")  if item | trim != "" -%}
@@ -926,6 +976,22 @@ script:
 
               {% if call_dinner_weekday == 1 %}
                 {{ dinner_weekday() }}
+              {% endif %}
+              
+              {% if call_media_system_on == 1 %}
+                {{ media_system_on() }}
+              {% endif %}
+
+              {% if call_media_system_off == 1 %}
+                {{ media_system_off() }}
+              {% endif %}
+
+              {% if call_washing_machine_done == 1 %}
+                {{ washing_machine_done() }}
+              {% endif %}
+
+              {% if call_washing_machine_done_again == 1 %}
+                {{ washing_machine_done_again() }}
               {% endif %}
 
               {%- endmacro -%}
