@@ -8,3 +8,112 @@
 #   @date           :   
 ###############################################################################
 
+###########################
+#     Helpers             #
+###########################
+
+###########################
+#     Sensors             #
+###########################
+
+
+###########################
+#     Automations         #
+###########################
+automation:
+alias: Living Room Lights
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.living_room_fp2_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Light On With Presence
+  - platform: state
+    entity_id:
+      - binary_sensor.living_room_fp2_presence_sensor_1
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Light Off With No Presence
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    id: Light On With Low Light
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    id: Light Off With Good Light
+condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On With Presence
+            alias: Light on with presence
+          - condition: numeric_state
+            entity_id: sensor.living_room_fp2_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 30
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off With No Presence
+            alias: Light off with no presence
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On With Low Light
+            alias: Light on with low light and presence
+          - condition: state
+            entity_id: input_boolean.living_room_occupied
+            state: "on"
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 30
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off With Good Light
+            alias: Light off with good light
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.corner_lamp
+                - light.standard_lamp
+mode: restart
+
+###########################
+#     Scripts             #
+###########################
