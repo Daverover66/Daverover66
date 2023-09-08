@@ -30,11 +30,11 @@ trigger:
     id: Light Off With No Presence
   - platform: numeric_state
     entity_id: sensor.living_room_fp2_light_sensor_light_level
-    below: 20
+    below: input_number.low_light_threshold
     id: Light On With Low Light
   - platform: numeric_state
     entity_id: sensor.living_room_fp2_light_sensor_light_level
-    above: 80
+    above: input_number.upper_light_threshold_level
     id: Light Off With Good Light
 condition:
   - condition: state
@@ -49,7 +49,7 @@ action:
             alias: Light on with presence
           - condition: numeric_state
             entity_id: sensor.living_room_fp2_light_sensor_light_level
-            below: 20
+            below: input_number.low_light_threshold
         sequence:
           - service: light.turn_on
             data:
@@ -101,3 +101,4 @@ action:
                 - light.corner_lamp
                 - light.standard_lamp
 mode: restart
+
