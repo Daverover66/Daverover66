@@ -469,7 +469,7 @@ script:
       - delay:
           hours: 0
           minutes: 0
-          seconds: 40
+          seconds: 55
           milliseconds: 0
       - service: media_player.play_media
         data:
