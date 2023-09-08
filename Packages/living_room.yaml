@@ -21,6 +21,11 @@
 #     Automations         #
 ###########################
 automation:
+  - id: living_room_lights
+    alias: Living Room Lights
+    initial_state: true
+    mode: restart
+    trigger:
 alias: Living Room Lights
 description: ""
 trigger:
@@ -112,7 +117,6 @@ action:
               entity_id:
                 - light.corner_lamp
                 - light.standard_lamp
-mode: restart
 
 ###########################
 #     Scripts             #
