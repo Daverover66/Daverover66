@@ -88,7 +88,39 @@ mqtt:
       payload_available: "online"
       payload_not_available: "offline"
 
+
+
 template:
+  - binary_sensor:
+    - name: "Daves Samsung Galaxy Home"
+      unique_id: daves_samsung_galaxy_home
+      state: >
+        {{ states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+    - name: "Gems Samsung Galaxy Home"
+      unique_id: gems_samsung_galaxy_home
+      state: >
+        {{ states('sensor.sm_s901b_wifi_connection') == "ForresterQ5G" or states('sensor.sm_s901b_wifi_connection') == "ForresterQ" }}
+    - name: "Seans Samsung Tablet Home"
+      unique_id: seans_samsung_galaxy_home
+      state: >
+        {{ states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+    - name: "Jamies Samsung Tablet Home"
+      unique_id: jamies_samsung_galaxy_home
+      state: >
+        {{ states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ5G" or states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ"}}
+    - name: "Dave Home"
+      unique_id: dave_home 
+      state: >-
+        {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_s22fe5g', 'home')}}
+    - name: "Gem Home"
+      unique_id: gem_home 
+      state: >- 
+        {{ is_state('device_tracker.sm_s901b', 'home') }}
+    - name: "Family Home"
+      unique_id: family_home 
+      state: >- 
+        {{ is_state('binary_sensor.daves_samsung_galaxy_home','on') or  
+          is_state('binary_sensor.gems_samsung_galaxy_home','on') }}
   - sensor:
       - name: "Dave"
         unique_id: dave_location
