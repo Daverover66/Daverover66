@@ -102,7 +102,7 @@
         {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
           You have {{ e_list | count }}
         {% if (e_list | count) >1 %} 
-          events in your calendar today 
+          events in your calendar today. 
         {% else %} 
           event in your calendar today. 
         {% endif %}
