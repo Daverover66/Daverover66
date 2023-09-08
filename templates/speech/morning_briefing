@@ -14,7 +14,7 @@
         {{ [
             'Today is ',
             'In case you have not been keeping track today is',
-            'Do you know what day of the week it is? No? Well today is',
+            'Do you know what day of the week it is? <prosody pitch="high">No?</prosody> Well today is',
             'This may or may not be good news, but today is'
               ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }}. The time is {{ now().strftime("%I:%M %p") }}.
       {% else %} 
@@ -99,7 +99,7 @@
       {% endif %} 
     </p>
     <p>
-        {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
+       {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
           You have {{ e_list | count }}
         {% if (e_list | count) >1 %} 
           events in your calendar today. 
@@ -108,8 +108,13 @@
         {% endif %}
         {%- for e in e_list %}
           {{ ['Then you have ','Next is ', 'Followed by ']|random if not loop.first else ['First up is ', 'First is ']|random}}
-          {{- e.summary }} at {{ (e.start|as_datetime).hour}}:{{ (e.start|as_datetime).minute}} {{-[' for ', '  and lasting for ', ' which lasts ']|random}}{{- ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round }} hour.
-        {%- endfor %}
+          {{- e.summary }}, starting at {{ (as_timestamp(e.start|as_datetime)) | timestamp_custom ('%H:%M %p')}}, {{-[' for ', '  and lasting for ', ' which lasts ']|random}}{{- ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round }} 
+          {%- if  ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round >1 -%}
+            hours.
+          {%- else -%}
+            hour
+          {% endif %}
+        {%- endfor %} 
     </p>
 
       {%- endmacro-%}
