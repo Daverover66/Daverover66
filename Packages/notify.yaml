@@ -461,6 +461,18 @@ script:
               {{ states('sensor.room_audio') }}
             {% endif %}
           message: >-
+            {% macro boop() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
+            {% endmacro %}
+
+            {% macro inform_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
+            {% endmacro %}
+
+            {% macro jetsons_chime() %}
+              <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
+            {% endmacro %}
+            
             {% macro greeting() %}
               <p>
               {% if now().strftime('%H')|int < 12%}
@@ -488,23 +500,29 @@ script:
               </p>
             {% endmacro %}
 
+            {% macro interruption() %}
+              <p>
+              {{ [
+                  'Pardon me, ',
+                  '<prosody pitch="high">Excuse me,</prosody> ',
+                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
+                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
+                  'I beg your pardon, ',
+                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
+                  'I am sorry to interrupt, but. ',
+                  'Just a quick heads up, ',
+                  '<prosody pitch="high">Information, </prosody>',
+                  'Pardon me for intruding on your relaxation once more.',
+                  'Excuse me for once again breaking the silence.'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
             {% macro time_is() %}
               <p>
               It is {{ now().strftime("%I:%M %p") }}
               </p>
-            {% endmacro %}
-
-            {% macro boop() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/good-place-boop.mp3'/>
-            {% endmacro %}
-
-            {% macro inform_chime() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/youve-been-informed.mp3'/>
-            {% endmacro %}
-
-            {% macro jetsons_chime() %}
-              <audio src='https://heder-homeassistant.s3.amazonaws.com/jetsons-tune.mp3'/>
-            {% endmacro %}
+            {% endmacro %}            
 
             {% macro confirmation() %}
               <p>
@@ -526,25 +544,7 @@ script:
               'There are still terabytes of calculations required before I can.<break time="1s"/> <prosody pitch="high">Oh, whatever.</prosody>'
               ] | random }}
               </p>
-            {% endmacro %}
-
-            {% macro interruption() %}
-              <p>
-              {{ [
-                  'Pardon me, ',
-                  '<prosody pitch="high">Excuse me,</prosody> ',
-                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
-                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
-                  'I beg your pardon, ',
-                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
-                  'I am sorry to interrupt, but. ',
-                  'Just a quick heads up, ',
-                  '<prosody pitch="high">Information, </prosody>',
-                  'Pardon me for intruding on your relaxation once more.',
-                  'Excuse me for once again breaking the silence.'
-                  ] | random }}
-              </p>
-            {% endmacro %}
+            {% endmacro %}  
 
             {% macro goodbye() %}
               <p>
