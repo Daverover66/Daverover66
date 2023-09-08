@@ -8,16 +8,16 @@
 #   @date                 :   05/12/2022
 #  
 #   @further modified by  :   Dave Forrester (@Daverover66)
-#   @date                 :   02/09/2023
+#   @date                 :   08/09/2023
 ###############################################################################    
 
 input_datetime:
   last_time_home_dave:
-    name: Chris Last Seen
+    name: Dave Last Seen
     has_date: true
     has_time: true
   last_time_home_gem:
-    name: Steven Last Seen
+    name: Gem Last Seen
     has_date: true
     has_time: true
 #  last_time_home_kaitlyn:
