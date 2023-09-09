@@ -148,6 +148,8 @@ mqtt:
   sensor:
     - name: "Room With Alexa Presence"
       state_topic: "house/presence/current_room"
+    - name: "Room Presence"
+      state_topic: "house/presence/backup_room
 
 template:
   ### Room audio for Alexa ###
