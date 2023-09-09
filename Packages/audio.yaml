@@ -65,6 +65,11 @@ automation:
           topic: house/presence/current_room
           payload: "{{ states('sensor.room_audio') }}"
           retain: true
+      - service: mqtt.publish
+        data:
+          topic: house/presence/backup_room
+          payload: "{{ states('input_text.room_presence') }}"
+          retain: true
 
   - id: 8a2711f5-a034-4df0-ba67-4b8f85ceaaee
     alias: Notification Volume Dim
