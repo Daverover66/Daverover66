@@ -1,3 +1,8 @@
+
+group:
+
+
+
 automation:
 #########################################################################
 # Living Room lights turn on if dark and no other lights already on.    #
