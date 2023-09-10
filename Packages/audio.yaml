@@ -178,11 +178,11 @@ template:
                   dave_s_2nd_echo_pop
                 {% elif sensor.name == 'Main Bedroom All Areas' %}
                   main_bedroom_dot
-                {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
+                {% elif sensor.name == 'Dining Room Presence Sensor Motion' %}  
                   dave_s_echo_pop
                 {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
                   guest_bedroom_echo_dot
-                {% elif sensor.name == 'Office Presence Sensor occupancy' %}
+                {% elif sensor.name == 'Office Presence Sensor Motion' %}
                   {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
                     guest_bedroom_echo_dot
                   {% else %}
