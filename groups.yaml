@@ -2,6 +2,10 @@
 #                All Groups                     #
 #################################################
 
+#################################################
+#            Presence and Occupancy             #
+#################################################
+
 family:
   name: Family
   entities:
@@ -37,13 +41,43 @@ occupancy:
     - binary_sensor.daves_samsung_galaxy_home
     - binary_sensor.gems_samsung_galaxy_home
 
+#################################################
+#                   Lighting                    #
+#################################################
 
+living_room_lights:
+  name: "Living Room Lights"
+  icon: mdi:bulb
+  entities:
+    - light.living_room_lights
+    - light.corner_lamp
+
+kitchen_lights:
+  name: "Kitchen Lights"
+  icon: mdi:bulb
+  entities:
+    - light.kitchen_lights_2
+
+main_bedroom_lights:
+  name: "Main Bedroom Lights"
+  icon: mdi:bulb
+  entities:
+    - switch.daddys_bedside_lamp_socket_1
+    - switch.mummys_bedside_lamp_socket_1
+ 
+guest_bedroom_lights:
+  name: "Guest Bedroom Lights"
+  icon: mdi:bulb
+  entities:
+    - light.guest_bedroom_bedside_lamp_left
+    - light.guest_bedroom_bedside_lamp_right
+    
 lamps:
   name: "Lamps"
   icon: mdi:lamp
   entities:
     - light.corner_lamp
-    - switch.daddys_bedside_lamp_socket_1e
+    - switch.daddys_bedside_lamp_socket_1
     - switch.mummys_bedside_lamp_socket_1
     - light.standard_lamp
     - light.guest_bedroom_bedside_lamp_left
