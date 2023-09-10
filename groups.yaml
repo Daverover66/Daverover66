@@ -2,4 +2,89 @@
 #                All Groups                     #
 #################################################
 
-Living Room Lights:
+family:
+  name: Family
+  entities:
+    - person.david_forrester
+    - person.gem_forrester
+    - sensor.dave_is_in_da_hoose
+    - sensor.gem_is_in_da_hoose
+
+
+room_presence:
+  name: Room Presence
+  icon: mdi:location-enter
+  entities:
+    - input_boolean.living_room_occupied
+    - input_boolean.room_occupied_dining_room
+    - input_boolean.room_occupied_garage
+    - input_boolean.room_occupied_guest_bedroom
+    - input_boolean.room_occupied_hallway
+    - input_boolean.room_occupied_jamie_s_room
+    - input_boolean.room_occupied_kitchen
+    - input_boolean.room_occupied_main_bedroom
+    - input_boolean.room_occupied_sean_s_room
+    - input_boolean.room_occupied_office
+    - input_boolean.room_occupied_cloakroom
+    - input_boolean.room_occupied_main_bathroom
+    - input_boolean.room_occupied_jack_jill
+    - input_boolean.upper_landing_occupied
+
+occupancy:
+  name: Occupancy
+  icon: mdi:home
+  entities:
+    - binary_sensor.daves_samsung_galaxy_home
+    - binary_sensor.gems_samsung_galaxy_home
+
+
+lamps:
+  name: "Lamps"
+  icon: mdi:lamp
+  entities:
+    - light.corner_lamp
+    - switch.daddys_bedside_lamp_socket_1e
+    - switch.mummys_bedside_lamp_socket_1
+    - light.standard_lamp
+    - light.guest_bedroom_bedside_lamp_left
+    - light.guest_bedroom_bedside_lamp_right
+
+lights:
+  name: "Lights"
+  icon: mdi:lightbulb-group
+  entities:
+    - switch.loft_light
+    - switch.under_shelf_lights_socket_1
+    - switch.cloakroom_light
+    - light.living_room_lights
+    - light.kitchen_lights_2
+    - switch.garage_lights
+    - light.landing_lights_2
+
+sockets:
+  name: "Sockets"
+  icon: mdi:power-socket-uk
+  entities:
+    - switch.under_shelf_lights_socket_1
+    - switch.kitchen_tablet_socket_1
+    - switch.ingrid_socket_1
+    - switch.ad_hoc_charging_socket_1
+    - switch.ad_hoc_tou_charging_2_socket_1
+    - switch.office_echo_pop_socket_1
+    - switch.home_assistant_server
+    - switch.bert_local
+    - switch.eric_local
+    - switch.ernie_local
+
+holiday_lights:
+  name: "Holiday Lights"
+  icon: mdi:lightbulb-multiple
+  entities:
+    - light.corner_lamp
+    - light.standard_lamp
+    - light.landing_lights_2
+    - light.guest_bedroom_bedside_lamp_left
+    - light.guest_bedroom_bedside_lamp_right
+    - light.kitchen_lights_2
+    - switch.daddys_bedside_lamp_socket_1
+    - switch.mummys_bedside_lamp_socket_1
