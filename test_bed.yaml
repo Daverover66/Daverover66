@@ -1,0 +1,24 @@
+automation:
+# MAster Bedroom lights turn on if dark and no other lights already on.
+  - id: e1cb39dc-0423-11eb-adc1-0242ac120002
+    alias: Master Bedroom Lights Needed
+    initial_state: true
+    trigger:
+    - entity_id: binary_sensor.master_bedroom_motion_occupancy
+      from: 'off'
+      platform: state
+      to: 'on'
+    condition:
+    - below: 20
+      condition: numeric_state
+      entity_id: sensor.master_bedroom_motion_illuminance_lux
+    - condition: time
+      after: '07:30:00'
+      before: '22:00:00'
+    - condition: state
+      entity_id: group.master_bedroom
+      state: 'off'
+    action:
+    - service: script.master_bedroom_lights_w_level  
+      data:
+        level: 255
