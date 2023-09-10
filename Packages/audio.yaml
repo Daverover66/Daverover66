@@ -162,56 +162,44 @@ template:
       - name: "Room Audio"
         unique_id: room_audio  
         state: |-
-          {% set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds %}
-          {% if last_alexa_called_seconds <= 60 %} 
-            {% set media_player = (states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')| selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first) %}
-            {% if is_state('binary_sensor.quiet_time_boys','off') %}
-              {{media_player}}
-            {% elif media_player == 'media_player.living_room_dot' or media_player == 'media_player.seans_room_dot' %}
-                dave_s_2nd_echo_pop
-            {% endif %}
-        
+          {%- set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds -%}
+          {%- if last_alexa_called_seconds <= 60 %} 
+            {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
           {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
             {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-            {% if is_state('binary_sensor.quiet_time_boys','off') %}
-              {% if sensor.name == 'Kitchen Presence Sensor all areas' %}
-                kitchen_echo_show
-              {% elif sensor.name == 'Living Room All Areas' %}
-                dave_s_2nd_echo_pop
-              {% elif sensor.name == 'Main Bedroom All Areas' %}
-                main_bedroom_dot
-              {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-                dave_s_echo_pop
-              {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-                guest_bedroom_echo_dot
-              {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-                {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
-                  guest_bedroom_echo_dot
+              {% if is_state('binary_sensor.quiet_time_boys','on') %}
+                {% if sensor.name == 'Main Bedroom All Areas' %}
+                  main_bedroom_dot
                 {% else %}
-                  dave_s_2nd_echo_pop_2 
-                {% endif %}
-              {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-                seans_room_dot
-              {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-                living_room_dot
-              {% endif %}
-            {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
-                kitchen_echo_show
-            {% elif sensor.name == 'Living Room All Areas' %}
-                dave_s_2nd_echo_pop
-            {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-                dave_s_2nd_echo_pop
-            {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-                dave_s_2nd_echo_pop     
-            {% elif sensor.name == 'Main Bedroom All Areas' %}
-                main_bedroom_dot
-            {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
-                dave_s_echo_pop
-            {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-                guest_bedroom_echo_dot
-            {% elif sensor.name == 'Office Presence Sensor occupancy' %}
-                dave_s_2nd_echo_pop_2        
-            {% endif %}
+                  dave_s_2nd_echo_pop
+                {%- endif %}
+              {% else %}
+                {% if sensor.name == 'Living Room All Areas' %}
+                  dave_s_2nd_echo_pop
+                {% elif sensor.name == 'Main Bedroom All Areas' %}
+                  main_bedroom_dot
+                {% elif sensor.name == 'Dining Room Presence Sensor occupancy' %}  
+                  dave_s_echo_pop
+                {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
+                  guest_bedroom_echo_dot
+                {% elif sensor.name == 'Office Presence Sensor occupancy' %}
+                  {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
+                    guest_bedroom_echo_dot
+                  {% else %}
+                    dave_s_2nd_echo_pop_2 
+                  {%- endif %}
+                {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
+                  seans_room_dot
+                {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
+                  living_room_dot
+                {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
+                  kitchen_echo_show                     
+                {%- endif %}
+             {%- endif %}
+          {% elif is_state('media_player.sky_q_main', 'on') %}
+            dave_s_2nd_echo_pop
+          {% elif is_state('media_player.sky_q_kitchen_mini_2', 'on') %}
+            kitchen_echo_show
           {% else %}
             {{ states('sensor.room_presence_for_alexa') }}        
           {% endif %}
