@@ -30,3 +30,15 @@ automation:
     - service: script.lights_w_level  
       data:
         level: 255
+
+script:
+  lights_w_level:
+  alias: Lights with Level
+  sequence:
+  - service: light.turn_on
+    entity_id: 
+    data:
+      brightness: '{{ level | int }}'
+      color_temp: 369
+  mode: single
+  
