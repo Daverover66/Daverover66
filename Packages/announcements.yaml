@@ -211,7 +211,7 @@ automation:
     trigger:
       - platform: state
         entity_id:
-          - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+        - binary_sensor.kitchen_presence_sensor_presence_sensor_1
         from: "off"
         to: "on"
         id: presence
@@ -237,6 +237,9 @@ automation:
           - condition: state
             entity_id: input_boolean.morning_briefing_played
             state: 'off'
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: 'on'
           sequence:
           - service: script.morning_briefing
     
