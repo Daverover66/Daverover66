@@ -127,6 +127,8 @@ automation:
 
   - id: smart_button_downstairs_1
     alias: Smart Button Downstairs 1 Automations
+    mode: restart
+    initial_state: true
     trigger:
       - platform: state
         entity_id:
@@ -233,7 +235,7 @@ automation:
                     entity_id: input_boolean.audible_notifications
                     state: "on"
                 then:
-                  - service: script.speech_engine
+                  - service: script.status_annc
                     data:
                       where: living_room
                       call_media_system_on: 1     
@@ -266,23 +268,10 @@ automation:
                     entity_id: input_boolean.audible_notifications
                     state: "on"
                 then:
-                  - service: notify.alexa_media_dave_s_2nd_echo_pop
+                  - service: script.status_annc
                     data:
-                      message: >-
-                        <voice name="Brian"><prosody rate="105%">{{ ['<prosody
-                        pitch="high">Pardon me sir</prosody>. The living room media
-                        system has been deactivated','<prosody pitch="high">Hailing
-                        frequencies</prosody><break time="2s"/> closed','<prosody
-                        pitch="high">Pardon me sir</prosody>. The living room
-                        televisual devices have been turned off','<prosody
-                        pitch="high">Pardon me sir</prosody>. Shall we see what is
-                        going on in the real world?','<prosody pitch="high">Pardon
-                        me sir</prosody>. I see that you have had your fill of tv.
-                        Its good to see that you have returned to reality']|random
-                        }}</prosody></voice>
-                      data:
-                        type: tts
-                        method: speak
+                      where: living_room
+                      call_media_system_off: 1
               - if:
                   - condition: state
                     entity_id: light.dreamview_g1_pro
@@ -331,8 +320,7 @@ automation:
                     data: {}
                     target:
                       entity_id: light.dreamview_g1_pro
-    mode: parallel
-    max: 10
+    
 
 ###########################
 #     Scripts             #
