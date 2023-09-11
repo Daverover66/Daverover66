@@ -1,0 +1,73 @@
+##################################################
+#              Current configuration             #     
+#                 September 2023                 #
+##################################################
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+  
+# Activate config editor
+config:
+
+http:
+  ip_ban_enabled: false
+  login_attempts_threshold: 5
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+###  Yaml file locations ######
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+alert: !include alerts.yaml
+template: !include templates.yaml
+group: !include groups.yaml
+sensor: !include sensors.yaml
+binary_sensor: !include binary_sensors.yaml
+mqtt: !include mqtt.yaml
+
+# location for sunrise and sunset times
+# latitude: !secret latitude
+# longitude: !secret longitude
+# unit_system: metric
+# time_zone: "europe/london" 
+
+### Packages locations ######
+homeassistant:
+  packages: !include_dir_named packages
+  media_dirs: 
+    media: /media
+
+  # Proximity sensor
+proximity:
+  home:
+    devices:
+      - device_tracker.daves_samsung_galaxy
+    tolerance: 50
+    unit_of_measurement: mi
+        
+# influx db
+#influxdb:
+#  host: a0d7b954-influxdb
+#  port: 8086
+#  database: homeassistant
+#  username: homeassistant
+#  password: homeassistant
+#  max_retries: 3
+#  default_measurement: state
+
+# influx db size
+
+
+# Alexa media player set up
+alexa_media:
+  accounts:
+    - email: !secret amazon_user
+      password: !secret amazon_password
+      url: "amazon.co.uk"
+      
