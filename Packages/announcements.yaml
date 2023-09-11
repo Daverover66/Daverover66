@@ -41,6 +41,28 @@ input_datetime:
   #  has_date: false
   #  has_time: true
 
+##################################################
+#   Toggles for confirmation or rate limiting    #
+##################################################
+
+input_boolean:
+ kids_bedtime_announcement_played:
+   name: Kids Bedtime Announcement Played
+   icon: mdi:bullhorn
+ morning_briefing_played:
+   name: Morning Briefing Played
+   icon: mdi:bullhorn
+ school_morning_announcement_played:
+   name: School Morning Announcement Played
+   icon: mdi:bullhorn
+ school_pick_up_announcement_played:
+   name: School Pick Up Announcement Played
+   icon: mdi:bullhorn
+ morning_briefing_played:
+   name: Morning Briefing Played
+   icon: mdi:bullhorn
+ 
+
 ################################
 # Announcement Automation - fires at the time of the above input_datetimes
 ################################
