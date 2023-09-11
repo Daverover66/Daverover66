@@ -12,6 +12,30 @@
 #     Helpers             #
 ###########################
 
+###########################################
+#     Input Number for threshold levels   #
+###########################################
+
+input_number:
+  upper_light_threshold_level:
+    name: Upper Light Threshold Level
+    initial: null
+    editable: true
+    icon: mdi:brightness-4
+    min: 60
+    max: 100
+    step: 1
+    mode: slider
+ low_light_threshold:
+   name: Low Light Threshold
+   initial: null
+   editable: true
+   icon: mdi:brightness-3
+   min: 0
+   max: 25
+   step: 1
+   mode: slider
+    
 ###########################
 #     Sensors             #
 ###########################
