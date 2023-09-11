@@ -201,5 +201,5 @@ template:
           {% elif is_state('media_player.sky_q_kitchen_mini_2', 'on') %}
             kitchen_echo_show
           {% else %}
-            {{ states('sensor.room_presence_for_alexa') }}        
+            {{ states('sensor.room_presence') }}        
           {% endif %}
