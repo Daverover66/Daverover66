@@ -1,0 +1,69 @@
+alias: Get Battery Output Limit
+description: Send a notification asking if the battery output should be limited overnight
+trigger:
+  - platform: time
+    at: "22:05:00"
+condition: []
+action:
+  - alias: Send a notification based on an input text helper
+    service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+    data:
+      message: |
+        Do you want to limit the battery output overnight?
+      title: Battery Output Limit
+      data:
+        actions:
+          - action: "YES"
+            title: "Yes"
+          - action: "NO"
+            title: "No"
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "YES"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "NO"
+    timeout:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') | float
+                }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 500
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 5000
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+mode: single
