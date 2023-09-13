@@ -1,3 +1,15 @@
+############################################################ 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Limit Home Battery Ouput            #
+#   @description    :   Ensures EV doesn't drain home       #
+#                       battery when charging EV overnight  #
+#                                                           #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Limit Battery Output
 description: Limit the output of the battery during overnight EV charging window
 trigger:
