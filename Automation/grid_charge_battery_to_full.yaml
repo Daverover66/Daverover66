@@ -1,0 +1,42 @@
+alias: Grid Charge Battery to full
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.start_battery_grid_charge
+    id: Start of off peak
+    alias: When off-peak period has started
+  - platform: time
+    at: input_datetime.end_battery_grid_charge
+    id: End of off peak
+    alias: When off-peak period has ended
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of off peak
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.default_battery_percentage
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of off peak
+        sequence:
+          - if:
+              - condition: not
+                conditions:
+                  - condition: state
+                    entity_id: select.solaredge_i1_storage_command_mode
+                    state: Maximize Self Consumption
+            then:
+              - device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: 0bdfb19491b49722c2a94351b9a673aa
+                type: select_option
+                option: Maximize Self Consumption
+mode: restart
