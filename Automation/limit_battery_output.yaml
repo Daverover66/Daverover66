@@ -1,0 +1,44 @@
+alias: Limit Battery Output
+description: Limit the output of the battery during overnight EV charging window
+trigger:
+  - platform: time
+    at: input_datetime.start_battery_output_limit
+    id: Start of Flux Period
+  - platform: time
+    at: input_datetime.end_battery_output_limit
+    id: End of Flux Period
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of Flux Period
+            alias: When triggered by start of limit period
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+      - conditions:
+          - condition: trigger
+            id: End of Flux Period
+            alias: When triggered by end of limit period
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+mode: single
