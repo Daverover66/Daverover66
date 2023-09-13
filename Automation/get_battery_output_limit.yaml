@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Get Battery Output Limit            #
+#   @description    :   For charging EV overnight           #
+#                                                           #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Get Battery Output Limit
 description: Send a notification asking if the battery output should be limited overnight
 trigger:
