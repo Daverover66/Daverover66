@@ -1,3 +1,14 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   17/08/2023                          #
+#   @automation     :   Grid Charge Battery to Full         #
+#   @description    :   For charging home battery overnight #
+#                                                           #
+#                                                           #
+#   @version        :   1.0                                 #
+#   @modified       :                                       #
+#############################################################
+
 alias: Grid Charge Battery to full
 description: ""
 trigger:
