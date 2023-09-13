@@ -42,6 +42,30 @@
 
         availability: >
           {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      -  name: "Total DC Power"
+         unique_id: total_dc_power
+         icon: mdi:solar-power
+         unit_of_measurement: "W"
+         state_class: "measurement"
+         device_class: "power"
+         state: >
+           {% set total_dc_power = (states('sensor.solaredge_i1_dc_power')|float(0) + states('sensor.solaredge_i2_dc_power')|float(0)) %}
+             {{ total_dc_power }}
+         availability: >
+           {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number }}
+
+       - name: "Total AC Power"
+         unique_id: total_ac_power
+         icon: mdi:solar-power
+         unit_of_measurement: "W"
+         state_class: "measurement"
+         device_class: "power"
+         state: >
+           {% set total_ac_power = (states('sensor.solaredge_i1_ac_power')|float(0) + states('sensor.solaredge_i2_ac_power')|float(0)) %}
+             {{ total_ac_power }}
+         availability: >
+           {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
           
       - name: "Solar Selfsufficiency Ratio"
         unique_id: solar_selfsufficiency_ratio
