@@ -384,7 +384,7 @@ automation:
       - condition: state
         entity_id: binary_sensor.quiet_time
         state: "off"
-    action:
+     action:
       - choose:
           - conditions:
               - condition: trigger
@@ -448,6 +448,9 @@ automation:
                 state: "on"
               - condition: state
                 entity_id: switch.office_echo_pop_socket_1
+                state: "on"
+              - condition: state
+                entity: binary_sensor.office_hours
                 state: "on"
             sequence:
               - service: input_boolean.turn_off
