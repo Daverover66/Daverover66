@@ -1,3 +1,14 @@
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   31/08/2023                         #
+#   @script         :   Grid Charge Battery                #
+#   @description    :   Charge home battery from grid      #
+#                          during off_peak                 #
+#                                                          #
+#   @version        :   1.0                                #
+#   @modified       :                                      #
+############################################################
+
 alias: Grid Charge Battery
 sequence:
   - service: number.set_value
