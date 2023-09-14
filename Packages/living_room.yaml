@@ -4,8 +4,8 @@
 #   @package        :   Living Room
 #   @description    :   All Living Room config
 #
-#   @modified by    :   
-#   @date           :   
+#   @modified by    :   Dave Forrester
+#   @date           :   14/09/2023
 ###############################################################################
 
 ###########################
@@ -19,8 +19,7 @@
 input_number:
   upper_light_threshold_level:
     name: Upper Light Threshold Level
-    initial: null
-    editable: true
+    initial: 80
     icon: mdi:brightness-4
     min: 70
     max: 90
@@ -28,8 +27,7 @@ input_number:
     mode: slider
  low_light_threshold:
    name: Low Light Threshold
-   initial: null
-   editable: true
+   initial: 15
    icon: mdi:brightness-3
    min: 10
    max: 30
