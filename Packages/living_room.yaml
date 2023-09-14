@@ -151,8 +151,8 @@ automation:
 
   - id: smart_button_downstairs_1
     alias: Smart Button Downstairs 1 Automations
-    mode: restart
     initial_state: true
+    mode: restart
     trigger:
       - platform: state
         entity_id:
@@ -172,12 +172,12 @@ automation:
         id: TV & Sky off
       - platform: numeric_state
         entity_id: sensor.living_room_fp2_light_sensor_light_level
-        below: 30
+        below: input_number.low_light_threshold
         alias: Low Light
         id: Low Light
       - platform: numeric_state
         entity_id: sensor.living_room_fp2_light_sensor_light_level
-        above: 50
+        above: input_number.upper_light_threshold_level
         id: High Light
         alias: High Light
     condition: []
@@ -204,38 +204,16 @@ automation:
                 data: {}
                 target:
                   entity_id: light.dreamview_g1_pro
-              - type: turn_off
-                device_id: 23629338a1f8b2487860c2b962ce2a4b
-                entity_id: switch.under_shelf_lights_local
-                domain: switch
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.under_shelf_lights_local
               - service: light.turn_off
                 data: {}
                 target:
                   entity_id:
                     - light.corner_lamp
                     - light.standard_lamp
-              - service: input_boolean.turn_off
-                data: {}
-                target:
-                  entity_id:
-                    - input_boolean.kids_bedtime_announcement_played
-                    - input_boolean.school_pick_up_announcement_played
-                    - input_boolean.school_morning_announcement_played
-                    - input_boolean.morning_briefing_played
-              - service: switch.turn_on
-                data: {}
-                target:
-                  entity_id: switch.guest_bedroom_camera_privacy
-              - service: switch.turn_on
-                data: {}
-                target:
-                  entity_id:
-                    - switch.jamie_s_room_cam_privacy
-              - service: switch.turn_on
-                data: {}
-                target:
-                  entity_id:
-                    - switch.seans_room_camera_privacy
               - service: script.bed_lamps_dim_at_bedtime
                 data: {}
           - conditions:
@@ -261,12 +239,12 @@ automation:
                 then:
                   - service: script.status_annc
                     data:
-                      where: living_room
-                      call_media_system_on: 1     
+                      where: Living Room
+                      call_media_system_on: 1
               - if:
                   - condition: numeric_state
                     entity_id: sensor.living_room_fp2_light_sensor_light_level
-                    below: 50
+                    below: 20
                 then:
                   - service: light.turn_on
                     data: {}
@@ -294,7 +272,7 @@ automation:
                 then:
                   - service: script.status_annc
                     data:
-                      where: living_room
+                      where: Living Room
                       call_media_system_off: 1
               - if:
                   - condition: state
@@ -321,7 +299,6 @@ automation:
               - condition: trigger
                 id:
                   - TV & Sky off
-                  - High Light
               - condition: state
                 entity_id: light.dreamview_g1_pro
                 state: "on"
@@ -344,6 +321,20 @@ automation:
                     data: {}
                     target:
                       entity_id: light.dreamview_g1_pro
+          - conditions:
+              - condition: trigger
+                id:
+                  - High Light
+              - condition: state
+                entity_id: light.dreamview_g1_pro
+                state: "on"
+            sequence:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro
+
+ 
     
 
 ###########################
