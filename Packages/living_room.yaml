@@ -242,7 +242,7 @@ automation:
               - if:
                   - condition: numeric_state
                     entity_id: sensor.living_room_fp2_light_sensor_light_level
-                    below: 20
+                    below: input_number.low_light_threshold
                 then:
                   - service: light.turn_on
                     data: {}
@@ -287,7 +287,7 @@ automation:
                   - TV & Sky on
               - condition: numeric_state
                 entity_id: sensor.living_room_fp2_light_sensor_light_level
-                below: 30
+                below: input_number.low_light_threshold
             sequence:
               - service: light.turn_on
                 data: {}
