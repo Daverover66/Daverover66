@@ -64,5 +64,25 @@
     column: 'value'
     unit_of_measurement: MB
 
+### mean indoor temperature for heating ######
+- platform: statistics
+  name: "Indoor Temperature Mean Last 24 Hours"
+  unique_id: indoor_temperature_mean_24h
+  entity_id: sensor.average_indoor_temperature
+  state_characteristic: mean
+  sampling_size: 100
+  max_age: 
+    hours: 24
+
+### En-Suite Bathroom Humidity Change Over 5 Minutes ###
+  name: "En-Suite Bathroom Humidity Change Over 5 Minutes"
+  unique_id: es_humidity_change_over_5m
+  entity_id: sensor.en_suite_temperature_and_humidity_humidity
+  state_characteristic: change
+  max_age:
+    minutes: 1
+  sampling_size: 60
+  precision: 1
+
 
 
