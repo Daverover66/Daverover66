@@ -203,31 +203,30 @@ action:
             id:
               - Turn On
         sequence:
-          - if:
-              - condition: state
-                entity_id: switch.guest_bedroom_camera_privacy
-                state: "on"
-            then:
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.guest_bedroom_camera_privacy
-          - if:
-              - condition: state
-                entity_id: switch.jamie_s_room_cam_privacy
-                state: "on"
-            then:
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.jamie_s_room_cam_privacy
-          - if:
-              - condition: state
-                entity_id: switch.seans_room_camera_privacy
-                state: "on"
-            then:
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.seans_room_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.guest_bedroom_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.jamie_s_room_cam_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.seans_room_camera_privacy
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.main_bedroom_bedside_lamps_active
+                - input_boolean.guest_bedroom_bedside_lamps_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.morning_briefing_played
+                - input_boolean.kids_bedtime_announcement_played
+                - input_boolean.school_morning_announcement_played
+                - input_boolean.school_pick_up_announcement_played
 mode: restart
