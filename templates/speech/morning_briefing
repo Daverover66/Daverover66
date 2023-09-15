@@ -107,14 +107,14 @@
           event in your calendar today. 
         {% endif %}
         {%- for e in e_list %}
-          {{ ['Then you have ','Next is ', 'Followed by ']|random if not loop.first else ['First up is ', 'First is ']|random}}
+          {{ [', Then you have ',', Next is ', ', Followed by ']|random if not loop.first else ['First up is ', 'First is ']|random}}
           {{- e.summary }}, starting at {{ (as_timestamp(e.start|as_datetime)) | timestamp_custom ('%H:%M %p')}}, {{-[' for ', '  and lasting for ', ' which lasts ']|random}}{{- ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round }} 
           {%- if  ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round >1 -%}
             hours.
           {%- else -%}
             hour
           {% endif %}
-        {%- endfor %} 
+        {%- endfor %}
     </p>
 
       {%- endmacro-%}
