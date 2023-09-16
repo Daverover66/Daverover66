@@ -85,12 +85,10 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -102,12 +100,10 @@ automation:
                    entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                    below: input_number.low_light_threshold
                sequence:
-                 - service: light.turn_on
-                   data:
-                     color_temp: 200
-                     brightness_pct: 100
+                 - service: scene.turn_on
+                   data: {}
                    target:
-                     entity_id: light.kitchen_lights_2
+                     entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -119,12 +115,10 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -136,12 +130,10 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 200
-                  brightness_pct: 100
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -153,12 +145,10 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -201,12 +191,10 @@ automation:
                 entity_id: binary_sensor.morning
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -218,12 +206,10 @@ automation:
                 entity_id: binary_sensor.lunchtime
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 200
-                  brightness_pct: 100
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -235,12 +221,10 @@ automation:
                 entity_id: binary_sensor.afternoon
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -252,12 +236,10 @@ automation:
                 entity_id: binary_sensor.dinner_time
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 200
-                  brightness_pct: 100
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -269,12 +251,10 @@ automation:
                 entity_id: binary_sensor.evening
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -311,12 +291,10 @@ automation:
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 200
-                  brightness_pct: 100
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -325,12 +303,10 @@ automation:
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -339,12 +315,10 @@ automation:
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 200
-                  brightness_pct: 100
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -353,12 +327,10 @@ automation:
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 367
-                  brightness: 28
+              - service: scene.turn_on
+                data: {}
                 target:
-                  entity_id: light.kitchen_lights_2
+                  entity_id: scene.kitchen_lights_normal
     mode: restart
     
 
