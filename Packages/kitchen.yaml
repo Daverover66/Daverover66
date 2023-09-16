@@ -387,7 +387,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: Kitchen
-                  call_magic_cube_side_not_set: 1
+                  call_mc_side_not_set: 1
           - conditions:
               - condition: trigger
                 id:
@@ -399,7 +399,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: Kitchen
-                  call_magic_cube_side_not_set: 1
+                  call_mc_side_not_set: 1
           - conditions:
               - condition: trigger
                 id:
