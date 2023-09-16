@@ -817,7 +817,7 @@ script:
               {{ [
                   'media systems have been deactivated?',
                   '<prosody pitch="high">Hailing frequencies</prosody><break time="1s"/>closed',
-                  'The kitchen televisual devices have been turned off',
+                  'The televisual devices have been turned off',
                   'I believe it might be time to see what is going on in the real world',
                   'now that you have had your fill of tv, might I suggest a return to reality'
                   ] | random   }}
