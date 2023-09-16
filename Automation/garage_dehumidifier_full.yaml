@@ -5,8 +5,8 @@
 #   @description    :   Lets me know when it's full        #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   16/09/2023                         #
 ############################################################
 
 alias: Garage Dehumdifier Water Tray Full
@@ -17,37 +17,130 @@ trigger:
       - sensor.garage_dehumidifier_water_tray_full
     from: not_full
     to: full
+    id: Full
+  - platform: state
+    entity_id:
+      - sensor.garage_dehumidifier_water_tray_full
+    from: full
+    to: not_full
+    id: Not Full
 condition: []
 action:
-  - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-    data:
-      message: >-
-        {{['The garage dehumidifier is full','The garage rust prevention system
-        has stalled','The garage humidity level is increasing exponentially']|
-        random }}
-      title: GARAGE DEHUMIDIFIER
-    alias: Send a notification based on an input text helper
-  - if:
-      - condition: state
-        entity_id: binary_sensor.quiet_time
-        state: "off"
-      - condition: state
-        entity_id: input_boolean.audible_notifications
-        state: "on"
-    then:
-      - service: notify.alexa_media_kitchen_echo_show
-        data:
-          message: >-
-            <voice name="Brian"><prosody rate="105%">{{ [  '<prosody
-            pitch="high">Excuse me. This is an important announcement for the
-            man of the house</prosody>. The garage dehumidifier water tray is
-            full. <prosody pitch="x-high">Please empty it</prosody>',   
-                  '<prosody pitch="high">Pardon my interruption</prosody>. I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
-                  '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
-                  '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
-                ]|random }}</prosody></voice>
-          data:
-            type: tts
-            method: speak
-    alias: Broadcast message outside quiet time
-mode: single
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Full
+        sequence:
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: >-
+                {{['The garage dehumidifier is full','The garage rust prevention
+                system has stalled','The garage humidity level is increasing
+                exponentially']| random }}
+              title: GARAGE DEHUMIDIFIER
+            alias: Send a notification based on an input text helper
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: script.set_announcements_volume
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ [  '<prosody pitch="high">Excuse me. This is an important
+                    announcement for the man of the house</prosody>. The garage
+                    dehumidifier water tray is full. <prosody
+                    pitch="x-high">Please empty it</prosody>',   
+                          '<prosody pitch="high">Pardon my interruption</prosody>. I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
+                          '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
+                          '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
+                        ]|random }}
+              - service: script.1693070811673
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
+            alias: Broadcast message outside quiet time
+          - service: light.turn_on
+            data:
+              color_name: aqua
+              brightness_pct: 10
+            target:
+              entity_id: light.kitchen_light_1
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.garage_dehumidifier_full
+      - conditions:
+          - condition: trigger
+            id:
+              - Not Full
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.garage_dehumidifier_full
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - service: script.set_announcements_volume
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ [  '<prosody pitch="low">Well now. Whoever emptied the
+                    garage dehumidifier, thank you.</prosody>',   
+                          '<prosody pitch="low">I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.</prosody>',   
+                          '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
+                          '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
+                        ]|random }}
+              - service: script.1693070811673
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
+            alias: Broadcast message outside quiet time
+          - if:
+              - condition: state
+                entity_id: light.kitchen_lights_2
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.kitchen_light_1
+            else:
+              - if:
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity_id: binary_sensor.lunchtime
+                        state: "on"
+                      - condition: state
+                        entity_id: binary_sensor.dinner_time
+                        state: "on"
+                then:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: scene.kitchen_lights_mealtimes
+                else:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: scene.kitchen_lights_normal
+mode: restart
+
