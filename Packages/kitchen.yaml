@@ -525,6 +525,178 @@ automation:
                       where: Kitchen
                       call_media_system_off: 1
 
+#################################################
+        Fridge and Freezer Door Watch
+#################################################
+
+  - id: fridge_and_freezer_door_watch
+    alias: Fridge & Freezer Door Watch
+    description: Warn me when the fridge or freezer door has been left open
+    initial_state: true
+    mode: parallel
+    max: 4
+    trigger:
+      - type: opened
+        platform: device
+        device_id: 9f175af0bcfb7c593fe265275f7fccc1
+        entity_id: binary_sensor.fridge_door_sensor_contact
+        domain: binary_sensor
+        id: Fridge Door Open
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+    alias: Fridge door open for 2 minutes
+  - type: opened
+    platform: device
+    device_id: 8297aa8791f38c9e27c1fd00bc82cdc4
+    entity_id: binary_sensor.freezer_door_sensor_contact
+    domain: binary_sensor
+    id: Freezer Door Open
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    alias: Freezer door open for 2 minutes
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Fridge Door Open
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - service: script.set_announcements_volume
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+          - service: script.speech_engine_for_tts
+            data:
+              voice: Brian
+              where: "{{ states('sensor.room_audio') }}"
+              message: >-
+                {{ [ '<prosody pitch="high">Pardon me, sir.</prosody> The fridge
+                appears to be open. Did someone forget to close it?',
+                      '<prosody pitch="high">Excuse me, sir.</prosody> Has anyone noticed that it is getting colder? Perhaps it is something to do with the fridge door being open',    
+                      '<prosody pitch="high">Pardon me, madam.</prosody> Would whoever was last in the fridge please check the door. It appears to be open',      
+                      '<prosody pitch="high">Pardon me, madam.</prosody> The automatic fridge door closing system seems to have failed. Manual operation has been enabled, which means you need to close it yourself'      
+                    ]|random }}
+          - delay:
+              hours: 0
+              minutes: 2
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - type: is_open
+                condition: device
+                device_id: 8297aa8791f38c9e27c1fd00bc82cdc4
+                entity_id: binary_sensor.fridge_door_sensor_contact
+                domain: binary_sensor
+            then:
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ ['<prosody pitch="high">Pardon my continued
+                    interruptions, but the fridge door is still open. Someone
+                    needs to close it before the food starts to go
+                    off?</prosody>', '<prosody pitch="high">Pardon me
+                    interrupting again. Has anyone noticed that it is still
+                    getting colder? Perhaps it is something to do with the
+                    fridge door still being open</prosody>', '<prosody
+                    pitch="high">Sorry to harp on about this, but whoever was
+                    last in the fridge needs to check the door. It appears to be
+                    still open</prosody>',  '<prosody pitch="x-high">Alert,
+                    Alert, Alert. Having informed you once that the automatic
+                    fridge door closing system seems to have failed, manual
+                    operation also seems to have failed. Unless you want a very
+                    smelly fridge, you need to close it yourself</prosody>',
+                    ]|random }}
+            alias: fridge door has not been closed yet
+            else:
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ ['<prosody pitch="low">Thank you for closing the fridge
+                    door. You saved all the food</prosody>',      
+                          '<prosody pitch="low">Well, that was close, but the fridge door is secure once more. I can already feel it getting warmer</prosody>',
+                          '<prosody pitch="low">Attention! Thank goodness the automatic fridge door closing systems self repair mechanism stepped in to save the food in the fridge</prosody>',
+                          '<prosody pitch="low">Pardon me. You will be pleased to know that we can all relax again, safe in the knowledge that the fridge is a place of cold once more</prosody>'     
+                        ]|random }}
+          - service: script.1693070811673
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+      - conditions:
+          - condition: trigger
+            id: Freezer Door Open
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - service: script.set_announcements_volume
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+          - service: script.speech_engine_for_tts
+            data:
+              voice: Brian
+              where: "{{ states('sensor.room_audio') }}"
+              message: >-
+                {{ [  '<prosody pitch="high">Pardon me sir.</prosody> The
+                freezer door appears to be open. Did someone forget to close
+                it?',          
+                      '<prosody pitch="high">Excuse me madam. Has anyone noticed that it is getting colder? Perhaps it is something to do with the freezer door being open</prosody>',              
+                      '<prosody pitch="high">Pardon me sir. Would whomever was last in the freezer needs please check the door. It appears to be open</prosody>',    
+                      '<prosody pitch="high">Excuse me sir. The automatic freezer door clozing system seems to have failed. Manual operation has been enabled, which means you need to close it yourself</prosody>',     
+                      '<prosody pitch="high">Burururururururururur.</prosody> Is that ice creeping across the floor? Ah yes, the freezer door is open. Someone needs to close it please'
+                    ]|random }}
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - type: is_open
+                condition: device
+                device_id: 8297aa8791f38c9e27c1fd00bc82cdc4
+                entity_id: binary_sensor.freezer_door_sensor_contact
+                domain: binary_sensor
+            then:
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ ['<prosody pitch="x-high">Alert, Alert, Alert.  The
+                    freezer door is still open, despite my previous
+                    notification. Will someone please close it before there is a
+                    puddle on the floor</prosody>',   
+                          '<prosody pitch="x-high">Pardon my continued interruptions. Has anyone noticed that it still feels like a summer day in antartica? Perhaps it is something to do with the freezer door still being open</prosody>',  
+                          '<prosody pitch="x-high">Excuse me. The automatic freezer door closing system seems to have failed in spectacular fashion. Manual operation has been engaged, which means you need to close it yourself</prosody>',  
+                          '<prosody pitch="x-high">Okay. Here is my honest assessment of our current predicament. The freezer is not going to close itself. Operation close the goddamn freezer door has commenced</prosody>'   
+                        ]|random }}
+            alias: freezer door has not been closed yet
+            else:
+              - service: script.speech_engine_for_tts
+                data:
+                  voice: Brian
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >-
+                    {{ ['<prosody pitch="low">Thank you for closing the freezer
+                    door. You saved all the food</prosody>',      
+                          '<prosody pitch="low">Well, that was close, but the feezer door is secure once more. I can already feel it getting warmer</prosody>',
+                          '<prosody pitch="low">Attention! Thank goodness the automatic freezer door closing systems self repair mechanism stepped in to prevent a massive puddle on the floor</prosody>',
+                          '<prosody pitch="low">Pardon me. You will be pleased to know that we can all relax again, safe in the knowledge that the freezer is the only sub zero place in the house</prosody>'     
+                        ]|random }}
+          - service: script.1693070811673
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+
+    
+
 
 
 ###########################
