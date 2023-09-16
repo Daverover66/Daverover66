@@ -5,8 +5,8 @@
 #   @description    :   Lets us know when the washing       #
 #                       has finished                        #
 #                                                           #
-#   @version        :   1.01                                #
-#   @modified       :   23/08/2023                          #
+#   @version        :   1.02                                #
+#   @modified       :   16/09/2023                          #
 #############################################################
 
 alias: Washing Machine - All Automations
@@ -22,24 +22,23 @@ trigger:
     alias: Washing machine drawing more than 10W power
   - platform: numeric_state
     entity_id: sensor.shelly1pm_e89f6d84a584_power
-    below: 5
+    below: 2
     id: Washing machine off
-    alias: Washing machine drawing less than 5W power for 30s.
+    alias: Washing machine drawing less than 2W power for 60s.
     for:
       hours: 0
-      minutes: 0
-      seconds: 30
+      minutes: 1
+      seconds: 0
   - platform: event
     event_type: timer.finished
     event_data:
       entity_id: timer.washing_machine_door_open
     id: Washing machine door not open
     alias: Washing done notification repeat with timer
-  - type: opened
-    platform: device
-    device_id: 3d59452e68f6f274a7d4ee5c1c408410
+  - platform: state
     entity_id: binary_sensor.washing_machine_door_contact
-    domain: binary_sensor
+    from: "off"
+    to: "on"
     id: Washing removed from machine
 condition: []
 action:
@@ -61,6 +60,10 @@ action:
               minutes: 1
               seconds: 0
               milliseconds: 0
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_on_off
           - if:
               - condition: state
                 entity_id: input_boolean.audible_notifications
@@ -69,19 +72,18 @@ action:
                 entity_id: binary_sensor.quiet_time
                 state: "off"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine_for_tts
                 data:
-                  message: >-
-                    <voice name="Brian"><prosody rate="110%"><prosody
-                    pitch="high">{{
+                  voice: Brian
+                  where: "{{states('sensor.room_audio') }}"
+                  message: |-
+                    {{
                       ['Information. The washing machine has completed its cycle. Better
                       get the washing hung up to dry',   
                         'Information, I have detected a reduction in the power consumption of the washing machine.  My fuzzy logic circuit has determined that means its finished',   
                         'Information. My sensors have detected a reduction in the rotational velocity of the washing machine. My artificially intuitive logic system has determined that now might be the optimal time to hang it up to dry',   
                         'Information. The washing machine has finished its cycle. It has cycled quite a long way and is quite tired after its exertions. I would hang the washing out to dry, but I dont have any arms. Or legs.  So I guess its up to you'     
-                      ]|random }}</prosody></prosody></voice>
-                    data:
-                      type: announce
+                      ]|random }}
           - if:
               - condition: and
                 conditions:
@@ -121,6 +123,10 @@ action:
               brightness_pct: 10
             target:
               entity_id: light.kitchen_light_2
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.washing_machine_finished
       - conditions:
           - condition: trigger
             id: Washing machine door not open
@@ -136,20 +142,19 @@ action:
                 entity_id: binary_sensor.quiet_time
                 state: "off"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine_for_tts
                 data:
-                  message: >-
-                    <voice name="Brian"><prosody rate="110%"><prosody
-                    pitch="x-high">{{ ['Pardon me for intruding on your
+                  voice: Brian
+                  where: "{{states('sensor.room_audio')}}"
+                  message: |-
+                    {{ ['Pardon me for intruding on your
                     relaxation once more. The washing is still in the machine.
                     Better get it out before it starts to smell, and I am sure
                     you do not want that',   
                       'Excuse me for once again breaking the silence. My motion sensors have detected zero activity since I last informed you that the washing was done. Please engage your glutes and get off your backside as the washing wont hang itself up',   
                       'Right, listen up humans, heres the deal. I tell you the washing is done, and you hang it up.  Someone, is not keeping their side of the deal',   
                       'There is a lovely breeze blowing through the garden right now and I should be hearing the pleasant flap flap of washing in the breeze. Unfortunately my auditory sensors appear to be malfunctioning and I hear nothing. Perhaps the washing line has not been deployed.'     
-                    ]|random }}</prosody></prosody></voice>
-                  data:
-                    type: announce
+                    ]|random }}
           - if:
               - condition: and
                 conditions:
@@ -186,21 +191,50 @@ action:
       - conditions:
           - condition: trigger
             id: Washing removed from machine
-          - condition: state
-            entity_id: timer.washing_machine_door_open
-            state: active
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: timer.washing_machine_door_open
+                state: active
+              - condition: state
+                entity_id: timer.washing_machine_door_open
+                state: idle
+            alias: Timer active or finished
         sequence:
           - service: timer.cancel
             data: {}
             target:
               entity_id: timer.washing_machine_door_open
-          - service: light.turn_off
-            data: {}
-            target:
-              entity_id: light.kitchen_light_2
-          - service: input_boolean.turn_off
-            data: {}
-            target:
-              entity_id: input_boolean.washing_machine_on_off
+          - if:
+              - condition: state
+                entity_id: light.kitchen_lights_2
+                state: "off"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.kitchen_light_2
+            else:
+              - if:
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity_id: binary_sensor.lunchtime
+                        state: "on"
+                      - condition: state
+                        entity_id: binary_sensor.dinner_time
+                        state: "on"
+                then:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: scene.kitchen_lights_mealtimes
+                else:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: scene.kitchen_lights_normal
+                alias: If lights on and mealtime set lights to bright, else normal
 mode: single
+
 
