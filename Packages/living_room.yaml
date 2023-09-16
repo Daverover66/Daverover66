@@ -189,6 +189,10 @@ automation:
                 entity_id: binary_sensor.overnight
                 state: "on"
             sequence:
+              - service: script.status_annc
+                data:
+                  where: living_room
+                  call_goodnight: 1
               - service: switch.turn_off
                 data: {}
                 target:
