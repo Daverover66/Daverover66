@@ -5,8 +5,8 @@
 #   @description    :                                      #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   16/09/2023                         #
 ############################################################
 
 alias: Main Bedroom Lights with Presence
@@ -32,16 +32,13 @@ trigger:
       seconds: 0
   - platform: numeric_state
     entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
-    below: 20
+    below: input_number.low_light_threshold
     id: Low Light
   - platform: numeric_state
     entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
     id: Good Light
-    above: 80
+    above: input_number.upper_light_threshold_level
 condition:
-  - condition: state
-    entity_id: input_boolean.main_bedroom_bedside_lamps_active
-    state: "on"
   - condition: state
     entity_id: input_boolean.holiday_mode
     state: "off"
@@ -59,12 +56,17 @@ action:
             alias: Filter Dave's side of bed
           - condition: numeric_state
             entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
-            below: 20
+            below: input_number.low_light_threshold
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
         sequence:
-          - service: switch.turn_on
-            data: {}
+          - service: light.turn_on
+            data:
+              brightness_pct: 5
+              color_temp: 500
             target:
-              entity_id: switch.daddys_bedside_lamp_socket_1
+              entity_id: light.sonoff_1001f6d950
       - conditions:
           - condition: trigger
             id:
@@ -74,13 +76,17 @@ action:
             alias: Filter Gem's side of bed
           - condition: numeric_state
             entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
-            below: 20
+            below: input_number.low_light_threshold
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
         sequence:
-          - service: switch.turn_on
-            data: {}
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
             target:
-              entity_id:
-                - switch.mummys_bedside_lamp_socket_1
+              entity_id: light.sonoff_1001f6d982
       - conditions:
           - condition: trigger
             id:
@@ -89,13 +95,13 @@ action:
             value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
             alias: Filter Dave's side of bed
           - condition: state
-            entity_id: switch.daddys_bedside_lamp_socket_1
             state: "on"
+            entity_id: light.sonoff_1001f6d950
         sequence:
-          - service: switch.turn_off
+          - service: light.turn_off
             data: {}
             target:
-              entity_id: switch.daddys_bedside_lamp_socket_1
+              entity_id: light.sonoff_1001f6d950
       - conditions:
           - condition: trigger
             id:
@@ -104,13 +110,13 @@ action:
             value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
             alias: Filter Gem's side of bed
           - condition: state
-            entity_id: switch.mummys_bedside_lamp_socket_1
             state: "on"
+            entity_id: light.sonoff_1001f6d982
         sequence:
-          - service: switch.turn_off
+          - service: light.turn_off
             data: {}
             target:
-              entity_id: switch.mummys_bedside_lamp_socket_1
+              entity_id: light.sonoff_1001f6d982
       - conditions:
           - condition: trigger
             id:
@@ -118,22 +124,36 @@ action:
           - condition: state
             entity_id: input_boolean.room_occupied_main_bedroom
             state: "on"
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
         sequence:
-          - service: switch.turn_on
-            data: {}
+          - service: light.turn_on
+            data:
+              color_temp: 500
+              brightness_pct: 5
             target:
               entity_id:
-                - switch.mummys_bedside_lamp_socket_1
-                - switch.daddys_bedside_lamp_socket_1
+                - light.sonoff_1001f6d950
+                - light.sonoff_1001f6d982
       - conditions:
           - condition: trigger
             id:
               - Good Light
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: light.sonoff_1001f6d950
+                state: "on"
+              - condition: state
+                entity_id: light.sonoff_1001f6d982
+                state: "on"
         sequence:
-          - service: switch.turn_off
+          - service: light.turn_off
             data: {}
             target:
               entity_id:
-                - switch.mummys_bedside_lamp_socket_1
-                - switch.daddys_bedside_lamp_socket_1
+                - light.sonoff_1001f6d982
+                - light.sonoff_1001f6d950
 mode: restart
+
