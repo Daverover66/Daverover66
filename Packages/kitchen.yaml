@@ -20,6 +20,7 @@ automation:
 ###########################
        Lighting           
 ###########################
+
   - id: kitchen_lights_with_presence
     alias: Kitchen Lights with Presence
     trigger:
@@ -332,7 +333,119 @@ automation:
                 target:
                   entity_id: scene.kitchen_lights_normal
     mode: restart
-    
+
+########################
+     Magic Cube
+########################
+
+  - id: magic_cube_stuff
+    alias: Magic Cube Stuff
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "1"
+        id: Side 1
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "2"
+        id: Side 2
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "3"
+        id: Side 3
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "4"
+        id: Side 4
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "5"
+        id: Side 5
+      - platform: state
+        entity_id:
+          - sensor.magic_cube_side
+        to: "6"
+        id: Side 6
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Side 1
+             - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
+              - service: script.status_annc
+                data:
+                  where: Kitchen
+                  call_magic_cube_side_not_set: 1
+          - conditions:
+              - condition: trigger
+                id:
+                  - Side 2
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
+              - service: script.status_annc
+                data:
+                  where: Kitchen
+                  call_magic_cube_side_not_set: 1
+          - conditions:
+              - condition: trigger
+                id:
+                  - Side 3
+                  - Side 4
+             - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off" 
+            sequence:
+              - service: script.status_annc
+                data:
+                  where: Kitchen
+                  call_coffee_timer: 1
+              - delay:
+                  hours: 0
+                  minutes: 4
+                  seconds: 0
+                  milliseconds: 0
+                alias: Wait 4 minutes
+              - service: script.status_annc
+                data:              
+                  where: "{{states('sensor.room_audio')}}"
+                  call_coffee_ready: 1
+          - conditions:
+              - condition: trigger
+                id: Side 6
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
+              - service: script.status_annc
+                data:
+                  where: "{{states('sensor.room_audio')}}"
+                  call_dinner_weekday: 1
+          - conditions:
+              - condition: trigger
+                id: Side 5
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
+              - service: script.status_annc
+                data:
+                  where: "{{states('sensor.room_audio')}}"
+                  call_dinner_sunday: 1
+
+  
 
 
 ###########################
