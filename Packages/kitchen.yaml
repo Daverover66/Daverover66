@@ -22,12 +22,11 @@ automation:
 ###########################
   - id: kitchen_lights_with_presence
     alias: Kitchen Lights with Presence
-       description: ""
-       trigger:
-         - platform: state
-           entity_id:
+    trigger:
+    - platform: state
+      entity_id:
              - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-           from: "off"
+           from: "off"           
            to: "on"
            id: Lights On
          - platform: state
