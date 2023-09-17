@@ -29,7 +29,7 @@ automation:
       - platform: state
         entity_id:
           - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-        from: "off"           
+        from: "off"
         to: "on"
         id: Lights On
       - platform: state
@@ -38,6 +38,10 @@ automation:
         from: "on"
         to: "off"
         id: Lights Off
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
       - platform: numeric_state
         entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
         below: input_number.low_light_threshold
@@ -56,6 +60,8 @@ automation:
         entity_id:
           - binary_sensor.lunchtime
         id: lunchtime ends
+        from: "on"
+        to: "off"
       - platform: state
         entity_id:
           - binary_sensor.dinner_time
@@ -67,7 +73,12 @@ automation:
           - binary_sensor.dinner_time
         from: "on"
         to: "off"
-        id: Dinner Time Ends
+        id: Dinner Time Ends 
+      - platform: state
+        entity_id:
+          - binary_sensor.lights_out
+        to: "off"
+        id: Allow Lights on
     condition:
       - condition: state
         entity_id: binary_sensor.lights_out
@@ -88,25 +99,73 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.washing_machine_finished
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.garage_dehumidifier_full
+                    state: "on"
+                then:
+                  - service: scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.washing_machine_finished
+                        state: "on"
+                      - condition: state
+                        entity_id: input_boolean.garage_dehumidifier_full
+                        state: "off"
+                    then:
+                      - service: scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
+                    else:
+                      - if:
+                          - condition: state
+                            entity_id: input_boolean.garage_dehumidifier_full
+                            state: "on"
+                        then:
+                          - service: scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
+                        else:
+                          - service: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
                   - Lights On
               - condition: state
                 entity_id: binary_sensor.lunchtime
-                   state: "on"
-                 - condition: numeric_state
-                   entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                   below: input_number.low_light_threshold
-               sequence:
-                 - service: scene.turn_on
-                   data: {}
-                   target:
-                     entity_id: scene.kitchen_lights_mealtimes
+                state: "on"
+              - condition: numeric_state
+                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+                below: input_number.low_light_threshold
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.washing_machine_finished
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.garage_dehumidifier_full
+                    state: "on"
+                then:
+                  - service: scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_and_washing_machine_indicator_on
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.washing_machine_finished
+                        state: "on"
+                      - condition: state
+                        entity_id: input_boolean.garage_dehumidifier_full
+                        state: "off"
+                    then:
+                      - service: scene.kitchen_lights_mealtimes_on_with_washing_machine_indicator_on
+                    else:
+                      - if:
+                          - condition: state
+                            entity_id: input_boolean.garage_dehumidifier_full
+                            state: "on"
+                        then:
+                          - service: scene.kitchen_lights_mealtimes_on_with_garage_dehumidifier_indicator_on
+                        else:
+                          - service: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
@@ -118,10 +177,34 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.washing_machine_finished
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.garage_dehumidifier_full
+                    state: "on"
+                then:
+                  - service: scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.washing_machine_finished
+                        state: "on"
+                      - condition: state
+                        entity_id: input_boolean.garage_dehumidifier_full
+                        state: "off"
+                    then:
+                      - service: scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
+                    else:
+                      - if:
+                          - condition: state
+                            entity_id: input_boolean.garage_dehumidifier_full
+                            state: "on"
+                        then:
+                          - service: scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
+                        else:
+                          - service: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -133,207 +216,355 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights On
-              - condition: state
-                entity_id: binary_sensor.evening
-                state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights Off
-              - condition: state
-                entity_id: light.kitchen_lights_2
-                state: "on"
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
               - if:
+                  - condition: state
+                    entity_id: input_boolean.washing_machine_finished
+                    state: "on"
                   - condition: state
                     entity_id: input_boolean.garage_dehumidifier_full
                     state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id:
+                    - >-
+                      scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_and_washing_machine_indicator_on
+            else:
               - if:
                   - condition: state
-                    entity_id: input_boolean.washing_machine_on_off
+                    entity_id: input_boolean.washing_machine_finished
                     state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - scene.kitchen_light_indicator_washing_machine_finished
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.morning
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.lunchtime
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.afternoon
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.dinner_time
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.evening
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Good Light
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
-              - if:
                   - condition: state
                     entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
+                    state: "off"
                 then:
                   - service: scene.turn_on
                     data: {}
                     target:
-                      entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+                      entity_id: >-
+                        scene.kitchen_lights_mealtimes_on_with_washing_machine_indicator_on
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.garage_dehumidifier_full
+                        state: "on"
+                    then:
+                      - service: scene.turn_on
+                        data: {}
+                        target:
+                          entity_id:
+                            - >-
+                              scene.kitchen_lights_mealtimes_on_with_garage_dehumidifier_indicator_on
+                    else:
+                      - service: scene.turn_on
+                        data: {}
+                        target:
+                          entity_id: scene.kitchen_lights_mealtimes
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: state
+            entity_id: binary_sensor.evening
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_finished
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.garage_dehumidifier_full
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id:
+                    - >-
+                      scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
+            else:
               - if:
                   - condition: state
-                    entity_id: input_boolean.washing_machine_on_off
+                    entity_id: input_boolean.washing_machine_finished
                     state: "on"
+                  - condition: state
+                    entity_id: input_boolean.garage_dehumidifier_full
+                    state: "off"
                 then:
                   - service: scene.turn_on
                     data: {}
                     target:
-                      entity_id:
-                        - scene.kitchen_light_indicator_washing_machine_finished
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lunchtime starts
+                      entity_id: >-
+                        scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.garage_dehumidifier_full
+                        state: "on"
+                    then:
+                      - service: scene.turn_on
+                        data: {}
+                        target:
+                          entity_id: >-
+                            scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
+                    else:
+                      - service: scene.turn_on
+                        data: {}
+                        target:
+                          entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+          - if:
               - condition: state
-                entity_id: light.kitchen_lights_2
+                entity_id: input_boolean.garage_dehumidifier_full
                 state: "on"
-            sequence:
+            then:
               - service: scene.turn_on
                 data: {}
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - lunchtime ends
+                  entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+          - if:
               - condition: state
-                entity_id: light.kitchen_lights_2
+                entity_id: input_boolean.washing_machine_finished
                 state: "on"
-            sequence:
+            then:
               - service: scene.turn_on
                 data: {}
                 target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Dinner Time Starts
+                  entity_id:
+                    - scene.kitchen_light_indicator_washing_machine_finished
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.morning
+            state: "on"
+          - condition: state
+            entity_id: light.kitchen_light_5
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.lunchtime
+            state: "on"
+          - condition: state
+            entity_id: light.kitchen_light_5
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_mealtimes
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.afternoon
+            state: "on"
+          - condition: state
+            entity_id: light.kitchen_light_5
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.dinner_time
+            state: "on"
+          - condition: state
+            entity_id: light.kitchen_light_5
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_mealtimes
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.evening
+            state: "on"
+          - condition: state
+            entity_id: light.kitchen_light_5
+            state: "off"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+          - if:
               - condition: state
-                entity_id: light.kitchen_lights_2
+                entity_id: input_boolean.garage_dehumidifier_full
                 state: "on"
-            sequence:
+            then:
               - service: scene.turn_on
                 data: {}
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Dinner Time Ends
+                  entity_id: scene.kitchen_light_indicator_garage_dehumidifier
+          - if:
               - condition: state
-                entity_id: light.kitchen_lights_2
+                entity_id: input_boolean.washing_machine_finished
                 state: "on"
-            sequence:
+            then:
               - service: scene.turn_on
                 data: {}
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id:
+                    - scene.kitchen_light_indicator_washing_machine_finished
+      - conditions:
+          - condition: trigger
+            id:
+              - Lunchtime starts
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_mealtimes
+      - conditions:
+          - condition: trigger
+            id:
+              - lunchtime ends
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinner Time Starts
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_mealtimes
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinner Time Ends
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "on"
+        sequence:
+          - service: scene.turn_on
+            data: {}
+            target:
+              entity_id: scene.kitchen_lights_normal
+      - conditions:
+          - condition: trigger
+            id:
+              - Allow Lights on
+          - condition: state
+            entity_id: input_boolean.room_occupied_kitchen
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - service: light.turn_on
+            data:
+              color_temp: 367
+              brightness: 28
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Allow Lights on
+          - condition: state
+            entity_id: switch.kitchen_lights_switch_switch_0
+            state: "off"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.kitchen_lights_switch_switch_0
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_finished
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_light_indicator_washing_machine_finished
+          - if:
+              - condition: state
+                entity_id: input_boolean.garage_dehumidifier_full
+                state: "on"
+            then:
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id:
+                    - scene.kitchen_light_indicator_garage_dehumidifier
+
 
 ########################
      Magic Cube
