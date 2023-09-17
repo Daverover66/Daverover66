@@ -1,0 +1,1551 @@
+
+##################################################
+    Kitchen Light Indicator Garage Dehumidifier
+##################################################
+
+- id: '1692688134088'
+  name: Kitchen Light Indicator Garage Dehumidifier
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color:
+        x: 0.151
+        y: 0.343
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 179.765
+      - 100
+      rgb_color:
+      - 0
+      - 255
+      - 254
+      xy_color:
+      - 0.151
+      - 0.343
+      state: 'on'
+    switch.kitchen_light_1_do_not_disturb:
+      brightness: 26
+      color:
+        x: 0.151
+        y: 0.343
+      color_mode: xy
+      color_power_on_behavior: previous
+      color_temp: 153
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 1 do_not_disturb
+      state: 'on'
+  icon: mdi:garage-variant
+  metadata: {}
+
+##################################################
+    Kitchen Light Indicator Washing Machine
+##################################################
+
+- id: '1692692252026'
+  name: Kitchen Light Indicator Washing Machine Finished
+  entities:
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color:
+        x: 0.596
+        y: 0.388
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 33.176
+      - 100
+      rgb_color:
+      - 255
+      - 141
+      - 0
+      xy_color:
+      - 0.596
+      - 0.388
+      state: 'on'
+    switch.kitchen_light_2_do_not_disturb:
+      brightness: 26
+      color:
+        x: 0.596
+        y: 0.388
+      color_mode: xy
+      color_power_on_behavior: previous
+      color_temp: 500
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 2 do_not_disturb
+      state: 'on'
+  icon: mdi:washing-machine-alert
+  metadata: {}
+
+##################################################
+             Kitchen Lights Normal
+##################################################
+
+- id: '1694412152715'
+  name: Kitchen Lights Normal
+  entities:
+    light.kitchen_lights_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      color_temp_kelvin: 2724
+      color_temp: 367
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      icon: mdi:lightbulb-group
+      friendly_name: Kitchen Lights
+      supported_features: 44
+      state: 'on'
+    switch.kitchen_lights_switch_switch_0:
+      friendly_name: Kitchen Lights Switch
+      state: 'on'
+  metadata:
+    light.kitchen_lights_2:
+      entity_only: true
+    switch.kitchen_lights_switch_switch_0:
+      entity_only: true
+
+##################################################
+    Living Room Lamps
+##################################################
+
+- id: '1694412351431'
+  name: Living Room Lamps
+  entities:
+    light.corner_lamp:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - bright
+      - colorful
+      - goodNight
+      - leisure
+      - nightLight
+      - party
+      - read
+      - soft
+      supported_color_modes:
+      - color_temp
+      - rgb
+      color_mode: color_temp
+      brightness: 75
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 136
+      - 13
+      xy_color:
+      - 0.599
+      - 0.382
+      entity_id:
+      - light.sonoff_1001f6db20
+      - light.sonoff_1001f6dac6
+      - light.sonoff_1001f6d9ea
+      icon: mdi:lightbulb-group
+      friendly_name: Corner Lamp
+      supported_features: 4
+      state: 'on'
+    light.standard_lamp:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - bright
+      - colorful
+      - goodNight
+      - leisure
+      - nightLight
+      - party
+      - read
+      - soft
+      supported_color_modes:
+      - color_temp
+      - rgb
+      color_mode: color_temp
+      brightness: 75
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 136
+      - 13
+      xy_color:
+      - 0.599
+      - 0.382
+      entity_id:
+      - light.sonoff_1001f6da0c
+      - light.sonoff_1001f6d78c
+      - light.sonoff_1001f6d860
+      icon: mdi:lightbulb-group
+      friendly_name: Standard Lamp
+      supported_features: 4
+      state: 'on'
+  metadata:
+    light.corner_lamp:
+      entity_only: true
+    light.standard_lamp:
+      entity_only: true
+
+##################################################
+           Kitchen Lights Mealtimes
+##################################################
+
+- id: '1694454322626'
+  name: Kitchen Lights Mealtimes
+  entities:
+    switch.kitchen_lights_switch_switch_0:
+      friendly_name: Kitchen Lights Switch
+      state: 'on'
+    light.kitchen_lights_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color:
+        x: 0.3451
+        y: 0.3516
+      icon: mdi:lightbulb-group
+      friendly_name: Kitchen Lights
+      supported_features: 44
+      color_mode: color_temp
+      brightness: 255
+      color_temp_kelvin: 5000
+      color_temp: 200
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      state: 'on'
+  metadata:
+    switch.kitchen_lights_switch_switch_0:
+      entity_only: true
+    light.kitchen_lights_2:
+      entity_only: true
+
+#######################################################################
+    Kitchen Light Indicator Garage Dehumidifier and Washing Machine
+#######################################################################
+
+- id: '1694930675653'
+  name: Kitchen Lights Normal On with Garage Dehumidifier and Washing Machine Indicator
+    On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 179.765
+      - 100
+      rgb_color:
+      - 0
+      - 255
+      - 254
+      xy_color:
+      - 0.151
+      - 0.343
+      color:
+        x: 0.151
+        y: 0.343
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 212
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 33.176
+      - 100
+      rgb_color:
+      - 255
+      - 141
+      - 0
+      xy_color:
+      - 0.596
+      - 0.388
+      color:
+        x: 0.596
+        y: 0.388
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 100
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 116
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 124
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 136
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
+
+###################################################################
+    Kitchen Lights Normal On with Washing Machine Indicator On
+###################################################################
+
+- id: '1694930934140'
+  name: Kitchen Lights Normal On with Washing Machine Indicator On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 84
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 33.176
+      - 100
+      rgb_color:
+      - 255
+      - 141
+      - 0
+      xy_color:
+      - 0.596
+      - 0.388
+      color:
+        x: 0.596
+        y: 0.388
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 92
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 136
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
+
+######################################################################
+    Kitchen Lights Normal On with Garage Dehumidifier Indicator On
+######################################################################
+
+- id: '1694931078964'
+  name: Kitchen Lights Normal On with Garage Dehumdifier Indicator On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 179.765
+      - 100
+      rgb_color:
+      - 0
+      - 255
+      - 254
+      xy_color:
+      - 0.151
+      - 0.343
+      color:
+        x: 0.151
+        y: 0.343
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 84
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 96
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 124
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 28
+      hs_color:
+      - 28.343
+      - 64.962
+      rgb_color:
+      - 255
+      - 167
+      - 89
+      xy_color:
+      - 0.524
+      - 0.387
+      color:
+        x: 0.4582
+        y: 0.4102
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 140
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 2724
+      color_temp: 367
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
+
+###########################################################################
+    Kitchen Lights Mealtimes On with Garage Dehumidifier Indicator On
+###########################################################################
+
+- id: '1694931239713'
+  name: Kitchen Lights Mealtimes On with Garage Dehumidifier Indicator On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 179.765
+      - 100
+      rgb_color:
+      - 0
+      - 255
+      - 254
+      xy_color:
+      - 0.151
+      - 0.343
+      color:
+        x: 0.151
+        y: 0.343
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 84
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 84
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 136
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
+
+################################################################################################
+    Kitchen Lights Mealtimes On with Garage Dehumidifier and Washing Machine Indicator On
+################################################################################################
+
+- id: '1694931340691'
+  name: Kitchen Lights Mealtimes On with Garage Dehumdifier and Washing Machine Indicator
+    On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 179.765
+      - 100
+      rgb_color:
+      - 0
+      - 255
+      - 254
+      xy_color:
+      - 0.151
+      - 0.343
+      color:
+        x: 0.151
+        y: 0.343
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 108
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 33.176
+      - 100
+      rgb_color:
+      - 255
+      - 141
+      - 0
+      xy_color:
+      - 0.596
+      - 0.388
+      color:
+        x: 0.596
+        y: 0.388
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 76
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 116
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 124
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 132
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
+
+######################################################################
+    Kitchen Lights Mealtimes On with Washing Machine Indicator On
+######################################################################
+
+- id: '1694931496341'
+  name: Kitchen Lights Mealtimes On with Washing Machine Indicator On
+  entities:
+    light.kitchen_light_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: initial
+      do_not_disturb: true
+      linkquality: 108
+      friendly_name: Kitchen Light 1
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: xy
+      brightness: 26
+      hs_color:
+      - 33.176
+      - 100
+      rgb_color:
+      - 255
+      - 141
+      - 0
+      xy_color:
+      - 0.596
+      - 0.388
+      color:
+        x: 0.596
+        y: 0.388
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 104
+      friendly_name: Kitchen Light 2
+      supported_features: 44
+      state: 'on'
+    light.kitchen_light_3:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 116
+      friendly_name: Kitchen Light 3
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_4:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: previous
+      do_not_disturb: true
+      linkquality: 120
+      friendly_name: Kitchen Light 4
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+    light.kitchen_light_5:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6535
+      min_mireds: 153
+      max_mireds: 500
+      effect_list:
+      - blink
+      - breathe
+      - okay
+      - channel_change
+      - finish_effect
+      - stop_effect
+      supported_color_modes:
+      - color_temp
+      - xy
+      color_mode: color_temp
+      brightness: 255
+      hs_color:
+      - 27.001
+      - 19.243
+      rgb_color:
+      - 255
+      - 228
+      - 205
+      xy_color:
+      - 0.372
+      - 0.35
+      color:
+        x: 0.3451
+        y: 0.3516
+      color_power_on_behavior: initial
+      do_not_disturb: false
+      linkquality: 136
+      friendly_name: Kitchen Light 5
+      supported_features: 44
+      color_temp_kelvin: 5000
+      color_temp: 200
+      state: 'on'
+  metadata:
+    light.kitchen_light_1:
+      entity_only: true
+    light.kitchen_light_2:
+      entity_only: true
+    light.kitchen_light_3:
+      entity_only: true
+    light.kitchen_light_4:
+      entity_only: true
+    light.kitchen_light_5:
+      entity_only: true
