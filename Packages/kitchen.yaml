@@ -17,6 +17,50 @@
 #     Automations         #
 ###########################
 automation:
+
+###########################
+#     Ad-Hoc Charging     #
+###########################
+
+  - id: ad_hoc_charging
+    alias: Ad-Hoc Charging
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: time
+        at: input_datetime.start_battery_output_limit
+        id: Start charge
+      - platform: time
+        at: input_datetime.end_battery_output_limit
+        id: Stop charge
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Start charge
+            sequence:
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.ad_hoc_charging_local
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.ad_hoc_tou_charging_2_socket_1
+          - conditions:
+              - condition: trigger
+                id: Stop charge
+            sequence:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.ad_hoc_charging_local
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.ad_hoc_tou_charging_2_socket_1
+
 ###########################
        Lighting           
 ###########################
