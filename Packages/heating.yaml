@@ -1,0 +1,41 @@
+###########################
+#       Automation        #
+###########################
+
+automation:
+  - id: tado_mode_home_and_away
+    alias: Tado - Trigger Home and Away modes
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id:
+          - zone.home
+        above: 0
+        id: someone_home  
+      - platform: numeric_state
+        entity_id:
+          - zone.home
+        id: noone_home
+        below: 1
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: someone_home
+            sequence:
+              - service: climate.set_preset_mode
+                data:
+                  preset_mode: home
+                target:
+                  entity_id: climate.downstairs
+          - conditions:
+              - condition: trigger
+                id: noone_home
+            sequence:
+              - service: climate.set_preset_mode
+                data:
+                  preset_mode: away
+                target:
+                  entity_id: climate.downstairs
