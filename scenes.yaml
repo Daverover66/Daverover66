@@ -1560,3 +1560,50 @@
       entity_only: true
     light.kitchen_light_5:
       entity_only: true
+
+###################################
+#  Bed Lights Scenes for Dimming  #
+###################################
+
+###############
+#     100%    #
+###############
+
+- id: '1695072452629'
+  name: Bed Lights Night 100%
+  entities:
+    light.bed_lamps:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9000
+      min_mireds: 111
+      max_mireds: 500
+      supported_color_modes:
+      - brightness
+      - color_temp
+      - rgb
+      color_mode: rgb
+      brightness: 255
+      hs_color:
+      - 255
+      - 50.196
+      rgb_color:
+      - 159
+      - 127
+      - 255
+      xy_color:
+      - 0.248
+      - 0.168
+      http_enabled: true
+      ble_enabled: true
+      lan_enabled: false
+      update_status: ok at Mon Sep 18 22:24:41 2023
+      timeout_count: 0
+      icon: mdi:string-lights
+      friendly_name: Bed Lamps
+      supported_features: 0
+      state: 'on'
+  metadata:
+    light.bed_lamps:
+      entity_only: true
+
+
