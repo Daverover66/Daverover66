@@ -117,7 +117,7 @@ automation:
                 state: "off"
               - stop: "Half Toll Disabled"
         default: []
-      - wait_template: '{{ not is_state("media_player.dave_s_echo_pop", "playing") }}'
+      - wait_template: '{{ not is_state("media_player.dave_s_2nd_echo_pop", "playing") }}'
         continue_on_timeout: false
         timeout: "00:02:00" # Only give it two minutes then give up, otherwise what's the point?
       - service: script.alexa_voice
