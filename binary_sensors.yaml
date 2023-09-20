@@ -1,0 +1,49 @@
+# Times Of Day
+- platform: tod
+  name: Night
+  after: sunset
+  before: sunrise
+- platform: tod
+  name: Day
+  after: sunrise
+  before: sunset
+- platform: tod
+  name: Quiet time
+  after: '21:33'
+  before: '06:47'
+- platform: tod
+  name: Quiet Time Boys
+  after: '19:57'
+  before: '07:03'
+- platform: tod
+  name: Lights Out
+  after: '22:33'
+  before: '06:47'
+- platform: tod
+  name: Morning
+  after: '06:27'
+  before: '11:33'
+- platform: tod
+  name: Lunchtime
+  after: '11:33'
+  before: '13:33'
+- platform: tod
+  name: Afternoon
+  after: '13:33'
+  before: '17:27'
+- platform: tod
+  name: Dinner Time
+  after: '17:27'
+  before: '18:33'
+- platform: tod
+  name: Evening
+  after: '18:33'
+  before: '21:57'
+- platform: tod
+  name: Overnight
+  after: '21:57'
+  before: '06:03'
+- platform: tod
+  name: Office Hours
+  after: "06:57"
+  before: "17:33"
