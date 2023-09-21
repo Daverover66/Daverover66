@@ -1003,10 +1003,6 @@ automation:
                 data:
                   where: "{{ states('sensor.room_audio') }}"
                   call_freezer_warning: 1
-          - service: script.speech_engine_for_tts
-            data:
-              voice: Brian
-              where: "{{ states('sensor.room_audio') }}"
               - delay:
                   hours: 0
                   minutes: 1
