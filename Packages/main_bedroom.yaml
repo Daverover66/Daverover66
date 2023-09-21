@@ -1,0 +1,70 @@
+###############################################################################
+#   @author         :   Dave Forrester (@Daverover66)
+#   @date           :   08/09/2023
+#   @package        :   Main Bedroom
+#   @description    :   All Main Bedroom config
+#
+#   @modified by    :   Dave Forrester
+#   @date           :   21/09/2023
+###############################################################################
+
+###########################
+#       Helpers           #
+###########################
+
+###########################
+#       Timer             #
+###########################
+
+timer:
+  en_suite_bathroom_fan:
+    duration: "01:00:00"
+###########################
+#       Toggle            #
+###########################
+
+input_boolean:
+  main_bedroom_bedside_lamps_activate:
+  name: Main Bedroom Bedside Lamps Activate
+  icon: mdi:lamp
+  
+###########################
+#       Number            #
+###########################
+
+input_number:
+  main_bedroom_sleep:
+    name: Main Bedroom Sleep
+    initial: 128
+    min: 255
+    max: 0
+    step: 4.25
+    mode: box
+    icon: mdi:numeric
+    unit_of_measurement: "lux"
+  main_bedroom_wake:
+    name: Main Bedroom Wake
+    initial: 0
+    min: 0
+    max: 255
+    step: 8.5
+    mode: box
+    icon: mdi:numeric
+    unit_of_measurement: "lux"
+  en_suite_fan_activate:
+    name: En-Suite Fan Activate
+    initial: 1
+    min: 1
+    max: 30
+    step: 1
+    mode: slider
+    icon: mdi:fan
+    unit_of_measurement: "%"
+
+###########################
+#       Automation        #
+###########################
+
+###########################
+#       Script            #
+###########################
