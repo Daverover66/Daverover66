@@ -12,6 +12,26 @@
 #       Helpers           #
 ###########################
 
+###########################
+#       Timer             #
+###########################
+
+timer:
+  washing_machine_door_open:
+    duration: "01:00:00"
+
+###########################
+#       Toggle            #
+###########################
+
+input_boolean:
+  washing_machine_on_off:
+    name: Washing Machine On/Off
+    icon: mdi:washing-machine
+  washing_machine_finished:
+    name: Washing Machine Finished
+    icon: mdi:washing-machine-off
+
 
 ###########################
 #     Automations         #
