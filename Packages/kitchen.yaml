@@ -17,6 +17,43 @@
 #     Automations         #
 ###########################
 automation:
+###########################
+#     Ad-Hoc Charging     #
+###########################
+
+  - id: kitchen_tablet_charge
+    alias: Kitchen Tablet Charge Toggle 
+    description: Maintain charge level of kitchen tablet between 20% & 90%
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.sm_t220_battery_level
+        below: 20
+        id: Kitchen Tablet Battery Low
+      - platform: numeric_state
+        entity_id: sensor.sm_t220_battery_level
+        above: 90
+        id: Kitchen Tablet Battery Charged
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Kitchen Tablet Battery Low
+            sequence:
+              - type: turn_on
+                device_id: 6c0823361c0892af0cd9e2882f3e32b2
+                entity_id: switch.kitchen_tablet_socket_1
+                domain: switch
+          - conditions:
+              - condition: trigger
+                id: Kitchen Tablet Battery Charged
+            sequence:
+              - type: turn_off
+                device_id: 6c0823361c0892af0cd9e2882f3e32b2
+                entity_id: switch.kitchen_tablet_socket_1
+                domain: switch
 
 ###########################
 #     Ad-Hoc Charging     #
