@@ -768,7 +768,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: "{{states('sensor.room_audio')}}"
-                  call_dinner_weekday:1
+                  call_dinner_weekday: 1
           - conditions:
               - condition: trigger
                 id:
