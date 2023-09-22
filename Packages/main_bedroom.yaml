@@ -60,10 +60,285 @@ input_number:
     mode: slider
     icon: mdi:fan
     unit_of_measurement: "%"
+  en_suite_fan_deactivate:
+    name: En-Suite Fan Deactivate
+    initial: 65
+    min: 35
+    max: 100
+    step: 1
+    mode: slider
+    icon: mdi:fan
+    unit_of_measurement: "%"
 
 ###########################
 #       Automation        #
 ###########################
+automation:
+###########################
+#       Lights            #
+###########################
+
+  - id: main_bedroom_lights_with_presence
+    alias: Main Bedroom Lights with Presence
+    description: ""
+    initial_state: true
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.main_bedroom_fp2_presence_sensor_2
+          - binary_sensor.main_bedroom_fp2_presence_sensor_3
+        id: Lights On
+        from: "off"
+        to: "on"
+      - platform: state
+        entity_id:
+          - binary_sensor.main_bedroom_fp2_presence_sensor_2
+          - binary_sensor.main_bedroom_fp2_presence_sensor_3
+        id: Lights Off
+        from: "on"
+        to: "off"
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
+      - platform: numeric_state
+        entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+        below: input_number.low_light_threshold
+        id: Low Light
+      - platform: numeric_state
+        entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+        id: Good Light
+        above: input_number.upper_light_threshold_level
+    condition:
+      - condition: state
+        entity_id: input_boolean.holiday_mode
+        state: "off"
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights On
+              - condition: template
+                value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+                alias: Filter Dave's side of bed
+              - condition: numeric_state
+                entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+                below: input_number.low_light_threshold
+              - condition: state
+                entity_id: input_boolean.main_bedroom_bedside_lamps_active
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
+            sequence:
+              - service: light.turn_on
+                data:
+                  brightness_pct: 5
+                  color_temp: 500
+                target:
+                  entity_id: light.sonoff_1001f6d950
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights On
+              - condition: template
+                value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+                alias: Filter Gem's side of bed
+              - condition: numeric_state
+                entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+                below: input_number.low_light_threshold
+              - condition: state
+                entity_id: input_boolean.main_bedroom_bedside_lamps_active
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
+            sequence:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness_pct: 5
+                target:
+                  entity_id: light.sonoff_1001f6d982
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights Off
+              - condition: template
+                value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+                alias: Filter Dave's side of bed
+              - condition: state
+                state: "on"
+                entity_id: light.sonoff_1001f6d950
+            sequence:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.sonoff_1001f6d950
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights Off
+              - condition: template
+                value_template: "{{\"Gem\" in trigger.to_state.attributes.friendly_name }}"
+                alias: Filter Gem's side of bed
+              - condition: state
+                state: "on"
+                entity_id: light.sonoff_1001f6d982
+            sequence:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.sonoff_1001f6d982
+          - conditions:
+              - condition: trigger
+                id:
+                  - Low Light
+              - condition: state
+                entity_id: input_boolean.room_occupied_main_bedroom
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.main_bedroom_bedside_lamps_active
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
+            sequence:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness_pct: 5
+                target:
+                  entity_id:
+                    - light.sonoff_1001f6d950
+                    - light.sonoff_1001f6d982
+          - conditions:
+              - condition: trigger
+                id:
+                  - Good Light
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: light.sonoff_1001f6d950
+                    state: "on"
+                  - condition: state
+                    entity_id: light.sonoff_1001f6d982
+                    state: "on"
+            sequence:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id:
+                    - light.sonoff_1001f6d982
+                    - light.sonoff_1001f6d950
+
+###########################
+#       En-Suite Fan      #
+###########################
+
+  - id: 1683829474990
+    alias: En-Suite Bathroom Fan On/Off with Humidity Level or Off with Timer
+    initial_state: true
+    mode: restart
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.en_suite_temperature_and_humidity_humidity
+        below: input_number.en_suite_fan_deactivate
+        id: Humidity Normal
+      - platform: state
+        entity_id:
+          - binary_sensor.quiet_time
+        from: "off" 
+        to: "on"
+        id: Quiet Time Start
+      - platform: state
+        entity_id:
+          - binary_sensor.quiet_time
+        to: "off"
+        id: Quiet Time End
+        from: "on"
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.en_suite_bathroom_fan
+        id: En-Suite Fan Off
+        alias: En-Suite Fan off with timer
+      - platform: numeric_state
+        entity_id: sensor.en_suite_humidity_change
+        above: input_number.en_suite_fan_activate
+        id: Shower On
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Shower On
+              - condition: state
+                entity_id: switch.en_suite_fan_switch
+                state: "off"
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
+              - type: turn_on
+                device_id: b5edcb03424d315e8e0842e735d916f7
+                entity_id: switch.en_suite_fan_switch
+                domain: switch
+              - service: timer.start
+                data: {}
+                target:
+                  entity_id: timer.en_suite_bathroom_fan
+          - conditions:
+              - condition: trigger
+                id:
+                  - Humidity Normal
+                  - En-Suite Fan Off
+              - condition: state
+                entity_id: switch.en_suite_fan_switch
+                state: "on"
+            sequence:
+              - type: turn_off
+                device_id: b5edcb03424d315e8e0842e735d916f7
+                entity_id: switch.en_suite_fan_switch
+                domain: switch
+          - conditions:
+              - condition: trigger
+                id: Quiet Time Start
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: switch.en_suite_fan_switch
+                    state: "on"
+                then:
+                  - type: turn_off
+                    device_id: b5edcb03424d315e8e0842e735d916f7
+                    entity_id: switch.en_suite_fan_switch
+                    domain: switch
+          - conditions:
+              - condition: trigger
+                id: Quiet Time End
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: switch.en_suite_fan_switch
+                    state: "off"
+                  - condition: numeric_state
+                    entity_id: sensor.en_suite_humidity_change
+                    above: input_number.en_suite_fan_activate
+                then:
+                  - type: turn_on
+                    device_id: b5edcb03424d315e8e0842e735d916f7
+                    entity_id: switch.en_suite_fan_switch
+                    domain: switch
+                  - service: timer.start
+                    data: {}
+                    target:
+                      entity_id: timer.en_suite_bathroom_fan
+ 
 
 ###########################
 #       Script            #
