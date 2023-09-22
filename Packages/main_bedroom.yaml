@@ -36,8 +36,8 @@ input_number:
   main_bedroom_sleep:
     name: Main Bedroom Sleep
     initial: 128
-    min: 255
-    max: 0
+    min: 0
+    max: 255
     step: 4.25
     mode: box
     icon: mdi:numeric
