@@ -27,8 +27,8 @@ timer:
 ###########################
 
 input_boolean:
-  main_bedroom_bedside_lamps_activate:
-    name: Main Bedroom Bedside Lamps Activate
+  main_bedroom_bedside_lamps_active:
+    name: Main Bedroom Bedside Lamps Active
     icon: mdi:lamp
   
 ###########################
