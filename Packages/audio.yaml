@@ -17,6 +17,12 @@
 # For more info on Media Players visit https://www.home-assistant.io/integrations/media_player/
 # MODIFY this section as needed or comment it out completely if not needed.
 #################################################################################
+
+################################
+# Media extractor is used for playing youtube audio. For more info ->https://www.home-assistant.io/integrations/media_extractor/
+#
+# If you have this enabled in another package or in your configuration.yaml comment out the line below
+media_extractor:
   
 ###########################
 #      Helpers            #
@@ -251,6 +257,176 @@ automation:
             - media_player.dave_s_2nd_echo_pop
         data:
           volume_level: "{{ states('input_number.alexa_volume_level_default_all') | float(0) }}"
+
+################################
+# Scripts to handle audio
+script:
+
+  ################################
+  # local_audio is meant to be used to play audio in your media folder. (https://www.home-assistant.io/integrations/media_source/)
+  # 
+  # Before using make sure you update as needed.
+  # 
+  # To call this using in the action section of your automation:
+  # 
+  # - service: script.local_audio
+  #   data:
+  #     speaker: main
+  #     volume: .3
+  #     media: /media/local_audio.mp3
+  #
+  local_audio:
+    sequence:
+    # Ensure that audible notifications are allowed. Comment out if not needed.
+    - condition: state
+      entity_id: input_boolean.audible_notifications
+      state: 'on'
+    # Ensure the family is home. If you are using a group to track the family, or a person just update as needed. Comment out if not needed.
+    - condition: state
+      entity_id: binary_sensor.family_home
+      state: 'on'
+    # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
+    - service: media_player.volume_set
+      data:
+        entity_id: >
+         {% set who = speaker %}
+          {% if who == 'kitchen' %}
+            media_player.kitchen_display
+          {% elif who == 'theater' %}
+            media_player.theater_speaker
+          {% elif who == 'croft' %}
+            media_player.croft_speaker
+          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
+            media_player.skylars_bedroom_speaker
+          {% elif who == 'master_bedroom' %}
+            media_player.master_bedroom_speaker
+          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
+            media_player.studio_speaker
+          {% elif who == 'main' %}
+            media_player.ha_blue
+          {% else %}
+            {% if states.input_boolean.audible_notifications.state == 'on' %}
+            media_player.ha_blue
+            {% else %}
+            media_player.kitchen_display
+            {% endif %}
+          {% endif %}
+        volume_level: >
+          {{ volume }}
+    - delay: 00:00:05
+    # This tells it to play the media and is set when the script is called. 
+    - service: media_player.play_media
+      data:
+        entity_id: >
+          {% set who = speaker %}
+          {% if who == 'kitchen' %}
+            media_player.kitchen_display
+          {% elif who == 'theater' %}
+            media_player.theater_speaker
+          {% elif who == 'croft' %}
+            media_player.croft_speaker
+          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
+            media_player.skylars_bedroom_speaker
+          {% elif who == 'master_bedroom' %}
+            media_player.master_bedroom_speaker
+          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
+            media_player.studio_speaker
+          {% elif who == 'main' %}
+            media_player.ha_blue
+          {% else %}
+            {% if states.input_boolean.audible_notifications.state == 'on' %}
+            media_player.ha_blue
+            {% else %}
+            media_player.kitchen_display
+            {% endif %}
+          {% endif %}
+        media_content_type: "music"
+        media_content_id: >
+          {{ media }}
+  
+  
+  ################################
+  # youtube_audio is meant to be used to play audio from well youtube. 
+  # This scrtip requires the media_extractor integration.
+  # 
+  # Before using make sure you update as needed.
+  # 
+  # To call this using in the action section of your automation:
+  # 
+  # - service: script.youtube_audio
+  #   data:
+  #     speaker: main
+  #     volume: .5
+  #     media: https://www.youtube.com/watch?v=pVeX4C9B1Lk
+  #
+  youtube_audio:
+    sequence:
+    # Ensure that audible notifications are allowed. Comment out if not needed.
+    - condition: state
+      entity_id: input_boolean.audible_notifications
+      state: 'on'
+    # Ensure the family is home. If you are using a group to track the family, or a person just update as needed. Comment out if not needed.
+    - condition: state
+      entity_id: binary_sensor.family_home
+      state: 'on'
+    # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
+    - service: media_player.volume_set
+      data:
+        entity_id: >
+          {% set who = speaker %}
+          {% if who == 'kitchen' %}
+            media_player.kitchen_display
+          {% elif who == 'theater' %}
+            media_player.theater_speaker
+          {% elif who == 'croft' %}
+            media_player.croft_speaker
+          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
+            media_player.skylars_bedroom_speaker
+          {% elif who == 'master_bedroom' %}
+            media_player.master_bedroom_speaker
+          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
+            media_player.studio_speaker
+          {% elif who == 'main' %}
+            media_player.ha_blue
+          {% else %}
+            {% if states.input_boolean.audible_notifications.state == 'on' %}
+            media_player.ha_blue
+            {% else %}
+            media_player.kitchen_display
+            {% endif %}
+          {% endif %}
+        volume_level: >
+          {{ volume }}
+    # This tells it to play the media and is set when the script is called.
+    #  media_content_type: video/Youtube
+    - service: media_extractor.play_media
+      data:
+        entity_id: >
+          {% set who = speaker %}
+          {% if who == 'kitchen' %}
+            media_player.kitchen_display
+          {% elif who == 'theater' %}
+            media_player.theater_speaker
+          {% elif who == 'croft' %}
+            media_player.croft_speaker
+          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
+            media_player.skylars_bedroom_speaker
+          {% elif who == 'master_bedroom' %}
+            media_player.master_bedroom_speaker
+          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
+            media_player.studio_speaker
+          {% elif who == 'main' %}
+            media_player.ha_blue
+          {% else %}
+            {% if states.input_boolean.audible_notifications.state == 'on' %}
+            media_player.ha_blue
+            {% else %}
+            media_player.kitchen_display
+            {% endif %}
+          {% endif %}
+        media_content_type: music
+        media_content_id: >
+          {{ media }}
 
 
 ############################################
