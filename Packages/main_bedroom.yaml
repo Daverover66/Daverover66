@@ -69,6 +69,15 @@ input_number:
     mode: slider
     icon: mdi:fan
     unit_of_measurement: "%"
+  en_suite_humidity_high:
+    name: En-Suite Humidity High
+    initial: 85
+    min: 65
+    max: 100
+    step: 1
+    mode: slider
+    icon: mdi:water-percent
+    unit_of_measurement: "%"
 
 ###########################
 #       Automation        #
@@ -327,8 +336,8 @@ automation:
                     entity_id: switch.en_suite_fan_switch
                     state: "off"
                   - condition: numeric_state
-                    entity_id: sensor.en_suite_humidity_change
-                    above: input_number.en_suite_fan_activate
+                    entity_id: sensor.en_suite_temperature_and_humidity_humidity
+                    above: input_number.en_suite_humidity_high
                 then:
                   - type: turn_on
                     device_id: b5edcb03424d315e8e0842e735d916f7
