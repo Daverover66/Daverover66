@@ -359,13 +359,13 @@ script:
 ###########################
 
   main_bedroom_bed_lights_night_dim:
-  alias: Main Bedroom bed lights with level
-  sequence:
-  - service: light.turn_on
-    entity_id: light.bed_lamps
-    data:
-      brightness: "{{ level | int }} \n"
-  mode: single
+    alias: Main Bedroom bed lights with level
+    sequence:
+    - service: light.turn_on
+      entity_id: light.bed_lamps
+      data:
+        brightness: "{{ level | int }} \n"
+    mode: single
 
 ###########################
 # Bed Lights Dim at Night #
