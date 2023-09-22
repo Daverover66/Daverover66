@@ -127,6 +127,22 @@ automation:
     description: ""
     trigger:
       - platform: state
+        entity_id: 
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+        from: "off"
+        to: "on"
+        id: BDZ On
+      - platform: state
+        entity_id: 
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+        from: "on"
+        to: "off"
+        id: BDZ Off
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
+      - platform: state
         entity_id:
           - binary_sensor.kitchen_presence_sensor_presence_sensor_1
         from: "off"
