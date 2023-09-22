@@ -158,6 +158,22 @@ automation:
           minutes: 0
           seconds: 30
         id: BDZ Off
+      - platform: state
+        entity_id:
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
+        from: "off"
+        to: "on"  
+        id: Utility On
+      - platform: state
+        entity_id:
+         - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
+        from: "on"
+        to: "off"
+        id: Utility Off
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
       - platform: numeric_state
         entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
         below: input_number.low_light_threshold
@@ -535,6 +551,29 @@ automation:
                 data: {}
                 target:
                   entity_id: light.back_door_zone_light
+          - conditions:
+              - condition: trigger
+                id:
+                  - Utility On
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
+           sequence:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness: 199
+                target:
+                  entity_id: light.utility_room_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Utility Off
+        sequence:
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.utility_room_light
           - conditions:
               - condition: trigger
                 id:
