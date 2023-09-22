@@ -86,12 +86,13 @@ input_number:
 #        Derivative        #
 ############################
 
-derivative:
-  source: sensor.en_suite_temperature_and_humidity_humidity
-  name: En-Suite Humidity Change
-  unit_time: m
-  time_window: "00:00:30"
-  round: 2
+sensor:
+  - platform: derivative
+    source: sensor.en_suite_temperature_and_humidity_humidity
+    name: En-Suite Humidity Change
+    unit_time: min
+    time_window: "00:00:30"
+    round: 2
 
 ###########################
 #       Automation        #
