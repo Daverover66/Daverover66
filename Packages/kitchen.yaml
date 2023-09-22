@@ -834,7 +834,7 @@ automation:
             sequence:
               - service: script.status_annc
                 data:
-                  where: Kitchen
+                  where: kitchen
                   call_coffee_timer: 1
               - delay:
                   hours: 0
@@ -917,7 +917,7 @@ automation:
                 then:
                   - service: script.status_annc
                     data:
-                      where: Kitchen
+                      where: kitchen
                       call_media_system_on: 1
           - conditions:
               - condition: trigger
@@ -945,7 +945,7 @@ automation:
                 then:
                   - service: script.status_annc
                     data:
-                      where: Kitchen
+                      where: kitchen
                       call_media_system_off: 1
 
 #################################################
