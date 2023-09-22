@@ -352,3 +352,52 @@ automation:
 ###########################
 #       Script            #
 ###########################
+script:
+
+###########################
+# Bed Lights with Level   #
+###########################
+
+  main_bedroom_bed_lights_night_dim:
+  alias: Main Bedroom bed lights with level
+  sequence:
+  - service: light.turn_on
+    entity_id: light.bed_lamps
+    data:
+      brightness: "{{ level | int }} \n"
+  mode: single
+
+###########################
+# Bed Lights Dim at Night #
+###########################  
+
+bed_lamps_dim_at_bedtime:
+  alias: Bed lamps dim at Bedtime
+  sequence:
+  - repeat:
+      while:
+      - condition: template
+        value_template: '{{ states("input_number.main_bedroom_sleep") | int > 0 }}'
+      sequence:
+      - service: script.main_bedroom_bed_lights_night_dim
+        data:
+          level: '{{ states("input_number.main_bedroom_sleep") }}'
+      - service: input_number.decrement
+        target:
+          entity_id: input_number.main_bedroom_sleep
+        data: {}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.bed_lamps
+  - service: input_number.set_value
+    data:
+      value: 128
+    target:
+      entity_id: input_number.main_bedroom_sleep
+  mode: single
