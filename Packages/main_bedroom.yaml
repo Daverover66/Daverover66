@@ -18,7 +18,10 @@
 
 timer:
   en_suite_bathroom_fan:
+    name: En-Suite Bathroom Fan
     duration: "01:00:00"
+    icon: mdi:fan
+  
 ###########################
 #       Toggle            #
 ###########################
@@ -78,6 +81,17 @@ input_number:
     mode: slider
     icon: mdi:water-percent
     unit_of_measurement: "%"
+
+############################
+#        Derivative        #
+############################
+
+derivative:
+  source: sensor.en_suite_temperature_and_humidity_humidity
+  name: En-Suite Humidity Change
+  unit_time: m
+  time_window: "00:00:30"
+  round: 2
 
 ###########################
 #       Automation        #
