@@ -143,6 +143,22 @@ automation:
           minutes: 0
           seconds: 30
       - platform: state
+        entity_id: 
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4 
+        from: "off"
+        to: "on"
+        id: Utility On
+      - platform: state
+        entity_id: 
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
+        from: "on"
+        to: "off"
+        id: Utility Off
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 30
+      - platform: state
         entity_id:
           - binary_sensor.kitchen_presence_sensor_presence_sensor_1
         from: "off"
@@ -204,6 +220,13 @@ automation:
         state: "off"
     action:
       - choose:
+          - conditions:
+              - condition: trigger
+                id: BDZ On
+              - condition: numeric_state
+                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+                below: input_number.low_light_threshold
+              #############  to be continued ############
           - conditions:
               - condition: trigger
                 id:
