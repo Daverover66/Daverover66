@@ -270,20 +270,19 @@ script:
               ] | random }} 
         # I try to ensure each of the following links is 60 seconds or less. 
         message: >
-          {{- [<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>,
-              https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/4L5LuNir-config-media-haunted-sounds-haunted-dragonroaring.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/ACSSWqDG-config-media-haunted-sounds-chainsrattling.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/AkRow1zW-config-media-haunted-sounds-haunted-tollingbell.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/cmGknuv5-config-media-haunted-sounds-haunted-catscream.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Dcw2PRyD-config-media-haunted-sounds-evillaughcackle.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/FaUgcX9b-config-media-haunted-sounds-evillaugh.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PkavOCzx-config-media-haunted-sounds-this-is-halloween.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PTYwhknz-config-media-haunted-sounds-evil-laugh-2.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/S7mNhLVj-config-media-haunted-sounds-scary.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/UnmZvi8p-config-media-haunted-sounds-haunted-heart.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Xs3TB3m3-config-media-haunted-sounds-creakingdoorspooky.mp3
-https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3
-            ] | random -}}
+          {{- ["<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/4L5LuNir-config-media-haunted-sounds-haunted-dragonroaring.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/ACSSWqDG-config-media-haunted-sounds-chainsrattling.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/AkRow1zW-config-media-haunted-sounds-haunted-tollingbell.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/cmGknuv5-config-media-haunted-sounds-haunted-catscream.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Dcw2PRyD-config-media-haunted-sounds-evillaughcackle.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/FaUgcX9b-config-media-haunted-sounds-evillaugh.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PTYwhknz-config-media-haunted-sounds-evil-laugh-2.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/S7mNhLVj-config-media-haunted-sounds-scary.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/UnmZvi8p-config-media-haunted-sounds-haunted-heart.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Xs3TB3m3-config-media-haunted-sounds-creakingdoorspooky.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>"
+              ] | random -}}
 
   # haunted_sounds_git:
   #   sequence:
