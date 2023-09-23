@@ -399,3 +399,6 @@ script:
 #     value_template: "{{ (value|replace(' days', '')) | int }}"
 #     unit_of_measurement: Days
 #     scan_interval: 43200
+
+#    resource: http://api.wolframalpha.com/v1/result?appid=JIUY8U-4V8KY45VT1&i=How%20many%20days%20until%2025th%20December%202017
+    
