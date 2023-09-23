@@ -1,7 +1,7 @@
 ###############################################################################
-# Countdown Sesor using WolfRam Alpha Natural language queries
+# Countdown Sensor using WolfRam Alpha Natural language queries
 ################################################################################
-
+sensor:
   - platform: rest
     name: Halloween Countdown
     resource: !secret wolframalpha_halloween_api
@@ -57,6 +57,47 @@
     value_template: "{{ (value|replace(' days', '')) | int }}"
     unit_of_measurement: Days
     scan_interval: 43200
+
+################################################
+#   These are events rather than holidays      #
+################################################
+
+  - platform: rest
+    name: Leonids Meteor Shower Countdown
+    resource: !secret wolframalpha_leonids_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Gemenids Meteor Shower Countdown
+    resource: !secret wolframalpha_gemenids_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Perseids Meteor Shower Countdown
+    resource: !secret wolframalpha_perseids_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Quadrantids Meteor Shower Countdown
+    resource: !secret wolframalpha_quadrantids_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+ - platform: rest
+    name: Halley's Comet Countdown
+    resource: !secret wolframalpha_halley_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200 
+
+  
 
  # - platform: rest
  #   name: Thanksgiving Day Countdown
