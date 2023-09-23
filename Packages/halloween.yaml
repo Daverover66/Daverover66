@@ -108,11 +108,10 @@ automation:
         - condition: trigger
           id: start
         sequence:
-        - service: script.local_audio
+        - service: script.aws_s3_audio
           data:
-            media: "/media/haunted_sounds/This_is_Halloween.mp3"
-            volume: .5
-            speaker: 'media_player.ha_blue'
+            where: kitchen
+            message: 
         - delay: '00:04:00'
         - service: script.turn_on
           target:
