@@ -8,7 +8,7 @@
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   12/09/2023                                       #
+#   @date                   :   23/09/2023                                       #
 ##################################################################################
 
 #################################################################################
@@ -289,26 +289,28 @@ script:
     - service: media_player.volume_set
       data:
         entity_id: >
-         {% set who = speaker %}
-          {% if who == 'kitchen' %}
-            media_player.kitchen_display
-          {% elif who == 'theater' %}
-            media_player.theater_speaker
-          {% elif who == 'croft' %}
-            media_player.croft_speaker
-          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
-            media_player.skylars_bedroom_speaker
-          {% elif who == 'master_bedroom' %}
-            media_player.master_bedroom_speaker
-          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
-            media_player.studio_speaker
-          {% elif who == 'main' %}
-            media_player.ha_blue
+         {% set where = speaker %}
+          {% if where == 'kitchen' %}
+            media_player.kitchen_echo_show
+          {% elif where == 'living_room' %}
+            media_player.dave_s_2nd_echo_pop
+          {% elif where == 'dining_room' %}
+            media_player.dave_s_echo_pop
+          {% elif where == 'main_bedroom'] %}
+            media_player.main_bedroom_dot
+          {% elif where == 'guest_bedroom' %}
+            media_player.guest_bedroom_echo_dot
+          {% elif where == 'jamies_room' %}
+            media_player.living_room_dot
+          {% elif where == 'seans_room' %}
+            media_player.seans_room_dot
+          {% elif where == 'office' %}
+            media_player.dave_s_2nd_echo_pop_2
           {% else %}
             {% if states.input_boolean.audible_notifications.state == 'on' %}
-            media_player.ha_blue
+            media_player.dave_s_2nd_echo_pop
             {% else %}
-            media_player.kitchen_display
+            media_player.kitchen_echo_show
             {% endif %}
           {% endif %}
         volume_level: >
@@ -318,26 +320,28 @@ script:
     - service: media_player.play_media
       data:
         entity_id: >
-          {% set who = speaker %}
-          {% if who == 'kitchen' %}
-            media_player.kitchen_display
-          {% elif who == 'theater' %}
-            media_player.theater_speaker
-          {% elif who == 'croft' %}
-            media_player.croft_speaker
-          {% elif who in ['skylar_bedroom', 'skylars_bedroom'] %}
-            media_player.skylars_bedroom_speaker
-          {% elif who == 'master_bedroom' %}
-            media_player.master_bedroom_speaker
-          {% elif who in ['studio', 'studio_speaker', 'media_player.studio_speaker'] %}
-            media_player.studio_speaker
-          {% elif who == 'main' %}
-            media_player.ha_blue
+          {% set where = speaker %}
+          {% if where == 'kitchen' %}
+            media_player.kitchen_echo_show
+          {% elif where == 'living_room' %}
+            media_player.dave_s_2nd_echo_pop
+          {% elif where == 'dining_room' %}
+            media_player.dave_s_echo_pop
+          {% elif where == 'main_bedroom'] %}
+            media_player.main_bedroom_dot
+          {% elif where == 'guest_bedroom' %}
+            media_player.guest_bedroom_echo_dot
+          {% elif where == 'jamies_room' %}
+            media_player.living_room_dot
+          {% elif where == 'seans_room' %}
+            media_player.seans_room_dot
+          {% elif where == 'office' %}
+            media_player.dave_s_2nd_echo_pop_2
           {% else %}
             {% if states.input_boolean.audible_notifications.state == 'on' %}
-            media_player.ha_blue
+            media_player.dave_s_2nd_echo_pop
             {% else %}
-            media_player.kitchen_display
+            media_player.kitchen_echo_show
             {% endif %}
           {% endif %}
         media_content_type: "music"
