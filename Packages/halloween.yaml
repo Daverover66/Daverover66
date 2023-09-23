@@ -111,7 +111,8 @@ automation:
         - service: script.aws_s3_audio
           data:
             where: kitchen
-            message: 
+            message: >-
+              <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PkavOCzx-config-media-haunted-sounds-this-is-halloween.mp3'/>
         - delay: '00:04:00'
         - service: script.turn_on
           target:
@@ -256,7 +257,7 @@ script:
     - condition: state
       entity_id: input_boolean.haunted_sounds
       state: 'on'
-    - service: script.local_audio # This script is in the audio.yaml in the packages folder. 
+    - service: script.aws_s3_audio # This script is in the audio.yaml in the packages folder. 
       data:
         speaker: >
           {{ ['media_player.kitchen_echo_show',
@@ -268,26 +269,9 @@ script:
               'media_player.living_room_dot',
               'media_player.seans_room_dot'
               ] | random }} 
-        volume: .5
-         # I try to ensure each of the following links is 60 seconds or less. 
+        # I try to ensure each of the following links is 60 seconds or less. 
         media: >
           {{- [
-            "/media/haunted_sounds/haunted_guest_welcome.mp3",
-            "/media/haunted_sounds/ChainsRattling.mp3",
-            "/media/haunted_sounds/CreakingDoorSpooky.mp3",
-            "/media/haunted_sounds/DemonHaunting.mp3",
-            "/media/haunted_sounds/Evil_Laugh_2.mp3",
-            "/media/haunted_sounds/Evillaugh.mp3",
-            "/media/haunted_sounds/Scary.mp3",
-            "/media/haunted_sounds/raven.mp3",
-            "/media/haunted_sounds/EvilLaughCackle.mp3",
-            "/media/haunted_sounds/Haunted-CatScream.mp3",
-            "/media/haunted_sounds/Haunted-DragonRoaring.mp3",
-            "/media/haunted_sounds/Haunted-Heart.mp3",
-            "/media/haunted_sounds/Haunted-ScaryScream.mp3",
-            "/media/haunted_sounds/Haunted-TRexRoar.mp3",
-            "/media/haunted_sounds/Haunted-TollingBell.mp3",
-            "/media/haunted_sounds/Haunted-Vocals.mp3"
             ] | random -}}
 
   # haunted_sounds_git:
