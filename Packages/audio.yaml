@@ -285,15 +285,17 @@ script:
     - condition: state
       entity_id: binary_sensor.family_home
       state: 'on'
-    # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
+    # This script plays the audio 
     - service: script.alexa_voice
         data:
+          where: "{{ where }}"
+          message: "{{ message }}"
         
   
   
   ################################
   # youtube_audio is meant to be used to play audio from well youtube. 
-  # This scrtip requires the media_extractor integration.
+  # This script requires the media_extractor integration.
   # 
   # Before using make sure you update as needed.
   # 
