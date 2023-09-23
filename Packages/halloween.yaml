@@ -220,7 +220,7 @@ script:
     sequence:
     - service: script.youtube_audio # This script is in the audio.yaml in the packages folder. 
       data:
-        speaker: >
+        where: >
           {{ ['media_player.kitchen_echo_show',
               'media_player.dave_s_2nd_echo_pop',
               'media_player.dave_s_echo_pop',
@@ -230,9 +230,8 @@ script:
               'media_player.living_room_dot',
               'media_player.seans_room_dot'
               ] | random }} 
-        volume: .5
         # I try to ensure each of the following links is 60 seconds or less. 
-        media: >
+        message: >
           {{- [
            "https://www.youtube.com/watch?v=-s04sbIViJQ",
            "https://www.youtube.com/watch?v=vF681VBX_oo",
@@ -259,7 +258,7 @@ script:
       state: 'on'
     - service: script.aws_s3_audio # This script is in the audio.yaml in the packages folder. 
       data:
-        speaker: >
+        where: >
           {{ ['media_player.kitchen_echo_show',
               'media_player.dave_s_2nd_echo_pop',
               'media_player.dave_s_echo_pop',
@@ -270,7 +269,7 @@ script:
               'media_player.seans_room_dot'
               ] | random }} 
         # I try to ensure each of the following links is 60 seconds or less. 
-        media: >
+        message: >
           {{- [
             ] | random -}}
 
