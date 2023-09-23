@@ -1,0 +1,66 @@
+###############################################################################
+# Countdown Sesor using WolfRam Alpha Natural language queries
+################################################################################
+
+  - platform: rest
+    name: Halloween Countdown
+    resource: !secret wolframalpha_halloween_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Christmas Countdown
+    resource: !secret wolframalpha_xmas_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Easter Countdown
+    resource: !secret wolframalpha_easter_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Mothers Countdown
+    resource: !secret wolframalpha_mothersday_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Fathers Countdown
+    resource: !secret wolframalpha_fathersday_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Chanukkah Countdown
+    resource: !secret wolframalpha_chanukkah_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Labor Day Countdown
+    resource: !secret wolframalpha_labor_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Memorial Day Countdown
+    resource: !secret wolframalpha_memorial_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
+
+  - platform: rest
+    name: Thanksgiving Day Countdown
+    resource: !secret wolframalpha_thanksgiving_api
+    value_template: "{{ (value|replace(' days', '')) | int }}"
+    unit_of_measurement: Days
+    scan_interval: 43200
