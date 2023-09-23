@@ -151,13 +151,39 @@ script:
           data:
             scene_id: before_haunting
             snapshot_entities:
-            - light.front_door_lamp
-            - light.living_room_lamp
-            - light.living_room_tower_lamp
-            - light.skylars_dresser_lamp
-            - light.kitchen_sink
-            - light.master_bedroom_tower_lamp
-            - light.jeff_lamp
+              - light.living_room_light
+              - light.cloakroom_light_2
+              - light.bed_lamps
+              - light.stair_lights
+              - light.sonoff_1001f6d982
+              - light.sonoff_1001f6d950
+              - light.sonoff_1001f6da3f
+              - light.sonoff_1001f6d954",
+  "light.sonoff_1001f6d7db",
+  "light.sonoff_1001f6daca",
+  "light.sonoff_1001f6d888",
+  "light.sonoff_1001f6d860",
+  "light.sonoff_1001f6d78c",
+  "light.sonoff_1001f6da0c",
+  "light.sonoff_1001f6d9ea",
+  "light.sonoff_1001f6dac6",
+  "light.sonoff_1001f6db20",
+  "light.back_door_light",
+  "light.guest_bedroom_bedside_lamp_left",
+  "light.guest_bedroom_bedside_lamp_right",
+  "light.landing_light_2",
+  "light.landing_light_1",
+  "light.kitchen_light_1",
+  "light.kitchen_light_2",
+  "light.kitchen_light_3",
+  "light.kitchen_light_4",
+  "light.kitchen_light_5",
+  "light.kitchen_lights_2",
+  "light.landing_lights_2",
+  "light.landing_light_3",
+  "light.landing_light_4",
+  "light.back_door_zone_light",
+  "light.utility_room_light
         # Change a random Random Light              
         - service: light.toggle
           data:
