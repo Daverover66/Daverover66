@@ -221,13 +221,14 @@ script:
     - service: script.youtube_audio # This script is in the audio.yaml in the packages folder. 
       data:
         speaker: >
-          {{ ['media_player.kitchen_display',
-              'media_player.upstairs_speaker',
-              'media_player.master_bedroom_speaker',
-              'media_player.croft_speaker',
-              'media_player.ha_blue',
-              'media_player.skylars_bedroom_speaker',
-              'media_player.theater'
+          {{ ['media_player.kitchen_echo_show',
+              'media_player.dave_s_2nd_echo_pop',
+              'media_player.dave_s_echo_pop',
+              'media_player.dave_s_2nd_echo_pop_2',
+              'media_player.main_bedroom_dot',
+              'media_player.guest_bedroom_echo_dot',
+              'media_player.living_room_dot',
+              'media_player.seans_room_dot'
               ] | random }} 
         volume: .5
         # I try to ensure each of the following links is 60 seconds or less. 
@@ -259,13 +260,14 @@ script:
     - service: script.local_audio # This script is in the audio.yaml in the packages folder. 
       data:
         speaker: >
-          {{ ['media_player.kitchen_display',
-              'media_player.upstairs_speaker',
-              'media_player.master_bedroom_speaker',
-              'media_player.croft_speaker',
-              'media_player.ha_blue',
-              'media_player.skylars_bedroom_speaker',
-              'media_player.theater'
+          {{ ['media_player.kitchen_echo_show',
+              'media_player.dave_s_2nd_echo_pop',
+              'media_player.dave_s_echo_pop',
+              'media_player.dave_s_2nd_echo_pop_2',
+              'media_player.main_bedroom_dot',
+              'media_player.guest_bedroom_echo_dot',
+              'media_player.living_room_dot',
+              'media_player.seans_room_dot'
               ] | random }} 
         volume: .5
          # I try to ensure each of the following links is 60 seconds or less. 
