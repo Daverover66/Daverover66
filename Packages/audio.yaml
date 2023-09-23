@@ -263,19 +263,19 @@ automation:
 script:
 
   ################################
-  # local_audio is meant to be used to play audio in your media folder. (https://www.home-assistant.io/integrations/media_source/)
+  # aws_s3_audio is meant to be used to play audio in your Amazon AWS S3 bucket.
   # 
   # Before using make sure you update as needed.
   # 
-  # To call this using in the action section of your automation:
+  # To call this script in the action section of your automation:
   # 
-  # - service: script.local_audio
+  # - service: script.aws_s3_audio
   #   data:
-  #     speaker: main
-  #     volume: .3
-  #     media: /media/local_audio.mp3
+  #     where: kitchen
+  #     message: >-
+  #        <audio src='insert aws url here'/>
   #
-  local_audio:
+  aws_s3_audio:
     sequence:
     # Ensure that audible notifications are allowed. Comment out if not needed.
     - condition: state
@@ -286,67 +286,9 @@ script:
       entity_id: binary_sensor.family_home
       state: 'on'
     # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
-    - service: media_player.volume_set
-      data:
-        entity_id: >
-         {% set where = speaker %}
-          {% if where == 'kitchen' %}
-            media_player.kitchen_echo_show
-          {% elif where == 'living_room' %}
-            media_player.dave_s_2nd_echo_pop
-          {% elif where == 'dining_room' %}
-            media_player.dave_s_echo_pop
-          {% elif where == 'main_bedroom'] %}
-            media_player.main_bedroom_dot
-          {% elif where == 'guest_bedroom' %}
-            media_player.guest_bedroom_echo_dot
-          {% elif where == 'jamies_room' %}
-            media_player.living_room_dot
-          {% elif where == 'seans_room' %}
-            media_player.seans_room_dot
-          {% elif where == 'office' %}
-            media_player.dave_s_2nd_echo_pop_2
-          {% else %}
-            {% if states.input_boolean.audible_notifications.state == 'on' %}
-            media_player.dave_s_2nd_echo_pop
-            {% else %}
-            media_player.kitchen_echo_show
-            {% endif %}
-          {% endif %}
-        volume_level: >
-          {{ volume }}
-    - delay: 00:00:05
-    # This tells it to play the media and is set when the script is called. 
-    - service: media_player.play_media
-      data:
-        entity_id: >
-          {% set where = speaker %}
-          {% if where == 'kitchen' %}
-            media_player.kitchen_echo_show
-          {% elif where == 'living_room' %}
-            media_player.dave_s_2nd_echo_pop
-          {% elif where == 'dining_room' %}
-            media_player.dave_s_echo_pop
-          {% elif where == 'main_bedroom'] %}
-            media_player.main_bedroom_dot
-          {% elif where == 'guest_bedroom' %}
-            media_player.guest_bedroom_echo_dot
-          {% elif where == 'jamies_room' %}
-            media_player.living_room_dot
-          {% elif where == 'seans_room' %}
-            media_player.seans_room_dot
-          {% elif where == 'office' %}
-            media_player.dave_s_2nd_echo_pop_2
-          {% else %}
-            {% if states.input_boolean.audible_notifications.state == 'on' %}
-            media_player.dave_s_2nd_echo_pop
-            {% else %}
-            media_player.kitchen_echo_show
-            {% endif %}
-          {% endif %}
-        media_content_type: "music"
-        media_content_id: >
-          {{ media }}
+    - service: script.alexa_voice
+        data:
+        
   
   
   ################################
