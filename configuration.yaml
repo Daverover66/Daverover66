@@ -41,6 +41,7 @@ mqtt: !include mqtt.yaml
 homeassistant:
   packages: !include_dir_named packages
   media_dirs: 
+    media: /media
     images: /media/images
     haunted_sounds: /media/haunted_sounds
     music: /media/music
