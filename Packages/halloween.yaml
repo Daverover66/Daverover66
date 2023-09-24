@@ -23,8 +23,8 @@
 #   - entity: automation.this_is_halloween
 #   - entity: input_boolean.this_is_halloween
 #   - entity: input_datetime.halloween_show
+#   - entity: input_boolean.spooky_music
 #   - entity: input_boolean.haunted_sounds
-#   - entity: input_boolean.scary_sounds
 # title: Halloween
 # show_header_toggle: false
 # state_color: true
@@ -39,10 +39,10 @@ input_boolean:
   this_is_halloween:
     name: This is Halloween
   # Enables Haunted Sounds. If on, basic haunted house effect happens
-  haunted_sounds:
-    name: Haunted Sounds
+  spooky_music:
+    name: Spooky Music
   # Enables More Intense Haunted Sounds. If on, scarier haunted house effect happens
-  scary_sounds:
+  haunted_sounds:
     name: Intense Hauntings
 
 
@@ -205,20 +205,55 @@ script:
             entity_id: scene.before_haunting
         # play more random haunted sounds. This time though, if we have scary sounds on we play one from there, if not, back to haunted sounds. 
         - service: >
-            {% if is_state('input_boolean.scary_sounds', 'on') %}
-              script.more_haunted_sounds
-            {% else %}
+            {% if is_state('input_boolean.haunted_sounds', 'on') %}
               script.haunted_sounds
+            {% else %}
+              script.spooky_music
             {% endif %}
         # Then delay again, and when that is done start over.
         - delay: '00:0{{ range(2,5) | random | int }}:00'
         
-        
-  # Update this script with your youtube sounds. 
-  # Each time this script is called it will play a random sound
-  more_haunted_sounds:
+  #  Update this script with your AWS S3 Spooky Music
+  #  Each time this script is called it will play a random sound
+  spooky_music:
     sequence:
-    - service: script.youtube_audio # This script is in the audio.yaml in the packages folder. 
+    - service: script.alexa_voice # This script is in the notify.yaml in the packages folder. 
+      data:
+        where: >
+          {{ ['media_player.kitchen_echo_show',
+              'media_player.dave_s_2nd_echo_pop',
+              'media_player.dave_s_echo_pop',
+              'media_player.dave_s_2nd_echo_pop_2',
+              'media_player.main_bedroom_dot',
+              'media_player.guest_bedroom_echo_dot',
+              'media_player.living_room_dot',
+              'media_player.seans_room_dot'
+              ] | random }} 
+        # These are short music pieces of no longer than 2 minutes . 
+        message: >
+          {{- ["<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PkavOCzx-config-media-haunted-sounds-this-is-halloween.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/5xnF7nvR-funny-happy-halloween-party-witches-sabbath-trailer-teaser-opener-116011.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/ANsMzBSC-creepy-music-box-halloween-music-horror-scary-spooky-dark-ambient-118577.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Daq8kA80-let-the-mystery-unfold-122118.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/l5bRQONZ-scary-forest-90162.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/OisFdWjp-slow-calm-dark-dark-ambient-halloween-walth-horror-and-creepy-116010.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/qo2ASzKP-halloween-time-122463.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/QOQpVPgn-happy-comedy-halloween-party-dance-for-kids-children-118581.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/riMAyEga-halloween-time-122605.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/StGC91zQ-halloween-114610.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/UWUSvGRU-scary-laugh-on-halloween-march-dark-night-monsters-ghosts-bats-116553.mp3'/>",
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/VzkhAnJC-spooky-shadows-165655.mp3"'/>"
+              ] | random -}}
+
+      
+  # Update this script with your AWS S3 sounds
+  # Each time this script is called it will play a random sound
+  haunted_sounds:
+    sequence:
+    - condition: state
+      entity_id: input_boolean.haunted_sounds
+      state: 'on'
+    - service: script.alexa_voice # This script is in the notify.yaml package
       data:
         where: >
           {{ ['media_player.kitchen_echo_show',
@@ -248,41 +283,7 @@ script:
             ] | random -}}
 
 
-  #Update this script with your local sounds.
-  #Each time this script is called it will play a random sound
-  haunted_sounds:
-    sequence:
-    # Ensure that haunted sounds are allowed. Comment out if not needed.
-    - condition: state
-      entity_id: input_boolean.haunted_sounds
-      state: 'on'
-    - service: script.alexa_voice # This script is in the notify.yaml in the packages folder. 
-      data:
-        where: >
-          {{ ['media_player.kitchen_echo_show',
-              'media_player.dave_s_2nd_echo_pop',
-              'media_player.dave_s_echo_pop',
-              'media_player.dave_s_2nd_echo_pop_2',
-              'media_player.main_bedroom_dot',
-              'media_player.guest_bedroom_echo_dot',
-              'media_player.living_room_dot',
-              'media_player.seans_room_dot'
-              ] | random }} 
-        # I try to ensure each of the following links is 60 seconds or less. 
-        message: >
-          {{- ["<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/4L5LuNir-config-media-haunted-sounds-haunted-dragonroaring.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/ACSSWqDG-config-media-haunted-sounds-chainsrattling.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/AkRow1zW-config-media-haunted-sounds-haunted-tollingbell.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/cmGknuv5-config-media-haunted-sounds-haunted-catscream.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Dcw2PRyD-config-media-haunted-sounds-evillaughcackle.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/FaUgcX9b-config-media-haunted-sounds-evillaugh.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PTYwhknz-config-media-haunted-sounds-evil-laugh-2.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/S7mNhLVj-config-media-haunted-sounds-scary.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/UnmZvi8p-config-media-haunted-sounds-haunted-heart.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Xs3TB3m3-config-media-haunted-sounds-creakingdoorspooky.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>"
-              ] | random -}}
+  
 
    
 # sensor:
