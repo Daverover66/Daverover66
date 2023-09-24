@@ -138,10 +138,62 @@ automation:
 
 script:
 
+#####################################
+#    Set Volume to Extra Spooky     #
+#####################################
+
+  audio_volume_extra_spooky:
+    sequence:
+    - service: media_player.volume_set
+      data:
+        volume_level: "{{ states('input_number.alexa_volume_level_high') | float(0) }}"
+      target:
+        entity_id:
+          - media_player.dave_s_echo_pop
+            # dining room #
+         # - media_player.guest_bedroom_echo_dot
+         # - media_player.living_room_dot
+            # jamies room #
+          - media_player.kitchen_echo_show
+          - media_player.dave_s_2nd_echo_pop
+            # living room #
+         # - media_player.main_bedroom_dot
+         # - media_player.dave_s_2nd_echo_pop_2
+            # office #
+         # - media_player.seans_room_dot
+    mode: single
+
+#####################################
+#        Set Volume to Normal       #
+#####################################
+
+  audio_volume_normal:
+    sequence:
+    - service: media_player.volume_set
+      data:
+        volume_level: "{{ states('input_number.alexa_volume_level_announcements') | float(0) }}"
+      target:
+        entity_id:
+          - media_player.dave_s_echo_pop
+            # dining room #
+         # - media_player.guest_bedroom_echo_dot
+         # - media_player.living_room_dot
+            # jamies room #
+          - media_player.kitchen_echo_show
+          - media_player.dave_s_2nd_echo_pop
+            # living room #
+         # - media_player.main_bedroom_dot
+         # - media_player.dave_s_2nd_echo_pop_2
+            # office #
+         # - media_player.seans_room_dot
+    mode: single 
+
   # This is where the magic happens. This is the script that handles all the haunted sounds. 
   # 
   haunted_house:
     sequence:
+    #  crank up the volume to extra spooky #
+    - service: script.audio_extra_spooky
     - repeat:
         while:
           - condition: state
@@ -217,6 +269,7 @@ script:
             {% endif %}
         # Then delay again, and when that is done start over.
         - delay: '00:0{{ range(2,5) | random | int }}:00'
+        - service: audio_volume_normal
         
   #  Update this script with your AWS S3 Spooky Music
   #  Each time this script is called it will play a random sound
