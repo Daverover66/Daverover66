@@ -256,7 +256,7 @@ script:
     - condition: state
       entity_id: input_boolean.haunted_sounds
       state: 'on'
-    - service: script.aws_s3_audio # This script is in the audio.yaml in the packages folder. 
+    - service: script.alexa_voice # This script is in the audio.yaml in the packages folder. 
       data:
         where: >
           {{ ['media_player.kitchen_echo_show',
