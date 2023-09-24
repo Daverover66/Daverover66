@@ -266,7 +266,7 @@ script:
   # aws_s3_audio is meant to be used to play audio in your Amazon AWS S3 bucket.
   #
   #  It may not be needed if you only have Amazon Echo speakers as all audio can be fed to the alexa_voice
-  #  script in the audio.yaml package.
+  #  script in the notify.yaml package.
   #
   # If you want to play audio files through Amazon Echo speakers, you'll need an Amazon AWS S3 bucket (aws.amazon.com) 
   # with audio files that have been through an audio converter such as v3.jovo.tech/audio-converter. These audio files must 
@@ -282,7 +282,7 @@ script:
   # 
   # Before using make sure you update as needed.
   # 
-  # Alternatively, if you have the alexa_voice script in your audio.yaml package, you can use 
+  # Alternatively, if you have the alexa_voice script in your notify.yaml package, you can use 
   # this script in the action section of your automation:
   # 
   # - service: script.alexa_voice
