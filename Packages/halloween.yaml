@@ -299,7 +299,7 @@ script:
                "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/riMAyEga-halloween-time-122605.mp3'/>",
                "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/StGC91zQ-halloween-114610.mp3'/>",
                "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/UWUSvGRU-scary-laugh-on-halloween-march-dark-night-monsters-ghosts-bats-116553.mp3'/>",
-               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/VzkhAnJC-spooky-shadows-165655.mp3"'/>"
+               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/VzkhAnJC-spooky-shadows-165655.mp3'/>"
               ] | random -}}
 
       
