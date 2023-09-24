@@ -195,15 +195,15 @@ script:
                 'light.landing_light_3','light.landing_light_4','light.kitchen_light_1','light.kitchen_light_2',
                 'light.kitchen_light_3','light.kitchen_light_4','light.kitchen_light_5','light.back_door_zone_light',
                 'light.utility_room_light] | random}}
-        # Start playing a random selection from our haunted sounds.
-        - service: script.haunted_sounds
+        # Start playing a random selection from our spooky music.
+        - service: script.spooky_music
         # Then another delay. This one is a random delay between 2 and 5 minutes. A delay of at least 2 minutes ensures the previous effect is done before the next one.
         - delay: '00:0{{ range(2,5) | random | int }}:00'
         # After the delay, change the state of the lights back to what they were 
         - service: scene.turn_on
           target:
             entity_id: scene.before_haunting
-        # play more random haunted sounds. This time though, if we have scary sounds on we play one from there, if not, back to haunted sounds. 
+        # play more random haunted sounds. This time though, if we have haunted sounds on we play one from there, if not, back to spooky music. 
         - service: >
             {% if is_state('input_boolean.haunted_sounds', 'on') %}
               script.haunted_sounds
@@ -248,38 +248,27 @@ script:
       
   # Update this script with your AWS S3 sounds
   # Each time this script is called it will play a random sound
-  haunted_sounds:
-    sequence:
-    - condition: state
-      entity_id: input_boolean.haunted_sounds
-      state: 'on'
-    - service: script.alexa_voice # This script is in the notify.yaml package
-      data:
-        where: >
-          {{ ['media_player.kitchen_echo_show',
-              'media_player.dave_s_2nd_echo_pop',
-              'media_player.dave_s_echo_pop',
-              'media_player.dave_s_2nd_echo_pop_2',
-              'media_player.main_bedroom_dot',
-              'media_player.guest_bedroom_echo_dot',
-              'media_player.living_room_dot',
-              'media_player.seans_room_dot'
-              ] | random }} 
-        # I try to ensure each of the following links is 60 seconds or less. 
-        message: >
-          {{- [
-           "https://www.youtube.com/watch?v=-s04sbIViJQ",
-           "https://www.youtube.com/watch?v=vF681VBX_oo",
-           "https://www.youtube.com/watch?v=WQVnOSj8DWI",
-           "https://www.youtube.com/watch?v=DaOnw_kCcYU",
-           "https://www.youtube.com/watch?v=E9VFB_0nSbA",
-           "https://www.youtube.com/watch?v=_A1yK0YU6U0",
-           "https://www.youtube.com/watch?v=AQ1SE4tLICg",
-           "https://www.youtube.com/watch?v=SsVj21c9isA",
-           "https://www.youtube.com/watch?v=nKltUaCxZPc",
-           "https://www.youtube.com/watch?v=G3JlB47fzV4",
-           "https://www.youtube.com/watch?v=_24O4vb-KWk",
-           "https://www.youtube.com/watch?v=oeLcHIpTlHU"
+haunted_sounds:
+   sequence:
+   - condition: state
+     entity_id: input_boolean.haunted_sounds
+     state: 'on'
+   - service: script.alexa_voice # This script is in the notify.yaml package
+     data:
+       where: >
+         {{ ['media_player.kitchen_echo_show',
+             'media_player.dave_s_2nd_echo_pop',
+             'media_player.dave_s_echo_pop',
+             'media_player.dave_s_2nd_echo_pop_2',
+             'media_player.main_bedroom_dot',
+             'media_player.guest_bedroom_echo_dot',
+             'media_player.living_room_dot',
+             'media_player.seans_room_dot'
+             ] | random }} 
+       # I try to ensure each of the following links is 60 seconds or less. 
+       message: >
+         {{- ["audio src='
+           
             ] | random -}}
 
 
