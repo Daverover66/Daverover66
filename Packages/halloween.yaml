@@ -57,9 +57,10 @@ input_datetime:
     has_time: true
 
 ################################
-# Media extractor is used for playing youtube audio. For more info ->https://www.home-assistant.io/integrations/media_extractor/
-#
+# Media extractor is used for playing YouTube audio. For more info ->https://www.home-assistant.io/integrations/media_extractor/
+# YouTube audio does not yet play on Amazon Echo speakers so comment out if not needed
 # If you have this enabled in another package or in your configuration.yaml comment out the line below
+# I have this in my audio.yaml file in packages
 #media_extractor:
 
 ############################
@@ -72,6 +73,7 @@ automation:
   - id: this_is_halloween
     alias: This is Halloween
     initial_state: true
+    mode: single
     trigger:
     # When the current time matches input_datetime.halloween_show, light this candle
     - platform: time
@@ -151,30 +153,10 @@ script:
           data:
             scene_id: before_haunting
             snapshot_entities:
+              # comment out any lights not needed
+              # downstairs lights
               - light.living_room_light
               - light.cloakroom_light_2
-              - light.bed_lamps
-              - light.stair_lights
-              - light.sonoff_1001f6d982
-              - light.sonoff_1001f6d950
-              - light.sonoff_1001f6da3f
-              - light.sonoff_1001f6d954
-              - light.sonoff_1001f6d7db
-              - light.sonoff_1001f6daca
-              - light.sonoff_1001f6d888
-              - light.sonoff_1001f6d860
-              - light.sonoff_1001f6d78c
-              - light.sonoff_1001f6da0c
-              - light.sonoff_1001f6d9ea
-              - light.sonoff_1001f6dac6
-              - light.sonoff_1001f6db20
-              - light.back_door_light
-              - light.guest_bedroom_bedside_lamp_left
-              - light.guest_bedroom_bedside_lamp_right
-              - light.landing_light_1
-              - light.landing_light_2
-              - light.landing_light_3
-              - light.landing_light_4
               - light.kitchen_light_1
               - light.kitchen_light_2
               - light.kitchen_light_3
@@ -182,6 +164,29 @@ script:
               - light.kitchen_light_5
               - light.back_door_zone_light
               - light.utility_room_light
+              - light.back_door_light
+              - light.sonoff_1001f6da0c # standard lamp light 1
+              - light.sonoff_1001f6d78c # standard lamp light 2
+              - light.sonoff_1001f6d860 # standard lamp light 3
+              - light.sonoff_1001f6db20 # corner lamp 1
+              - light.sonoff_1001f6dac6 # corner lamp 2
+              - light.sonoff_1001f6d9ea # corner lamp 3
+              - light.sonoff_1001f6d888 # living room light 1
+              - light.sonoff_1001f6daca # living room light 2
+              - light.sonoff_1001f6d7db # living room light 3
+              - light.sonoff_1001f6d954 # living room light 4
+              - light.sonoff_1001f6da3f # living room light 5
+              # upstairs lights
+              - light.sonoff_1001f6d982 # mum's bedside lamp
+              - light.sonoff_1001f6d950 # dad's bedside lamp                
+              - light.bed_lamps
+              - light.stair_lights
+              - light.guest_bedroom_bedside_lamp_left
+              - light.guest_bedroom_bedside_lamp_right
+              - light.landing_light_1
+              - light.landing_light_2
+              - light.landing_light_3
+              - light.landing_light_4
         # Change a random Random Light              
         - service: light.toggle
           data:
@@ -223,11 +228,11 @@ script:
           {{ ['media_player.kitchen_echo_show',
               'media_player.dave_s_2nd_echo_pop',
               'media_player.dave_s_echo_pop',
-              'media_player.dave_s_2nd_echo_pop_2',
-              'media_player.main_bedroom_dot',
-              'media_player.guest_bedroom_echo_dot',
-              'media_player.living_room_dot',
-              'media_player.seans_room_dot'
+              #'media_player.dave_s_2nd_echo_pop_2',
+              #'media_player.main_bedroom_dot',
+              #'media_player.guest_bedroom_echo_dot',
+              #'media_player.living_room_dot',
+              #'media_player.seans_room_dot'
               ] | random }} 
         # These are short music pieces of no longer than 2 minutes . 
         message: >
@@ -259,11 +264,11 @@ haunted_sounds:
          {{ ['media_player.kitchen_echo_show',
              'media_player.dave_s_2nd_echo_pop',
              'media_player.dave_s_echo_pop',
-             'media_player.dave_s_2nd_echo_pop_2',
-             'media_player.main_bedroom_dot',
-             'media_player.guest_bedroom_echo_dot',
-             'media_player.living_room_dot',
-             'media_player.seans_room_dot'
+             #'media_player.dave_s_2nd_echo_pop_2',
+             #'media_player.main_bedroom_dot',
+             #'media_player.guest_bedroom_echo_dot',
+             #'media_player.living_room_dot',
+             #'media_player.seans_room_dot'
              ] | random }} 
        # I try to ensure each of the following links is 60 seconds or less. 
        message: >
