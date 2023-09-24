@@ -108,7 +108,7 @@ automation:
         - condition: trigger
           id: start
         sequence:
-        - service: script.aws_s3_audio
+        - service: script.alexa_voice
           data:
             where: kitchen
             message: >-
@@ -256,7 +256,7 @@ script:
     - condition: state
       entity_id: input_boolean.haunted_sounds
       state: 'on'
-    - service: script.alexa_voice # This script is in the audio.yaml in the packages folder. 
+    - service: script.alexa_voice # This script is in the notify.yaml in the packages folder. 
       data:
         where: >
           {{ ['media_player.kitchen_echo_show',
@@ -284,135 +284,11 @@ script:
                "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/Yjp0Z1J6-config-media-haunted-sounds-haunted-scaryscream.mp3'/>"
               ] | random -}}
 
-  # haunted_sounds_git:
-  #   sequence:
-  #   # Ensure that haunted sounds are allowed. Comment out if not needed.
-  #   - condition: state
-  #     entity_id: input_boolean.haunted_sounds
-  #     state: 'on'
-  #   - service: script.youtube_audio # This script is in the audio.yaml in the packages folder. 
-  #     data:
-  #       speaker: >
-  #         {{ ['media_player.kitchen_display',
-  #             'media_player.upstairs_speaker',
-  #             'media_player.master_bedroom_speaker',
-  #             'media_player.croft_speaker',
-  #             'media_player.ha_blue',
-  #             'media_player.skylars_bedroom_speaker',
-  #             'media_player.theater'
-  #             ] | random }} 
-  #       volume: .5
-  #        # I try to ensure each of the following links is 60 seconds or less. 
-  #       media: >
-  #         {{ [
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/EvilLaughCackle.mp3'.
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/ChainsRattling.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/CreakingDoorSpooky.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Evil_Laugh_2.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Evillaugh.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Haunted-CatScream.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Haunted-DragonRoaring.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Haunted-Heart.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Haunted-ScaryScream.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Haunted-TollingBell.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/Scary.mp3',
-  #           'https://raw.githubusercontent.com/thejeffreystone/home-assistant-configuration/master/config/media/haunted_sounds/raven.mp3'
-  #         ] | random }}
- 
-
-################################
-  # local_audio is meant to be used to play audio in your media folder. (https://www.home-assistant.io/integrations/media_source/)
-  # 
-  # Before using make sure you update as needed.
-  # 
-  # To call this using in the action section of your automation:
-  # 
-  # - service: script.local_audio
-  #   data:
-  #     speaker: media_player.ha_blue
-  #     volume: .5
-  #     media: /media/local_audio.mp3
-  #
-  # local_audio:
-  #   sequence:
-  #   # Ensure that audible notifications are allowed. Comment out if not needed.
-  #   - condition: state
-  #     entity_id: input_boolean.audible_notifications
-  #     state: 'on'
-  #   # Ensure the family is home. If you are using a group to track the family, or a person just update as needed. Comment out if not needed.
-  #   - condition: state
-  #     entity_id: group.family
-  #     state: 'home'
-  #   # Update the media player with the one you want to use
-  #   - service: media_player.turn_on
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #   # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
-  #   - service: media_player.volume_set
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #       volume_level: >
-  #         {{ volume }}
-  #   - delay: 00:00:05
-  #   # This tells it to play the media and is set when the script is called. 
-  #   - service: media_player.play_media
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #       media_content_type: "music"
-  #       media_content_id: >
-  #         {{ media }}
-  
-  
-  ################################
-  # youtube_audio is meant to be used to play audio from well youtube. 
-  # This scrtip requires the media_extractor integration.
-  # 
-  # Before using make sure you update as needed.
-  # 
-  # To call this using in the action section of your automation:
-  # 
-  # - service: script.youtube_audio
-  #   data:
-  #     speaker: media_player.ha_blue
-  #     volume: .5
-  #     media: https://www.youtube.com/watch?v=pVeX4C9B1Lk
-  #
-  # youtube_audio:
-  #   sequence:
-  #   # Ensure that audible notifications are allowed. Comment out if not needed.
-  #   - condition: state
-  #     entity_id: input_boolean.audible_notifications
-  #     state: 'on'
-  #   # Ensure the family is home. If you are using a group to track the family, or a person just update as needed. Comment out if not needed.
-  #   - condition: state
-  #     entity_id: group.family
-  #     state: 'home'
-  #   # Update the media player with the one you want to use
-  #   - service: media_player.turn_on
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #   # This sets the voume via a parameter when the script is called, and should be a value between .1 and 1.0
-  #   - service: media_player.volume_set
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #       volume_level: >
-  #         {{ volume }}
-  #   # This tells it to play the media and is set when the script is called. 
-  #   - service: media_extractor.play_media
-  #     data:
-  #       entity_id: >
-  #         {{ speaker }}
-  #       media_content_type: video/youtube
-  #       media_content_id: >
-  #         {{ media }}
-  
+   
 # sensor:
-#   # Halloween Countdown Sensor using Wolfram Alpha. See the note at the top for a link to how to set it up
+#   # Halloween Countdown Sensor using Wolfram Alpha. See the note at the top for a link to how to set it up.
+#     Mine is in my holidays.yaml package
+#
 #   - platform: rest
 #     name: Halloween Countdown
 #     resource: !secret wolframalpha_halloween_api
