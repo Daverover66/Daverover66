@@ -160,6 +160,12 @@ automation:
         id: BDZ Off
       - platform: state
         entity_id:
+          - binary_sensor.back_door_sensor_contact
+        from: "off"
+        to: "on"
+        id: Back Door Entry 
+      - platform: state
+        entity_id:
           - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
         from: "off"
         to: "on"  
@@ -528,6 +534,23 @@ automation:
                     target:
                       entity_id:
                         - scene.kitchen_light_indicator_washing_machine_finished
+          - conditions:
+              - condition: trigger
+                id:
+                  - Back Door Entry
+              - condition: sun
+                before: sunrise
+                after: sunset
+              - condition: state
+                entity_id: light.back_door_zone_light
+                state: "off"
+            sequence:
+              - service: light.turn_on
+                data:
+                  color_temp: 500
+                  brightness: 127
+                target:
+                  entity_id: light.back_door_zone_light
           - conditions:
               - condition: trigger
                 id:
