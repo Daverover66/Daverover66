@@ -250,7 +250,7 @@ script:
                 'light.guest_bedroom_bedside_lamp_right','light.landing_light_1','light.landing_light_2',
                 'light.landing_light_3','light.landing_light_4','light.kitchen_light_1','light.kitchen_light_2',
                 'light.kitchen_light_3','light.kitchen_light_4','light.kitchen_light_5','light.back_door_zone_light',
-                'light.utility_room_light] | random}}
+                'light.utility_room_light'] | random}}
         # Start playing a random selection from our spooky music.
         - service: script.spooky_music
         # Then another delay. This one is a random delay between 2 and 5 minutes. A delay of at least 2 minutes ensures the previous effect is done before the next one.
