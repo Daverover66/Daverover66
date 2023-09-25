@@ -95,7 +95,25 @@ automation:
     action:
     - service: input_boolean.turn_on
       entity_id: input_boolean.this_is_halloween  
+    - service: switch.turn_on
+      entity_id: switch.living_room_light
+    - delay: '00:00:20'
+    - service: scene.turn_on
+      data: {}
+      target:
+        entity_id: scene.halloween_living_room_light
+    - delay: '00:01:00'
+    - service: light.turn_off
+      entity_id: light.living_room_lights
+    - service: light.turn_on
+      entity_id: light.living_room_lights
+      data:
+        brightness: 255
+        color_temp: 160
+    - service: switch.turn_off
+      entity_id: switch.living_room_light
     - delay: '02:00:00'
+    
     - service: input_boolean.turn_off
       entity_id: input_boolean.this_is_halloween
 
