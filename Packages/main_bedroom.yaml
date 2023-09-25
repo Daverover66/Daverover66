@@ -38,7 +38,7 @@ input_boolean:
 input_number:
   main_bedroom_sleep:
     name: Main Bedroom Sleep
-    initial: 128
+    initial: 255
     min: 0
     max: 255
     step: 4.25
@@ -81,18 +81,6 @@ input_number:
     mode: slider
     icon: mdi:water-percent
     unit_of_measurement: "%"
-
-############################
-#        Derivative        #
-############################
-
-sensor:
-  - platform: derivative
-    source: sensor.en_suite_temperature_and_humidity_humidity
-    name: En-Suite Humidity Change
-    unit_time: min
-    time_window: "00:00:30"
-    round: 2
 
 ###########################
 #       Automation        #
@@ -414,7 +402,7 @@ bed_lamps_dim_at_bedtime:
       entity_id: light.bed_lamps
   - service: input_number.set_value
     data:
-      value: 128
+      value: 255
     target:
       entity_id: input_number.main_bedroom_sleep
   mode: single
