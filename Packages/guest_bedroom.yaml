@@ -17,7 +17,9 @@
 ###########################
 
 input_boolean:
-  guest_bedroom_bed_lamps_active:
+  guest_bedroom_bedside_lamps_active:
+    name: Guest Bedroom Bedside Lamps Active
+    icon: mdi:lamp
   
   
 ###########################
@@ -156,11 +158,82 @@ automation:
                     - light.guest_bedroom_bedside_lamp_left
                     - light.guest_bedroom_bedside_lamp_right
 
+###############################
+#    Smart Button Upstairs 1  #
+###############################
+
+  - id: smart_button_upstairs_1_automations
+    alias: Smart Button Upstairs 1 Automations
+    description: ""
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.smart_button_upstairs_1_action
+        id: Casper & Sky on
+        to: single
+      - platform: state
+        entity_id:
+          - sensor.smart_button_upstairs_1_action
+        to: double
+        id: Casper & Sky off
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Casper & Sky on
+            sequence:
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.casper_switch_0
+              - service: media_player.turn_on
+                data: {}
+                target:
+                  entity_id: media_player.sky_q_guest_bedroom_mini
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.status_annc
+                    data:
+                      where: Guest Bedroom
+                      call_interruption: 1
+                      call_media_system_on: 1
+          - conditions:
+              - condition: trigger
+                id: Casper & Sky off
+            sequence:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.casper_switch_0
+              - service: media_player.turn_off
+                data: {}
+                target:
+                  entity_id: media_player.sky_q_guest_bedroom_mini
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.status_annc
+                    data:
+                      where: Guest Bedroom
+                      call_interruption: 1
+                      call_media_system_off: 1            
+
 
 ###########################
 #        Scripts          #
 ###########################
 
-###########################
-#     Helpers             #
-###########################
