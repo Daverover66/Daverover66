@@ -265,6 +265,8 @@ automation:
   - id: 1683829474990
     alias: En-Suite Bathroom Fan On/Off with Humidity Level or Off with Timer
     description: ""
+    initial_state: true
+    mode: single
     trigger:
       - platform: numeric_state
         entity_id: sensor.en_suite_temperature_and_humidity_humidity
@@ -293,67 +295,20 @@ automation:
         entity_id: sensor.en_suite_humidity_change
         above: input_number.en_suite_fan_activate
         id: Shower On
-condition: []
-action:
-  - choose:
-      - conditions:
-          - condition: trigger
-            id:
-              - Shower On
-          - condition: state
-            entity_id: switch.en_suite_fan_switch
-            state: "off"
-          - condition: state
-            entity_id: binary_sensor.quiet_time
-            state: "off"
-        sequence:
-          - type: turn_on
-            device_id: b5edcb03424d315e8e0842e735d916f7
-            entity_id: switch.en_suite_fan_switch
-            domain: switch
-          - service: timer.start
-            data: {}
-            target:
-              entity_id: timer.en_suite_bathroom_fan
-      - conditions:
-          - condition: trigger
-            id:
-              - Humidity Normal
-              - En-Suite Fan Off
-          - condition: state
-            entity_id: switch.en_suite_fan_switch
-            state: "on"
-        sequence:
-          - type: turn_off
-            device_id: b5edcb03424d315e8e0842e735d916f7
-            entity_id: switch.en_suite_fan_switch
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id: Quiet Time Start
-        sequence:
-          - if:
-              - condition: state
-                entity_id: switch.en_suite_fan_switch
-                state: "on"
-            then:
-              - type: turn_off
-                device_id: b5edcb03424d315e8e0842e735d916f7
-                entity_id: switch.en_suite_fan_switch
-                domain: switch
-      - conditions:
-          - condition: trigger
-            id: Quiet Time End
-        sequence:
-          - if:
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Shower On
               - condition: state
                 entity_id: switch.en_suite_fan_switch
                 state: "off"
-              - condition: numeric_state
-                entity_id: sensor.en_suite_temperature_and_humidity_humidity
-                above: input_number.en_suite_humidity_high
-                alias: Confirm En-Suite humidity is above 75%
-            then:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+            sequence:
               - type: turn_on
                 device_id: b5edcb03424d315e8e0842e735d916f7
                 entity_id: switch.en_suite_fan_switch
@@ -362,7 +317,53 @@ action:
                 data: {}
                 target:
                   entity_id: timer.en_suite_bathroom_fan
-mode: single
+          - conditions:
+              - condition: trigger
+                id:
+                  - Humidity Normal
+                  - En-Suite Fan Off
+              - condition: state
+                entity_id: switch.en_suite_fan_switch
+                state: "on"
+            sequence:
+              - type: turn_off
+                device_id: b5edcb03424d315e8e0842e735d916f7
+                entity_id: switch.en_suite_fan_switch
+                domain: switch
+          - conditions:
+              - condition: trigger
+                id: Quiet Time Start
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: switch.en_suite_fan_switch
+                    state: "on"
+                then:
+                  - type: turn_off
+                    device_id: b5edcb03424d315e8e0842e735d916f7
+                    entity_id: switch.en_suite_fan_switch
+                    domain: switch
+          - conditions:
+              - condition: trigger
+                id: Quiet Time End
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: switch.en_suite_fan_switch
+                    state: "off"
+                  - condition: numeric_state
+                    entity_id: sensor.en_suite_temperature_and_humidity_humidity
+                    above: input_number.en_suite_humidity_high
+                    alias: Confirm En-Suite humidity is above 75%
+                then:
+                  - type: turn_on
+                    device_id: b5edcb03424d315e8e0842e735d916f7
+                    entity_id: switch.en_suite_fan_switch
+                    domain: switch
+                  - service: timer.start
+                    data: {}
+                    target:
+                      entity_id: timer.en_suite_bathroom_fan
 
 
 ###########################
