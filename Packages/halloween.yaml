@@ -45,6 +45,11 @@ input_boolean:
   haunted_sounds:
     name: Intense Hauntings
 
+###############################
+# input_number for extra spooky volume (https://www.home-assistant.io/integrations/input_number/)
+#
+input_number:
+
 
 ############################
 # input_datetime (https://www.home-assistant.io/integrations/input_datetime/)
@@ -115,7 +120,7 @@ automation:
             where: kitchen
             message: >-
               <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PkavOCzx-config-media-haunted-sounds-this-is-halloween.mp3'/>
-        - delay: '00:04:00'
+        - delay: '00:03:20'
         - service: script.turn_on
           target:
             entity_id: script.haunted_house
