@@ -272,7 +272,7 @@ automation:
         to: "on"
         id: Wake Up
     condition: []
-      action:
+    action:
       - choose:
           - conditions:
               - condition: trigger
