@@ -251,6 +251,8 @@ script:
               - light.corner_lamp
               - light.living_room_light
               # upstairs lights
+              - light.main_bathroom_light
+              - light.kids_bathroom_light
               - light.sonoff_1001f6d982 # mum's bedside lamp
               - light.sonoff_1001f6d950 # dad's bedside lamp
               - light.bed_lamps
@@ -262,10 +264,10 @@ script:
         - service: light.toggle
           data:
             entity_id: >
-              {{ ['light.living_room_light','light.cloakroom_light_2','light.bed_lamps','light.stair_lights',
+              {{ ['light.kids_bathroom_light','light.main_bathroom_light','light.living_room_light','light.cloakroom_light_2',
                   'light.living_room_light','light.back_door_light','light.guest_bedroom_bedside_lamp_left',
-                  'light.corner_lamp','light.standard_lamp','light.guest_bedroom_bedside_lamp_right',
-                  'light.landing_lights_2','light.kitchen_lights_2','light.back_door_zone_light',
+                  'light.corner_lamp','light.standard_lamp','light.guest_bedroom_bedside_lamp_right','light.stair_lights',
+                  'light.landing_lights_2','light.kitchen_lights_2','light.back_door_zone_light','light.bed_lamps',
                   'light.utility_room_light'
                   ] | random }}
         # Start playing a random selection from our spooky music.
