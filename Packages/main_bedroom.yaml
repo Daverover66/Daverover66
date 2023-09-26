@@ -259,6 +259,12 @@ automation:
     initial_state: true
     mode: single
     trigger: 
+      - platform: template
+        value_template: "{% if (as_timestamp(states('sensor.sun_next_rising')) | timestamp_custom ('%H')) | float(0) > 7 %} true {% endif %}"
+        id: Activate
+      - platform: template
+        value_template: "{% if (as_timestamp(states('sensor.sun_next_rising')) | timestamp_custom ('%H')) | float(0) < 7 %} true {% endif %}"
+        id: Deactivate
       - platform: state
         entity_id: binary_sensor.morning
         state: "on"
@@ -268,7 +274,34 @@ automation:
       entity_id: input_boolean.wakeup_lights
       state: "on"
     action:
-      service: script.main_bedroom_morning_wakeup_lighting
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Activate
+            sequence:
+              - service: input_boolean.turn_on
+                data: {}
+                target:
+                  entity_id: input_boolean.wakeup_lights
+          - conditions:
+              - condition: trigger
+                id:
+                  - Deactivate
+            sequence:
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.wakeup_lights
+          - conditions:
+              - condition: trigger
+                id:
+                  - Wake Up
+              - condition: state
+                entity_id: input_boolean.wakeup_lights
+                state: "on"
+            sequence:      
+              - service: script.main_bedroom_morning_wakeup_lighting
 
 ###########################
 #       En-Suite Fan      #
