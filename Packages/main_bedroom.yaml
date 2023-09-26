@@ -497,7 +497,7 @@ bed_lamps_dim_at_bedtime:
             - condition: template
               value_template: "{{ states('input_number.main_bedroom_wake') | int < 256 }}"
           sequence:
-            - service:  script.main_bedroom_bed_lights_night_dim
+            - service:  script.main_bedroom_bed_lights_morning_wake
               data:
                 level: '{{ states("input_number.main_bedroom_wake") }}'
             - service: input_number.increment
