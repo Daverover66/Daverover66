@@ -30,6 +30,9 @@ input_boolean:
   main_bedroom_bedside_lamps_active:
     name: Main Bedroom Bedside Lamps Active
     icon: mdi:lamp
+  wakeup_lights:
+    name: Bedroom Wakeup Lights
+    icon: mdi:white-balance-sunny 
   
 ###########################
 #       Number            #
@@ -247,6 +250,27 @@ automation:
                     - light.sonoff_1001f6d950
 
 ###########################
+#       Wake Up Lights    #
+###########################
+
+  - id: main_bedroom_wakeup_lights
+    alias: Main Bedroom Wakeup Lights
+    description: "Turn on wakeup lights once sunrise is later than 7am"
+    initial_state: true
+    mode: single
+    trigger: 
+      - platform: state
+        entity_id: binary_sensor.morning
+        state: "on"
+        id: Wake Up
+    condition:
+      condition: state
+      entity_id: input_boolean.wakeup_lights
+      state: "on"
+    action:
+      service: script.main_bedroom_morning_wakeup_lighting
+
+###########################
 #       En-Suite Fan      #
 ###########################
 
@@ -379,6 +403,11 @@ script:
 bed_lamps_dim_at_bedtime:
   alias: Bed lamps dim at Bedtime
   sequence:
+  - service: input_number.set_value
+    data:
+      value: 255
+    target:
+      entity_id: input_number.main_bedroom_sleep
   - repeat:
       while:
       - condition: template
@@ -406,3 +435,31 @@ bed_lamps_dim_at_bedtime:
     target:
       entity_id: input_number.main_bedroom_sleep
   mode: single
+
+##############################
+# Bed Lights Wakeup Lighting #
+##############################
+
+  main_bedroom_morning_wakeup_lighting:
+    sequence:
+      - service: input_number.set_value
+        data:
+          value: 8.5
+        target:
+          entity_id: input_number.main_bedroom_wake          
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ states('input_number.main_bedroom_wake') | int < 256 }}"
+          sequence:
+            - service:  script.main_bedroom_bed_lights_night_dim
+              data:
+                  level: '{{ states("input_number.main_bedroom_wake") }}'
+            - service: input_number.increment
+              entity_id: input_number.main_bedroom_wake
+            - delay: 00:01:00
+      - service: input_number.set_value
+        data:
+          value: 8.5
+        target:
+          entity_id: input_number.main_bedroom_wake
