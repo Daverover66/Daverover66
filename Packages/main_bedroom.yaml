@@ -271,11 +271,8 @@ automation:
         from: "off"
         to: "on"
         id: Wake Up
-    condition:
-      condition: state
-      entity_id: input_boolean.wakeup_lights
-      state: "on"
-    action:
+    condition: []
+      action:
       - choose:
           - conditions:
               - condition: trigger
