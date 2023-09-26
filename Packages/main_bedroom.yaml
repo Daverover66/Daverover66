@@ -446,9 +446,11 @@ bed_lamps_dim_at_bedtime:
       - condition: template
         value_template: '{{ states("input_number.main_bedroom_sleep") | int > 0 }}'
       sequence:
-      - service: script.main_bedroom_bed_lights_night_dim
+      - service: script.turn_on
         data:
           level: '{{ states("input_number.main_bedroom_sleep") }}'
+        target:
+          entity_id: script.main_bedroom_bed_lights_night_dim
       - service: input_number.decrement
         target:
           entity_id: input_number.main_bedroom_sleep
@@ -485,9 +487,11 @@ bed_lamps_dim_at_bedtime:
             - condition: template
               value_template: "{{ states('input_number.main_bedroom_wake') | int < 256 }}"
           sequence:
-            - service:  script.main_bedroom_bed_lights_night_dim
+            - service:  script.turn_on
               data:
                   level: '{{ states("input_number.main_bedroom_wake") }}'
+              target:
+                entity_id: script.main_bedroom_bed_lights_night_dim
             - service: input_number.increment
               entity_id: input_number.main_bedroom_wake
             - delay: 00:01:00
