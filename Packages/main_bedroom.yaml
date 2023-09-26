@@ -271,6 +271,10 @@ automation:
         from: "off"
         to: "on"
         id: Wake Up
+      - platform: numeric_state
+        entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+        above: 50
+        id: Lights Off
     condition: []
     action:
       - choose:
@@ -301,6 +305,21 @@ automation:
                 state: "on"
             sequence:      
               - service: script.main_bedroom_morning_wakeup_lighting
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights Off
+              - condition: state
+                entity_id: binary_sensor.morning
+                state: "on"
+              - condition: state
+                entity_id: light.bed_lamps
+                state: "on"
+            sequence:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.bed_lamps
 
 ###########################
 #       En-Suite Fan      #
