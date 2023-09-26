@@ -266,8 +266,10 @@ automation:
         value_template: "{% if (as_timestamp(states('sensor.sun_next_rising')) | timestamp_custom ('%H')) | float(0) < 7 %} true {% endif %}"
         id: Deactivate
       - platform: state
-        entity_id: binary_sensor.morning
-        state: "on"
+        entity_id:
+          - binary_sensor.morning
+        from: "off"
+        to: "on"
         id: Wake Up
     condition:
       condition: state
