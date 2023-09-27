@@ -64,14 +64,14 @@ automation:
       - condition: state
         entity_id: input_boolean.holiday_mode
         state: "off"
-      - condition: state
-        entity_id: binary_sensor.lights_out
-        state: "off"
     action:
       - choose:
           - conditions:
               - condition: trigger
                 id: Light on
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
               - condition: numeric_state
                 entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
                 below: input_number.low_light_threshold
@@ -126,6 +126,9 @@ automation:
               - condition: state
                 entity_id: input_boolean.room_occupied_guest_bedroom
                 state: "on"
+              - condition: state
+                entity_id: binary_sensor.lights_out
+                state: "off"
             sequence:
               - service: light.turn_on
                 data:
