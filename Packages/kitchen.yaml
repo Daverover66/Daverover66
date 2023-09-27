@@ -219,13 +219,22 @@ automation:
         id: Allow Lights on
     condition:
       - condition: state
-        entity_id: binary_sensor.lights_out
-        state: "off"
-      - condition: state
         entity_id: input_boolean.holiday_mode
         state: "off"
     action:
       - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Lights On
+              - condition: state
+                entity_id: binary_sensor.overnight
+                state:"on"
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.kitchen_night_lights
+                metadata: {}
           - conditions:
               - condition: trigger
                 id:
