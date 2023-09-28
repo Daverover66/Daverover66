@@ -1334,12 +1334,9 @@ automation:
                     state: active
             sequence:
               - if:
-                  - condition: template
-                    value_template: "{{ is_state('light.kitchen_light_5','on') }}"
-                  - condition: template
-                    value_template: "{{ is_state_attr('light.kitchen_light_5','color_temp',200) }}"
-                  - condition: template
-                    value_template: "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
+                  - "{{ is_state('light.kitchen_light_5','on') }}"
+                  - "{{ is_state_attr('light.kitchen_light_5','color_temp',200) }}"
+                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
                then:
                  - service: scene.turn_on
                    data: {}
@@ -1348,12 +1345,9 @@ automation:
                        scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_indicator_on
                 else:
                   - if:
-                      - condition: template
-                        value_template: "{{ is_state('light.kitchen_light_5','on') }}"
-                      - condition: template
-                        value_template: "{{ is_state_attr('light.kitchen_light_5','color_temp',367) }}"
-                      - condition: template
-                        value_template: "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
+                      - "{{ is_state('light.kitchen_light_5','on') }}"
+                      - "{{ is_state_attr('light.kitchen_light_5','color_temp',367) }}"
+                      - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
                     then:
                       - service: scene.turn_on
                         data: {}
@@ -1362,12 +1356,8 @@ automation:
                             scene.kitchen_lights_normal_on_with_garage_dehumidifier_indicator_on
                     else:
                       - if:
-                          - condition: template
-                            value_template: "{{ is_state('light.kitchen_light_5','on') }}"
-                          - condition: template
-                            value_template: >-
-                              {{ is_state_attr('light.kitchen_light_5','color_temp',200)
-                              }}
+                          - "{{ is_state('light.kitchen_light_5','on') }}"
+                          - "{{ is_state_attr('light.kitchen_light_5','color_temp',200) }}"
                         then:
                           - service: scene.turn_on
                             data: {}
@@ -1375,13 +1365,8 @@ automation:
                               entity_id: scene.kitchen_lights_mealtimes
                         else:
                           - if:
-                              - condition: template
-                                value_template: "{{ is_state('light.kitchen_light_5','on') }}"
-                              - condition: template
-                                value_template: >-
-                                  {{
-                                   is_state_attr('light.kitchen_light_5','color_temp',367)
-                                  }}
+                              - "{{ is_state('light.kitchen_light_5','on') }}"
+                              - "{{ is_state_attr('light.kitchen_light_5','color_temp',367) }}"
                             then:
                               - service: scene.turn_on
                                 data: {}
