@@ -229,7 +229,7 @@ automation:
                   - Lights On
               - condition: state
                 entity_id: binary_sensor.overnight
-                state:"on"
+                state: "on"
             sequence:
               - service: scene.turn_on
                 target:
@@ -247,12 +247,8 @@ automation:
                 below: input_number.low_light_threshold
             sequence:
               - if:
-                  - condition: state
-                    entity_id: input_boolean.washing_machine_finished
-                    state: "on"
-                  - condition: state
-                    entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
+                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
+                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
                 then:
                   - service: scene.turn_on
                     data: {}
@@ -262,12 +258,8 @@ automation:
                           scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
                 else:
                   - if:
-                      - condition: state
-                        entity_id: input_boolean.washing_machine_finished
-                        state: "on"
-                      - condition: state
-                        entity_id: input_boolean.garage_dehumidifier_full
-                        state: "off"
+                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
+                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
                     then:
                       - service: scene.turn_on
                         data: {}
@@ -276,9 +268,7 @@ automation:
                             scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
                     else:
                       - if:
-                          - condition: state
-                            entity_id: input_boolean.garage_dehumidifier_full
-                            state: "on"
+                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
                         then:
                           - service: scene.turn_on
                             data: {}
@@ -302,12 +292,8 @@ automation:
                 below: input_number.low_light_threshold
             sequence:
               - if:
-                  - condition: state
-                    entity_id: input_boolean.washing_machine_finished
-                    state: "on"
-                  - condition: state
-                    entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
+                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
+                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
                 then:
                   - service: scene.turn_on
                     data: {}
