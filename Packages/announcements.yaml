@@ -367,6 +367,29 @@ automation:
           message: !include ../templates/speech/calendar_event.yaml
 
   ###########################################
+  #      Announce Calendar Events           #
+  ########################################### 
+
+  - id: birthday_announcements
+    alias: Birthday Announcements
+    initial_state: true
+    mode: single
+    description: ""
+    trigger:
+      - platform: calendar
+        event: start
+        offset: "8:5:0"
+        entity_id: calendar.birthdays
+    condition:
+      - "{{ is_state('input_boolean.audible_notifications','on') }}"
+      - "{{ is_state('binary_sensor.quiet_time','off') }}"
+    action:
+      - service: script.speech_engine
+        data:
+          where: "{{ states('sensor.room_audio') }}"
+          message: !include ../templates/speech/calendar_event.yaml
+
+  ###########################################
   #          Office Echo                    #
   ########################################### 
   - id: office_echo
