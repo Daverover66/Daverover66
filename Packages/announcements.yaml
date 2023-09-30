@@ -343,6 +343,30 @@ automation:
                 entity_id: input_boolean.kids_bedtime_announcement_played
 
   ###########################################
+  #      Announce Calendar Events           #
+  ########################################### 
+
+  - id: calendar_event_announcements
+    alias: Calendar Event Announcements
+    description: ""
+    mode: single
+    initial_state: true
+    trigger:
+      - platform: calendar
+        event: start
+        offset: "-0:30:0"
+        entity_id: calendar.forrester_events
+    condition:
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: "on"
+    action:
+      - service: script.speech_engine
+        data:
+          where: "{{ states('sensor.room_audio') }}"
+          message: !include ../templates/speech/calendar_event.yaml
+
+  ###########################################
   #          Office Echo                    #
   ########################################### 
   - id: office_echo
