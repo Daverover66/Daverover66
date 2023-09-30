@@ -391,14 +391,15 @@ automation:
       - delay: 
           hours: 0
           minutes: 0
-          seconds: 10
+          seconds: 15
           milliseconds: 0
       - service: media_player.play_media
         data:
-          media_content_id: Awesome Birthday Song
-          media_content_type: AMAZON_MUSIC
-        target:
-          entity_id: "{{ states('sensor.room_audio') }}"
+          {
+            "entity_id": "media_player.dave_s_2nd_echo_pop",
+            "media_content_id": "Awesome Birthday Song in everywhere group",
+            "media_content_type": "AMAZON_MUSIC"
+          }
     
 
   ###########################################
