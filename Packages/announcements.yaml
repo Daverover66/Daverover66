@@ -367,7 +367,7 @@ automation:
           message: !include ../templates/speech/calendar_event.yaml
 
   ###########################################
-  #      Announce Calendar Events           #
+  #            Announce Birthdays           #
   ########################################### 
 
   - id: birthday_announcements
@@ -387,7 +387,19 @@ automation:
       - service: script.speech_engine
         data:
           where: "{{ states('sensor.room_audio') }}"
-          message: !include ../templates/speech/calendar_event.yaml
+          message: !include ../templates/speech/birthday.yaml
+      - delay: 
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - service: media_player.play_media
+        data:
+          media_content_id: Awesome Birthday Song
+          media_content_type: AMAZON_MUSIC
+        target:
+          entity_id: "{{ states('sensor.room_audio') }}"
+    
 
   ###########################################
   #          Office Echo                    #
