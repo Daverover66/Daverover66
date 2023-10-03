@@ -38,20 +38,20 @@
   - name: "Dave Home"
     unique_id: dave_home 
     state: >-
-      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_s22fe5g', 'home')}}
+      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_s22fe5g', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
 
 - binary_sensor: 
   - name: "Gem Home"
     unique_id: gem_home 
     state: >- 
-      {{ is_state('device_tracker.sm_s901b', 'home') }} 
+      {{ is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
       
 - binary_sensor: 
   - name: "Family Home"
     unique_id: family_home 
     state: >- 
-      {{ is_state('binary_sensor.daves_samsung_galaxy_home','on') or  
-        is_state('binary_sensor.gems_samsung_galaxy_home','on') }}
+      {{ is_state('binary_sensor.gem_home','on') or is_state('binary_sensor.dave_home','on')}}
+        
 
 - sensor:
   ##### Low Battery List ######
