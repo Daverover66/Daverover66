@@ -281,3 +281,127 @@
           {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
         {% endfor %}
         {{ ns.totalrainfall | float(0) | round(2)}}
+
+################################
+#    More Days until sensors   #
+################################
+
+- sensor:
+  - name: "Days Until Mum's Birthday"
+    unique_id: days_until_mums_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=9, day=24)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=24))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=9, day=24)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Dad's Birthday"
+    unique_id: days_until_dads_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=9, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=30))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=9 day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Sean's Birthday"
+    unique_id: days_until_seans_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=22))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Jamie's Birthday"
+    unique_id: days_until_jamies_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=1, day=7)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=7))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=1, day=7)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Gregor's Birthday"
+    unique_id: days_until_gregors_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=3, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=15))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=3, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Blair's Birthday"
+    unique_id: days_until_blairs_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=11, day=9)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=11, day=9))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=11, day=9)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Grandad's Birthday"
+    unique_id: days_until_grandads_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=5, day=13)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=5, day=13))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=5, day=13)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Grandma's Birthday"
+    unique_id: days_until_grandmas_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=1, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=15))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=1, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Dada's Birthday"
+    unique_id: days_until_dadas_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=9, day=11)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=11))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=9, day=11)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Nannie's Birthday"
+    unique_id: days_until_nannies_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=7, day=22))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
