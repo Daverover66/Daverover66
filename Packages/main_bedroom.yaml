@@ -211,9 +211,14 @@ automation:
               - condition: trigger
                 id:
                   - Low Light
-              - condition: state
-                entity_id: input_boolean.room_occupied_main_bedroom
-                state: "on"
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.main_bedroom_fp2_presence_sensor_2
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.main_bedroom_fp2_presence_sensor_3
+                    state: "on"
               - condition: state
                 entity_id: input_boolean.main_bedroom_bedside_lamps_active
                 state: "on"
