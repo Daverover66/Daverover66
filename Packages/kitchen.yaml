@@ -86,16 +86,31 @@ automation:
     trigger:
       - platform: time
         at: input_datetime.start_battery_output_limit
-        id: Start charge
+        id: Start of Charge Period 1
       - platform: time
         at: input_datetime.end_battery_output_limit
-        id: Stop charge
+        id: End of Charge Period 1
+      - platform: time
+        at: input_datetime.start_battery_output_limit_slot_2
+        id: Start of Charge Period 2
+      - platform: time
+        at: input_datetime.end_battery_output_limit_slot_2
+        id: End of Charge Period 2
+      - platform: time
+        at: input_datetime.start_battery_output_limit_slot_3
+       id: Start of Charge Period 3
+      - platform: time
+        at: input_datetime.end_battery_output_limit_slot_3
+        id: End of Charge Period 3
     condition: []
     action:
       - choose:
           - conditions:
               - condition: trigger
-                id: Start charge
+                id: 
+                  - Start of Charge Period 1
+                  - Start of Charge Period 2
+                  - Start of Charge Period 3            
             sequence:
               - service: switch.turn_on
                 data: {}
@@ -107,7 +122,10 @@ automation:
                   entity_id: switch.ad_hoc_tou_charging_2_socket_1
           - conditions:
               - condition: trigger
-                id: Stop charge
+                id: 
+                  - End of Charge Period 1
+                  - End of Charge Period 2
+                  - End of Charge Period 3
             sequence:
               - service: switch.turn_off
                 data: {}
