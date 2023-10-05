@@ -15,21 +15,33 @@ description: Limit the output of the battery during overnight EV charging window
 trigger:
   - platform: time
     at: input_datetime.start_battery_output_limit
-    id: Start of Flux Period
+    id: Start of Charge Period 1
   - platform: time
     at: input_datetime.end_battery_output_limit
-    id: End of Flux Period
+    id: End of Charge Period 1
+  - platform: time
+    at: input_datetime.start_battery_output_limit_slot_2
+    id: Start of Charge Period 2
+  - platform: time
+    at: input_datetime.end_battery_output_limit_slot_2
+    id: End of Charge Period 2
+  - platform: time
+    at: input_datetime.start_battery_output_limit_slot_3
+    id: Start of Charge Period 3
+  - platform: time
+    at: input_datetime.end_battery_output_limit_slot_3
+    id: End of Charge Period 3
 condition: []
 action:
   - choose:
       - conditions:
           - condition: trigger
-            id: Start of Flux Period
-            alias: When triggered by start of limit period
+            id: Start of Charge Period 1
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
             above: >-
               input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -39,11 +51,14 @@ action:
                 | float(0) }}
             target:
               entity_id: number.solaredge_i1_storage_discharge_limit
-            alias: Set Storage Discharge Limit to Input Number Helper Value
       - conditions:
           - condition: trigger
-            id: End of Flux Period
-            alias: When triggered by end of limit period
+            id: End of Charge Period 1
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            below: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -52,5 +67,70 @@ action:
                 float(0) }}
             target:
               entity_id: number.solaredge_i1_storage_discharge_limit
-            alias: Set Storage Discharge Limit to Input Number Helper Value
+      - conditions:
+          - condition: trigger
+            id: Start of Charge Period 2
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: End of Charge Period 2
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            below: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: Start of Charge Period 3
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: End of Charge Period 3
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            below: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
 mode: single
