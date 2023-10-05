@@ -5,19 +5,31 @@
 #   @description    :   Turns on chargepoint at cheap rate #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01 (for Agile Import)            #
+#   @modified       :   05/10/23                           #
 ############################################################
 
 alias: Rolec EV Chargepoint schedule
-description: Keeps trying in case Shelly switch becomes unavailable
+description: Multiple Slots for Agile
 trigger:
   - platform: time
     at: input_datetime.rolec_wallbox_on
-    id: Rolec On
+    id: Rolec On 1
   - platform: time
     at: input_datetime.rolec_wallbox_off
-    id: Rolec Off
+    id: Rolec Off 1
+  - platform: time
+    at: input_datetime.rolec_wallbox_slot_2_on_at
+    id: Rolec On 2
+  - platform: time
+    at: input_datetime.rolec_wallbox_slot_2_off_at
+    id: Rolec Off 2
+  - platform: time
+    at: input_datetime.rolec_wallbox_slot_3_on_at
+    id: Rolec On 3
+  - platform: time
+    at: input_datetime.rolec_wallbox_slot_3_off_at
+    id: Rolec Off 3
   - platform: state
     entity_id:
       - switch.shelly1_c45bbe7867c7
@@ -28,7 +40,9 @@ action:
   - choose:
       - conditions:
           - condition: trigger
-            id: Rolec On
+            id:
+              - Rolec On 1
+          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
         sequence:
           - type: turn_on
             device_id: e7eb66cdf13a7f21fc1052c0f676589e
@@ -36,7 +50,46 @@ action:
             domain: switch
       - conditions:
           - condition: trigger
-            id: Rolec Off
+            id:
+              - Rolec On 2
+          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
+        sequence:
+          - type: turn_on
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id:
+              - Rolec On 3
+          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
+        sequence:
+          - type: turn_on
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Rolec Off 1
+          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
+        sequence:
+          - type: turn_off
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Rolec Off 2
+          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
+        sequence:
+          - type: turn_off
+            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+            entity_id: switch.shelly1_c45bbe7867c7
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Rolec Off 3
+          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
         sequence:
           - type: turn_off
             device_id: e7eb66cdf13a7f21fc1052c0f676589e
@@ -45,9 +98,28 @@ action:
       - conditions:
           - condition: trigger
             id: Rolec Available
-          - condition: time
-            after: input_datetime.rolec_wallbox_on
-            before: input_datetime.rolec_wallbox_off
+          - condition: or
+            conditions:
+              - condition: time
+                after: input_datetime.rolec_wallbox_on
+                before: input_datetime.rolec_wallbox_off
+              - condition: time
+                after: input_datetime.rolec_wallbox_slot_2_on_at
+                before: input_datetime.rolec_wallbox_slot_2_off_at
+              - condition: time
+                after: input_datetime.rolec_wallbox_slot_3_on_at
+                before: input_datetime.rolec_wallbox_slot_3_off_at
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.rolec_slot_1_active
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.rolec_slot_2_active
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.rolec_slot_3_active
+                state: "on"
           - condition: state
             entity_id: switch.shelly1_c45bbe7867c7
             state: "off"
@@ -66,9 +138,28 @@ action:
       - conditions:
           - condition: trigger
             id: Rolec Available
-          - condition: time
-            after: input_datetime.rolec_wallbox_off
-            before: input_datetime.rolec_wallbox_on
+          - condition: or
+            conditions:
+              - condition: time
+                after: input_datetime.rolec_wallbox_off
+                before: input_datetime.rolec_wallbox_on
+              - condition: time
+                after: input_datetime.rolec_wallbox_slot_2_off_at
+                before: input_datetime.rolec_wallbox_slot_2_on_at
+              - condition: time
+                after: input_datetime.rolec_wallbox_slot_3_off_at
+                before: input_datetime.rolec_wallbox_slot_3_on_at
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.rolec_slot_1_active
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.rolec_slot_2_active
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.rolec_slot_3_active
+                state: "off"
           - condition: state
             entity_id: switch.shelly1_c45bbe7867c7
             state: "on"
@@ -82,6 +173,5 @@ action:
               message: The Rolec was turned off because it was on outside off peak
               title: ROLEC OFF
             alias: Send a notification based on an input text helper
-      - conditions: []
-        sequence: []
 mode: single
+
