@@ -5,8 +5,8 @@
 #   @description    :   For charging home battery overnight #
 #                                                           #
 #                                                           #
-#   @version        :   1.0                                 #
-#   @modified       :                                       #
+#   @version        :   1.01                                #
+#   @modified       :   05/10/23                            #
 #############################################################
 
 alias: Grid Charge Battery to full
@@ -26,7 +26,8 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - Start of off peak
+              - Start of slot 1
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_1_active','on') }}"
           - condition: numeric_state
             entity_id: sensor.solaredge_b1_state_of_energy
             below: input_number.default_battery_percentage
@@ -36,18 +37,56 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - End of off peak
+              - End of slot 1
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_1_active','on') }}"
         sequence:
-          - if:
-              - condition: not
-                conditions:
-                  - condition: state
-                    entity_id: select.solaredge_i1_storage_command_mode
-                    state: Maximize Self Consumption
-            then:
-              - device_id: 952193e87f675ba7f7e32eda5500c572
-                domain: select
-                entity_id: 0bdfb19491b49722c2a94351b9a673aa
-                type: select_option
-                option: Maximize Self Consumption
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 2
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_2_active','on') }}"
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+           below: input_number.default_battery_percentage
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 2
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_2_active','on') }}"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 3
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_3_active','on') }}"
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.default_battery_percentage
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 3
+          - "{{ is_state('input_boolean.grid_charge_battery_slot_3_active','on') }}"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
 mode: restart
