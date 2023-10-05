@@ -885,6 +885,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: "{{states('sensor.room_audio')}}"
+                  call_interruption: 1
                   call_dinner_weekday: 1
           - conditions:
               - condition: trigger
@@ -895,6 +896,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: kitchen
+                  call_interruption: 1
                   call_coffee_timer: 1
               - delay:
                   hours: 0
@@ -905,6 +907,7 @@ automation:
               - service: script.status_annc
                 data:
                   where: "{{states('sensor.room_audio')}}"
+                  call_interruption: 1
                   call_coffee_ready: 1
           - conditions:
               - condition: trigger
@@ -926,8 +929,10 @@ automation:
             sequence:
               - service: script.status_annc
                 data:
-                  where: "{{states('sensor.room_audio')}}"
+                  where: living_room
+                  call_interruption: 1
                   call_dinner_sunday: 1
+
 
 ###############################
    Smart Button Downstairs 2
