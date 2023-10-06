@@ -77,4 +77,36 @@ alexa_media:
     - email: !secret amazon_user
       password: !secret amazon_password
       url: "amazon.co.uk"
+
+# Octopus Agile
+octopusagile:
+  region_code: "N"
+  mpan: !secret mpan
+  serial: !secret serial
+  auth: !secret API
+  startdate: "2023-10-06"
+  run_devices:
+  - energy_time: 2.5
+    entity_id: dishwasher
+    icon: mdi:dishwasher
+    run_before: '06:00:00'
+    run_time: 3
+  - energy_time: 2.5
+    entity_id: washing_machine
+    icon: mdi:washing-machine
+    run_before: '06:00:00'
+    run_time: 2.5
+  - energy_time: 3
+    entity_id: home_battery
+    icon: mdi:battery
+    run_before: '06:00:00'
+    run_time: 3
+  - energy_time: 4
+    entity_id: electric_vehicle
+    icon: mdi:ev-station
+    run_before: '06:00:00'
+    run_time: 4
+  moneymakers:
+  - switch.shelly1_e45bbe7867c7
+  - switch.valkyrie_switch_1
       
