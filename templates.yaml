@@ -405,3 +405,18 @@
       {% else %}
         {{ ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
+
+- sensor:
+  - name: xxxxxx
+    unique_id: xxxxxx
+    state: >
+      {% set start_time = states('octopusagile.electric_vehicle') %}
+       # {{ (as_timestamp(start_time|as_datetime)) | timestamp_custom ('%H:%M %p')}}
+      {% set now = as_timestamp(now()) %}
+      {% set active =  (as_timestamp(start_time)|int) - (now|int) %}
+       # {{ active }}
+      {% if active <= 0 %}
+        Active
+      {% else %}
+        Waiting
+      {% endif %}
