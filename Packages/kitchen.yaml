@@ -711,9 +711,6 @@ automation:
               - condition: state
                 entity_id: light.kitchen_lights_2
                 state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
             sequence:
               - service: scene.turn_on
                 data: {}
