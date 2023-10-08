@@ -116,6 +116,14 @@
           {% endif %}
         {%- endfor %}
     </p>
+    <p>
+       The home battery has 
+      {{states('sensor.battery_state_of_charge') }}% charge left.
+       The cheapest charging time starts at 
+      {{states('sensor.home_battery_charge_start_time') }}
+       and finishes at
+      {{states('sensor.home_battery_charge_end_time') }}
+    </p>
 
       {%- endmacro-%}
             
