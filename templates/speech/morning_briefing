@@ -123,6 +123,7 @@
       {{states('sensor.home_battery_charge_start_time') }}
        and finishes at
       {{states('sensor.home_battery_charge_end_time') }}
+       So if you want to charge it before then, you know what to do.
     </p>
 
       {%- endmacro-%}
