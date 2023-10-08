@@ -441,3 +441,24 @@
       {% set duration_in_secs = (end_in|float(0) - start_in|float(0))*3600 %}  
       {% set end_time = (as_timestamp(start_time) + duration_in_secs )|timestamp_custom ('%H:%M')%}
         {{ end_time }}
+
+### EV Charge Times ### 
+- sensor:
+  - name: "EV Charge Start Time"
+    unique_id: ev_charge_start_time
+    icon: mdi:clock-start
+    state: >
+      {% set start_time = states('octopusagile.electric_vehicle') %}
+        {{ as_timestamp(start_time)|timestamp_custom('%H:%M')}}
+
+- sensor:
+  - name: "EV Charge End Time"
+    unique_id: ev_charge_end_time
+    icon: mdi:clock-end
+    state: >
+      {% set start_time = states('octopusagile.electric_vehicle') %}
+      {% set end_in = state_attr('octopusagile.electric_vehicle','end_in') %}
+      {% set start_in = state_attr('octopusagile.electric_vehicle','start_in') %}
+      {% set duration_in_secs = (end_in|float(0) - start_in|float(0))*3600 %}  
+      {% set end_time = (as_timestamp(start_time) + duration_in_secs )|timestamp_custom ('%H:%M')%}
+        {{ end_time }}
