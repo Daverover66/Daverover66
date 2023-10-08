@@ -84,5 +84,58 @@
   sampling_size: 60
   precision: 1
 
+### mean indoor temperature ######
+- platform: statistics
+  name: "Indoor Temperature Mean Last 24 Hours"
+  unique_id: indoor_temperature_mean_24h
+  entity_id: sensor.average_indoor_temperature
+  state_characteristic: mean
+  sampling_size: 100
+  max_age: 
+    hours: 24
+
+### mean indoor humidity  ######
+- platform: statistics
+  name: "Indoor Humidity Mean Last 24 Hours"
+  unique_id: indoor_humidity_mean_24h
+  entity_id: sensor.average_indoor_humidity_level
+  state_characteristic: mean
+  sampling_size: 100
+  max_age: 
+    hours: 24
+
+### mean outoor temperature ######
+- platform: statistics
+  name: "Outdoor Temperature Mean Last 24 Hours"
+  unique_id: outdoor_temperature_mean_24h
+  entity_id: sensor.outside_temperature 
+  state_characteristic: mean
+  sampling_size: 100
+  max_age: 
+    hours: 24
+
+### mean outdoor humidity ######
+- platform: statistics
+  name: "Outdoor Humidity Mean Last 24 Hours"
+  unique_id: outdoor_humidity_mean_24h
+  entity_id: sensor.outside_humidity 
+  state_characteristic: mean
+  sampling_size: 100
+  max_age: 
+    hours: 24
+
+### En-Suite Bathroom Humidity Change Over 5 Minutes ###
+- platform: statistics
+  name: "En-Suite Bathroom Humidity Change Over 5 Minutes"
+  unique_id: es_humidity_change_over_5m
+  entity_id: sensor.en_suite_temperature_and_humidity_humidity
+  state_characteristic: change
+  max_age:
+    minutes: 5
+  sampling_size: 300
+  precision: 1
+
+### Octopus Agile ##
+- platform: "octopusagile"
 
 
