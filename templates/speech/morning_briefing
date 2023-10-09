@@ -13,8 +13,8 @@
       {% if is_state('binary_sensor.morning','on') %} 
         {{ [
             'Today is ',
-            'In case you have not been keeping track today is',
-            'Do you know what day of the week it is? <prosody pitch="high">No?</prosody> Well today is',
+            'In case you have not been keeping track, today is',
+            'Do you know what day of the week it is? <prosody pitch="high">No!</prosody> Well today is',
             'This may or may not be good news, but today is'
               ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }}. The time is {{ now().strftime("%I:%M %p") }}.
       {% else %} 
@@ -64,7 +64,7 @@
       {% if is_state('binary_sensor.evening','on') %}
         The overnight forecast says we can expect {{ states('weather.forecast_home') }} weather. With a low of {{ states('sensor.overnight_low_temp')}} degrees celsius.
       {% else %}
-        The current forecast says we should expect {{ states('weather.forecast_home') }} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
+        The current forecast says we should expect {% if is_state('weather.forecast_home','partlycloudy') %} partly cloudy {% else %}{{ states('weather.forecast_home') }} {% endif %} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
       {% endif %}
     </p>
     <p>
@@ -99,11 +99,11 @@
       {% endif %} 
     </p>
     <p>
-       {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
+      {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
           You have {{ e_list | count }}
-        {% if (e_list | count) >1 %} 
+        {% if (e_list | count) >1 or (e_list | count) <1 %} 
           events in your calendar today. 
-        {% else %} 
+        {% elif (e_list | count) <1 %} 
           event in your calendar today. 
         {% endif %}
         {%- for e in e_list %}
@@ -117,13 +117,34 @@
         {%- endfor %}
     </p>
     <p>
-       The home battery has 
-      {{states('sensor.battery_state_of_charge') }}% charge left.
-       The cheapest charging time starts at 
-      {{states('sensor.home_battery_charge_start_time') }}
-       and finishes at
-      {{states('sensor.home_battery_charge_end_time') }}
-       So if you want to charge it before then, you know what to do.
+      The home battery has 
+      {{states('sensor.battery_state_of_charge') }}% charge remaining.
+        If it needs a top up, the cheapest charging time starts at 
+      {{states('sensor.home_battery_charge_start_time') }},
+      and finishes at
+      {{states('sensor.home_battery_charge_end_time') }}.
+      If you want to charge it outside of that window, you know what to do.
+    </p>
+    <p>
+        The car might need a top up today. If it does, the best time to charge the battery is at
+      {{states('sensor.ev_charge_start_time') }}.
+        The charge period ends at
+      {{states('sensor.ev_charge_end_time') }}.
+        So if you want to charge it outside of that time, you know what to do.
+    </p>
+    <p>
+      {% if is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
+        {{ ['Its a school holiday today and Mummy is off too',
+            'No school today and mummy too can play. Hooray!',
+            'schools out and mummy is in da hoose'] | random }}
+      {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','off') %}
+        {{ ['Its a school holiday today and mummy is working',
+            'No school today, but mummy cant play',
+            'schools out, but mummy is not,sorry'] | random }}
+      {% elif is_state('calendar.school_holidays','off') and is_state('calendar.gem_holidays','off') %}
+        {{ ['There are no holidays today',
+            'Work and school for everyone today. Yippee!'] | random }}
+      {% endif %}
     </p>
 
       {%- endmacro-%}
