@@ -5,48 +5,67 @@
 #   @description    :   All Heating config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   14/09/2023
+#   @date           :   10/10/2023
 ###############################################################################
 
+###########################
+#         Helpers         #
+###########################
+
+###########################
+#         Schedule        #
+###########################
+
+schedule:
+  general_heating_schedule:
+    name: "General Heating Schedule"
+    monday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    tuesday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    wednesday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    thursday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    friday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    saturday:
+      - from: "06:45:00"
+        to: "21:30:00"
+    sunday:
+      - from: "06:45:00"
+        to: "21:30:00"
+
+  dining_room_heating_schedule:
+    name: "Dining Room Heating Schedule
+    sunday:
+      - from: "14:00:00"
+        to: "16:00:00"
+
+  office_heating_schedule:
+    name: "Office Heating Schedule
+    monday:
+      - from: "06:45:00"
+        to: "17:30:00"
+    tuesday:
+      - from: "06:45:00"
+        to: "17:30:00"
+    wednesday:
+      - from: "06:45:00"
+        to: "17:30:00"
+    thursday:
+      - from: "06:45:00"
+        to: "17:30:00"
+    friday:
+      - from: "06:45:00"
+        to: "17:30:00" 
+    
 
 ###########################
 #       Automation        #
 ###########################
-
-automation:
-  - id: tado_mode_home_and_away
-    alias: Tado - Trigger Home and Away modes
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: numeric_state
-        entity_id:
-          - zone.home
-        above: 0
-        id: someone_home  
-      - platform: numeric_state
-        entity_id:
-          - zone.home
-        id: noone_home
-        below: 1
-    condition: []
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: someone_home
-            sequence:
-              - service: climate.set_preset_mode
-                data:
-                  preset_mode: home
-                target:
-                  entity_id: climate.downstairs
-          - conditions:
-              - condition: trigger
-                id: noone_home
-            sequence:
-              - service: climate.set_preset_mode
-                data:
-                  preset_mode: away
-                target:
-                  entity_id: climate.downstairs
