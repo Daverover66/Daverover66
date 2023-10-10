@@ -42,13 +42,13 @@ schedule:
         to: "21:30:00"
 
   dining_room_heating_schedule:
-    name: "Dining Room Heating Schedule
+    name: "Dining Room Heating Schedule"
     sunday:
       - from: "14:00:00"
         to: "16:00:00"
 
   office_heating_schedule:
-    name: "Office Heating Schedule
+    name: "Office Heating Schedule"
     monday:
       - from: "06:45:00"
         to: "17:30:00"
