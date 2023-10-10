@@ -5,7 +5,7 @@
 #   @description    :   All Spare Room config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   25/09/2023
+#   @date           :   10/10/2023
 ###############################################################################
 
 ###########################
@@ -181,6 +181,12 @@ automation:
           - sensor.smart_button_upstairs_1_action
         to: double
         id: Casper & Sky off
+     - platform: state
+        entity_id:
+          - sensor.smart_button_upstairs_1_action
+        attribute: action
+        to: release 
+        id: Night Lights
     condition: []
     action:
       - choose:
@@ -233,7 +239,28 @@ automation:
                     data:
                       where: Guest Bedroom
                       call_interruption: 1
-                      call_media_system_off: 1            
+                      call_media_system_off: 1          
+          - conditions:
+              - condition: trigger
+                id: Night Lights
+            sequence:
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+              - service: light.turn_on
+                data:
+                  rgb_color:
+                  - 255
+                  - 244
+                  - 4
+                  brightness: 5
+                target:
+                  entity_id: 
+                    - light.guest_bedroom_bedside_lamp_right
+                    - light.guest_bedroom_bedside_lamp_left
+                  
+                
 
 
 ###########################
