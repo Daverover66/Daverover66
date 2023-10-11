@@ -444,6 +444,9 @@ automation:
       - condition: state
         entity_id: binary_sensor.quiet_time
         state: "off"
+      - condition: state
+        entity_id: binary_sensor.quiet_time
+        state: "off"  
      action:
       - choose:
           - conditions:
