@@ -38,7 +38,7 @@
   - name: "Dave Home"
     unique_id: dave_home 
     state: >-
-      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_s22fe5g', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
+      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_davessamsunggalaxys23', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
 
 - binary_sensor: 
   - name: "Gem Home"
