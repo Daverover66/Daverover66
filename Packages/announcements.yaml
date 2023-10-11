@@ -445,7 +445,7 @@ automation:
         entity_id: binary_sensor.quiet_time
         state: "off"
       - condition: state
-        entity_id: binary_sensor.quiet_time
+        entity_id: calendar.gem_holidays 
         state: "off"  
      action:
       - choose:
