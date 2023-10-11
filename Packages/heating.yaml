@@ -86,11 +86,11 @@ input_number:
 input_boolean:
   maintenance_mode:
     name: Maintenance Mode
-    icon: mdi:spanner
+    icon: mdi:wrench
 
   party_mode:
     name: Party Mode
-    icon: mdi:spanner
+    icon: mdi:wrench
 
 ###########################
 #       Automation        #
