@@ -1,0 +1,956 @@
+ #####################################
+ #
+ #
+ #
+ #
+ #
+ #
+ #
+ - title: Testing 2
+    path: testing-2
+    type: custom:grid-layout
+    badges: []
+    cards:
+      - type: custom:layout-card
+        layout_type: grid
+        cards:
+          - type: horizontal-stack
+            view_layout:
+              grid-area: header
+            cards:
+              - type: markdown
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                content: >-
+                  {% set time = now().hour %}
+
+                  {% if (time >= 18) %}
+                    <font color = "#00ff00"> 
+                    Good Evening {{ user }}
+                  {% elif (time >=12) %}
+                    <font color = "#00ff00"> 
+                    Good Afternoon {{ user }}
+                  {% elif (time >= 5) %}
+                    <font color = "#00ff00">
+                    Good Morning {{ user }}
+                  {% else %}
+                    <font color = "#00ff00">
+                    Hello, {{ user }}!
+                  {% endif %} and welcome to your energy dashboard.  Today's
+                  date is: 
+              - type: energy-date-selection
+          - type: custom:power-distribution-card
+            view_layout:
+              grid-area: tl
+            card_mod:
+              style: |
+                ha-card {
+                 background: none;
+                 border: none;
+                 padding-top: 50px;
+                 padding-bottom: 50px;
+                 margin: 0px 0px 0px 0px;
+                }
+            title: Power Flow
+            entities:
+              - name: SE4000H
+                preset: solar
+                icon: mdi:solar-power
+                entity: sensor.inverter_1_production
+                unit_of_display: W
+                decimals: 0
+                color_threshold: '1000'
+                icon_color:
+                  bigger: Lime
+                  smaller: Orangered
+                arrow_color:
+                  bigger: Lime
+                  smaller: Orangered
+              - name: Home
+                preset: home
+                icon: mdi:home
+                entity: sensor.solar_house_consumption_w
+                unit_of_display: W
+                decimals: 0
+                invert_value: false
+                invert_arrow: true
+                color_threshold: '1500'
+                icon_color:
+                  bigger: Orangered
+                  smaller: Lime
+                arrow_color:
+                  bigger: Orangered
+                  smaller: Lime
+              - name: SE3680H
+                preset: solar
+                icon: mdi:solar-power
+                entity: sensor.solaredge_i2_dc_power
+                unit_of_display: W
+                decimals: 0
+                color_threshold: '1000'
+                icon_color:
+                  bigger: Lime
+                  smaller: Orangered
+                arrow_color:
+                  bigger: Lime
+                  smaller: Orangered
+              - decimals: 2
+                display_abs: true
+                name: placeholder
+                unit_of_display: W
+                preset: placeholder
+              - name: Grid
+                preset: grid
+                icon: mdi:transmission-tower
+                entity: sensor.solaredge_m1_ac_power
+                unit_of_display: W
+                decimals: 0
+                invert_value: true
+                invert_arrow: false
+                color_threshold: '1000'
+                icon_color:
+                  bigger: Orangered
+                  smaller: Lime
+                arrow_color:
+                  bigger: Orangered
+                  smaller: Lime
+              - name: Battery
+                preset: battery
+                icon: mdi:battery-high
+                entity: sensor.solaredge_b1_dc_power
+                unit_of_display: W
+                decimals: ''
+                invert_value: false
+                invert_arrow: true
+                color_threshold: '3500'
+                icon_color:
+                  bigger: Orangered
+                  smaller: Lime
+                arrow_color:
+                  bigger: Orangered
+                  smaller: Lime
+                secondary_info_entity: sensor.battery_state_of_charge
+                secondary_info_replace_name: true
+                display_abs: true
+            center:
+              type: bars
+              content:
+                - preset: custom
+                  name: INV 1
+                  bar_color: lime
+                  bar_bg_color: palegreen
+                  entity: sensor.inverter_1_efficiency_int
+                - preset: custom
+                  name: INV 2
+                  bar_color: Lime
+                  bar_bg_color: pale green
+                  entity: sensor.inverter_2_efficiency_int
+                - name: BATT
+                  preset: custom
+                  entity: sensor.solar_battery_efficiency_int
+                  bar_color: Orangered
+                  bar_bg_color: Salmon
+            animation: flash
+          - type: vertical-stack
+            view_layout:
+              grid_view: tm
+            cards:
+              - type: gauge
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                entity: sensor.solaredge_b1_state_of_energy
+                needle: true
+                segments:
+                  - from: 0
+                    to: 2
+                    color: '#ff0f0f'
+                  - from: 2
+                    to: 4
+                    color: '#ff0f17'
+                  - from: 4
+                    to: 6
+                    color: '#ff0d10'
+                  - from: 6
+                    to: 8
+                    color: '#ff0b0a'
+                  - from: 8
+                    to: 10
+                    color: '#ff0904'
+                  - from: 10
+                    to: 12
+                    color: '#ff1604'
+                  - from: 12
+                    to: 14
+                    color: '#ff2304'
+                  - from: 14
+                    to: 16
+                    color: '#ff3004'
+                  - from: 16
+                    to: 18
+                    color: '#ff3d04'
+                  - from: 18
+                    to: 20
+                    color: '#ff4a05'
+                  - from: 20
+                    to: 22
+                    color: '#ff5705'
+                  - from: 22
+                    to: 24
+                    color: '#ff6405'
+                  - from: 24
+                    to: 26
+                    color: '#ff7106'
+                  - from: 26
+                    to: 28
+                    color: '#ff7e06'
+                  - from: 28
+                    to: 30
+                    color: '#ff8b06'
+                  - from: 30
+                    to: 32
+                    color: '#ff9807'
+                  - from: 32
+                    to: 34
+                    color: '#ffa507'
+                  - from: 34
+                    to: 36
+                    color: '#ffb207'
+                  - from: 36
+                    to: 38
+                    color: '#ffbf07'
+                  - from: 38
+                    to: 40
+                    color: '#ffcc07'
+                  - from: 40
+                    to: 42
+                    color: '#ffd024'
+                  - from: 42
+                    to: 44
+                    color: '#ffd441'
+                  - from: 44
+                    to: 46
+                    color: '#ffd85e'
+                  - from: 46
+                    to: 48
+                    color: '#ffdc7b'
+                  - from: 48
+                    to: 50
+                    color: '#ffe198'
+                  - from: 50
+                    to: 52
+                    color: '#ffe689'
+                  - from: 52
+                    to: 54
+                    color: '#ffeb7a'
+                  - from: 54
+                    to: 56
+                    color: '#fff06b'
+                  - from: 56
+                    to: 58
+                    color: '#fff55c'
+                  - from: 58
+                    to: 60
+                    color: '#fffa4d'
+                  - from: 60
+                    to: 62
+                    color: '#ffff3e'
+                  - from: 62
+                    to: 64
+                    color: '#fdff3c'
+                  - from: 64
+                    to: 66
+                    color: '#fcff39'
+                  - from: 66
+                    to: 68
+                    color: '#e9ff36'
+                  - from: 68
+                    to: 70
+                    color: '#d6ff34'
+                  - from: 70
+                    to: 72
+                    color: '#c3ff31'
+                  - from: 72
+                    to: 74
+                    color: '#aff92f'
+                  - from: 74
+                    to: 76
+                    color: '#9cff2c'
+                  - from: 76
+                    to: 78
+                    color: '#89ff2a'
+                  - from: 78
+                    to: 80
+                    color: '#76f927'
+                  - from: 80
+                    to: 82
+                    color: '#63f324'
+                  - from: 82
+                    to: 84
+                    color: '#50ed20'
+                  - from: 84
+                    to: 86
+                    color: '#3ce71d'
+                  - from: 86
+                    to: 88
+                    color: '#29e11b'
+                  - from: 88
+                    to: 90
+                    color: '#16db18'
+                  - from: 90
+                    to: 92
+                    color: '#04d916'
+                  - from: 92
+                    to: 94
+                    color: '#04d916'
+                  - from: 94
+                    to: 96
+                    color: '#04d916'
+                  - from: 96
+                    to: 98
+                    color: '#04d916'
+                  - from: 98
+                    to: 100
+                    color: '#04d916'
+                name: Battery Charge
+                min: 0
+                max: 100
+              - type: custom:apexcharts-card
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                experimental:
+                  color_threshold: true
+                header:
+                  show: true
+                  show_states: true
+                  colorize_states: true
+                  title: Today's Agile Import Rates
+                stacked: false
+                graph_span: 18h
+                span:
+                  start: day
+                  offset: +6h
+                now:
+                  show: true
+                  label: Now
+                  color: black
+                yaxis:
+                  - min: -10
+                    max: 60
+                    decimals: 1
+                series:
+                  - entity: >-
+                      sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                    type: column
+                    name: price
+                    color: gray
+                    opacity: 1
+                    stroke_width: 0
+                    unit: p/Kw
+                    show:
+                      in_header: false
+                      legend_value: false
+                      header_color_threshold: true
+                    color_threshold:
+                      - value: -100
+                        color: cyan
+                      - value: 0
+                        color: green
+                      - value: 20
+                        color: orange
+                      - value: 30
+                        color: red
+                    data_generator: |
+                      return entity.attributes.all_rates.map((entry) => {
+                         return [new Date(entry.valid_from), entry.value_inc_vat];
+                       });
+          - type: custom:tesla-style-solar-power-card
+            card_mod: null
+            style: |
+              ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+            view_layout:
+              grid_view: tr
+            name: Home Power Flow
+            change_house_bubble_color_with_flow: 1
+            threshold_in_k: 1
+            show_gap: true
+            hide_inactive_lines: 1
+            generation_icon: mdi:solar-power-variant-outline
+            grid_to_house_entity: sensor.solar_grid_to_house_w
+            grid_to_battery_entity: sensor.solar_grid_to_battery_w
+            generation_to_grid_entity: sensor.solar_panel_to_grid_w
+            generation_to_battery_entity: sensor.solar_panel_to_battery_w
+            generation_to_house_entity: sensor.solar_panel_to_house_w
+            battery_to_house_entity: sensor.solar_battery_to_house_w
+            battery_to_grid_entity: sensor.solar_battery_to_grid_w
+            battery_extra_entity: sensor.battery_state_of_charge
+            generation_extra_entity: sensor.openweathermap_cloud_coverage
+            appliance1_consumption_entity: sensor.shellyem_244cab4194b1_channel_2_power
+          - type: vertical-stack
+            view_layout:
+              grid_view: ml
+            cards:
+              - type: energy-usage-graph
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                title: Energy Usage
+              - type: custom:apexcharts-card
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                series:
+                  - entity: sensor.solar_panel_to_house_daily
+                    name: Direct Usage
+                    color: var(--energy-solar-color)
+                  - entity: sensor.solar_battery_in_daily
+                    name: Battery Charging
+                    color: var(--energy-battery-in-color)
+                  - entity: sensor.solar_exported_power_daily
+                    name: Exported Power
+                    color: var(--energy-grid-return-color)
+                update_interval: 1min
+                chart_type: donut
+                apex_config:
+                  plotOptions:
+                    pie:
+                      expandOnClick: false
+                      donut:
+                        size: 50%
+                        labels:
+                          show: true
+                          value:
+                            fontSize: 32px
+                            fontWeight: 900
+                          total:
+                            show: true
+                            showAlways: true
+                            label: Self Consumption
+                            formatter: |
+                              EVAL:function(w) {
+                                let values = w.globals.seriesTotals;
+                                let total = values[0] + values[1] + values[2];
+                                let self = values[0] + values[1];
+                                return ((self / total) * 100).toFixed(0) + "%";
+                              }
+                  dataLabels:
+                    formatter: |
+                      EVAL:function(value) {
+                        return value.toFixed(0) + "%";
+                      }
+                  chart:
+                    selection:
+                      enabled: false
+                  tooltip:
+                    enabled: false
+                  states:
+                    normal:
+                      filter:
+                        type: none
+                        value: 0
+                    hover:
+                      filter:
+                        type: none
+                        value: 0
+                    active:
+                      filter:
+                        type: none
+                        value: 0
+                  legend:
+                    onItemClick:
+                      toggleDataSeries: false
+                    onItemHover:
+                      highlightDataSeries: false
+              - type: energy-grid-neutrality-gauge
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+          - type: custom:octopus-energy-rates-card
+            entity: >-
+              sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+            card_mod: null
+            style: |
+              ha-card {
+              background: none;
+              border: none;
+              margin: 0px 0px 0px 0px;
+              }
+            cols: 2
+            showday: true
+            showpast: false
+          - type: vertical-stack
+            cards:
+              - type: energy-distribution
+                card_mod: null
+                style: |
+                  ha-card {
+                  background: none;
+                  border: none;
+                  margin: 0px 0px 0px 0px;
+                  }
+                view_layout:
+                  grid_view: mr
+                title: Energy Distribution
+              - type: custom:apexcharts-card
+                series:
+                  - entity: sensor.solar_panel_to_house_daily
+                    name: Direct Consumption
+                    color: var(--energy-solar-color)
+                  - entity: sensor.solar_battery_out_daily
+                    name: Battery Usage
+                    color: var(--energy-battery-out-color)
+                  - entity: sensor.solar_imported_power_daily
+                    name: Imported Power
+                    color: var(--energy-grid-consumption-color)
+                update_interval: 1min
+                chart_type: donut
+                apex_config:
+                  plotOptions:
+                    pie:
+                      expandOnClick: false
+                      donut:
+                        size: 50%
+                        labels:
+                          show: true
+                          value:
+                            fontSize: 32px
+                            fontWeight: 900
+                          total:
+                            show: true
+                            showAlways: true
+                            label: Self-Consumption Rate
+                            formatter: |
+                              EVAL:function(w) {
+                                let values = w.globals.seriesTotals;
+                                let total = values[0] + values[1] + values[2];
+                                let self = values[0] + values[1];
+                                return ((self / total) * 100).toFixed(0) + "%";
+                              }
+                  dataLabels:
+                    formatter: |
+                      EVAL:function(value) {
+                        return value.toFixed(0) + "%";
+                      }
+                  chart:
+                    selection:
+                      enabled: false
+                  tooltip:
+                    enabled: false
+                  states:
+                    normal:
+                      filter:
+                        type: none
+                        value: 0
+                    hover:
+                      filter:
+                        type: none
+                        value: 0
+                    active:
+                      filter:
+                        type: none
+                        value: 0
+                  legend:
+                    onItemClick:
+                      toggleDataSeries: false
+                    onItemHover:
+                      highlightDataSeries: false
+        layout:
+          grid-template-columns: 33.3% 33.3% 33.3%
+          grid-template-rows: auto
+          grid-template-areas: |
+            "header header header"
+            "tl tm tr"
+            "ml mm mr"
+  - title: Testing 3
+    path: testing-3
+    type: panel
+    badges: []
+    cards:
+      - type: custom:stack-in-card
+        title: []
+        mode: vertical
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: markdown
+                content: >-
+                  {% set time = now().hour %}
+
+                  {% if (time >= 18) %}
+                    <font color = "#00ff00"> 
+                    Good Evening {{ user }}
+                  {% elif (time >=12) %}
+                    <font color = "#00ff00"> 
+                    Good Afternoon {{ user }}
+                  {% elif (time >= 5) %}
+                    <font color = "#00ff00">
+                    Good Morning {{ user }}
+                  {% else %}
+                    <font color = "#00ff00">
+                    Hello, {{ user }}!
+                  {% endif %} and welcome to your energy dashboard.  Today's
+                  date is: 
+              - type: energy-date-selection
+          - type: horizontal-stack
+            cards:
+              - type: custom:power-distribution-card
+                title: Power Flow
+                card_mod:
+                  style: |
+                    ha-card {
+                     padding-top: 50px;
+                     padding-bottom: 50px;
+                     margin: 0px 0px 0px 0px;
+                    }
+                entities:
+                  - name: SE4000H
+                    preset: solar
+                    icon: mdi:solar-power
+                    entity: sensor.inverter_1_production
+                    unit_of_display: W
+                    decimals: 0
+                    color_threshold: '1000'
+                    icon_color:
+                      bigger: Lime
+                      smaller: Orangered
+                    arrow_color:
+                      bigger: Lime
+                      smaller: Orangered
+                  - name: Home
+                    preset: home
+                    icon: mdi:home
+                    entity: sensor.solar_house_consumption_w
+                    unit_of_display: W
+                    decimals: 0
+                    invert_value: false
+                    invert_arrow: true
+                    color_threshold: '1500'
+                    icon_color:
+                      bigger: Orangered
+                      smaller: Lime
+                    arrow_color:
+                      bigger: Orangered
+                      smaller: Lime
+                  - name: SE3680H
+                    preset: solar
+                    icon: mdi:solar-power
+                    entity: sensor.solaredge_i2_dc_power
+                    unit_of_display: W
+                    decimals: 0
+                    color_threshold: '1000'
+                    icon_color:
+                      bigger: Lime
+                      smaller: Orangered
+                    arrow_color:
+                      bigger: Lime
+                      smaller: Orangered
+                  - decimals: 2
+                    display_abs: true
+                    name: placeholder
+                    unit_of_display: W
+                    preset: placeholder
+                  - name: Grid
+                    preset: grid
+                    icon: mdi:transmission-tower
+                    entity: sensor.solaredge_m1_ac_power
+                    unit_of_display: W
+                    decimals: 0
+                    invert_value: true
+                    invert_arrow: false
+                    color_threshold: '1000'
+                    icon_color:
+                      bigger: Orangered
+                      smaller: Lime
+                    arrow_color:
+                      bigger: Orangered
+                      smaller: Lime
+                  - name: Battery
+                    preset: battery
+                    icon: mdi:battery-high
+                    entity: sensor.solaredge_b1_dc_power
+                    unit_of_display: W
+                    decimals: ''
+                    invert_value: false
+                    invert_arrow: true
+                    color_threshold: '3500'
+                    icon_color:
+                      bigger: Orangered
+                      smaller: Lime
+                    arrow_color:
+                      bigger: Orangered
+                      smaller: Lime
+                    secondary_info_entity: sensor.battery_state_of_charge
+                    secondary_info_replace_name: true
+                    display_abs: true
+                center:
+                  type: bars
+                  content:
+                    - preset: custom
+                      name: INV 1
+                      bar_color: lime
+                      bar_bg_color: palegreen
+                      entity: sensor.inverter_1_efficiency_int
+                    - preset: custom
+                      name: INV 2
+                      bar_color: Lime
+                      bar_bg_color: pale green
+                      entity: sensor.inverter_2_efficiency_int
+                    - name: BATT
+                      preset: custom
+                      entity: sensor.solar_battery_efficiency_int
+                      bar_color: Orangered
+                      bar_bg_color: Salmon
+                animation: flash
+              - type: vertical-stack
+                cards:
+                  - type: gauge
+                    entity: sensor.solaredge_b1_state_of_energy
+                    needle: true
+                    segments:
+                      - from: 0
+                        to: 2
+                        color: '#ff0f0f'
+                      - from: 2
+                        to: 4
+                        color: '#ff0f17'
+                      - from: 4
+                        to: 6
+                        color: '#ff0d10'
+                      - from: 6
+                        to: 8
+                        color: '#ff0b0a'
+                      - from: 8
+                        to: 10
+                        color: '#ff0904'
+                      - from: 10
+                        to: 12
+                        color: '#ff1604'
+                      - from: 12
+                        to: 14
+                        color: '#ff2304'
+                      - from: 14
+                        to: 16
+                        color: '#ff3004'
+                      - from: 16
+                        to: 18
+                        color: '#ff3d04'
+                      - from: 18
+                        to: 20
+                        color: '#ff4a05'
+                      - from: 20
+                        to: 22
+                        color: '#ff5705'
+                      - from: 22
+                        to: 24
+                        color: '#ff6405'
+                      - from: 24
+                        to: 26
+                        color: '#ff7106'
+                      - from: 26
+                        to: 28
+                        color: '#ff7e06'
+                      - from: 28
+                        to: 30
+                        color: '#ff8b06'
+                      - from: 30
+                        to: 32
+                        color: '#ff9807'
+                      - from: 32
+                        to: 34
+                        color: '#ffa507'
+                      - from: 34
+                        to: 36
+                        color: '#ffb207'
+                      - from: 36
+                        to: 38
+                        color: '#ffbf07'
+                      - from: 38
+                        to: 40
+                        color: '#ffcc07'
+                      - from: 40
+                        to: 42
+                        color: '#ffd024'
+                      - from: 42
+                        to: 44
+                        color: '#ffd441'
+                      - from: 44
+                        to: 46
+                        color: '#ffd85e'
+                      - from: 46
+                        to: 48
+                        color: '#ffdc7b'
+                      - from: 48
+                        to: 50
+                        color: '#ffe198'
+                      - from: 50
+                        to: 52
+                        color: '#ffe689'
+                      - from: 52
+                        to: 54
+                        color: '#ffeb7a'
+                      - from: 54
+                        to: 56
+                        color: '#fff06b'
+                      - from: 56
+                        to: 58
+                        color: '#fff55c'
+                      - from: 58
+                        to: 60
+                        color: '#fffa4d'
+                      - from: 60
+                        to: 62
+                        color: '#ffff3e'
+                      - from: 62
+                        to: 64
+                        color: '#fdff3c'
+                      - from: 64
+                        to: 66
+                        color: '#fcff39'
+                      - from: 66
+                        to: 68
+                        color: '#e9ff36'
+                      - from: 68
+                        to: 70
+                        color: '#d6ff34'
+                      - from: 70
+                        to: 72
+                        color: '#c3ff31'
+                      - from: 72
+                        to: 74
+                        color: '#aff92f'
+                      - from: 74
+                        to: 76
+                        color: '#9cff2c'
+                      - from: 76
+                        to: 78
+                        color: '#89ff2a'
+                      - from: 78
+                        to: 80
+                        color: '#76f927'
+                      - from: 80
+                        to: 82
+                        color: '#63f324'
+                      - from: 82
+                        to: 84
+                        color: '#50ed20'
+                      - from: 84
+                        to: 86
+                        color: '#3ce71d'
+                      - from: 86
+                        to: 88
+                        color: '#29e11b'
+                      - from: 88
+                        to: 90
+                        color: '#16db18'
+                      - from: 90
+                        to: 92
+                        color: '#04d916'
+                      - from: 92
+                        to: 94
+                        color: '#04d916'
+                      - from: 94
+                        to: 96
+                        color: '#04d916'
+                      - from: 96
+                        to: 98
+                        color: '#04d916'
+                      - from: 98
+                        to: 100
+                        color: '#04d916'
+                    name: Battery Charge
+                    min: 0
+                    max: 100
+                  - type: custom:apexcharts-card
+                    experimental:
+                      color_threshold: true
+                    header:
+                      show: true
+                      show_states: true
+                      colorize_states: true
+                      title: Today's Agile Import Rates
+                    stacked: false
+                    graph_span: 18h
+                    span:
+                      start: day
+                      offset: +6h
+                    now:
+                      show: true
+                      label: Now
+                      color: black
+                    yaxis:
+                      - min: -10
+                        max: 60
+                        decimals: 1
+                    series:
+                      - entity: >-
+                          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                        type: column
+                        name: price
+                        color: gray
+                        opacity: 1
+                        stroke_width: 0
+                        unit: p/Kw
+                        show:
+                          in_header: false
+                          legend_value: false
+                          header_color_threshold: true
+                        color_threshold:
+                          - value: -100
+                            color: cyan
+                          - value: 0
+                            color: green
+                          - value: 20
+                            color: orange
+                          - value: 30
+                            color: red
+                        data_generator: |
+                          return entity.attributes.all_rates.map((entry) => {
+                             return [new Date(entry.valid_from), entry.value_inc_vat];
+                           });
+              - type: custom:tesla-style-solar-power-card
+                name: Home Power Flow
+                change_house_bubble_color_with_flow: 1
+                threshold_in_k: 1
+                show_gap: true
+                hide_inactive_lines: 1
+                generation_icon: mdi:solar-power-variant-outline
+                grid_to_house_entity: sensor.solar_grid_to_house_w
+                grid_to_battery_entity: sensor.solar_grid_to_battery_w
+                generation_to_grid_entity: sensor.solar_panel_to_grid_w
+                generation_to_battery_entity: sensor.solar_panel_to_battery_w
+                generation_to_house_entity: sensor.solar_panel_to_house_w
+                battery_to_house_entity: sensor.solar_battery_to_house_w
+                battery_to_grid_entity: sensor.solar_battery_to_grid_w
+                battery_extra_entity: sensor.battery_state_of_charge
+                generation_extra_entity: sensor.openweathermap_cloud_coverage
+                appliance1_consumption_entity: sensor.shellyem_244cab4194b1_channel_2_power
