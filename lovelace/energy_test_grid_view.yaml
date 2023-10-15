@@ -1,11 +1,12 @@
- #####################################
- #
- #
- #
- #
- #
- #
- #
+###############################################################################
+#   @author         :   Dave Forrester
+#   @date           :   15/10/23
+#   @view           :   energy_test
+#   @description    :   Trying out a grid layout with no backgrounds or borders
+#
+#   @modified by    :   
+#   @date           :   
+###############################################################################
  - title: Testing 2
     path: testing-2
     type: custom:grid-layout
@@ -19,6 +20,7 @@
               grid-area: header
             cards:
               - type: markdown
+                ## this next section removes card background and borders ##
                 card_mod: null
                 style: |
                   ha-card {
