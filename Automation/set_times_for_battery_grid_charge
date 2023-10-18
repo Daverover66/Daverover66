@@ -1,0 +1,28 @@
+alias: Set times for battery grid charge
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.overnight
+    from: "off"
+    to: "on"
+condition:
+  - condition: state
+    entity_id: input_boolean.grid_charge_home_battery
+    state: "on"
+action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.grid_charge_battery_slot_1_active
+  - service: input_datetime.set_datetime
+    data:
+      time: "{{states('sensor.home_battery_charge_start_time')}}"
+    target:
+      entity_id: input_datetime.start_battery_grid_charge
+  - service: input_datetime.set_datetime
+    data:
+      time: "{{states('sensor.home_battery_charge_end_time')}}"
+    target:
+      entity_id: input_datetime.end_battery_grid_charge
+mode: single
