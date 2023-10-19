@@ -438,24 +438,43 @@
         availability: >
           {{ states('sensor.solaredge_b1_state_of_energy') | is_number }}
 
-    - name: "Solar Battery Time to Charge"     
-      unique_id: battery_time_to_full
+   - name: "Solar Battery Time to Charge Grid"     
+      unique_id: battery_time_to_full_grid
       state: >
-        {% set wattsToCharge = ((states('sensor.solaredge_b1_maximum_energy') | float(0) *1000)/100)*(100 - states('sensor.solaredge_b1_state_of_energy') | float) %}
-        {% set totalhrs =  (wattsToCharge | float / states('sensor.solaredge_b1_dc_power') | float) | round(2) %}
+        {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+        {% set energy_used_percent = 100 - states('sensor.solaredge_b1_state_of_energy') | float(0) %}
+        {% set energy_used_w = (max_energy_w * energy_used_percent)/100 %}
+        {% set watts_to_charge = (max_energy_w - energy_used_w) %}
+        {% set totalhrs =  (watts_to_charge / 3900) | round(2) %}
         {{ '%02d:%02d' | format((totalhrs | int),((totalhrs*60) % 60) | round(0)) }}
       availability: >
-        {{ states('sensor.solaredge_b1_status_text') == 'Charging' }}
-        
-    - name: "Solar Battery Time to Empty"     
+        {{ states('sensor.solaredge_b1_dc_power') |float(0) | is_number }}
+
+    - name: "Solar Battery Time to Charge Solar"     
+      unique_id: battery_time_to_full_solar
+      state: >
+        {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+        {% set energy_used_percent = 100 - states('sensor.solaredge_b1_state_of_energy') | float(0) %}
+        {% set energy_used_w = (max_energy_w * energy_used_percent)/100 %}
+        {% set watts_to_charge = (max_energy_w - energy_used_w) %}
+        {% set totalhrs =  (watts_to_charge / states('sensor.solaredge_b1_dc_power') | float(0)) | round(2) %}
+          {% if totalhrs < 0 %}
+            {{ '%02d:%02d' | format((totalhrs | int *-1),((totalhrs*60) % 60) | round(0)) }}
+          {% else %}
+            {{ '%02d:%02d' | format((totalhrs | int),((totalhrs*60) % 60) | round(0)) }}
+          {% endif %}
+      availability: >
+        {{ states('sensor.solaredge_b1_dc_power') |float(0) | is_number }}
+
+     - name: "Solar Battery Time to Empty"     
       unique_id: battery_time_to_empty
       state: >
-        {% set batterypower = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
-        {% set wattsToDischarge = ((states('sensor.solaredge_b1_maximum_energy') | float(0) *1000)/100)*(states('sensor.solaredge_b1_state_of_energy') | float) %}
-        {% set totalhrs =  (wattsToDischarge | float / batterypower | float) | round(2) %}
+        {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
+        {% set watts_to_discharge = ((states('sensor.solaredge_b1_maximum_energy') | float(0) *1000)/100)*(states('sensor.solaredge_b1_state_of_energy') | float) %}
+        {% set totalhrs =  (watts_to_discharge | float / battery_power | float) | round(2) %}
         {{ '%02d:%02d' | format((totalhrs | int),((totalhrs*60) % 60) | round(0)) }}
       availability: >
-        {{ states('sensor.solaredge_b1_status_text') == 'Discharging' }}
+        {{ states('sensor.solaredge_b1_dc_power') | is_number }}
 
           
 ### Financials for Octopus Go (check tariffs)
