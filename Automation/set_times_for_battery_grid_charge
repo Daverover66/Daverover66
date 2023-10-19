@@ -1,3 +1,11 @@
+################################################################################## 
+#   @author                 :   Dave Forrester                                   #
+#   @date                   :   19/10/23                                         #
+#   @automation             :   set_times_for_battery_grid_charge                #
+#   @description            :   read the best grid charge slot in Agile and set  # 
+#                               charge times                                     #
+##################################################################################
+
 alias: Set times for battery grid charge
 description: ""
 trigger:
