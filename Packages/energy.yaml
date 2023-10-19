@@ -472,7 +472,11 @@
         {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
         {% set watts_to_discharge = ((states('sensor.solaredge_b1_maximum_energy') | float(0) *1000)/100)*(states('sensor.solaredge_b1_state_of_energy') | float) %}
         {% set totalhrs =  (watts_to_discharge | float / battery_power | float) | round(2) %}
-        {{ '%02d:%02d' | format((totalhrs | int),((totalhrs*60) % 60) | round(0)) }}
+	  {% if totalhrs < 0 %}
+            {{ '%02d:%02d' | format((totalhrs | int * -1),((totalhrs*60) % 60) | round(0)) }}
+          {% else %}
+            {{ '%02d:%02d' | format((totalhrs | int ),((totalhrs*60) % 60) | round(0)) }}
+          {% endif %}
       availability: >
         {{ states('sensor.solaredge_b1_dc_power') | is_number }}
 
