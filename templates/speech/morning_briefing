@@ -118,11 +118,12 @@
     </p>
     <p>
       The home battery has 
-      {{states('sensor.battery_state_of_charge') }}% charge remaining.
-        If it needs a top up, the cheapest charging time starts at 
-      {{states('sensor.home_battery_charge_start_time') }},
-      and finishes at
-      {{states('sensor.home_battery_charge_end_time') }}.
+      {{states('sensor.battery_state_of_charge') }}% charge remaining, and will last another 
+      {{ states('sensor.solar_battery_time_to_empty')}} hours, at the current rate of consumption.
+       The estimated solar production for today is {{ states('sensor.energy_production_today_3') | round (2)}}kWh. So
+        if the battery needs a top up, the cheapest half hour charging slot is at,
+        {{ as_timestamp(state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time'))|timestamp_custom ('%H:%M')}}, when the price will be
+        {{ state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost')  }} per kWh.
       If you want to charge it outside of that window, you know what to do.
     </p>
     <p>
