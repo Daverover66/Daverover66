@@ -445,7 +445,7 @@
         {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
         {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
         {% set hrs_to_full =  (energy_used_w / 3900) | round(2) %}
-          {{ '%02d:%02d' | format((hrs_to_full * -1 | int),((hrs_to_full*60) % 60) | round(0)) }}
+          {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
       availability: >
         {{ 0 not in [ states('sensor.solaredge_b1_dc_power')|float] }}
 
