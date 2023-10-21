@@ -249,10 +249,39 @@ automation:
                 entity_id: binary_sensor.overnight
                 state: "on"
             sequence:
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.kitchen_night_lights
-                metadata: {}
+              - if:
+                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
+                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
+                then:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: >-
+                        scene.kitchen_night_lights_with_garage_dehumidifier_full_and_washing_machine_finished
+                else:
+                  - if:
+                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
+                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
+                    then:
+                      - service: scene.turn_on
+                        data: {}
+                        target:
+                          entity_id: scene.kitchen_night_lights_with_washing_machine_indicator
+                    else:
+                      - if:
+                          - "{{ is_state('input_boolean.washing_machine_finished','off') }}"
+                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}" 
+                        then:
+                          - service: scene.turn_on
+                            data: {}
+                            target:
+                              entity_id: >-
+                                scene.kitchen_night_lights_with_garage_dehumidifier_full_indicator
+                        else:
+                          - service: scene.turn_on
+                            data: {}
+                            target:
+                              entity_id: scene.kitchen_night_lights
           - conditions:
               - condition: trigger
                 id:
