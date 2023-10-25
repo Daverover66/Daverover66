@@ -596,7 +596,7 @@ script:
                   'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
                   'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
                   'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
-                  'Sean and Jamie. <prosody pitch="x-high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                  'Sean and Jamie. <prosody pitch="high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
                   ] | random }}
               </p>
             {% endmacro %}
