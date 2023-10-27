@@ -34,8 +34,8 @@ data:
                 'Today is a school day.  So no time to chill.  Time to get up and go downstairs'] | random }}
           {% elif is_state('binary_sensor.fridayschool','on') %}
             {{ ['Its a Friday school day today. So you need to get up now. But its a half day and you have Schools Out this afternoon.',
-                'School today.  So as warm, and cosy, as your bed is. <emphasis level="strong">Might I suggest you get up now.</emphasis> On the plus side. It is Friday. So Schools Out this afternoon. ',
-                'Today is a school day.  So no time to chill.  Time to get up and go downstairs.  You might also like to know that its Friday and you have Schools Out this afternoon.'] | random }}
+                'School today.  So as warm and cozee as your bed is. <emphasis level="reduced">Might I suggest you get up now.</emphasis> On the plus side. <prosody pitch="high">It is Friday. So Schools Out this afternoon.</prosody> ',
+                'Today is a school day.  So no time to chill.  Time to get up and go downstairs.  <prosody pitch="high">You might also like to know that its Friday and you have Schools Out this afternoon.</prosody>'] | random }}
           {% endif %}
          </p>
       
