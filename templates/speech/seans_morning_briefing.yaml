@@ -1,5 +1,5 @@
 >
- {%- macro getReport() -%} 
+    {%- macro getReport() -%} 
         <p>
             Good morning Sean.  Its time to get up.
         </p>
@@ -7,16 +7,16 @@
           {% if is_state('binary_sensor.morning','on') %} 
             {{ [
                 'Today is ',
-                'In case you have not been keeping track. Today is',
+                'In case you have not been keeping track. Today is ',
                 'Do you know what day of the week it is? <emphasis level="strong">No?</emphasis> Well today is',
                 'This may or may not be good news, but today is'
                   ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }}. The time is {{ now().strftime("%I:%M %p") }}.
           {% else %} 
             {{ [
-                'You have missed half of',
+                'You have missed half of ',
                 'In case you have not been keeping track. Today is',
                 'Do you know what day of the week it is? <emphasis level="strong">No?</emphasis> Well today is',
-                'Now that you are awake I can tell you that today is'
+                'Now that you are awake I can tell you that today is '
                   ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }} and it is now {{ now().strftime("%I:%M %p") }}.
           {% endif %}
         </p>
@@ -25,6 +25,10 @@
             {{ ['Its a school holiday today so no need to get up early',
                 'No school today.  So why not have a lie in',
                 'Today is a school holiday.  So chill and have a duvet day'] | random }}
+          {% elif is_state('binary_sensor.workday_sensor','on') %}
+            {{ ['Its the weekend so no school today',
+                'Guess what? Its the weekend.  Why not have a lie in.',
+                'Its the weekend. So you can either chill in bed,or get up and watch tv'] | random }}
           {% elif is_state('binary_sensor.schoolday','on') %}
             {{ ['Its a school day today so you need to get up now',
                 'School today.  So as warm and cosy as your bed is, <emphasis level="reduced">might I suggest you get up now</emphasis>',
@@ -35,7 +39,27 @@
                 'Today is a school day.  So no time to chill.  Time to get up and go downstairs.  <prosody pitch="high">You might also like to know that its Friday and you have Schools Out this afternoon.</prosody>'] | random }}
           {% endif %}
          </p>
-      
+        The Temperature outside is {{states('sensor.outside_temperature')|round}} degrees, but 
+        {{ ['its a toasty warm ',
+            'its much warmer at ',
+            'its a positively tropical '] | random }}{{ states('sensor.downstairs_temperature')|round}} degrees downstairs.
+    <p>
+        The weather forecast for today says we should expect 
+        {% if is_state('weather.forecast_home','partlycloudy') %} 
+        partly cloudy 
+        {% else %}
+        {{ states('weather.forecast_home') }} 
+        {% endif %}weather. 
+        With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
+    </p>
+    <p>
+      {% if is_state('switch.living_room_tv','on') %}
+        The TV is on downstairs and is showing
+        {{ state_attr('media_player.sky_q_main','media_series_title')}}
+        {% else %}
+        If youre quick, you can be first up and watch what you want on TV downstairs.
+        {% endif %}
+    </p>
       {%- endmacro-%}
             
       {# a macro that removes all newline characters, empty spaces, and returns formatted text  #} 
