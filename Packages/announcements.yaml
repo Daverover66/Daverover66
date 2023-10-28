@@ -5,7 +5,7 @@
 #   @description    :   Daily Announcements.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   07/09/2023
+#   @date           :   27/10/2023
 ###############################################################################
 
 ###############################
@@ -30,6 +30,10 @@ input_datetime:
     has_time: true
   daily_report:
     name: Daily Report
+    has_date: false
+    has_time: true
+  seans_morning_briefing:
+    name: Seans Morning Briefing 
     has_date: false
     has_time: true
   #audible_notification_on:
@@ -60,6 +64,9 @@ input_boolean:
    icon: mdi:bullhorn
  morning_briefing_played:
    name: Morning Briefing Played
+   icon: mdi:bullhorn
+ seans_morning_briefing_played:
+   name: Seans Morning Briefing Played 
    icon: mdi:bullhorn
  
 
@@ -265,7 +272,23 @@ automation:
           sequence:
           - service: script.morning_briefing
     
-
+  ###################################################
+  #    Seans Morning Briefing with time             #
+  ###################################################
+  - id: play_seans_morning_briefing_annc
+    alias: Play Seans Morning Briefing
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: time
+        at: input_datetime.seans_morning_briefing 
+    condition:
+      - condition: state
+        entity_id: input_boolean.seans_morning_briefing_played
+        state: "off"
+    action:
+      - service: script.seans_morning_briefing 
+      
   ###################################################
   #    Bedtime                                      #
   ###################################################
@@ -581,6 +604,18 @@ script:
           entity_id: media_player.kitchen_echo_show 
       - service: input_boolean.turn_on
         entity_id: input_boolean.morning_briefing_played
+
+  seans_morning_briefing:
+    sequence:
+      - service: script.speech_engine
+        data:
+          where: seans_room 
+          message: !include ../templates/speech/seans_morning_briefing.yaml
+          msg_summary: "seans morning briefing"
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.seans_morning_briefing_played 
 
   #daily_briefing:
   #  sequence:
