@@ -25,7 +25,7 @@
             {{ ['Its a school holiday today so no need to get up early',
                 'No school today.  So why not have a lie in',
                 'Today is a school holiday.  So chill and have a duvet day'] | random }}
-          {% elif is_state('binary_sensor.workday_sensor','on') %}
+          {% elif is_state('binary_sensor.workday_sensor','off') %}
             {{ ['Its the weekend so no school today',
                 'Guess what? Its the weekend.  Why not have a lie in.',
                 'Its the weekend. So you can either chill in bed,or get up and watch tv'] | random }}
