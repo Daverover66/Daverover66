@@ -4,8 +4,9 @@
 #   @automation     :   All Presence and Occupation        #
 #   @description    :   Room and area occupation           #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   30/10/23                           #
+#   @mod descrip    :   correcting various actions         #
 ############################################################      
 
 alias: All Presence and Occupancy
@@ -13,7 +14,10 @@ description: Set room presence and room occupancy based on motion and presence.
 trigger:
   - platform: state
     entity_id:
-      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_2
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
       - binary_sensor.dining_room_presence_sensor_occupancy
       - binary_sensor.living_room_fp2_presence_sensor_1
       - binary_sensor.hallway_camera_cell_motion_detection
@@ -23,17 +27,22 @@ trigger:
       - binary_sensor.guest_bedroom_camera_cell_motion_detection
       - binary_sensor.guest_bedroom_motion_occupancy
       - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.main_bedroom_fp2_presence_sensor_4
       - binary_sensor.office_presence_sensor_occupancy
       - binary_sensor.cloakroom_presence_occupancy
       - binary_sensor.main_bathroom_presence_occupancy
       - binary_sensor.jack_and_jill_presence_occupancy
       - binary_sensor.upper_landing_presence_occupancy
+      - binary_sensor.garage_camera_cell_motion_detection_2
     from: "off"
     to: "on"
     id: Motion
   - platform: state
     entity_id:
-      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_2
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
       - binary_sensor.dining_room_presence_sensor_occupancy
       - binary_sensor.living_room_fp2_presence_sensor_1
       - binary_sensor.hallway_camera_cell_motion_detection
@@ -43,18 +52,16 @@ trigger:
       - binary_sensor.guest_bedroom_camera_cell_motion_detection
       - binary_sensor.guest_bedroom_motion_occupancy
       - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.main_bedroom_fp2_presence_sensor_4
       - binary_sensor.office_presence_sensor_occupancy
       - binary_sensor.cloakroom_presence_occupancy
       - binary_sensor.main_bathroom_presence_occupancy
       - binary_sensor.jack_and_jill_presence_occupancy
       - binary_sensor.upper_landing_presence_occupancy
+      - binary_sensor.garage_camera_cell_motion_detection_2
     from: "on"
     to: "off"
     id: No Motion
-    for:
-      hours: 0
-      minutes: 1
-      seconds: 0
   - platform: state
     entity_id:
       - media_player.kitchen_echo_show
@@ -86,9 +93,9 @@ trigger:
     id: External Door Open
   - platform: state
     entity_id:
-      - binary_sensor.living_room_fp2_presence_sensor_4
       - binary_sensor.living_room_fp2_presence_sensor_2
       - binary_sensor.living_room_fp2_presence_sensor_3
+      - binary_sensor.living_room_fp2_presence_sensor_4
       - binary_sensor.main_bedroom_fp2_presence_sensor_2
       - binary_sensor.main_bedroom_fp2_presence_sensor_3
       - binary_sensor.living_room_fp2_presence_sensor_5
@@ -97,9 +104,9 @@ trigger:
     id: Chair or Bed Occupied
   - platform: state
     entity_id:
-      - binary_sensor.living_room_fp2_presence_sensor_4
       - binary_sensor.living_room_fp2_presence_sensor_2
       - binary_sensor.living_room_fp2_presence_sensor_3
+      - binary_sensor.living_room_fp2_presence_sensor_4
       - binary_sensor.main_bedroom_fp2_presence_sensor_2
       - binary_sensor.main_bedroom_fp2_presence_sensor_3
       - binary_sensor.living_room_fp2_presence_sensor_5
@@ -121,7 +128,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Living Room
+              value: living_room
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -153,7 +160,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Living Room Sofa
+              value: living_room_sofa
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -182,7 +189,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Living Room Recliner Sofa
+              value: living_room_recliner
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -211,7 +218,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Living Room Corner Chair
+              value: living_room_corner_chair
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -240,7 +247,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Living Room Desk
+              value: living_room_desk
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -271,12 +278,12 @@ action:
                 value_template: "{{\"Ingrid\" in trigger.to_state.attributes.friendly_name}}"
                 alias: Filter Ingrid
               - condition: template
-                value_template: "{{\"G3\" in trigger.to_state.attributes.friendly_name }}"
+                value_template: "{{\"Kitchen\" in trigger.to_state.attributes.friendly_name }}"
                 alias: Filter Kitchen
         sequence:
           - service: input_text.set_value
             data:
-              value: Kitchen
+              value: kitchen
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -288,7 +295,7 @@ action:
             id:
               - No Motion
           - condition: template
-            value_template: "{{\"G3\" in trigger.to_state.attributes.friendly_name }}"
+            value_template: "{{\"Kitchen\" in trigger.to_state.attributes.friendly_name }}"
             alias: Filter Kitchen
           - condition: state
             entity_id: switch.ingrid_socket_1
@@ -309,7 +316,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Dining Room
+              value: dining_room
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -334,11 +341,11 @@ action:
               - Motion
           - condition: template
             value_template: "{{\"Hallway\" in trigger.to_state.attributes.friendly_name }}"
-            alias: "Filter Hallway "
+            alias: Filter Hallway
         sequence:
           - service: input_text.set_value
             data:
-              value: "Hallway "
+              value: hallway
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -351,7 +358,7 @@ action:
               - No Motion
           - condition: template
             value_template: "{{\"Hallway\" in trigger.to_state.attributes.friendly_name }}"
-            alias: "Filter Hallway "
+            alias: Filter Hallway
         sequence:
           - service: input_boolean.turn_off
             data: {}
@@ -367,7 +374,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Lower Landing
+              value: lower_landing
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -393,11 +400,11 @@ action:
               - Last Called Alexa
           - condition: template
             value_template: "{{\"Main\" in trigger.to_state.attributes.friendly_name }}"
-            alias: "Filter Main Bedroom "
+            alias: Filter Main Bedroom
         sequence:
           - service: input_text.set_value
             data:
-              value: "Main Bedroom "
+              value: main_bedroom
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -426,7 +433,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Dad's Side of the Bed
+              value: dads_side_of_bed
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -455,7 +462,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Gem's Side of the Bed
+              value: mums_side_of_bed
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -484,7 +491,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: En-Suite Bathroom
+              value: en_suite
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -514,7 +521,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Jamie's Room
+              value: jamies_room
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -544,7 +551,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Sean's Room
+              value: seans_room
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -574,7 +581,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Guest Bedroom
+              value: guest_bedroom
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -604,7 +611,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Office
+              value: office
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -633,7 +640,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: Garage
+              value: garage
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -662,7 +669,7 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: "Cloakroom "
+              value: cloakroom
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -675,7 +682,7 @@ action:
               - No Motion
           - condition: template
             value_template: "{{\"Cloakroom\" in trigger.to_state.attributes.friendly_name }}"
-            alias: "Filter Cloakroom "
+            alias: Filter Cloakroom
         sequence:
           - service: input_boolean.turn_off
             data: {}
@@ -691,13 +698,14 @@ action:
         sequence:
           - service: input_text.set_value
             data:
-              value: " Main Bathroom"
+              value: bathroom
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
             data: {}
             target:
-              entity_id: input_boolean.room_occupied_main_bedroom
+              entity_id:
+                - input_boolean.room_occupied_main_bathroom
       - conditions:
           - condition: trigger
             id:
@@ -716,10 +724,11 @@ action:
               - Motion
           - condition: template
             value_template: "{{\"Upper\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Upper Landing
         sequence:
           - service: input_text.set_value
             data:
-              value: Upper Landing
+              value: upper_landing
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -743,10 +752,11 @@ action:
               - Motion
           - condition: template
             value_template: "{{\"Jack\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Kids Bathroom
         sequence:
           - service: input_text.set_value
             data:
-              value: Jack & Jill Bathroom
+              value: kids_bathroom
             target:
               entity_id: input_text.room_presence
           - service: input_boolean.turn_on
@@ -764,4 +774,90 @@ action:
             data: {}
             target:
               entity_id: input_boolean.room_occupied_jack_jill
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - alias: Filter Kitchen Table
+            condition: template
+            value_template: "{{\"Dinner\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: kitchen_table
+            target:
+              entity_id: input_text.room_presence
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_table_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Dinner\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Kitchen Table
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_table_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Back Door Zone
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: back_door_zone
+            target:
+              entity_id: input_text.room_presence
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.back_door_zone_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.back_door_zone_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion
+          - condition: template
+            value_template: "{{\"Utility\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Utility Room
+        sequence:
+          - service: input_text.set_value
+            data:
+              value: utility_room
+            target:
+              entity_id: input_text.room_presence
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.utility_room_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - No Motion
+          - condition: template
+            value_template: "{{\"Utility\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.utility_room_occupied
 mode: restart
+
