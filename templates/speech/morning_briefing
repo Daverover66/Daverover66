@@ -117,6 +117,30 @@
         {%- endfor %}
     </p>
     <p>
+      {{ ['My latest smart device sensor sweep has detected that','Smart device sensors have detected that','My smart device crystal ball has revealed that'] | random }} 
+        {% set batts_count = expand('group.critical_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | selectattr('state', 'lt', '30') | list | count %}
+        {% if batts_count > 0 %}
+        {% set batts = expand('group.critical_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | selectattr('state', 'lt', '30') | list %}
+        {% for bat in batts %}
+         The {{ bat.name }} is at {{ bat.state }}%. 
+         {{ ['This is lower than the minimum thresshold for satisfactory operation.',
+             'Any lower and it will cease to function.',
+             'That is pretty low'] | random }}
+         {{ ['So perhaps you should replace the batteries before it dies.',
+             'So it might be time for replacement batteries',
+             'So I guess you know what to do.' ] | random }}
+         {% endfor %}
+         {% else %} 
+         {{ ['all device batteries are within acceptable limits.',
+             'all battery operated devices are at full power.',
+             'you have no batteries to replace today.' ] | random }}
+         {% endif %}
+    </p>
+    <p>
       The home battery has 
       {{states('sensor.battery_state_of_charge') }}% charge remaining, and is 
        {% set time = states('sensor.solar_battery_time_to_empty')%}
