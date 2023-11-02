@@ -561,9 +561,14 @@ automation:
               - condition: trigger
                 id:
                   - BDZ On
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
+              - condition: or
+                conditions:
+                  - condition: numeric_state
+                    entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+                    below: input_number.low_light_threshold
+                  - condition: time
+                    after: "18:00:00"
+                    before: "07:00:00"
             sequence:
               - service: light.turn_on
                 data:
