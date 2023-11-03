@@ -314,17 +314,21 @@ template:
         state: |-
           {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
           {% if is_state('binary_sensor.quiet_time_boys','on') %}
-            {% if sensor.name == 'Living Room All Areas' or is_state('media_player.sky_q_main', 'playing') %}
+            {% if sensor.name == 'unknown' %}
+              dave_s_2nd_echo_pop
+            {% elif sensor.name == 'Living Room All Areas' or is_state('media_player.sky_q_main', 'playing') %}
               dave_s_2nd_echo_pop
             {% elif sensor.name == 'Kitchen Presence Sensor all areas' or is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
               kitchen_echo_show 
             {% else %}
               main_bedroom_dot
             {%- endif %}
+          {% elif sensor.name == 'unknown' %}
+            dave_s_2nd_echo_pop
           {% elif sensor.name == 'Living Room All Areas' and is_state('media_player.sky_q_main', 'playing') %}
-          dave_s_2nd_echo_pop
+            dave_s_2nd_echo_pop
           {% elif sensor.name == 'Kitchen Presence Sensor all areas' and is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
-          kitchen_echo_show
+            kitchen_echo_show
           {% else %}
             {% if sensor.name == 'Living Room All Areas' %}
               dave_s_2nd_echo_pop
