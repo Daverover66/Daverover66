@@ -67,10 +67,15 @@
     </p>
     <p>
       {% if is_state('binary_sensor.evening','on') %}
-        The overnight forecast says we can expect {{ states('weather.forecast_home') }} weather. With a low of {{ states('sensor.overnight_low_temp')}} degrees celsius.
-      {% else %}
-        The current forecast says we should expect {% if is_state('weather.forecast_home','partlycloudy') %} partly cloudy {% else %}{{ states('weather.forecast_home') }} {% endif %} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
-      {% endif %}
+          The overnight forecast says we can expect {{ states('weather.forecast_home') }} weather. With a low of {{ states('sensor.overnight_low_temp')}} degrees celsius.
+        {% else %}
+          The current forecast says we should expect 
+          {% if is_state('weather.forecast_home','partlycloudy') %} partly cloudy 
+          {% elif is_state('weather.forecast_home','fog') %} foggy
+          {% else %}
+          {{ states('weather.forecast_home') }} 
+          {% endif %} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
+        {% endif %}
     </p>
     <p>
       {% if is_state('sun.sun', 'below_horizon') %} 
