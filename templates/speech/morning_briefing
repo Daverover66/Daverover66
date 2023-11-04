@@ -44,6 +44,11 @@
             'with partly cloudy skies.', 
             'with scattered clouds' 
               ] | random }} 
+      {% elif is_state('weather.forecast_home', 'fog') %} 
+            {{ [ 
+                'and foggy.',  
+                'with fog.' 
+                ] | random }} 
       {% elif is_state('weather.forecast_home', 'sunny') %} 
         {% if is_state('sun.sun', 'above_horizon') %} 
           {{ [ 
