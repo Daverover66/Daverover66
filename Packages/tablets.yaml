@@ -21,15 +21,15 @@ automation:
         id: Daves tablet charged
     condition: []
     action:
-      choose:
-        conditions:
-          - condition: trigger
-            id: Daves tablet charged
-        sequence:
-          - service: notify.mobile_app_daves_samsung_galaxy
-            data:
-              message: Your tablet is charged.
-    mode: single
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Daves tablet charged
+            sequence:
+              - service: notify.mobile_app_daves_samsung_galaxy
+                data:
+                  message: Your tablet is charged.
+    
 
 alias: Gem's Kindle Battery Watch
 description: ""
