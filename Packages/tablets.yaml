@@ -52,23 +52,22 @@ automation:
               - condition: trigger
                 id: Daves tablet charged
             sequence:
-              - service: notify.mobile_app_daves_samsung_galaxy
+              - service: script.text_notify_dave
                 data:
+                  title: TABLET CHARGED
                   message: Your tablet is charged.
           - conditions:
               - condition: trigger
                 id: Gems Kindle Battery low
             sequence:
-              - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+              - service: script.text_notify_gem
                 data:
-                  message: Gems Kindle battery is low, please charge.
-                  title: GEM'S KINDLE
-               alias: Send a notification based on an input text helper
-             - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                  title: GEM KINDLE
+                  message: Gems Kindle battery is low, please charge.                  
+             - service: script.text_notify_dave
                data:
+                 title: GEM KINDLE
                  message: Gems Kindle battery is low, please charge.
-                 title: GEM'S KINDLE
-               alias: Send a notification based on an input text helper
           - conditions: 
                - condition: trigger
                  id: Jamie Network Type
@@ -76,29 +75,26 @@ automation:
                  entity_id: person.jamie
                  state: home
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
+                  title: JAMIE TABLET
                   message: Jamie's tablet has changed network
-                  title: NETWORK CHANGE
-                alias: Send a notification based on an input text helper
           - conditions:
               - condition: trigger
                 id: Jamie Low Battery
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
+                  title: JAMIE TABLET
                   message: Jamie's tablet needs charged
-                  title: TABLET LOW BATTERY
-                alias: Send a notification based on an input text helper
           - conditions:
               - condition: trigger
                 id: Jamie Fully Charged
             sequence:
               - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
                 data:
+                  title: JAMIE TABLET
                   message: Jamie's tablet is charged
-                  title: TABLET CHARGED  
-                alias: Send a notification based on an input text helper
           - conditions:
               - condition: trigger
                 id: Sean Network Type
@@ -106,29 +102,27 @@ automation:
                 entity_id: person.sean
                 state: home
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
+                  title: SEAN TABLET
                   message: Sean's tablet has changed network
-                  title: NETWORK CHANGE
-                alias: Send a notification based on an input text helper
           - conditions:
               - condition: trigger
                 id: Sean Low Battery
             sequence:
               - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
                 data:
+                  title: SEAN TABLET
                   message: Sean's tablet needs charged
-                  title: TABLET LOW BATTERY
-                alias: Send a notification based on an input text helper
           - conditions:
               - condition: trigger
                 id: Sean Fully Charged
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
+                  title: SEAN TABLET
                   message: Sean's tablet is charged
-                  title: TABLET CHARGED
-                alias: Send a notification based on an input text helper
+                  
     
 
 
