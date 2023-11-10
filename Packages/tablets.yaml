@@ -9,18 +9,27 @@
 ###############################################################################
 
 automation:
-  - alias: Dave's Samsung Tablet Automations
-  description: ""
-  trigger:
-    - platform: numeric_state
-      entity_id: sensor.sm_t736b_battery_level
-      above: 99
-  condition: []
-  action:
-    - service: notify.mobile_app_daves_samsung_galaxy
-      data:
-        message: Your tablet is charged.
-  mode: single
+  - id: all_tablet_automations
+    alias: All Tablet Automations
+    initial_state: true
+    mode: single
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.sm_t736b_battery_level
+        above: 99
+        id: Daves tablet charged
+    condition: []
+    action:
+      choose:
+        conditions:
+          - condition: trigger
+            id: Daves tablet charged
+        sequence:
+          - service: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: Your tablet is charged.
+    mode: single
 
 alias: Gem's Kindle Battery Watch
 description: ""
