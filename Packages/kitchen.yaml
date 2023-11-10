@@ -539,7 +539,7 @@ automation:
                             data: {}
                             target:
                               entity_id:
-                                - scene.kitchen_light_indicator_garage_dehumidifier_full
+                                - scene.kitchen_light_indicator_garage_dehumidifier
                         else:
                           - service: light.turn_off
                             data: {}
