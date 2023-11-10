@@ -34,6 +34,17 @@ automation:
         entity_id: sensor.jamie_s_samsung_tablet_battery_level
         above: 99
         id: Jamie Fully Charged
+      - platform: state
+        entity_id: sensor.sean_s_samsung_galaxy_network_type
+        id: Sean Network Type
+      - platform: numeric_state
+        entity_id: sensor.sean_s_samsung_galaxy_battery_level
+        below: 10
+        id: Sean Low Battery
+      - platform: numeric_state
+        entity_id: sensor.sean_s_samsung_galaxy_battery_level
+        above: 99
+        id: Sean Fully Charged
     condition: []
     action:
       - choose:
@@ -88,61 +99,37 @@ automation:
                   message: Jamie's tablet is charged
                   title: TABLET CHARGED  
                 alias: Send a notification based on an input text helper
+          - conditions:
+              - condition: trigger
+                id: Sean Network Type
+              - condition: state
+                entity_id: person.sean
+                state: home
+            sequence:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: Sean's tablet has changed network
+                  title: NETWORK CHANGE
+                alias: Send a notification based on an input text helper
+          - conditions:
+              - condition: trigger
+                id: Sean Low Battery
+            sequence:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: Sean's tablet needs charged
+                  title: TABLET LOW BATTERY
+                alias: Send a notification based on an input text helper
+          - conditions:
+              - condition: trigger
+                id: Sean Fully Charged
+            sequence:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: Sean's tablet is charged
+                  title: TABLET CHARGED
+                alias: Send a notification based on an input text helper
     
 
 
 
-
-
-alias: Sean's Tablet All Automation
-description: ""
-trigger:
-  - platform: state
-    entity_id:
-      - sensor.sean_s_samsung_galaxy_network_type
-    id: Network Type
-  - platform: numeric_state
-    entity_id: sensor.sean_s_samsung_galaxy_battery_level
-    below: 10
-    id: Low Battery
-  - platform: numeric_state
-    entity_id: sensor.sean_s_samsung_galaxy_battery_level
-    above: 99
-    id: Fully Charged
-condition: []
-action:
-  - choose:
-      - conditions:
-          - condition: trigger
-            id:
-              - Network Type
-          - condition: state
-            entity_id: person.sean
-            state: home
-        sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-            data:
-              message: Sean's tablet has changed network
-              title: NETWORK CHANGE
-            alias: Send a notification based on an input text helper
-      - conditions:
-          - condition: trigger
-            id:
-              - Low Battery
-        sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-            data:
-              message: Sean's tablet needs charged
-              title: TABLET LOW BATTERY
-            alias: Send a notification based on an input text helper
-      - conditions:
-          - condition: trigger
-            id:
-              - Fully Charged
-        sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-            data:
-              message: Sean's tablet is charged
-              title: TABLET CHARGED
-            alias: Send a notification based on an input text helper
-mode: single
