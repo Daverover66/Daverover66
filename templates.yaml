@@ -462,3 +462,39 @@
       {% set duration_in_secs = (end_in|float(0) - start_in|float(0))*3600 %}  
       {% set end_time = (as_timestamp(start_time) + duration_in_secs )|timestamp_custom ('%H:%M')%}
         {{ end_time }}
+
+  - name: "Estimated Earliest Evening MODBUS Disconnect Times"
+    unique_id: estimated_earliest_evening_modbus_disconnect_times
+    icon: mdi:clock-start
+    state: >
+      {% set t1 = states('input_datetime.morning_modbus_disconnect_time') %}
+      {% set t2 = '13:54:00' %}
+      {% set time_pm_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
+        {{ time_pm_earliest }}
+      
+  - name: "Estimated Latest Evening MODBUS Disconnect Times"
+    unique_id: estimated_latest_evening_modbus_disconnect_times
+    icon: mdi:clock-start
+    state: >
+      {% set t1 = states('input_datetime.morning_modbus_disconnect_time') %}
+      {% set t2 = '14:08:00' %}
+      {% set time_pm_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
+        {{ time_pm_latest }}
+
+  - name: "Estimated Earliest Morning MODBUS Disconnect Times"
+    unique_id: estimated_earliest_morning_modbus_disconnect_times
+    icon: mdi:clock-start
+    state: >
+      {% set t1 = states('input_datetime.evening_modbus_disconnect_time')  %}
+      {% set t2 = '09:56:00' %}
+      {% set time_am_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
+        {{ time_am_earliest }}
+      
+  - name: "Estimated Latest Morning MODBUS Disconnect Times"
+    unique_id: estimated_latest_morning_modbus_disconnect_times
+    icon: mdi:clock-start
+    state: >
+      {% set t1 = states('input_datetime.evening_modbus_disconnect_time')  %}
+      {% set t2 = '10:10:00' %}
+      {% set time_am_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
+        {{ time_am_latest }} 
