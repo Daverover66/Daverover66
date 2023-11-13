@@ -338,6 +338,11 @@ automation:
     trigger:
       - platform: numeric_state
         entity_id: sensor.en_suite_temperature_and_humidity_humidity
+        above: 80
+        id: Humidity High
+        alias: When En-Suite humidity is below 65%
+      - platform: numeric_state
+        entity_id: sensor.en_suite_temperature_and_humidity_humidity
         below: 65
         id: Humidity Normal
         alias: When En-Suite humidity is below 65%
@@ -383,6 +388,7 @@ automation:
               - condition: trigger
                 id:
                   - Shower On
+                  - Humdidity High
               - condition: state
                 entity_id: switch.en_suite_fan_switch
                 state: "off"
