@@ -5,8 +5,8 @@
 #   @description    :   Basic security for the house when   #
 #                       we are away. Uses Alert integration #
 #                                                           #
-#   @version        :   1.0                                 #
-#   @modified       :                                       #
+#   @version        :   1.01                                #
+#   @modified       :   15/11/23                            #
 #############################################################
 
 alias: Security System
@@ -74,26 +74,26 @@ trigger:
     id: Clear
   - platform: state
     entity_id:
-      - person.gem_forrester
-    to: home
+      - binary_sensor.gem_home
+    to: "on"
     id: Gem Home
   - platform: state
     entity_id:
-      - person.david_forrester
-    to: home
+      - binary_sensor.dave_home
+    to: "on"
     id: Dave Home
     enabled: true
   - platform: state
     entity_id:
-      - group.residents
-    from: home
-    to: not_home
+      - binary_sensor.family_home
+    from: "on"
+    to: "off"
     id: We've all gone out
   - platform: state
     entity_id:
-      - group.residents
-    from: not_home
-    to: home
+      - binary_sensor.family_home
+    from: "off"
+    to: "on"
     id: We're all home again
 condition: []
 action:
@@ -133,15 +133,24 @@ action:
               entity_id: input_boolean.sentry_mode
       - conditions:
           - condition: trigger
+            id: We're all home again
+          - condition: state
+            entity_id: input_boolean.sentry_mode
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.sentry_mode
+      - conditions:
+          - condition: trigger
             id: Gem Home
           - condition: state
             entity_id: input_boolean.sentry_mode
             state: "on"
-          - condition: not
-            conditions:
-              - condition: state
-                entity_id: person.david_forrester
-                state: home
+          - condition: state
+            entity_id: binary_sensor.dave_home
+            state: "off"
             alias: Confirm Dave is not home
         sequence:
           - service: input_boolean.turn_off
@@ -154,15 +163,14 @@ action:
           - condition: state
             entity_id: input_boolean.sentry_mode
             state: "on"
-          - condition: not
-            conditions:
-              - condition: state
-                entity_id: person.gem_forrester
-                state: home
+          - condition: state
+            entity_id: binary_sensor.gem_home
+            state: "off"
             alias: Confirm Gem is not home
         sequence:
           - service: input_boolean.turn_off
             data: {}
             target:
               entity_id: input_boolean.sentry_mode
-mode: single
+mode: restart
+
