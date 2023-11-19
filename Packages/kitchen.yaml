@@ -249,302 +249,62 @@ automation:
                 entity_id: binary_sensor.overnight
                 state: "on"
             sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: >-
-                        scene.kitchen_night_lights_with_garage_dehumidifier_full_and_washing_machine_finished
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: scene.kitchen_night_lights_with_washing_machine_indicator
-                    else:
-                      - if:
-                          - "{{ is_state('input_boolean.washing_machine_finished','off') }}"
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}" 
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: >-
-                                scene.kitchen_night_lights_with_garage_dehumidifier_full_indicator
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_night_lights
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_night_lights
           - conditions:
               - condition: trigger
                 id:
                   - Lights On
-              - condition: state
-                entity_id: binary_sensor.morning
-                state: "on"
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.morning
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.afternoon
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.evening
+                    state: "on"
               - condition: numeric_state
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
-                    else:
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: >-
-                                scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_normal
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
                   - Lights On
-              - condition: state
-                entity_id: binary_sensor.lunchtime
-                state: "on"
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.lunchtime
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.dinner_time
+                    state: "on"
               - condition: numeric_state
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_mealtimes_on_with_washing_machine_indicator_on
-                    else:
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id:
-                                - >-
-                                  scene.kitchen_lights_mealtimes_on_with_garage_dehumidifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights On
-              - condition: state
-                entity_id: binary_sensor.afternoon
-                state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
-                    else:
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: >-
-                                scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights On
-              - condition: state
-                entity_id: binary_sensor.dinner_time
-                state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_mealtimes_on_with_washing_machine_indicator_on
-                    else:
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id:
-                                - >-
-                                  scene.kitchen_lights_mealtimes_on_with_garage_dehumidifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights On
-              - condition: state
-                entity_id: binary_sensor.evening
-                state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - if:
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','off') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
-                     else:
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: >-
-                                scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_normal
+              - service: scene.turn_on
+                data: {}
+                target:
+                  entity_id: scene.kitchen_lights_mealtimes
           - conditions:
               - condition: trigger
                 id:
                   - Lights Off
             sequence:
-              - if:
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                  - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_light_indicator_washing_machine_finished_and_garage_dehumidifier_full
-                else:
-                  - if:
-                      - "{{ is_state('input_boolean.washing_machine_finished','on') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id:
-                            - scene.kitchen_light_indicator_washing_machine_finished
-                    else:                      
-                      - if:
-                          - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id:
-                                - scene.kitchen_light_indicator_garage_dehumidifier
-                        else:
-                          - service: light.turn_off
-                            data: {}
-                            target:
-                              entity_id: light.kitchen_lights_2
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -614,33 +374,41 @@ automation:
                   brightness: 199
                 target:
                   entity_id: light.utility_room_light
-      - conditions:
-          - condition: trigger
-            id:
-              - Utility Off
-        sequence:
-          - service: light.turn_off
-            data: {}
-            target:
-              entity_id: light.utility_room_light
           - conditions:
               - condition: trigger
                 id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.morning
-                state: "on"
-              - condition: state
-                entity_id: light.kitchen_light_5
-                state: "off"
+                  - Utility Off
             sequence:
-              - service: scene.turn_on
+              - service: light.turn_off
                 data: {}
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id: light.utility_room_light
+              - conditions:
+                  - condition: trigger
+                    id:
+                      - Low Light
+                  - condition: state
+                    entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+                    state: "on"
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity_id: binary_sensor.morning
+                        state: "on"
+                      - condition: state
+                        entity_id: binary_sensor.afternoon
+                        state: "on"
+                      - condition: state
+                        entity_id: binary_sensor.evening
+                        state: "on"
+                  - condition: state
+                    entity_id: light.kitchen_light_5
+                    state: "off"
+                sequence:
+                  - service: scene.turn_on
+                    data: {}
+                    target:
+                      entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -648,45 +416,14 @@ automation:
               - condition: state
                 entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
                 state: "on"
-              - condition: state
-                entity_id: binary_sensor.lunchtime
-                state: "on"
-              - condition: state
-                entity_id: light.kitchen_light_5
-                state: "off"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.afternoon
-                state: "on"
-              - condition: state
-                entity_id: light.kitchen_light_5
-                state: "off"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.dinner_time
-                state: "on"
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.lunchtime
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.dinner_time
+                    state: "on"
               - condition: state
                 entity_id: light.kitchen_light_5
                 state: "off"
@@ -695,24 +432,6 @@ automation:
                 data: {}
                 target:
                   entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.evening
-                state: "on"
-              - condition: state
-                entity_id: light.kitchen_light_5
-                state: "off"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
           - conditions:
               - condition: trigger
                 id:
@@ -722,25 +441,6 @@ automation:
                 data: {}
                 target:
                   entity_id: light.kitchen_lights_2
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_light_indicator_garage_dehumidifier
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.washing_machine_finished
-                    state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - scene.kitchen_light_indicator_washing_machine_finished
           - conditions:
               - condition: trigger
                 id:
@@ -800,81 +500,10 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.washing_machine_finished
-                    state: "on"
-                  - condition: state
-                    entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - >-
-                          scene.kitchen_lights_normal_on_with_garage_dehumidifier_and_washing_machine_indicator_on
-                else:
-                  - if:
-                      - condition: state
-                        entity_id: input_boolean.washing_machine_finished
-                        state: "on"
-                      - condition: state
-                        entity_id: input_boolean.garage_dehumidifier_full
-                        state: "off"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_normal_on_with_washing_machine_indicator_on_2
-                    else:
-                      - if:
-                          - condition: state
-                            entity_id: input_boolean.garage_dehumidifier_full
-                            state: "on"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: >-
-                                scene.kitchen_lights_normal_on_with_garage_dehumdifier_indicator_on
-                        else:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
-                  - Allow Lights on
-              - condition: state
-                entity_id: switch.kitchen_lights_switch_switch_0
-                state: "off"
-            sequence:
-              - service: switch.turn_on
+              - service: scene.turn_on
                 data: {}
                 target:
-                  entity_id: switch.kitchen_lights_switch_switch_0
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.washing_machine_finished
-                    state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_light_indicator_washing_machine_finished
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.garage_dehumidifier_full
-                    state: "on"
-                then:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id:
-                        - scene.kitchen_light_indicator_garage_dehumidifier
+                  entity_id: scene.kitchen_lights_normal
 
 
 
