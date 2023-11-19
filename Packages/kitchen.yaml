@@ -190,7 +190,7 @@ automation:
         id: Utility On
       - platform: state
         entity_id:
-         - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
+          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
         from: "on"
         to: "off"
         id: Utility Off
@@ -249,10 +249,15 @@ automation:
                 entity_id: binary_sensor.overnight
                 state: "on"
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  rgb_color:
+                    - 255
+                    - 254
+                    - 223
+                  brightness: 10
                 target:
-                  entity_id: scene.kitchen_night_lights
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -272,10 +277,12 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 367
+                  brightness: 28
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -292,10 +299,12 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 200
+                  brightness: 255
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -367,7 +376,7 @@ automation:
               - condition: state
                 entity_id: binary_sensor.lights_out
                 state: "off"
-           sequence:
+            sequence:
               - service: light.turn_on
                 data:
                   color_temp: 500
@@ -383,32 +392,34 @@ automation:
                 data: {}
                 target:
                   entity_id: light.utility_room_light
-              - conditions:
-                  - condition: trigger
-                    id:
-                      - Low Light
+          - conditions:
+              - condition: trigger
+                id:
+                  - Low Light
+              - condition: state
+                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+                state: "on"
+              - condition: or
+                conditions:
                   - condition: state
-                    entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+                    entity_id: binary_sensor.morning
                     state: "on"
-                  - condition: or
-                    conditions:
-                      - condition: state
-                        entity_id: binary_sensor.morning
-                        state: "on"
-                      - condition: state
-                        entity_id: binary_sensor.afternoon
-                        state: "on"
-                      - condition: state
-                        entity_id: binary_sensor.evening
-                        state: "on"
                   - condition: state
-                    entity_id: light.kitchen_light_5
-                    state: "off"
-                sequence:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_lights_normal
+                    entity_id: binary_sensor.afternoon
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.evening
+                    state: "on"
+              - condition: state
+                entity_id: light.kitchen_lights_2
+                state: "off"
+            sequence:
+              - service: light.turn_on
+                data:
+                  color_temp: 367
+                  brightness: 28
+                target:
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -425,13 +436,15 @@ automation:
                     entity_id: binary_sensor.dinner_time
                     state: "on"
               - condition: state
-                entity_id: light.kitchen_light_5
+                entity_id: light.kitchen_lights_2
                 state: "off"
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 200
+                  brightness: 255
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
