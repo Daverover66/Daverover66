@@ -1279,10 +1279,15 @@ automation:
                 data: {}
                 target:
                   entity_id: timer.washing_machine_door_open
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  rgb_color:
+                    - 255
+                    - 0
+                    - 0
+                  brightness: 5
                 target:
-                  entity_id: scene.kitchen_light_indicator_washing_machine_finished
+                  entity_id: light.kitchen_aura_lamp 
               - service: input_boolean.turn_on
                 data: {}
                 target:
@@ -1352,50 +1357,10 @@ automation:
                     entity_id: timer.washing_machine_door_open
                     state: active
             sequence:
-              - if:
-                  - "{{ is_state('light.kitchen_light_5','on') }}"
-                  - "{{ is_state_attr('light.kitchen_light_5','color_temp',200) }}"
-                  - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-               then:
-                 - service: scene.turn_on
-                   data: {}
-                   target:
-                     entity_id: >-
-                       scene.kitchen_lights_mealtimes_on_with_garage_dehumdifier_indicator_on
-                else:
-                  - if:
-                      - "{{ is_state('light.kitchen_light_5','on') }}"
-                      - "{{ is_state_attr('light.kitchen_light_5','color_temp',367) }}"
-                      - "{{ is_state('input_boolean.garage_dehumidifier_full','on') }}"
-                    then:
-                      - service: scene.turn_on
-                        data: {}
-                        target:
-                          entity_id: >-
-                            scene.kitchen_lights_normal_on_with_garage_dehumidifier_indicator_on
-                    else:
-                      - if:
-                          - "{{ is_state('light.kitchen_light_5','on') }}"
-                          - "{{ is_state_attr('light.kitchen_light_5','color_temp',200) }}"
-                        then:
-                          - service: scene.turn_on
-                            data: {}
-                            target:
-                              entity_id: scene.kitchen_lights_mealtimes
-                        else:
-                          - if:
-                              - "{{ is_state('light.kitchen_light_5','on') }}"
-                              - "{{ is_state_attr('light.kitchen_light_5','color_temp',367) }}"
-                            then:
-                              - service: scene.turn_on
-                                data: {}
-                                target:
-                                  entity_id: scene.kitchen_lights_normal
-                            else:
-                              - service: light.turn_off
-                                data: {}
-                                target:
-                                  entity_id: light.kitchen_light_2
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.kitchen_aura_lamp
               - service: input_boolean.turn_off
                 data: {}
                 target:
