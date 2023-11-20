@@ -140,7 +140,7 @@ automation:
        Lighting           
 ###########################
 
-  - id: kitchen_lights_with_presence
+   - id: kitchen_lights_with_presence
     alias: Kitchen Lights with Presence
     description: ""
     trigger:
@@ -458,50 +458,32 @@ automation:
               - condition: trigger
                 id:
                   - Lunchtime starts
-              - condition: state
-                entity_id: light.kitchen_lights_2
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_mealtimes
-          - conditions:
-              - condition: trigger
-                id:
-                  - lunchtime ends
-              - condition: state
-                entity_id: light.kitchen_lights_2
-                state: "on"
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target:
-                  entity_id: scene.kitchen_lights_normal
-          - conditions:
-              - condition: trigger
-                id:
                   - Dinner Time Starts
               - condition: state
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 200
+                  brightness: 255
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
+                  - lunchtime ends
                   - Dinner Time Ends
               - condition: state
                 entity_id: light.kitchen_lights_2
                 state: "on"
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 367
+                  brightness: 28
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -513,10 +495,12 @@ automation:
                 entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
                 below: input_number.low_light_threshold
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 367
+                  brightness: 28
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id: light.kitchen_lights_2
 
 
 
@@ -524,7 +508,7 @@ automation:
      Magic Cube
 ########################
 
-  - id: magic_cube_stuff
+    - id: magic_cube_stuff
     alias: Magic Cube Stuff
     initial_state: true
     mode: restart
@@ -573,10 +557,12 @@ automation:
                 entity_id: input_boolean.holiday_mode
                 state: "off"
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 200
+                  brightness: 255
                 target:
-                  entity_id: scene.kitchen_lights_mealtimes
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id:
@@ -619,10 +605,12 @@ automation:
               - condition: trigger
                 id: Side 6
             sequence:
-              - service: scene.turn_on
-                data: {}
+              - service: light.turn_on
+                data:
+                  color_temp: 367
+                  brightness: 28
                 target:
-                  entity_id: scene.kitchen_lights_normal
+                  entity_id: light.kitchen_lights_2
           - conditions:
               - condition: trigger
                 id: Side 5
@@ -989,7 +977,7 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - Washing Removed
+                  - Washing removed from machine
               - condition: or
                 conditions:
                   - condition: state
