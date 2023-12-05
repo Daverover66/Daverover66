@@ -1,3 +1,19 @@
+############################################################# 
+#   @author         :   Dave Forrester                      #
+#   @date           :   05/12/2023                          #
+#   @automation     :   Intermittent Grid Charge Battery    #
+#   @description    :   For charging home battery overnight #
+#                       using target time entity from       #
+#                       BottlecapDave Octopus Integration   #
+#                                                           #
+#                                                           #
+#   @version        :   1                                   #
+#   @modified       :   05/12/23                            #
+#############################################################
+
+alias: Intermittent Grid Charge Battery
+description: ""
+trigger:
   - platform: state
     entity_id:
       - >-
