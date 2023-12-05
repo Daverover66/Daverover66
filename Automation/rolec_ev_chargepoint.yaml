@@ -5,124 +5,101 @@
 #   @description    :   Turns on chargepoint at cheap rate #
 #                                                          #
 #                                                          #
-#   @version        :   1.01 (for Agile Import)            #
-#   @modified       :   05/10/23                           #
+#   @version        :   1.02 (for Agile Import)            #
+#   @modified       :   05/12/23                           #
 ############################################################
 
 alias: Rolec EV Chargepoint schedule
 description: Multiple Slots for Agile
 trigger:
-  - platform: time
-    at: input_datetime.rolec_wallbox_on
-    id: Rolec On 1
-  - platform: time
-    at: input_datetime.rolec_wallbox_off
-    id: Rolec Off 1
-  - platform: time
-    at: input_datetime.rolec_wallbox_slot_2_on_at
-    id: Rolec On 2
-  - platform: time
-    at: input_datetime.rolec_wallbox_slot_2_off_at
-    id: Rolec Off 2
-  - platform: time
-    at: input_datetime.rolec_wallbox_slot_3_on_at
-    id: Rolec On 3
-  - platform: time
-    at: input_datetime.rolec_wallbox_slot_3_off_at
-    id: Rolec Off 3
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+    from: "off"
+    to: "on"
+    id: "On"
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+    from: "on"
+    to: "off"
+    id: "Off"
   - platform: state
     entity_id:
       - switch.shelly1_c45bbe7867c7
     from: unavailable
     id: Rolec Available
+  - alias: Rolec 4 Hour charge completed
+    platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.rolec_4_hour_charge_period
+    id: Stop Charge
 condition: []
 action:
   - choose:
       - conditions:
           - condition: trigger
             id:
-              - Rolec On 1
-          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
+              - "On"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
         sequence:
-          - type: turn_on
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: timer.start
+            data: {}
+            target:
+              entity_id: timer.rolec_4_hour_charge_period
       - conditions:
           - condition: trigger
             id:
-              - Rolec On 2
-          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
+              - "Off"
         sequence:
-          - type: turn_on
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id:
-              - Rolec On 3
-          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
-        sequence:
-          - type: turn_on
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id: Rolec Off 1
-          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
-        sequence:
-          - type: turn_off
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id: Rolec Off 2
-          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
-        sequence:
-          - type: turn_off
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
-      - conditions:
-          - condition: trigger
-            id: Rolec Off 3
-          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
-        sequence:
-          - type: turn_off
-            device_id: e7eb66cdf13a7f21fc1052c0f676589e
-            entity_id: switch.shelly1_c45bbe7867c7
-            domain: switch
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+          - service: timer.pause
+            data: {}
+            target:
+              entity_id: timer.rolec_4_hour_charge_period
       - conditions:
           - condition: trigger
             id: Rolec Available
-          - condition: or
-            conditions:
-              - condition: time
-                after: input_datetime.rolec_wallbox_on
-                before: input_datetime.rolec_wallbox_off
-              - condition: time
-                after: input_datetime.rolec_wallbox_slot_2_on_at
-                before: input_datetime.rolec_wallbox_slot_2_off_at
-              - condition: time
-                after: input_datetime.rolec_wallbox_slot_3_on_at
-                before: input_datetime.rolec_wallbox_slot_3_off_at
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: input_boolean.rolec_slot_1_active
-                state: "on"
-              - condition: state
-                entity_id: input_boolean.rolec_slot_2_active
-                state: "on"
-              - condition: state
-                entity_id: input_boolean.rolec_slot_3_active
-                state: "on"
+          - condition: state
+            entity_id: >-
+              binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            state: "on"
           - condition: state
             entity_id: switch.shelly1_c45bbe7867c7
             state: "off"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+          - condition: state
+            entity_id: timer.rolec_4_hour_charge_period
+            state: active
         sequence:
           - service: switch.turn_on
             data: {}
@@ -131,35 +108,17 @@ action:
           - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
             data:
               message: >-
-                The Rolec was turned on because it became available during off
-                peak
+                The Rolec was turned on because it became available during a
+                charge period.
               title: ROLEC ON
             alias: Send a notification based on an input text helper
       - conditions:
           - condition: trigger
             id: Rolec Available
-          - condition: or
-            conditions:
-              - condition: time
-                after: input_datetime.rolec_wallbox_off
-                before: input_datetime.rolec_wallbox_on
-              - condition: time
-                after: input_datetime.rolec_wallbox_slot_2_off_at
-                before: input_datetime.rolec_wallbox_slot_2_on_at
-              - condition: time
-                after: input_datetime.rolec_wallbox_slot_3_off_at
-                before: input_datetime.rolec_wallbox_slot_3_on_at
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: input_boolean.rolec_slot_1_active
-                state: "off"
-              - condition: state
-                entity_id: input_boolean.rolec_slot_2_active
-                state: "off"
-              - condition: state
-                entity_id: input_boolean.rolec_slot_3_active
-                state: "off"
+          - condition: state
+            entity_id: >-
+              binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            state: "off"
           - condition: state
             entity_id: switch.shelly1_c45bbe7867c7
             state: "on"
@@ -170,8 +129,185 @@ action:
               entity_id: switch.shelly1_c45bbe7867c7
           - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
             data:
-              message: The Rolec was turned off because it was on outside off peak
+              message: >-
+                The Rolec was turned off because it was on outside of a charge
+                period.
               title: ROLEC OFF
             alias: Send a notification based on an input text helper
-mode: single
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop Charge
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_battery_master
+mode: single   
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_on
+#    id: Rolec On 1
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_off
+#    id: Rolec Off 1
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_slot_2_on_at
+#    id: Rolec On 2
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_slot_2_off_at
+#    id: Rolec Off 2
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_slot_3_on_at
+#    id: Rolec On 3
+#  - platform: time
+#    at: input_datetime.rolec_wallbox_slot_3_off_at
+#    id: Rolec Off 3
+#  - platform: state
+#    entity_id:
+#      - switch.shelly1_c45bbe7867c7
+#    from: unavailable
+#    id: Rolec Available
+#condition: []
+#action:
+#  - choose:
+#      - conditions:
+#          - condition: trigger
+#            id:
+#              - Rolec On 1
+#          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
+#        sequence:
+#          - type: turn_on
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id:
+#              - Rolec On 2
+#          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
+#        sequence:
+#          - type: turn_on
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id:
+#              - Rolec On 3
+#          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
+#        sequence:
+#          - type: turn_on
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id: Rolec Off 1
+#          - "{{ is_state('input_boolean.rolec_slot_1_active','on') }}"
+#        sequence:
+#          - type: turn_off
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id: Rolec Off 2
+#          - "{{ is_state('input_boolean.rolec_slot_2_active','on') }}"
+#        sequence:
+#          - type: turn_off
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id: Rolec Off 3
+#          - "{{ is_state('input_boolean.rolec_slot_3_active','on') }}"
+#        sequence:
+#          - type: turn_off
+#            device_id: e7eb66cdf13a7f21fc1052c0f676589e
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            domain: switch
+#      - conditions:
+#          - condition: trigger
+#            id: Rolec Available
+#          - condition: or
+#            conditions:
+#              - condition: time
+#                after: input_datetime.rolec_wallbox_on
+#                before: input_datetime.rolec_wallbox_off
+#              - condition: time
+#                after: input_datetime.rolec_wallbox_slot_2_on_at
+#                before: input_datetime.rolec_wallbox_slot_2_off_at
+#              - condition: time
+#                after: input_datetime.rolec_wallbox_slot_3_on_at
+#                before: input_datetime.rolec_wallbox_slot_3_off_at
+#          - condition: or
+#            conditions:
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_1_active
+#                state: "on"
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_2_active
+#                state: "on"
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_3_active
+#                state: "on"
+#          - condition: state
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            state: "off"
+#        sequence:
+#          - service: switch.turn_on
+#            data: {}
+#            target:
+#              entity_id: switch.shelly1_c45bbe7867c7
+#          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+#            data:
+#              message: >-
+#                The Rolec was turned on because it became available during off
+#                peak
+#              title: ROLEC ON
+#            alias: Send a notification based on an input text helper
+#      - conditions:
+#          - condition: trigger
+#            id: Rolec Available
+#          - condition: or
+#            conditions:
+#              - condition: time
+#                after: input_datetime.rolec_wallbox_off
+#                before: input_datetime.rolec_wallbox_on
+#              - condition: time
+#               after: input_datetime.rolec_wallbox_slot_2_off_at
+#                before: input_datetime.rolec_wallbox_slot_2_on_at
+#              - condition: time
+#                after: input_datetime.rolec_wallbox_slot_3_off_at
+#                before: input_datetime.rolec_wallbox_slot_3_on_at
+#          - condition: or
+#            conditions:
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_1_active
+#                state: "off"
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_2_active
+#                state: "off"
+#              - condition: state
+#                entity_id: input_boolean.rolec_slot_3_active
+#                state: "off"
+#          - condition: state
+#            entity_id: switch.shelly1_c45bbe7867c7
+#            state: "on"
+#        sequence:
+#         - service: switch.turn_off
+#            data: {}
+#            target:
+#              entity_id: switch.shelly1_c45bbe7867c7
+#          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+#            data:
+#              message: The Rolec was turned off because it was on outside off peak
+#              title: ROLEC OFF
+#            alias: Send a notification based on an input text helper
+#mode: single
 
