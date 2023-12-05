@@ -1,0 +1,110 @@
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours
+    from: "off"
+    to: "on"
+    id: "On"
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours
+    from: "on"
+    to: "off"
+    id: "Off"
+  - platform: numeric_state
+    entity_id: sensor.energy_production_tomorrow_3
+    below: input_number.solar_production_threshold_for_grid_charging_battery
+    id: Allow Grid Charge
+  - platform: numeric_state
+    entity_id: sensor.energy_production_tomorrow_3
+    above: input_number.solar_production_threshold_for_grid_charging_battery
+    id: Stop Grid Charge
+  - alias: Cloakroom Light off with Timer
+    platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.home_battery_3_hour_charge_period
+    id: Stop Charge
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Allow Grid Charge
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_home_battery
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop Grid Charge
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_home_battery
+      - conditions:
+          - condition: trigger
+            id: "On"
+          - condition: state
+            entity_id: input_boolean.grid_charge_home_battery
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+          - service: timer.start
+            data: {}
+            target:
+              entity_id: timer.home_battery_3_hour_charge_period
+      - conditions:
+          - condition: trigger
+            id: "Off"
+        sequence:
+          - service: script.turn_off
+            data: {}
+            target:
+              entity_id: script.grid_charge_battery
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: timer.pause
+            data: {}
+            target:
+              entity_id: timer.home_battery_3_hour_charge_period
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop Charge
+        sequence:
+          - service: script.turn_off
+            data: {}
+            target:
+              entity_id: script.grid_charge_battery
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_home_battery
+mode: restart
