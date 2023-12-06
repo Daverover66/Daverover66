@@ -1,3 +1,26 @@
+Car battery
+{% set topup = states('sensor.rolec_energy_consumption_daily') | float(0) %}
+{{ ['My sensors are unable to determine the charge level of the battery in the car.',
+    'There is a damping field blocking access to the car battery.',
+    'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
+{% if topup < 0.5 %}
+  However, it was topped up last night with {{ topup }}kWh of lovely cheap energy
+  {{ ['So unless it is still very low, it should not need a further topup today.',
+      'So it should be good for another few miles.',
+      'So the battery should not need a further topup today.'] | random }}
+{% else %}
+{{ ['So the car might need a topup today.',
+    'If it has had a lot of use it might need a topup today.',
+    'If it has not been charged for a while, the battery might need a topup today.'] | random }}
+{% endif %}
+  If you feel that it does need a topup, the best time for a half hour topup is at 
+{% set time_start = state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time')%}
+  {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}.
+  A full 4 hour charge can be started at
+{{states('sensor.ev_charge_end_time') }}.
+ So if you want to charge it outside of that time,
+{{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
+
 Time to empty
 {%- set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
 {%- if battery_power == 0 %}
