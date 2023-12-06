@@ -216,17 +216,26 @@
         {% endif %}
       </p>
       <p>
-          {{ ['My sensors are unable to determine the charge level of the battery in the car.',
-              'There is a damping field blocking access to the car battery.',
-              'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
-          {{ ['So the car might need a topup today.',
-              'If it has had a lot of use it might need a topup today.',
-              'If it has not been charged for a while, the battery might need a topup today.'] | random }}
-              If it does, the best time to charge it is at
-        {{states('sensor.ev_charge_start_time') }}.
-          The charge period ends at
-        {{states('sensor.ev_charge_end_time') }}.
-          So if you want to charge it outside of that time,
+        {% set topup = states('sensor.rolec_energy_consumption_daily') | float(0) %}
+        {{ ['My sensors are unable to determine the charge level of the battery in the car.',
+            'There is a damping field blocking access to the car battery.',
+            'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
+        {% if topup > 0.5 %}
+          However, I have detected that it was topped up last night with {{ topup }}kWh of lovely cheap energy.
+          {{ ['So unless it is still very low, it should not need a further topup today.',
+              'So it should be good for another few miles.',
+              'So the battery should not need a further topup today.'] | random }}
+        {% else %} I can tell you that the car was not charged last night.
+        {{ ['So the car might need a topup today.',
+            'If it has had a lot of use it might need a topup today.',
+            'If it has not been charged for a while, the battery might need a topup today.'] | random }}
+        {% endif %}
+          If you feel that it does need a topup, the best time for a half hour topup is at 
+        {% set time_start = state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time')%}
+          {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}.  When the price will be {{ ((state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost'))*100)|round(1)}} pence per kWh.
+          A full 4 hour charge can be started tonight at
+        {{states('sensor.ev_charge_start_time') }}.  When the price will be {{ state_attr('octopusagile.electric_vehicle','rate')}} pence per kWh
+         So if you want to charge it outside of that time,
         {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
       </p>
       <p>
