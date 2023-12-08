@@ -258,7 +258,7 @@
   - platform: time_pattern
     hours: /1
   action: 
-    - service: weather.get_forecast
+    - service: weather.get_forecasts 
       target: 
         entity_id: weather.openweathermap
       data: 
@@ -272,15 +272,15 @@
       state: >
         {% set ns = namespace() %}
         {% set ns.totalrainfall = 0 %}
-        {% for daypart in range(0, 7) %}
-          {% set rainfall = my_forecast.forecast[daypart].precipitation %}
-          {% set rainfall_probability = my_forecast.forecast[daypart].precipitation_probability / 100 %}
+        {% for daypart in range(0,7) %}
+          {% set rainfall = my_forecast["weather.openweathermap"].forecast[daypart].precipitation %}
+          {% set rainfall_probability = my_forecast["weather.openweathermap"].forecast[daypart].precipitation_probability / 100 %}
           {% if rainfall_probability > 0 %}
             {% set rainfall = rainfall * rainfall_probability %}
           {% endif %}
           {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
         {% endfor %}
-        {{ ns.totalrainfall | float(0) | round(2)}}
+        {{ ns.totalrainfall | float(0) | round(2) }}
 
 ################################
 #    More Days until sensors   #
