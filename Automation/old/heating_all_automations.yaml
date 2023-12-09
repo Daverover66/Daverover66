@@ -1,0 +1,543 @@
+alias: HEATING - All Automations
+description: >-
+  Detects when a window is open or closed and sets heating on or off in that
+  room. Detects when no-one is home and turns heating off.
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.dave_home
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Dave Away
+  - platform: state
+    entity_id:
+      - binary_sensor.dave_home
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Dave Home
+  - platform: state
+    entity_id:
+      - binary_sensor.gem_home
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Gem Away
+  - platform: state
+    entity_id:
+      - binary_sensor.gem_home
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Gem Home
+  - platform: state
+    entity_id:
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.hallway_window_contact
+    to: "on"
+    id: Downstairs Door or Window Open
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  - platform: state
+    entity_id:
+      - binary_sensor.front_door_sense_contact
+      - binary_sensor.back_door_sensor_contact
+      - binary_sensor.side_door_sensor_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.hallway_window_contact
+    to: "off"
+    id: Downstairs Door or Window Closed
+  - type: opened
+    platform: device
+    device_id: e6ba853c7dec9cf8415d6881aa429444
+    entity_id: binary_sensor.dining_room_window_right_contact
+    domain: binary_sensor
+    id: Dining Room Window Right Open
+  - type: not_opened
+    platform: device
+    device_id: e6ba853c7dec9cf8415d6881aa429444
+    entity_id: binary_sensor.dining_room_window_right_contact
+    domain: binary_sensor
+    id: Dining Room Window Right Closed
+  - type: opened
+    platform: device
+    device_id: f9aaa501ddaeabde9538648caab6c975
+    entity_id: binary_sensor.cloakroom_window_contact
+    domain: binary_sensor
+    id: Cloakroom Window Open
+  - type: not_opened
+    platform: device
+    device_id: f9aaa501ddaeabde9538648caab6c975
+    entity_id: binary_sensor.cloakroom_window_contact
+    domain: binary_sensor
+    id: Cloakroom Window Closed
+  - type: opened
+    platform: device
+    device_id: 5af72a1353a555c5830dcba725c7cf23
+    entity_id: binary_sensor.en_suite_window_sensor_contact
+    domain: binary_sensor
+    id: En-Suite Window Open
+  - type: not_opened
+    platform: device
+    device_id: 5af72a1353a555c5830dcba725c7cf23
+    entity_id: binary_sensor.en_suite_window_sensor_contact
+    domain: binary_sensor
+    id: En-Suite Window Closed
+  - type: opened
+    platform: device
+    device_id: 13a27670b56ff35704df9339e2a668a1
+    entity_id: binary_sensor.office_window_sensor_contact
+    domain: binary_sensor
+    id: Office Window Open
+  - type: not_opened
+    platform: device
+    device_id: 13a27670b56ff35704df9339e2a668a1
+    entity_id: binary_sensor.office_window_sensor_contact
+    domain: binary_sensor
+    id: Office Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+    to: "on"
+    id: Bedroom Window Open
+  - platform: state
+    entity_id:
+      - binary_sensor.main_bedroom_window_left_contact
+      - binary_sensor.main_bedroom_window_right_contact
+    to: "off"
+    id: Bedroom Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+    id: Guest Bedroom Window Open
+    to: "on"
+  - platform: state
+    entity_id:
+      - binary_sensor.guest_bedroom_window_left_contact
+      - binary_sensor.guest_bedroom_window_right_contact
+    to: "off"
+    id: Guest Bedroom Window Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+    to: "on"
+    id: Upstairs Windows Open
+  - platform: state
+    entity_id:
+      - binary_sensor.sean_s_bedroom_window_left_contact
+      - binary_sensor.sean_s_bedroom_window_right_contact
+      - binary_sensor.bathroom_window_contact
+      - binary_sensor.jamie_s_bedroom_window_left_contact
+      - binary_sensor.jamie_s_bedroom_window_right_contact
+    to: "off"
+    id: Upstairs Windows Closed
+  - platform: state
+    entity_id:
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "on"
+    id: Kids Bathroom Window Open
+  - platform: state
+    entity_id:
+      - binary_sensor.kids_bathroom_window_left_contact
+      - binary_sensor.kids_bathroom_window_right_contact
+    to: "off"
+    id: Kids Bathroom Window Closed
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Dave Away
+          - condition: state
+            entity_id: person.gem_forrester
+            state: not_home
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: "On"
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+        sequence:
+          - service: script.heating_turn_off_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Gem Away
+          - condition: state
+            entity_id: person.david_forrester
+            state: not_home
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: "On"
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+        sequence:
+          - service: script.heating_turn_off_all_radiators
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Dave Home
+              - Gem Home
+          - condition: state
+            entity_id: input_select.desired_heating_mode
+            state: Auto
+        sequence:
+          - if:
+              - condition: state
+                entity_id: climate.downstairs
+                state: "off"
+              - condition: state
+                entity_id: climate.upstairs
+                state: "off"
+            then:
+              - service: script.heating_resume_schedule_all_radiators
+                data: {}
+      - conditions:
+          - condition: trigger
+            id: Downstairs Door or Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 84daad158322931a2b14ee69a6a9c8f5
+                domain: climate
+                entity_id: climate.downstairs
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 84daad158322931a2b14ee69a6a9c8f5
+                domain: climate
+                entity_id: climate.downstairs
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            alias: Turn off heating downstairs
+            target:
+              entity_id: climate.downstairs
+      - conditions:
+          - condition: trigger
+            id: Downstairs Door or Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.downstairs
+      - conditions:
+          - condition: trigger
+            id: Cloakroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 2fe808a84c082db3968a4d856fe6e8ef
+                domain: climate
+                entity_id: climate.cloakroom
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 2fe808a84c082db3968a4d856fe6e8ef
+                domain: climate
+                entity_id: climate.cloakroom
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.cloakroom
+      - conditions:
+          - condition: trigger
+            id: Cloakroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.cloakroom
+      - conditions:
+          - condition: trigger
+            id: En-Suite Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 2912cee70e19436c9d6795287d1cf8c9
+                domain: climate
+                entity_id: climate.en_suite_bathroom
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 2912cee70e19436c9d6795287d1cf8c9
+                domain: climate
+                entity_id: climate.en_suite_bathroom
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.en_suite_bathroom
+      - conditions:
+          - condition: trigger
+            id: En-Suite Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.en_suite_bathroom
+      - conditions:
+          - condition: trigger
+            id: Office Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 71a6edc5565513cdbe48f2b5c45189fa
+                domain: climate
+                entity_id: climate.office
+                type: is_hvac_mode
+                hvac_mode: auto
+              - condition: device
+                device_id: 71a6edc5565513cdbe48f2b5c45189fa
+                domain: climate
+                entity_id: climate.office
+                type: is_hvac_mode
+                hvac_mode: heat
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.office
+      - conditions:
+          - condition: trigger
+            id: Office Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id: climate.office
+      - conditions:
+          - condition: trigger
+            id: Bedroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 5b51bb0d00f12ec04c45d29296b6b9ee
+                domain: climate
+                entity_id: climate.master_bedroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 5b51bb0d00f12ec04c45d29296b6b9ee
+                domain: climate
+                entity_id: climate.master_bedroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.master_bedroom
+      - conditions:
+          - condition: trigger
+            id: Bedroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.master_bedroom
+      - conditions:
+          - condition: trigger
+            id: Guest Bedroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: bc71698349b1224d4f591b0d87542cb5
+                domain: climate
+                entity_id: climate.guest_bedroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: bc71698349b1224d4f591b0d87542cb5
+                domain: climate
+                entity_id: climate.guest_bedroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id:
+                - climate.guest_bedroom
+      - conditions:
+          - condition: trigger
+            id: Guest Bedroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.guest_bedroom
+      - conditions:
+          - condition: trigger
+            id: Upstairs Windows Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.upstairs
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.upstairs
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id:
+                - climate.upstairs
+      - conditions:
+          - condition: trigger
+            id: Upstairs Windows Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.upstairs
+      - conditions:
+          - condition: trigger
+            id: Kids Bathroom Window Open
+          - condition: or
+            conditions:
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.kids_bathroom
+                type: is_hvac_mode
+                hvac_mode: heat
+              - condition: device
+                device_id: 4815bc131fac9883b8fc60472f8ac3e2
+                domain: climate
+                entity_id: climate.kids_bathroom
+                type: is_hvac_mode
+                hvac_mode: auto
+            alias: Test if heating is on or in auto
+        sequence:
+          - service: climate.set_hvac_mode
+            data:
+              hvac_mode: "off"
+            target:
+              entity_id: climate.kids_bathroom
+      - conditions:
+          - condition: trigger
+            id: Kids Bathroom Window Closed
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_select.desired_heating_mode
+                state: Auto
+            then:
+              - service: climate.set_hvac_mode
+                data:
+                  hvac_mode: auto
+                target:
+                  entity_id:
+                    - climate.kids_bathroom
+mode: restart
