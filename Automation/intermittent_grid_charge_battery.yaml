@@ -7,65 +7,123 @@
 #                       BottlecapDave Octopus Integration   #
 #                                                           #
 #                                                           #
-#   @version        :   1                                   #
-#   @modified       :   05/12/23                            #
+#   @version        :   1.01                                #
+#   @modified       :   08/12/23                            #
 #############################################################
 
-alias: Intermittent Grid Charge Battery
+alias: Intermittent Grid Charge Battery.
 description: ""
 trigger:
+###  first two triggers turn on and off the automation when predicted solar production is above and below 20kWh. See Options 1 and 2 ### 
+  - platform: numeric_state
+    entity_id: sensor.energy_production_tomorrow_3
+    below: input_number.solar_production_threshold_for_grid_charging_battery
+    id: Grid Charge Allowed
+  - platform: numeric_state
+    entity_id: sensor.energy_production_tomorrow_3
+    above: input_number.solar_production_threshold_for_grid_charging_battery
+    id: Grid Charge Not Allowed
+### I have a tod binary sensor that turns on at 10pm. This trigger turns on the grid charge battery ###
+### master toggle to allow overnight grid charging if the automation is enabled. See Option 3 ###
+  - platform: state
+    entity_id:
+      - binary_sensor.overnight
+    from: "off"
+    to: "on"
+    id: Activate Grid Charge
+### this trigger starts the grid charge process when the target rate binary sensor turns on.  See Option 4 ###
+### https://bottlecapdave.github.io/HomeAssistant-OctopusEnergy/setup/target_rate/ intermittent rate setup ###
+### is at the bottom of the page.  ###
   - platform: state
     entity_id:
       - >-
         binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours
     from: "off"
     to: "on"
-    id: "On"
+    id: Start Grid Charge
+### this trigger stops the grid charge process when the target rate binary sensor turns off. See Option 5  ###
   - platform: state
     entity_id:
       - >-
         binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours
     from: "on"
     to: "off"
-    id: "Off"
-  - platform: numeric_state
-    entity_id: sensor.energy_production_tomorrow_3
-    below: input_number.solar_production_threshold_for_grid_charging_battery
-    id: Allow Grid Charge
-  - platform: numeric_state
-    entity_id: sensor.energy_production_tomorrow_3
-    above: input_number.solar_production_threshold_for_grid_charging_battery
     id: Stop Grid Charge
-  - alias: Cloakroom Light off with Timer
+### target rate sensor is set to continuously calculate cheapest 6 x half hour slots for a total of 3 hours. ###
+### once the last half slot is over,the next 6 slots are already calculated and set. So the battery will ###
+### start charging again, which we don't want.  So this trigger stops the charging process and turns off the grid charge ###
+### battery master toggle. See Option 6  ###
+  - alias: End Charge With Timer
     platform: event
-    event_type: timer.finished
+    event_type:
+      - timer.finished
+      - timer.cancelled
     event_data:
       entity_id: timer.home_battery_3_hour_charge_period
-    id: Stop Charge
+    id: End Grid Charge
+### I have another tod binary sensor that turns on at 7am. This trigger cancels th 3 hour timer if it has not ###
+### already finished (belt and braces). See Option 7 ###
+  - platform: state
+    entity_id:
+      - binary_sensor.morning
+    from: "off"
+    to: "on"
+    id: Reset Timer
+    alias: Reset Timer when Morning turns on
+### My SE inverter resets twice a day.  The overnight reset is often during a grid charge period. When the ###
+### inverter resets, it stops the grid charge process.  So this trigger starts it again when the inverter ###
+### completes its reset. See Option 8 ###
+  - platform: state
+    entity_id:
+      - switch.solaredge_i1_grid_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
 condition: []
 action:
   - choose:
+### Option 1 ###
       - conditions:
           - condition: trigger
             id:
-              - Allow Grid Charge
+              - Grid Charge Allowed
+        sequence:          
+          - service: automation.turn_on
+            target:
+              entity_id:
+                - automation.test_intermittent_charge_times
+              device_id: []
+              area_id: []
+            data: {}
+### Option 2 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Charge Not Allowed
+        sequence:
+          - service: automation.turn_off
+            target:
+              entity_id:
+                - automation.test_intermittent_charge_times
+              device_id: []
+              area_id: []
+            data:
+              stop_actions: true
+### Option 3 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate Grid Charge
         sequence:
           - service: input_boolean.turn_on
             data: {}
             target:
               entity_id: input_boolean.grid_charge_home_battery
+### Option 4 ###
       - conditions:
           - condition: trigger
             id:
-              - Stop Grid Charge
-        sequence:
-          - service: input_boolean.turn_off
-            data: {}
-            target:
-              entity_id: input_boolean.grid_charge_home_battery
-      - conditions:
-          - condition: trigger
-            id: "On"
+              - Start Grid Charge
           - condition: state
             entity_id: input_boolean.grid_charge_home_battery
             state: "on"
@@ -76,13 +134,11 @@ action:
               entity_id: input_boolean.home_battery_grid_charging
           - service: script.grid_charge_battery
             data: {}
-          - service: timer.start
-            data: {}
-            target:
-              entity_id: timer.home_battery_3_hour_charge_period
+### Option 5 ###
       - conditions:
           - condition: trigger
-            id: "Off"
+            id:
+              - Stop Grid Charge
         sequence:
           - service: script.turn_off
             data: {}
@@ -101,10 +157,11 @@ action:
             data: {}
             target:
               entity_id: timer.home_battery_3_hour_charge_period
+### Option 6 ###
       - conditions:
           - condition: trigger
             id:
-              - Stop Charge
+              - End Grid Charge
         sequence:
           - service: script.turn_off
             data: {}
@@ -123,4 +180,30 @@ action:
             data: {}
             target:
               entity_id: input_boolean.grid_charge_home_battery
+### Option 7 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Reset Timer
+        sequence:
+          - service: timer.cancel
+            data: {}
+            target:
+              entity_id: timer.home_battery_3_hour_charge_period
+### Option 8 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: state
+            entity_id: input_boolean.grid_charge_home_battery
+            state: "on"
+          - condition: state
+            entity_id: >-
+              binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours
+            state: "on"
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
 mode: restart
+
