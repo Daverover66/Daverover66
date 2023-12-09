@@ -69,14 +69,24 @@ automation:
           minutes: 1
           seconds: 0
         id: Light Off With No Presence
-      - platform: numeric_state
-        entity_id: sensor.living_room_fp2_light_sensor_light_level
-        below: input_number.low_light_threshold
-        id: Light On With Low Light
-      - platform: numeric_state
-        entity_id: sensor.living_room_fp2_light_sensor_light_level
-        above: input_number.upper_light_threshold_level
-        id: Light Off With Good Light
+      - platform: sun
+        event: sunset
+        offset: "-00:30:00"
+        id: Dusk
+      - platform: sun
+        event: sunrise
+        offset: "00:30:00"
+        id: Dawn 
+      - platform: state
+        entity_id: light.dreamview_g1_pro
+        from: "off"
+        to: "on"
+        id: TV Mood Lights On
+      - platform: state
+        entity_id: light.dreamview_g1_pro
+        from: "on"
+        to: "off"
+        id: TV Mood Lights Off
     condition:
       - condition: state
         entity_id: input_boolean.holiday_mode
@@ -91,6 +101,9 @@ automation:
               - condition: numeric_state
                 entity_id: sensor.living_room_fp2_light_sensor_light_level
                 below: input_number.low_light_threshold
+              - condition: state
+                entity_id: input_boolean.allow_corner_lamp_on
+                state: "on"
             sequence:
               - service: light.turn_on
                 data:
@@ -115,10 +128,13 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - Light On With Low Light
-                alias: Light on with low light and presence
+                  - Dusk 
+                alias: Light on at Dusk and presence
               - condition: state
                 entity_id: input_boolean.living_room_occupied
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.allow_corner_lamp_on
                 state: "on"
             sequence:
               - service: light.turn_on
@@ -132,8 +148,8 @@ automation:
           - conditions:
               - condition: trigger
                 id:
-                  - Light Off With Good Light
-                alias: Light off with good light
+                  - Dawn 
+                alias: Light off at Dawn 
             sequence:
               - service: light.turn_off
                 data: {}
@@ -141,6 +157,32 @@ automation:
                   entity_id:
                     - light.corner_lamp
                     - light.standard_lamp
+          - conditions:
+              - condition: trigger
+                id:
+                  - TV Mood Lights On
+            sequence:
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.allow_corner_lamp_on
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: light.corner_lamp
+          - conditions:
+              - condition: trigger
+                id:
+                  - TV Mood Lights Off
+            sequence:
+              - service: input_boolean.turn_on
+                data: {}
+                target:
+                  entity_id: input_boolean.allow_corner_lamp_on
+              - service: light.turn_on
+                data: {}
+                target:
+                  entity_id: light.corner_lamp
 
 #########################################
 #              Smart Button             #
