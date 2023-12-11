@@ -1,0 +1,182 @@
+alias: Show Agile Prices on Aura Lamp
+description: ""
+trigger:
+  - platform: sun
+    event: sunset
+    offset: "-00:05:00"
+    id: Not Allowed
+  - platform: sun
+    event: sunset
+    offset: "04:15:00"
+    id: Allowed
+  - platform: numeric_state
+    entity_id:
+      - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+    below: 0
+    id: Plunge
+  - platform: numeric_state
+    entity_id:
+      - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+    below: 0.1
+    id: Cheap
+    above: 0
+  - platform: numeric_state
+    entity_id:
+      - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+    below: 0.2
+    id: Medium
+    above: 0.1
+  - platform: numeric_state
+    entity_id:
+      - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+    below: 0.35
+    id: Expensive
+    above: 0.2
+  - platform: numeric_state
+    entity_id:
+      - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+    id: Most Expensive
+    above: 0.35
+condition:
+  - condition: state
+    entity_id: input_boolean.allow_kitchen_aura_lamp
+    state: "on"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Not Allowed
+        sequence:
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_kitchen_aura_lamp
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Allowed
+        sequence:
+          - service: input_boolean.turn_on
+            target:
+              entity_id:
+                - input_boolean.allow_kitchen_aura_lamp
+              device_id: []
+              area_id: []
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Plunge
+        sequence:
+          - service: light.turn_on
+            data:
+              rgb_color:
+                - 0
+                - 0
+                - 255
+              brightness_pct: 1
+            target:
+              entity_id: light.kitchen_aura_lamp
+          - service: input_boolean.turn_off
+            target:
+              entity_id: "{{ states('sensor.current_energy_rate') }}"
+            data: {}
+            alias: Turn off last rate
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.plunge_pricing
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Cheap
+        sequence:
+          - service: light.turn_on
+            data:
+              rgb_color:
+                - 0
+                - 255
+                - 0
+              brightness_pct: 1
+            target:
+              entity_id: light.kitchen_aura_lamp
+          - service: input_boolean.turn_off
+            target:
+              entity_id: "{{ states('sensor.current_energy_rate') }}"
+            data: {}
+            alias: Turn off last rate
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.cheap_energy
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Medium
+        sequence:
+          - service: light.turn_on
+            data:
+              rgb_color:
+                - 255
+                - 255
+                - 0
+              brightness_pct: 1
+            target:
+              entity_id: light.kitchen_aura_lamp
+          - service: input_boolean.turn_off
+            target:
+              entity_id: "{{ states('sensor.current_energy_rate') }}"
+            data: {}
+            alias: Turn off last rate
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.medium_cost_energy
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Expensive
+        sequence:
+          - service: light.turn_on
+            data:
+              rgb_color:
+                - 255
+                - 153
+                - 0
+              brightness_pct: 1
+            target:
+              entity_id: light.kitchen_aura_lamp
+          - service: input_boolean.turn_off
+            target:
+              entity_id: "{{ states('sensor.current_energy_rate') }}"
+            data: {}
+            alias: Turn off last rate
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.expensive_energy
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Most Expensive
+        sequence:
+          - service: light.turn_on
+            data:
+              rgb_color:
+                - 255
+                - 0
+                - 0
+              brightness_pct: 1
+            target:
+              entity_id: light.kitchen_aura_lamp
+          - service: input_boolean.turn_off
+            target:
+              entity_id: "{{ states('sensor.current_energy_rate') }}"
+            data: {}
+            alias: Turn off last rate
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.most_expensive_energy
+            data: {}
+mode: single
