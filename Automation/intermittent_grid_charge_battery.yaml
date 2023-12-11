@@ -79,6 +79,20 @@ trigger:
     from: unavailable
     to: "on"
     id: Inverter Reset
+### Triggers a pre-peak half hour top up subject to conditions.  See Option 9 ### 
+  - platform: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+    from: "off"
+    to: "on"
+    id: Topup
+### Triggers end of half hour pre-peak top up.  See Option 10 ###
+  - platform: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+    from: "on"
+    to: "off"
+    id: Topdown
 condition: []
 action:
   - choose:
@@ -205,5 +219,59 @@ action:
         sequence:
           - service: script.grid_charge_battery
             data: {}
+### Option 9 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Topup
+          - condition: time
+            after: "10:00:00"
+            before: "15:31:00"
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 25
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+          - service: script.speech_engine
+            data:
+              where: "{{states('sensor.room_audio')}}"
+              message: >-
+                Attention in the house.  The home battery is performing a half
+                hour pree peak topup, as its charge level is {{
+                states('sensor.battery_state_of_charge') }}%.
+### Option 10 ###
+      - conditions:
+          - condition: trigger
+            id:
+              - Topdown
+          - condition: state
+            entity_id: input_boolean.home_battery_grid_charging
+            state: "on"
+        sequence:
+          - service: script.turn_off
+            data: {}
+            target:
+              entity_id: script.grid_charge_battery
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.speech_engine
+            data:
+              where: "{{states('sensor.room_audio')}}"
+              message: >-
+                Attention in the house.  The home battery has completed a half
+                hour pree peak topup and its charge level is now a more healthy
+                {{ states('sensor.battery_state_of_charge') }}%.
 mode: restart
 
