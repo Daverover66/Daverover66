@@ -1,3 +1,13 @@
+###############################################################################
+#   @author         :   Jeffrey Stone
+#   @date           :   02/19/2019
+#   @template       :   morning_briefing
+#   @description    :   text for morning briefing.
+#
+#   @modified by    :   Dave Forrester (Daverover66)
+#   @date           :   27/12/2023
+###############################################################################
+
 >
   {%- macro getReport() -%} 
     <p>
@@ -27,6 +37,14 @@
       {% endif %}
     </p>
     <p>
+        {% if is_state('sensor.days_until_christmas','0') %} 
+          we wish you a merry christmas, we wish you a merry christmas, we 
+          wish you a merry christmas, and a happy new year.
+          Yes, today is christmas day.  Have a festive time and don't eat 
+          too many mince pies.
+        {% endif %}
+    </p>
+    <p>
       The Temperature in Clovenfords is {{states('sensor.outside_temperature')|round}} degrees  
       {% if is_state('weather.forecast_home', 'rainy') %} 
         {{ [ 
@@ -45,10 +63,10 @@
             'with scattered clouds' 
               ] | random }} 
       {% elif is_state('weather.forecast_home', 'fog') %} 
-            {{ [ 
-                'and foggy.',  
-                'with fog.' 
-                ] | random }} 
+        {{ [ 
+            'and foggy.',  
+            'with fog.' 
+              ] | random }} 
       {% elif is_state('weather.forecast_home', 'sunny') %} 
         {% if is_state('sun.sun', 'above_horizon') %} 
           {{ [ 
@@ -109,7 +127,7 @@
       {% endif %} 
     </p>
     <p>
-      {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['events'] | sort(attribute= 'start') | list %}
+      {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['calendar.forrester_events']['events'] | sort(attribute= 'start') | list %}
             You have {{ e_list | count }}
       {% if (e_list | count) >1 or (e_list | count) <1 %} 
             events in your calendar today. 
@@ -153,6 +171,11 @@
     <p>
         {% set charge_level = states('sensor.battery_state_of_charge') | float(0) %}
         {% set time = states('sensor.solar_battery_time_to_empty')%}
+          {% if time >= '24' %}
+            {% set time = '23:59' %}
+          {% else %}
+            {% set time = states('sensor.solar_battery_time_to_empty') %}
+          {% endif %}
         {% set solar_forecast = states('sensor.energy_production_today_3') | float(0) | round (2) %}
         {% set season =  states('sensor.season') %}
         {% if charge_level >= 99.5 %} 
@@ -164,7 +187,7 @@
                   'the energy stored in the battery should not be needed.',
                   'the rest of he world will benefit from your energy production.' ] | random }} 
             {% else %}
-               {{ ['there should be enough energy between solar and the battery for todays energy needs.',
+              {{ ['there should be enough energy between solar and the battery for todays energy needs.',
                   'the energy stored in the battery should not be needed.',
                   'the rest of he world will benefit from your energy production.' ] | random }} 
             {% endif %}
@@ -175,7 +198,7 @@
                   'the energy stored in the battery should not be needed.',
                   'the rest of he world will benefit from your energy production.' ] | random }} 
             {% else %}
-               {{ ['there should be enough energy between solar and the battery for todays energy needs.',
+              {{ ['there should be enough energy between solar and the battery for todays energy needs.',
                   'the energy stored in the battery should not be needed.',
                   'the rest of he world will benefit from your energy production.' ] | random }} 
             {% endif %}
@@ -208,38 +231,49 @@
                 a time to be determined once the currently active slot has closed
             {% else %}
                 {{ as_timestamp(state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time'))|timestamp_custom ('%H:%M')}}, 
-                  when the price will be {{ state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost')  }} per kWh.
+                  when the price will be {{ (state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost') *100) | round(1)}} pence per kWh.
                   If you want to charge it outside of that window, 
-                 {{ ['you know what to do.','on your own head be it.','you had better get your credit card out.'] | random }}   
+                {{ ['you know what to do.','on your own head be it.','you had better get your credit card out.'] | random }}   
             {% endif %}    
           {% endif %}
         {% endif %}
       </p>
       <p>
-        {% set topup = states('sensor.rolec_energy_consumption_daily') | float(0) %}
-        {{ ['My sensors are unable to determine the charge level of the battery in the car.',
-            'There is a damping field blocking access to the car battery.',
-            'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
-        {% if topup > 0.5 %}
-          However, I have detected that it was topped up last night with {{ topup }}kWh of lovely cheap energy.
-          {{ ['So unless it is still very low, it should not need a further topup today.',
-              'So it should be good for another few miles.',
-              'So the battery should not need a further topup today.'] | random }}
-        {% else %} I can tell you that the car was not charged last night.
-        {{ ['So the car might need a topup today.',
-            'If it has had a lot of use it might need a topup today.',
-            'If it has not been charged for a while, the battery might need a topup today.'] | random }}
-        {% endif %}
-          If you feel that it does need a topup, the best time for a half hour topup is at 
-        {% set time_start = state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time')%}
-          {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}.  When the price will be {{ ((state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost'))*100)|round(1)}} pence per kWh.
-          A full 4 hour charge can be started tonight at
-        {{states('sensor.ev_charge_start_time') }}.  When the price will be {{ state_attr('octopusagile.electric_vehicle','rate')}} pence per kWh
-         So if you want to charge it outside of that time,
-        {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
+          {% set topup = states('sensor.rolec_energy_consumption_daily') | float(0) %}
+          {{ ['My sensors are unable to determine the charge level of the battery in the car.',
+              'There is a damping field blocking access to the car battery.',
+              'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
+          {% if topup > 0.5 %}
+              However, I have detected that it was topped up last night with {{ topup | round(1) }}kWh of lovely cheap energy.
+              So it should be good for another {{ (topup * 3.5) | round()}} miles.
+          {% else %} I can tell you that the car was not charged last night.
+          {{ ['So it might need a topup today.',
+              'If it has had a lot of use it might need a topup today.',
+              'If it has not been charged for a while, the battery might need a topup today.'] | random }}
+          {% endif %}
+            If you feel that it does, the best time for a half hour topup is at 
+            {% if is_state('binary_sensor.octopus_energy_target_home_battery_topup','on') %}
+                a time to be determined once the currently active slot has closed.
+            {% else %}
+            {% set time_start = state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_time')%}
+              {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}.  When the price will be {{ ((state_attr('binary_sensor.octopus_energy_target_home_battery_topup','next_min_cost'))*100)|round(1)}} pence per kWh.
+            {% endif %}   A full 4 hour charge can be started tonight at
+          {{states('sensor.ev_charge_start_time') }}.  When the price will be {{ state_attr('octopusagile.electric_vehicle','rate')}} pence per kWh.
+            So if you want to charge it outside of that time,
+          {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
       </p>
       <p>
-        {% if is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
+        {% if is_state('binary_sensor.workday_sensor','off') %}
+          {% if is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on')%}
+            {{ ['Its the weekend and its a holiday, so come on mummy, get the big breakfast on',
+              'The working week is done and its holiday time.  Time for all those weekend and holiday jobs',
+              '<emphasis_level="reduced">Hooray.</emphasis> Its the weekend and a holiday. So make the most of it '] | random }}
+          {% else %}
+            {{ ['Its the weekend, so come on mummy, get the big breakfast on',
+                'The working week is done.  Time for all those weekend jobs',
+                '<emphasis_level="reduced">Hooray.</emphasis> Its the weekend. So make the most of it '] | random }}
+          {% endif %}
+        {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
           {{ ['Its a school holiday today and Mummy is off too',
               'No school today and mummy too can play. Hooray!',
               'schools out and mummy is in da hoose'] | random }}
@@ -247,10 +281,6 @@
           {{ ['Its a school holiday today and mummy is working',
               'No school today, but mummy cant play',
               'schools out, but mummy is not,sorry'] | random }}
-        {% elif is_state('binary_sensor.workday_sensor','off') and is_state('calendar.gem_holidays','off') %}
-          {{ ['Its the weekend, so come on mummy, get the big breakfast on',
-              'The working week is done.  Time for all those weekend jobs',
-              '<emphasis_level="reduced">Hooray.</emphasis> Its the weekend. So make the most of it '] | random }}
         {% elif is_state('calendar.school_holidays','off') and is_state('calendar.gem_holidays','off') %}
           {{ ['There are no holidays today',
               'Work and school for everyone today. Yippee!'] | random }}
