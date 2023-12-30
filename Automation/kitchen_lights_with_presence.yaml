@@ -1,4 +1,15 @@
-  - id: kitchen_lights_with_presence
+############################################################ 
+#   @author         :   Dave Forrester                     #
+#   @date           :   11/12/2023                         #
+#   @automation     :   Kitchen Lights with Presence       #
+#   @description    :   All kitchen area lights            #
+#                                                          #
+#   @version        :                                      #
+#   @modified       :                                      #
+#   @mod descrip    :                                      #
+############################################################  
+
+- id: kitchen_lights_with_presence
     alias: Kitchen Lights with Presence
     description: ""
     trigger:
