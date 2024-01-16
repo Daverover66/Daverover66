@@ -452,87 +452,107 @@ automation:
   #############################################
   # Normal Notifications
   # Door chime when doors are open to make sure we know when people are coming/going
-  - id: door_notifications
-    alias: Door Notifications
-    trigger:
-      - platform: state
-        entity_id:
-          - binary_sensor.front_door_sense_contact
-          - binary_sensor.back_door_sensor_contact 
-          - binary_sensor.side_door_sensor_contact 
-        from: "off"
-        to: "on"
-        id: Chime
-      - platform: state
-        entity_id:
-          - binary_sensor.front_door_sense_contact
-          - binary_sensor.back_door_sensor_contact 
-          - binary_sensor.side_door_sensor_contact 
-        from: "off"
-        to: "on"
-        for: "00:02:00"
-        id: Door Still Open
-      - platform: state
-        entity_id:
-          - binary_sensor.back_door_sensor_contact
-          - binary_sensor.side_door_sensor_contact
-          - binary_sensor.front_door_sense_contact
-    from: "on"
-    to: "off"
-    id: Chime Off
-    condition:
-      condition: and
-      conditions:
-        - condition: state
-          entity_id: input_boolean.audible_notifications
-          state: "on"
-        - condition: state
-          entity_id: input_boolean.guest_mode
-          state: "off"
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Chime
-            sequence:
-              - service: script.alexa_voice
-                data:
-                  where: kitchen
-                  message: |
-                    <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
-          - conditions:
-              - condition: trigger
-                id: Chime Off    
-            sequence:
-              - service: script.alexa_voice
-                data:
-                  where: kitchen
-                  message: |
-                    <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>    
-          - conditions:
-              - condition: trigger
-                id: Door Still Open
-            sequence:
-              - service: script.speech_engine
-                data:
-                  where: "{{ states('sensor.room_audio') }}"
-                  message: >
-                    The {{ trigger.to_state.attributes.friendly_name }}
-                    {{ [
-                      ' is standing open.',
-                      ' is open.',
-                      ' does not close on its own.',
-                      ' was left standing open.'
-                    ] | random }}
-                    {{ [
-                        'Can a human be so kind and close it?',
-                        'The air quality in this house has actually improved.',
-                        'Closing the door would improve the internal climate of the house.',
-                        'Hey. The door was just opened and this is crazy. But now you know. So close it maybe.',
-                        'If at first you do not succeed in closing the door, please try again. Like, Right now seems like a good time to try again.',
-                        'And the automatic door closer appears to be broken. So, you know what to do. Time to get physical.',
-                        'I would close it for you. But I lack legs. And Arms.'
-                    ] | random }}
+  - id: external_door_related_automations
+  alias: External Door Related Automations
+  description: Lights and announcements etc
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.back_door_sensor_contact
+        - binary_sensor.front_door_sense_contact
+        - binary_sensor.side_door_sensor_contact
+      to: "on"
+      id: Chime
+      from: "off"
+    - platform: state
+      entity_id:
+        - binary_sensor.back_door_sensor_contact
+        - binary_sensor.side_door_sensor_contact
+        - binary_sensor.front_door_sense_contact
+      from: "off"
+      to: "on"
+      for:
+        hours: 0
+        minutes: 2
+        seconds: 0
+      id: Door still open
+    - platform: state
+      entity_id:
+        - binary_sensor.back_door_sensor_contact
+        - binary_sensor.side_door_sensor_contact
+        - binary_sensor.front_door_sense_contact
+      from: "on"
+      to: "off"
+      id: Chime Off
+  condition: []
+  action:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id:
+                - Chime
+            - condition: template
+              value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
+              alias: Filter Back Door
+            - condition: sun
+              after: sunset
+              before: sunrise
+          sequence:
+            - service: light.turn_on
+              data:
+                color_temp: 500
+                brightness_pct: 100
+              target:
+                entity_id: light.back_door_light
+            - service: script.alexa_voice
+              data:
+                where: kitchen
+                message: >
+                  <audio
+                  src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
+        - conditions:
+            - condition: trigger
+              id:
+                - Chime Off
+            - condition: template
+              value_template: "{{\"Back\"  in trigger.to_state.attributes.friendly_name }}"
+              alias: Filter Back Door
+            - condition: state
+              entity_id: light.back_door_light
+              state: "on"
+          sequence:
+            - service: script.alexa_voice
+              data:
+                where: kitchen
+                message: >
+                  <audio
+                  src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
+            - service: script.back_door_light_dim_when_door_closed
+              data: {}
+        - conditions:
+            - condition: trigger
+              id: Door Still Open
+          sequence:
+            - service: script.speech_engine
+              data:
+                where: "{{ states('sensor.room_audio') }}"
+                message: >
+                  Attention in the house.  The {{
+                  trigger.to_state.attributes.friendly_name }} {{ [
+                    ' is standing open.',
+                    ' is open.',
+                    ' does not close on its own.',
+                    ' was left standing open.'
+                  ] | random }} {{ [
+                      'Can a human be so kind and close it?',
+                      'The air quality in this house has actually improved.',
+                      'Closing the door would improve the internal climate of the house.',
+                      'Hey. The door was just opened and this is crazy. But now you know. So close it maybe.',
+                      'If at first you do not succeed in closing the door, please try again. Like, Right now seems like a good time to try again.',
+                      'And the automatic door closer appears to be broken. So, you know what to do. Time to get physical.',
+                      'I would close it for you. But I lack legs. And Arms.'
+                  ] | random }}
+    mode: restart
     initial_state: true
 
   # If guest mode is enabled, notify the house
