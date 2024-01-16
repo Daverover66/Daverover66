@@ -115,34 +115,32 @@ automation:
               - service: script.text_notify_parents
                 data:
                   title: "Lockdown Issue"
-                  message: "Unable to lock down Anchorage House due to issue"
+                  message: "Unable to lock down the house due to an issue"
               - service: script.speech_engine
-                data_template:
-                  where: "{{ states.sensor.room_audio.state }}"
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >
                     {{ [
                     "I was unable to activate barn door protocol due to an open door.",
                     "You may want to check the external doors. I was unable to secure them all.",
-                    "My systems check has failed. Please check the external doors.",
-                    "Someone has left the pod bay doors open."
+                    "My systems check has failed. Please check the external doors."
                     ] | random }}
         default:
           - service: script.speech_engine
-            data_template:
-              who: "{{ states.sensor.room_audio.state }}"
+            data:
+              where: "{{ states('sensor.room_audio') }}"
               message: >
                 {{ [
                 "Barn door protocol has been activated.",
-                "Anchorage House has been secured! ",
+                "The house has been secured! ",
                 "Sentry Mode is active. ",
                 "I am now monitoring the doors and will let you know if anyone attempts to access.",
-                "Anchorage House Shields are up."
+                "Shields raised."
                 ] | random }}
-          - service: script.text_notify
-            data_template:
-              who: "parents"
-              title: "Security Armed"
-              message: "Security System has been armed."
+          - service: script.text_notify_parents
+            data:
+              title: "Security Notice"
+              message: "Security System lockdown initiated."
           - service: alarm_control_panel.aarlo_set_mode
             data:
               entity_id: alarm_control_panel.aarlo_ah_base_station
