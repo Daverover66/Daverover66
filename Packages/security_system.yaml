@@ -3,19 +3,29 @@
 #   @date           :   03/13/2019
 #   @package        :   Security
 #   @description    :   Everything related to security functions.
+#
+#   @modified by    :   David Forrester
+#   @date           :   16/01/2024
 ###############################################################################
 
+#######################
+#      Helpers        #
+#######################
+
+#######################
+#      Toggle         #
+#######################
 input_boolean:
   # Main security switch. If this is on, the security is armed.
   sentry_mode:
     name: Sentry Mode
     icon: mdi:security
-  # Vacation mode is automagically set when we are 3 hours from the house, and turns off when we return.
+  # Vacation mode is automagically set when we are 1 hour from the house, and turns off when we return.
   # This is used to modify some of the normal automations.
-  vacation_mode:
-    name: Vacation Mode
+  holiday_mode:
+    name: Holiday Mode
     icon: mdi:airplane-takeoff
-  # Guest mode is use to modify autoamtions when we have guests.
+  # Guest mode is use to modify automations when we have guests.
   # In some cases this prevents security from being set to prevent security alarm going off
   guest_mode:
     name: Guest Mode
@@ -50,11 +60,35 @@ input_boolean:
     name: Dog Mode
     icon: mdi:dog-side
 
-sensor:
-  - platform: authenticated
-  - platform: mqtt
-    name: front_door_motion_away_count
-    state_topic: "house/front_door_motion/away_count"
+#######################
+#        Group        #
+#######################
+
+group: 
+  external_doors:
+  name: External Doors
+  icon: mdi:door-closed-lock
+  entities:
+    - binary_sensor.back_door_sensor_contact 
+    - binary_sensor.side_door_sensor_contact 
+    - binary_sensor.front_door_sense_contact 
+
+  garage_doors:
+  name: Garage Doors
+  icon: mdi:garage-variant-lock
+  entities:
+    - binary_sensor.garage_door_left_contact 
+    - binary_sensor.garage_door_right_contact 
+
+######################
+#   reinstate once Reolink doorbell camera installed
+######################
+
+# sensor:
+#   - platform: authenticated
+#   - platform: mqtt
+#     name: front_door_motion_away_count
+#     state_topic: "house/front_door_motion/away_count"
 
 automation:
   #############################################
