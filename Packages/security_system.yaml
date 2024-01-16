@@ -358,7 +358,7 @@ automation:
                 data:
                   title: "Dog Alert"
                   message: "Huxley or Max may be trying to go out and no one appears to be here to let them out."
-      - service: script.dog_mode_lighting_on
+#      - service: script.dog_mode_lighting_on
       - delay:
           minutes: 20
       - service: input_boolean.turn_off
@@ -373,17 +373,17 @@ automation:
         entity_id: input_boolean.dog_mode
         to: "off"
     action:
-      - service: script.text_notify
+      - service: script.text_notify_parents
         data:
-          who: "jeff"
+          title: "Dog Mode"
           message: "Dog Mode has been disabled"
-      - service: scene.turn_on
-        entity_id: scene.kitchen_lightning_off
+#      - service: scene.turn_on
+#        entity_id: scene.kitchen_lightning_off
   #############################################
 
   #############################################
   # Garage Monitoring
-  # If garage is opens when sun is below horion turn on drivway lights.
+  # If garage is open when sun is below horizon turn on driveway lights.
   - id: garage_opened_night
     alias: Garage Opened at Night
     trigger:
@@ -393,10 +393,10 @@ automation:
         to: "on"
     condition:
       - condition: state
-        entity_id: sun.sun
-        state: below_horizon
-    action:
-      - service: script.driveway_on
+        entity_id: binary_sensor.day
+        state: "off"
+#    action:
+#      - service: script.driveway_on
     initial_state: true
 
   # If garage is open at sunset turn on driveway lights.
@@ -404,14 +404,16 @@ automation:
     alias: Garage Open At Sunset
     initial_state: true
     trigger:
-      - platform: sun
-        event: sunset
+      - platform: state
+        entity_id: binary_sensor.day
+        from: "on"
+        to: "off"
     condition:
       - condition: state
-        entity_id: binary_sensor.garage_door
+        entity_id: group.garage_doors
         state: "on"
-    action:
-      - service: script.driveway_on
+#    action:
+#      - service: script.driveway_on
 
   # If garage doors are closed kick off script to turn them off, and turn off alert.
   - id: garage_closed
@@ -422,26 +424,28 @@ automation:
         from: "on"
         to: "off"
     action:
-      - service: script.driveway_off
-      - service: input_boolean.turn_off
-        data:
-          entity_id: input_boolean.garage_after_dark
+#      - service: script.driveway_off
+#      - service: input_boolean.turn_off
+#        data:
+#          entity_id: input_boolean.garage_after_dark
     initial_state: true
 
-  # If garage is still open at 10:30pm turn on alart to make sure it get closed.
+  # If garage is still open at 10:30pm turn on alert to make sure it gets closed.
   - id: close_garage_lights_out
     alias: Close Garage at lights out
     initial_state: true
     trigger:
-      - platform: time
-        at: "22:30:00"
+      - platform: state
+        entity_id: binary_sensor.overnight
+        from: "off" 
+        to: "on"
     condition:
       - condition: state
-        entity_id: binary_sensor.garage_door
+        entity_id: group.garage_doors
         state: "on"
     action:
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.garage_after_dark
+#      - service: input_boolean.turn_on
+#        entity_id: input_boolean.garage_after_dark
 
   #############################################
 
@@ -453,22 +457,21 @@ automation:
     trigger:
       - platform: state
         entity_id:
-          - binary_sensor.front_door
-          - binary_sensor.laundry_room_door
-          - binary_sensor.attic_door
-          - binary_sensor.back_door
-        to: "on"
-        id: chime
-      - platform: state
-        entity_id:
-          - binary_sensor.front_door
-          - binary_sensor.laundry_room_door
-          - binary_sensor.attic_door
-          - binary_sensor.back_door
+          - binary_sensor.front_door_sense_contact
+          - binary_sensor.back_door_sensor_contact 
+          - binary_sensor.side_door_sensor_contact 
         from: "off"
         to: "on"
-        for: "00:01:00"
-        id: door_still_open
+        id: Chime
+      - platform: state
+        entity_id:
+          - binary_sensor.front_door_sense_contact
+          - binary_sensor.back_door_sensor_contact 
+          - binary_sensor.side_door_sensor_contact 
+        from: "off"
+        to: "on"
+        for: "00:02:00"
+        id: Door Still Open
     condition:
       condition: and
       conditions:
@@ -478,19 +481,19 @@ automation:
         - condition: state
           entity_id: input_boolean.guest_mode
           state: "off"
-        - condition: or
-          conditions:
-            - condition: state
-              entity_id: media_player.ha_blue
-              state: "idle"
-            - condition: state
-              entity_id: media_player.ha_blue
-              state: "off"
+        # - condition: or
+        #   conditions:
+        #     - condition: state
+        #       entity_id: media_player.ha_blue
+        #       state: "idle"
+        #     - condition: state
+        #       entity_id: media_player.ha_blue
+        #       state: "off"
     action:
       - choose:
           - conditions:
               - condition: trigger
-                id: chime
+                id: Chime
             sequence:
               - service: media_player.turn_on
                 entity_id: media_player.ha_blue
