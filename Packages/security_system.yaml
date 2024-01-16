@@ -472,6 +472,14 @@ automation:
         to: "on"
         for: "00:02:00"
         id: Door Still Open
+      - platform: state
+        entity_id:
+          - binary_sensor.back_door_sensor_contact
+          - binary_sensor.side_door_sensor_contact
+          - binary_sensor.front_door_sense_contact
+    from: "on"
+    to: "off"
+    id: Chime Off
     condition:
       condition: and
       conditions:
@@ -492,6 +500,15 @@ automation:
                   where: kitchen
                   message: |
                     <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
+          - conditions:
+              - condition: trigger
+                id: Chime Off    
+            sequence:
+              - service: script.alexa_voice
+                data:
+                  where: kitchen
+                  message: |
+                    <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>    
           - conditions:
               - condition: trigger
                 id: Door Still Open
