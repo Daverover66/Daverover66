@@ -20,7 +20,7 @@ input_boolean:
   sentry_mode:
     name: Sentry Mode
     icon: mdi:security
-  # Vacation mode is automagically set when we are 1 hour from the house, and turns off when we return.
+  # Holiday mode is automagically set when we are 1 hour from the house, and turns off when we return.
   # This is used to modify some of the normal automations.
   holiday_mode:
     name: Holiday Mode
@@ -141,18 +141,22 @@ automation:
             data:
               title: "Security Notice"
               message: "Security System lockdown initiated."
-          - service: alarm_control_panel.aarlo_set_mode
-            data:
-              entity_id: alarm_control_panel.aarlo_ah_base_station
-              mode: "Armed"
-          - service: media_player.play_media
-            target:
-              device_id: edb192da8c7f80c32410147961257fae
-            data:
-              media_content_id: disarm easy viz
-              media_content_type: routine
-          - service: script.turn_on
-            entity_id: script.reset_front_door_motion_count
+
+#########################################################################
+#       Need to decide what to do with cameras 
+#          - service: alarm_control_panel.aarlo_set_mode
+#            data:
+#              entity_id: alarm_control_panel.aarlo_ah_base_station
+#              mode: "Armed"
+#          - service: media_player.play_media
+#            target:
+#              device_id: edb192da8c7f80c32410147961257fae
+#            data:
+#              media_content_id: disarm easy viz
+#              media_content_type: routine
+#          - service: script.turn_on
+#            entity_id: script.reset_front_door_motion_count
+##########################################################################
 
   # When sentry mode is disabled / security disarmed by any method, notify everyone.
   - id: sentry_mode_disabled
@@ -176,14 +180,14 @@ automation:
                   state: "on"
             sequence:
               - service: script.speech_engine
-                data_template:
-                  who: "{{ states.sensor.room_audio.state }}"
+                data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >
                     {{ [
                     "Barn door protocol has been deactivated.",
                     "I am no longer monitoring the access points. ",
                     "Sentry Mode has been disabled. ",
-                    "Anchorage House Shields are down."
+                    "Shields are down."
                     ] | random }}
               - service: script.text_notify
                 data_template:
@@ -199,15 +203,17 @@ automation:
         default:
           - service: input_boolean.turn_off
             entity_id: input_boolean.sentry_mode
-          - service: script.text_notify
-            data_template:
-              who: "parents"
+          - service: script.text_notify_parents
+            data:
               title: "Potential Security Issue"
               message: "Security System has been disarmed, but I could not validate presence."
-          - service: alarm_control_panel.aarlo_set_mode
-            data:
-              entity_id: alarm_control_panel.aarlo_ah_base_station
-              mode: "home"
+
+####################################################################################
+#               As above with cameras, or this could be Alarmo? 
+#          - service: alarm_control_panel.aarlo_set_mode
+#            data:
+#              entity_id: alarm_control_panel.aarlo_ah_base_station
+#              mode: "home"
   #############################################
 
   #############################################
@@ -218,7 +224,7 @@ automation:
     initial_state: true
     trigger:
       - platform: time
-        at: 05:30:00
+        at: 06:50:00
     condition:
       condition: or
       conditions:
