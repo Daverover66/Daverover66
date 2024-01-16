@@ -20,7 +20,7 @@ input_boolean:
   sentry_mode:
     name: Sentry Mode
     icon: mdi:security
-  # Holiday mode is automagically set when we are 1 hour from the house, and turns off when we return.
+  # Holiday mode is automagically set when we are 2 hours from the house, and turns off when we return.
   # This is used to modify some of the normal automations.
   holiday_mode:
     name: Holiday Mode
@@ -189,15 +189,17 @@ automation:
                     "Sentry Mode has been disabled. ",
                     "Shields are down."
                     ] | random }}
-              - service: script.text_notify
-                data_template:
-                  who: "parents"
+              - service: script.text_notify_parents
+                data:
                   title: "Welcome Home"
                   message: "Security System has been disarmed."
-              - service: alarm_control_panel.aarlo_set_mode
-                data:
-                  entity_id: alarm_control_panel.aarlo_ah_base_station
-                  mode: "home"
+####################################################################################
+#               As above with cameras, or this could be Alarmo? 
+#                  
+#              - service: alarm_control_panel.aarlo_set_mode
+#                data:
+#                  entity_id: alarm_control_panel.aarlo_ah_base_station
+#                  mode: "home"
               - service: input_boolean.turn_off
                 entity_id: input_boolean.security_alarm
         default:
@@ -242,14 +244,16 @@ automation:
     alias: Nightly Lockdown
     initial_state: true
     trigger:
-      - platform: time
-        at: "23:00:00"
+      - platform: state
+        entity_id: binary_sensor.overnight
+        from: "off"
+        to: "on"
     condition:
       - condition: state
-        entity_id: person.jeffrey
+        entity_id: person.david_forrester
         state: home
       - condition: state
-        entity_id: person.katherine
+        entity_id: person.gem_forrester
         state: home
       - condition: state
         entity_id: input_boolean.guest_mode
@@ -264,57 +268,65 @@ automation:
   #############################################
 
   #############################################
-  # Vacation Mode Enabled
-  # Enable when everyone is 3 hours away.
-  # Disbaled happens in family_is_home automation in presence.yaml
-  - id: enable_vacation_mode
-    alias: Enable Vacation Mode
+  # Holiday Mode Enabled
+  # Enable when everyone is 2 hours away.
+  # Disabled happens in family_is_home automation in presence.yaml
+  - id: enable_holiday_mode
+    alias: Enable Holiday Mode
     initial_state: true
     trigger:
       - platform: numeric_state
-        entity_id: sensor.jeff_ett_home
-        above: 180
+        entity_id: sensor.waze_travel_time_2 # Dave out #
+        above: 120
       - platform: numeric_state
-        entity_id: sensor.kat_ett_home
-        above: 180
+        entity_id: sensor.waze_travel_time # Gem Out #
+        above: 120
     condition:
       - condition: numeric_state
-        entity_id: sensor.jeff_ett_home
-        above: 180
+        entity_id: sensor.waze_travel_time_2
+        above: 120
       - condition: numeric_state
-        entity_id: sensor.kat_ett_home
-        above: 180
+        entity_id: sensor.waze_travel_time
+        above: 120
     action:
       - service: input_boolean.turn_on
-        entity_id: input_boolean.vacation_mode
+        entity_id: input_boolean.holiday_mode
   #############################################
 
   #############################################
   # Dog Mode
   #
   # Activate Dog Mode
-  # If done via motion annouce in kitchen. If manually just text.
+  # If done via motion announce in kitchen. If manually just text.
   - id: dog_mode_activated
     alias: Dog Mode Activated
     mode: single
     trigger:
       - platform: state
-        entity_id: binary_sensor.back_door_motion
+        entity_id: binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3  # back door zone #
+        from: "off"
         to: "on"
+        id: Motion
       - platform: state
         entity_id: input_boolean.dog_mode
+        from: "off"
         to: "on"
+        id: Manual
     action:
       - choose:
           - conditions:
-              - condition: template
-                value_template: '{{ trigger.to_state.attributes.friendly_name == "Dog Mode" }}'
+              - condition: trigger
+                id:
+                  - Manual
             sequence:
-              - service: script.text_notify
+              - service: script.text_notify_parents
                 data:
-                  who: "parents"
+                  title: "Dog Mode"
                   message: "Dog Mode has been enabled manually"
           - conditions:
+              - condition: trigger
+                id:
+                  - Motion
               - condition: state
                 entity_id: input_boolean.sentry_mode
                 state: "on"
@@ -324,11 +336,14 @@ automation:
             sequence:
               - service: input_boolean.turn_on
                 entity_id: input_boolean.dog_mode
-              - service: script.jarvis_alert
-                data_template:
-                  who: kitchen
-                  message: "Turning on Dog Mode."
+              - service: script.speech_engine
+                data:
+                  where: kitchen
+                  message: "Dog Mode has been activated."
           - conditions:
+              - condition: trigger
+                id:
+                  - Motion
               - condition: state
                 entity_id: input_boolean.sentry_mode
                 state: "on"
@@ -336,13 +351,13 @@ automation:
                 entity_id: group.family
                 state: "not_home"
               - condition: state
-                entity_id: input_boolean.vacation_mode
+                entity_id: input_boolean.holiday_mode
                 state: "off"
             sequence:
-              - service: script.text_alert
+              - service: script.text_notify_parents
                 data:
-                  who: parents
-                  message: "Winston may be trying to go out and no one appears to be here to let him out."
+                  title: "Dog Alert"
+                  message: "Huxley or Max may be trying to go out and no one appears to be here to let them out."
       - service: script.dog_mode_lighting_on
       - delay:
           minutes: 20
