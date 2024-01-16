@@ -574,56 +574,55 @@ automation:
         to: "on"
     action:
       - service: script.speech_engine
-        data_template:
-          who: "{{ states.sensor.room_audio.state }}"
+        data:
+          where: "{{ states('sensor.room_audio') }}"
           message: >
             {{ [
             "Guest Mode has been enabled.",
-            "I have switched to the system to guest mode.",
+            "I have switched the home to guest mode.",
             "I have enabled guest mode. ",
             "Guest Mode is on."
             ] | random }}
 
   # If sentry mode is on / Security armed, notify when there is movement around doors.
-  - id: motion_detected_front_door
-    alias: Motion Detected Front Door
-    trigger:
-      - platform: state
-        entity_id: binary_sensor.aarlo_motion_front_door
-        from: "off"
-        to: "on"
-
-    action:
-      - service: image_processing.scan
-        entity_id: image_processing.doods_aarlo_front_door
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: '{{ states("image_processing.doods_aarlo_front_door") | int > 0 }}'
-            sequence:
-              - service: mqtt.publish
-                data:
-                  topic: house/front_door_motion/away_count
-                  payload_template: "{{ states.sensor.front_door_motion_away_count.state | int + 1 }}"
-                  retain: true
-              - service: script.status_annc
-                data:
-                  who: "{{ states.sensor.room_presence.state }}"
-                  call_interuption: 1
-                  call_snark_door_motion: 1
-                  speech_message: >
-                    {{ [
-                    "I have detected someone at the ",
-                    "Someone appears to be at the ",
-                    "There is a person at the ",
-                    "My sensors are picking up presence at the ",
-                    "We appear to have a visitor at the ",
-                    "My sensors have detected a meat popsicle at the "
-                    ] | random }}
-                    {{ trigger.to_state.attributes.friendly_name }}.
-      - delay:
-          minutes: 2
-    initial_state: true
+  # - id: motion_detected_front_door
+  #   alias: Motion Detected Front Door
+  #   trigger:
+  #     - platform: state
+  #       entity_id: binary_sensor.aarlo_motion_front_door
+  #       from: "off"
+  #       to: "on"
+  #   action:
+  #     - service: image_processing.scan
+  #       entity_id: image_processing.doods_aarlo_front_door
+  #     - choose:
+  #         - conditions:
+  #             - condition: template
+  #               value_template: '{{ states("image_processing.doods_aarlo_front_door") | int > 0 }}'
+  #           sequence:
+  #             - service: mqtt.publish
+  #               data:
+  #                 topic: house/front_door_motion/away_count
+  #                 payload_template: "{{ states.sensor.front_door_motion_away_count.state | int + 1 }}"
+  #                 retain: true
+  #             - service: script.status_annc
+  #               data:
+  #                 who: "{{ states.sensor.room_presence.state }}"
+  #                 call_interuption: 1
+  #                 call_snark_door_motion: 1
+  #                 speech_message: >
+  #                   {{ [
+  #                   "I have detected someone at the ",
+  #                   "Someone appears to be at the ",
+  #                   "There is a person at the ",
+  #                   "My sensors are picking up presence at the ",
+  #                   "We appear to have a visitor at the ",
+  #                   "My sensors have detected a meat popsicle at the "
+  #                   ] | random }}
+  #                   {{ trigger.to_state.attributes.friendly_name }}.
+  #     - delay:
+  #         minutes: 2
+  #   initial_state: true
 
   #############################################
 
@@ -636,16 +635,16 @@ automation:
     trigger:
       - platform: state
         entity_id:
-          - binary_sensor.front_door
-          - binary_sensor.back_door
-          - binary_sensor.side_door
-          - binary_sensor.garage_door
+          - binary_sensor.front_door_sense_contact 
+          - binary_sensor.back_door_sensor_contact 
+          - binary_sensor.side_door_sensor_contact 
+          - group.garage_doors
+        from: "off"
         to: "on"
     condition:
       - condition: state
         entity_id: input_boolean.sentry_mode
         state: "on"
-
     action:
       - choose:
           - conditions:
@@ -657,17 +656,17 @@ automation:
                 entity_id: input_boolean.dog_mode
                 state: "on"
             sequence:
-              - service: script.text_notify
+              - service: script.text_notify_dave
                 data:
-                  who: "jeff"
+                  title: "Security Bypass"
                   message: "Dog Mode enabled, bypassing back door sensor."
         default:
-          - service: script.jarvis_alert
-            data_template:
-              message: "My security protocols are being overidden,, The {{ trigger.to_state.attributes.friendly_name }} has been opened."
-          - service: script.text_alert
+          - service: script.speech_engine
             data:
-              who: parents
+              where: "{{ states('sensor.room_audio')}}"
+              message: "My security protocols are being overidden,, The {{ trigger.to_state.attributes.friendly_name }} has been opened."
+          - service: script.text_notify_parents
+            data:
               title: "Security Alert!!"
               message: "{{ trigger.to_state.attributes.friendly_name }} has been opened."
           - service: input_boolean.turn_on
