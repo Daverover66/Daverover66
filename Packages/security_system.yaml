@@ -112,13 +112,13 @@ automation:
                 entity_id: input_boolean.sentry_mode
               - service: input_boolean.turn_on
                 entity_id: input_boolean.lockdown_issue
-              - service: script.text_notify
+              - service: script.text_notify_parents
                 data:
-                  who: "parents"
+                  title: "Lockdown Issue"
                   message: "Unable to lock down Anchorage House due to issue"
               - service: script.speech_engine
                 data_template:
-                  who: "{{ states.sensor.room_audio.state }}"
+                  where: "{{ states.sensor.room_audio.state }}"
                   message: >
                     {{ [
                     "I was unable to activate barn door protocol due to an open door.",
