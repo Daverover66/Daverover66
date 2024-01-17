@@ -701,16 +701,16 @@ automation:
     action:
       - service: script.turn_off
         entity_id: script.security_response
-      - service: media_player.media_stop
-        entity_id: media_player.ha_blue
+      # - service: media_player.media_stop
+      #   entity_id: media_player.ha_blue
       - service: input_boolean.turn_off
         entity_id: input_boolean.security_alarm
       - service: scene.turn_on
         entity_id: scene.normal_livingroom_lighting
-      - service: script.text_alert
+      - service: script.text_notify_parents
         data:
-          who: parents
-          message: "Security Issue Cleared! Canceling Repsonse."
+          title: "Security Issue!
+          message: "Security Issue Cleared! Cancelling Response."
 
   # Security alarm is turned on, lets make it loud.
   - id: security_alarm_on
@@ -735,44 +735,60 @@ automation:
     action:
       - service: script.turn_off
         entity_id: script.notification_security_alarm_audio
-      - service: media_player.media_stop
-        entity_id: media_player.ha_blue
+      # - service: media_player.media_stop
+      #   entity_id: media_player.ha_blue
 
-  # If water leak is deteced near fridge, let everyone know.
+  # If water leak is detected, let everyone know.
   - id: water_leak_detected
     alias: Welcome Home
     trigger:
       - platform: state
         entity_id:
-          - binary_sensor.0x286d9700010c9f39_water_leak
+          - binary_sensor.leak_detector_dishwasher_water_leak
+          - binary_sensor.leak_detector_washing_machine_water_leak
+          - binary_sensor.kids_bathroom_leak_detector_water_leak
+          - binary_sensor.main_bathroom_leak_detector_water_leak
         from: "off"
         to: "on"
+        id: Leak
     action:
-      - service: script.text_notify
-        data_template:
-          who: "parents"
-          title: "Water Leak!!!!"
-          message: >
-            {% set location = trigger.to_state.attributes.friendly_name %}
-            location + has detected a leak
-      - service: script.jarvis_alert
-        data_template:
-          message: >
-            {% set location = trigger.to_state.attributes.friendly_name %}
-            {%- macro issue_report(location) -%}
-              {{ [
-                  'I have detected an issue!',
-                  'We have a problem!',
-                  'You might not like this.',
-                  'There is something that needs your attention.'
-                  ] | random }}
-              {{ [
-                location + " is detecting a leak.",
-                location + " has detected water.",
-                location + " is picking up water."
-                ] | random }}
-            {%- endmacro -%}
-            {{issue_report(location)}}
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Leak
+            sequence:
+              - service: script.text_notify_parents
+                data:
+                  title: "Water Leak!!!!"
+                  message: >
+                    Water leak detected in {{ trigger.to_state.attributes.friendly_name}}
+               - condition: trigger
+                 id: Leak
+               - condition: state
+                 entity_id: input_boolean.audible_notifications 
+                 state: "on"
+               - condition: state
+                 entity_id: binary_sensor.quiet_time
+                 state: "off"
+            sequence:     
+              - service: script.speech_engine
+                data:
+                  message: >
+                    {% set location = trigger.to_state.attributes.friendly_name %}
+                    {%- macro issue_report(location) -%}
+                      {{ [
+                          'I have detected an issue!',
+                          'We have a problem!',
+                          'You might not like this.',
+                          'There is something that needs your attention.'
+                          ] | random }}
+                      {{ [
+                        location + " is detecting a leak.",
+                        location + " has detected water.",
+                        location + " is picking up water."
+                        ] | random }}
+                    {%- endmacro -%}
+                    {{issue_report(location)}}
 
   #############################################
 
