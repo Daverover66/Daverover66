@@ -739,8 +739,8 @@ automation:
       #   entity_id: media_player.ha_blue
 
   # If water leak is detected, let everyone know.
-  - id: water_leak_detected
-    alias: Welcome Home
+  - id: water_leak_detection_and_alarm
+    alias: Water Leak Detection and Alarm
     trigger:
       - platform: state
         entity_id:
@@ -762,6 +762,7 @@ automation:
                   title: "Water Leak!!!!"
                   message: >
                     Water leak detected in {{ trigger.to_state.attributes.friendly_name}}
+          - conditions:
                - condition: trigger
                  id: Leak
                - condition: state
@@ -773,6 +774,7 @@ automation:
             sequence:     
               - service: script.speech_engine
                 data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >
                     {% set location = trigger.to_state.attributes.friendly_name %}
                     {%- macro issue_report(location) -%}
@@ -907,27 +909,30 @@ automation:
   #         type: announce
   #############################################
 
+##########################
+#        Scripts         #    
+##########################
 script:
-  driveway_doods:
-    sequence:
-      - service: image_processing.scan
-        entity_id: image_processing.doods_driveway
-      - repeat:
-          while:
-            - condition: template
-              value_template: '{{ states("image_processing.doods_driveway") | int > 0 }}'
-          sequence:
-            - service: script.text_alert_image
-              data:
-                who: jeff
-                title: Person Detected!
-                message: >
-                  {{ states("image_processing.doods_driveway") | int}} people detected near vehicles
-                url: /media/images/driveway_latest.jpg
-                content_type: JPEG
-            - delay: 00:01:00
-            - service: image_processing.scan
-              entity_id: image_processing.doods_driveway
+#   driveway_doods:
+#     sequence:
+#       - service: image_processing.scan
+#         entity_id: image_processing.doods_driveway
+#       - repeat:
+#           while:
+#             - condition: template
+#               value_template: '{{ states("image_processing.doods_driveway") | int > 0 }}'
+#           sequence:
+#             - service: script.text_alert_image
+#               data:
+#                 who: jeff
+#                 title: Person Detected!
+#                 message: >
+#                   {{ states("image_processing.doods_driveway") | int}} people detected near vehicles
+#                 url: /media/images/driveway_latest.jpg
+#                 content_type: JPEG
+#             - delay: 00:01:00
+#             - service: image_processing.scan
+#               entity_id: image_processing.doods_driveway
 
   # backyard_doods:
   #   sequence:
@@ -950,56 +955,56 @@ script:
   #         - service: image_processing.scan
   #           entity_id: image_processing.doods_driveway
 
-  theater_occupancy:
-    sequence:
-      - service: image_processing.scan
-        entity_id: image_processing.doods_theater_camera
-      - repeat:
-          while:
-            - condition: template
-              value_template: '{{ states("image_processing.doods_theater_camera") | int > 0 }}'
-          sequence:
-            - service: script.text_debug
-              data:
-                message: >
-                  {{ states("image_processing.doods_theater_camera") | int}} people detected in Theater
-            - delay: 00:03:00
-            - service: image_processing.scan
-              entity_id: image_processing.doods_theater_camera
+  # theater_occupancy:
+  #   sequence:
+  #     - service: image_processing.scan
+  #       entity_id: image_processing.doods_theater_camera
+  #     - repeat:
+  #         while:
+  #           - condition: template
+  #             value_template: '{{ states("image_processing.doods_theater_camera") | int > 0 }}'
+  #         sequence:
+  #           - service: script.text_debug
+  #             data:
+  #               message: >
+  #                 {{ states("image_processing.doods_theater_camera") | int}} people detected in Theater
+  #           - delay: 00:03:00
+  #           - service: image_processing.scan
+  #             entity_id: image_processing.doods_theater_camera
 
-  kitchen_occupancy:
-    sequence:
-      - service: image_processing.scan
-        entity_id: image_processing.doods_kitchen_camera
-      - repeat:
-          while:
-            - condition: template
-              value_template: '{{ states("image_processing.doods_kitchen_camera") | int > 0 }}'
-          sequence:
-            - service: script.text_debug
-              data:
-                message: >
-                  {{ states("image_processing.doods_kitchen_camera") | int}} people detected in Kitchen
-            - delay: 00:03:00
-            - service: image_processing.scan
-              entity_id: image_processing.doods_kitchen_camera
+  # kitchen_occupancy:
+  #   sequence:
+  #     - service: image_processing.scan
+  #       entity_id: image_processing.doods_kitchen_camera
+  #     - repeat:
+  #         while:
+  #           - condition: template
+  #             value_template: '{{ states("image_processing.doods_kitchen_camera") | int > 0 }}'
+  #         sequence:
+  #           - service: script.text_debug
+  #             data:
+  #               message: >
+  #                 {{ states("image_processing.doods_kitchen_camera") | int}} people detected in Kitchen
+  #           - delay: 00:03:00
+  #           - service: image_processing.scan
+  #             entity_id: image_processing.doods_kitchen_camera
 
-  livingroom_occupancy:
-    sequence:
-      - service: image_processing.scan
-        entity_id: image_processing.doods_livingroom_camera
-      - repeat:
-          while:
-            - condition: template
-              value_template: '{{ states("image_processing.doods_livingroom_camera") | int > 0 }}'
-          sequence:
-            - service: script.text_debug
-              data:
-                message: >
-                  {{ states("image_processing.doods_livingroom_camera") | int}} people detected in Livingroom
-            - delay: 00:03:00
-            - service: image_processing.scan
-              entity_id: image_processing.doods_livingroom_camera
+  # livingroom_occupancy:
+  #   sequence:
+  #     - service: image_processing.scan
+  #       entity_id: image_processing.doods_livingroom_camera
+  #     - repeat:
+  #         while:
+  #           - condition: template
+  #             value_template: '{{ states("image_processing.doods_livingroom_camera") | int > 0 }}'
+  #         sequence:
+  #           - service: script.text_debug
+  #             data:
+  #               message: >
+  #                 {{ states("image_processing.doods_livingroom_camera") | int}} people detected in Livingroom
+  #           - delay: 00:03:00
+  #           - service: image_processing.scan
+  #             entity_id: image_processing.doods_livingroom_camera
 
   # door chime script, just plays sound anytime called.
   # door_chime:
@@ -1041,7 +1046,7 @@ script:
   standby:
     sequence:
       - service: script.turn_on
-        entity_id: script.vacation_canceled
+        entity_id: script.holiday_cancelled
       - service: script.turn_on
         entity_id: script.disarm_security
       - service: script.turn_on
@@ -1051,15 +1056,17 @@ script:
       - service: script.turn_on
         entity_id: script.clear_security_issue
 
-  # If vacation mode is on, turn it off
-  vacation_canceled:
+  # If holiday mode is on, turn it off
+  holiday_cancelled:
     sequence:
       - condition: state
-        entity_id: input_boolean.vacation_mode
+        entity_id: input_boolean.holiday_mode
         state: "on"
-      - data:
-          entity_id: input_boolean.vacation_mode
-        service: input_boolean.turn_off
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.holiday_mode
+        
 
   # If security is armed, disarm it
   disarm_security:
@@ -1068,7 +1075,9 @@ script:
         entity_id: input_boolean.sentry_mode
         state: "on"
       - service: input_boolean.turn_off
-        entity_id: input_boolean.sentry_mode
+        data: {}
+        target:
+          entity_id: input_boolean.sentry_mode
 
   # If alarm is on, turn it off
   cancel_security_alarm:
@@ -1077,7 +1086,9 @@ script:
         entity_id: input_boolean.security_alarm
         state: "on"
       - service: input_boolean.turn_off
-        entity_id: input_boolean.security_alarm
+        data: {}
+        target:
+          entity_id: input_boolean.security_alarm
 
   clear_security_issue:
     sequence:
@@ -1085,7 +1096,9 @@ script:
         entity_id: input_boolean.security_issue
         state: "on"
       - service: input_boolean.turn_off
-        entity_id: input_boolean.security_issue
+        data: {}
+        target:
+          entity_id: input_boolean.security_issue
 
   # if there are lockdown issues, turn them off
   cancel_lockdown_issue:
@@ -1094,7 +1107,9 @@ script:
         entity_id: input_boolean.lockdown_issue
         state: "on"
       - service: input_boolean.turn_off
-        entity_id: input_boolean.lockdown_issue
+        data: {}
+        target:
+          entity_id: input_boolean.lockdown_issue
 
   # Turn on guest mode, and welcome the victims...I mean guests
   visitors_here:
@@ -1103,10 +1118,10 @@ script:
         entity_id: input_boolean.guest_mode
         state: "off"
       - service: input_boolean.turn_on
-        data:
+        data: {}
+        target:
           entity_id: input_boolean.guest_mode
-      - service: script.turn_on
-        entity_id: script.haunted_guest_welcome
+      - service: script.haunted_guest_welcome
 
   # Turn off guest mode
   visitors_gone:
@@ -1115,7 +1130,8 @@ script:
         entity_id: input_boolean.guest_mode
         state: "on"
       - service: input_boolean.turn_off
-        data:
+        data: {}
+        target:
           entity_id: input_boolean.guest_mode
 
   reset_front_door_motion_count:
