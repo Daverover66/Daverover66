@@ -8,13 +8,34 @@
 #   @date                 :   05/12/2022
 #  
 #   @further modified by  :   Dave Forrester (@Daverover66)
-#   @date                 :   08/09/2023
+#   @date                 :   20/01/2024
 ###############################################################################    
 
 ##############################
 #        Helpers             #
 ##############################
 
+##############################
+#          Timer             #
+##############################
+
+timer:
+  office_presence:
+    duration: "01:00:00"
+
+##############################
+#         Number             #
+##############################
+
+input_number:
+  presence_threshold:
+    name: Presence Threshold
+    initial: 130
+    min: 0
+    max: 900
+    step: 1
+    mode: box
+    
 ##############################
 #        Datetime            #
 ##############################
@@ -54,6 +75,8 @@ group:
       - sensor.dave_is_in_da_hoose
       - sensor.gem_is_in_da_hoose
 
+ # some more example groups
+ 
  # friends:
  #   name: Friends
  #   entities:
@@ -148,6 +171,28 @@ template:
         {{ is_state('binary_sensor.daves_samsung_galaxy_home','on') or  
           is_state('binary_sensor.gems_samsung_galaxy_home','on') }}
   - sensor:
+      ### another location based sensor ###
+      - name: "Dave is in da hoose"
+        unique_id: dave_is_in_da_hoose
+        state: |-
+          {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
+          {% if dave_location == "on" %}
+            home
+          {% else %}
+          not_home
+          {% endif %}
+
+      ### yet another location based sensor ###
+      - name: "Gem is in da hoose"
+        unique_id: gem_is_in_da_hoose
+        state: |-
+          {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
+          {% if gem_location == "on" %}
+            home
+          {% else %}
+          not_home
+          {% endif %}
+          
       - name: "Dave"
         unique_id: dave_location
         state: >-
@@ -186,7 +231,6 @@ template:
             {%- endif %}
           {%- endif %}
  
-  - sensor:
       - name: "Gem"
         unique_id: gem_location
         state: >-
@@ -235,122 +279,71 @@ automation:
 #        Family Arrived      #
 ##############################
 
-  - id: family_has_arrived
-    alias: Family Has arrived
-    trigger:
-      - platform: zone
-        entity_id: person.david_forrester
-        zone: zone.home
-        event: enter
-        id: dave
-      - entity_id: person.gem_forrester
-        from: not_home
-        platform: state
-        to: home
-        id: gem
-      - entity_id: group.family
-        platform: state
-        to: home
-        id: family
-        from: not_home
-    condition: []
-    action:
-      - service: script.family_is_home
-      # - if:
-      #     condition:
-      # - choose:
-      #     - conditions:
-      #         - condition: trigger
-      #           id: chris
-      #       sequence:
-      #         - service: input_boolean.turn_off
-      #           data: {}
-      #           entity_id: input_boolean.chris_travel_monitor
-      #     - conditions:
-      #         - condition: trigger
-      #           id: steven
-      #       sequence:
-      #         - service: input_boolean.turn_off
-      #           data: {}
-      #           entity_id: input_boolean.steven_travel_monitor
-      #   default: []
-    mode: single
-    initial_state: true
-
+    - id: family_has_arrived
+      alias: Family Has Arrived
+      description: ""
+      mode: single
+      initial_state: true
+      trigger:
+        - platform: state
+          entity_id:
+            - binary_sensor.family_home
+          from: "off"
+          to: "on"
+          id: Auto
+        - platform: state
+          entity_id:
+            - input_boolean.family_is_home
+          from: "off"
+          to: "on"
+          id: Manual
+      condition:
+        - condition: state
+          entity_id: input_boolean.family_is_home
+          state: "off"
+      action:
+        - service: input_boolean.turn_on
+          data: {}
+          target:
+            entity_id: input_boolean.family_is_home
+      
 ##############################
 #        Family Left         #
 ##############################
 
   - id: family_has_left
-    alias: Family Has Left
+    alias: "Family has left"
+    description: ""
+    mode: single
     initial_state: true
     trigger:
-      - entity_id: group.family
-        from: home
-        platform: state
-        to: not_home
-    mode: single
-    condition:
-      - condition: state
-        entity_id: input_boolean.guest_mode
-        state: "off"
+      - platform: state
+        entity_id:
+          - binary_sensor.family_home
+        from: "on"
+        to: "off"
+        id: Auto
+      - platform: state
+        entity_id:
+          - input_boolean.family_is_home
+        from: "on"
+        to: "off"
+        id: Manual
+    condition: []
     action:
-      - service: script.family_is_away
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Auto
+            sequence:
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                 entity_id: input_boolean.family_is_home
+    
 
-  # - id: chris_arrives_work
-  #   alias: Chris Arrives At Work
-  #   trigger:
-  #     - entity_id: person.chris
-  #       event: enter
-  #       platform: zone
-  #       zone: zone.work_chris
-  #   condition:
-  #     - condition: state
-  #       entity_id: binary_sensor.morning
-  #       state: "on"
-  #   action:
-  #     - service: script.text_notify
-  #       data:
-  #         who: "steven"
-  #         message: "Chris has arrived at work"
-  #   initial_state: true
 
-  # - id: e1cb15b0-0423-11eb-adc1-0242ac120002
-  #   alias: Zone Debugger
-  #   trigger:
-  #     - platform: state
-  #       entity_id: person.chris
-  #   condition:
-  #     - condition: state
-  #       entity_id: input_boolean.chris_location_debug
-  #       state: "on"
-  #   action:
-  #     - service: script.chris_location_debug
-
-  # - id: chris_leaves_work
-  #   alias: Chris Leaves work
-  #   initial_state: true
-  #   trigger:
-  #     - entity_id: person.chris
-  #       event: leave
-  #       platform: zone
-  #       zone: zone.work_chris
-  #   condition:
-  #     - condition: or
-  #       conditions:
-  #         - condition: state
-  #           entity_id: binary_sensor.afternoon
-  #           state: "on"
-  #         - condition: state
-  #           entity_id: binary_sensor.evening
-  #           state: "on"
-  #   action:
-  #     - service: script.text_notify
-  #       data:
-  #         who: "steven"
-  #         message: "Chris just left"
-  #     - service: input_boolean.turn_off
-  #       entity_id: input_boolean.chris_traffic_alert_home
 
   - id: welcome_home
     alias: Welcome Home
