@@ -75,6 +75,10 @@ group:
       - sensor.dave_is_in_da_hoose
       - sensor.gem_is_in_da_hoose
 
+  arriving:
+    name: Arriving
+    entities: []
+
  # some more example groups
  
  # friends:
@@ -112,9 +116,7 @@ group:
  #     - binary_sensor.espresense_dining_room_motion
  #     - binary_sensor.espresense_living_room_motion
 
- # arriving:
- #   name: Arriving
- #   entities: []
+
 
 ##############################
 #        Sensors             #
