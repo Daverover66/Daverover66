@@ -79,45 +79,6 @@ group:
     name: Arriving
     entities: []
 
- # some more example groups
- 
- # friends:
- #   name: Friends
- #   entities:
- #     - person.kaitlyn
- #     - person.ronald
-
- # people:
- #   name: People
- #   entities:
- #     - person.chris
- #     - person.steven
-
- # chris:
- #   name: Chris
- #   entities:
- #     - device_tracker.chriss_iphone_4 # iCloud integration
- #     - device_tracker.christophers_apple_watch # iCloud integration
- #     - device_tracker.chriss_ipad_2 # iCloud integration
- #     - device_tracker.chriss_iphone_3 # HA Mobile App
- #     - device_tracker.chriss_ipad # HA Mobile App
-
- # steven:
- #   name: Steven
- #   entities:
- #     - device_tracker.stevens_iphone_3 # HA Mobile App
-
- # occupancy:
- #   name: Occupancy
- #   entities:
- #     - binary_sensor.espresense_bedroom_motion
- #     - binary_sensor.espresense_lab_motion
- #     - binary_sensor.espresense_kitchen_motion
- #     - binary_sensor.espresense_dining_room_motion
- #     - binary_sensor.espresense_living_room_motion
-
-
-
 ##############################
 #        Sensors             #
 ##############################
@@ -526,9 +487,9 @@ automation:
                   title: DAVE LEFT
                 alias: Notify Gem's phone
     
-
-
-
+####################################
+#          Welcome Home            #
+####################################
 
   - id: welcome_home
     alias: Welcome Home
@@ -536,17 +497,8 @@ automation:
     trigger:
       - platform: state
         entity_id:
-          - person.chris
-          - person.steven
-          - person.kaitlyn
-          - person.ronald
-          - person.mari
-          - person.rheena
-          - person.danielle
-          - person.daniel
-          - person.brian
-          - person.rathnam
-          - person.nico
+          - person.david_forrester
+          - person.gem_forrester
         from: "not_home"
         to: "home"
     action:
@@ -558,12 +510,9 @@ automation:
             sequence:
               - wait_for_trigger:
                   - platform: state
-                    entity_id: binary_sensor.front_door
+                    entity_id: binary_sensor.front_door_sense_contact
                     from: "off"
                     to: "on"
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.arrival
               - delay:
                   hours: 0
                   minutes: 0
