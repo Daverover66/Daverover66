@@ -1,7 +1,7 @@
 >
   {# Event Report #}
   {%- macro getReport() -%}
-      <p>
+    <p>
         {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
         {% if person == "Gem is in da hoose and Dave is in da hoose and Gem Forrester and David Forrester" %}
         {% set person_home = "Mummy and Daddy" %}
@@ -40,21 +40,15 @@
     </p>
 
     <p>
-    {%- if is_state('climate.my_ecobee','off') %}
-      <s>The internal climate control system is off. The temperature inside is {{ state_attr('climate.my_ecobee', 'current_temperature') }} degrees</s>
-    {%- elif is_state('climate.my_ecobee','heat_cool') %}
-      <s>The internal climate control system will try to keep the temperature between {{ state_attr('climate.my_ecobee', 'target_temp_low') }} and {{ state_attr('climate.my_ecobee', 'target_temp_high') }}</s>
-    {% else %}
-      <s>The internal climate control system is set to {{ states('climate.my_ecobee') }} with a current temperature of {{ state_attr('climate.my_ecobee', 'current_temperature') }} which is 
-      
-      {%- if state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int |round > 0 %}
-        {{ state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int }} degrees above 
-      {%- elif state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int |round < 0 %}
-        {{ (state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int) | abs }} degrees below
+    {%- if is_state('climate.downstairs','off') and is_state('climate.upstairs','off') %}
+      The heating is off. The temperature outside is {{ states('sensor.outside_temperature') }} degrees  while inside it is {{ states('sensor.average_indoor_temperature') }} degrees
+      {% if states('sensor.average_indoor_temperature') | float(0) <= 18 and is_state('input_boolean.winter_mode','on' )%}
+      So I have turned on the heating for your comfort.
       {% else %}
-        right at 
+      If it gets too warm, you might have to open a window
       {% endif %}
-      the set point of {{ state_attr('climate.my_ecobee', 'temperature') }} degrees</s>
+    {%- elif is_state('climate.downstairs','heat') and is_state('climate.upstairs','heat') %}
+      The heating is on so I will try to keep the temperature at a comfortable {{ states('input_number.heating_comfort_temperature') }} degrees.
     {%- endif -%}
     </p>
 
