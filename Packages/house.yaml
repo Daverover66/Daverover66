@@ -1,0 +1,284 @@
+- platform: history_stats
+  name: Jeff Driving Time
+  entity_id: binary_sensor.jeff_driving
+  state: "on"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    days: 7
+- platform: history_stats
+  name: Jeff School
+  entity_id: person.jeffrey
+  state: "SHMES"
+  type: count
+  end: "{{ now() }}"
+  duration:
+    days: 7
+- platform: history_stats
+  name: Kat Driving Time
+  entity_id: binary_sensor.kat_driving
+  state: "on"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    days: 7
+- platform: history_stats
+  name: Speech time
+  entity_id: media_player.ha_blue
+  state: "playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    days: 8
+- platform: history_stats
+  name: AppleTV time
+  entity_id: media_player.home_theater
+  state: "Playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    hours: 24
+- platform: history_stats
+  name: AppleTV time this week
+  entity_id: media_player.home_theater
+  state: "Playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    days: 7
+- platform: history_stats
+  name: Game time
+  entity_id: media_player.playstation_4
+  state: "playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    hours: 24
+- platform: history_stats
+  name: Roku time
+  entity_id: media_player.bedroom
+  state: "playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    hours: 24
+- platform: history_stats
+  name: Roku Theater time
+  entity_id: media_player.roku_premiere
+  state: "playing"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    hours: 24
+- platform: history_stats
+  name: Washer Time
+  entity_id: sensor.washer_status #entity
+  state: "running"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    days: 7
+
+- platform: history_stats
+  name: Outside Lights
+  entity_id: group.outside_lights
+  state: "on"
+  type: time
+  end: "{{ now() }}"
+  duration:
+    hours: 24
+
+- platform: history_stats
+  name: Skylar Sleep Last Night
+  entity_id: sensor.skylar_location
+  state: "bed"
+  type: time
+  start: "{{ now().replace(hour=19, minute=0, second=0) - timedelta(days=1) }}"
+  end: "{{ now() }}"
+
+- platform: statistics
+  name: Wind Speed Stats
+  entity_id: sensor.pirateweather_wind_speed
+  state_characteristic: mean
+  sampling_size: 500
+- platform: statistics
+  name: "Lightning Strikes Last 20 Mins"
+  entity_id: sensor.acurite_6045m_under_deck_strcnt
+  state_characteristic: change
+  max_age:
+    minutes: 20
+  precision: 0
+- platform: statistics
+  name: Visibility Stats
+  entity_id: sensor.nws_current_visibility
+  state_characteristic: mean
+  sampling_size: 500
+- platform: statistics
+  name: Temperature Stats
+  entity_id: sensor.pirateweather_temperature
+  state_characteristic: mean
+  sampling_size: 500
+- platform: statistics
+  name: Humidity Stats
+  entity_id: sensor.pirateweather_humidity
+  state_characteristic: mean
+  sampling_size: 500
+- platform: statistics
+  name: Washer Power Stats
+  entity_id: sensor.washer_switch_electric_consumption_w
+  state_characteristic: mean
+  max_age:
+    days: 30
+
+- platform: template
+  sensors:
+    sensor_count:
+      friendly_name: "Number of Sensors"
+      value_template: >-
+        {{ states.sensor | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    automation_count:
+      friendly_name: "Number of Automations"
+      value_template: >-
+        {{ states.automation| rejectattr('state', 'eq', 'unavailable') | list | count }}
+    script_count:
+      friendly_name: "Number of Scripts"
+      value_template: >-
+        {{ states.script | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    binary_sensor_count:
+      friendly_name: "Number of Binary Sensors"
+      value_template: >-
+        {{ states.binary_sensor | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    tracker_count:
+      friendly_name: "Number of Devices"
+      value_template: >-
+        {{ states.device_tracker| rejectattr('state', 'eq', 'unavailable') | list | count }}
+    lights_count:
+      friendly_name: "Number of Lights"
+      value_template: >-
+        {{ states.light | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    switches_count:
+      friendly_name: "Number of Switches"
+      value_template: >-
+        {{ states.switch | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    camera_count:
+      friendly_name: "Number of online Cameras"
+      value_template: >-
+        {{ states.camera | rejectattr('state', 'eq', 'unavailable') | list | count }}
+    entities_count:
+      friendly_name: "Number of Entities"
+      value_template: >-
+        {{ states | rejectattr('state', 'eq', 'unavailable') | list | count}}
+    na_entities_count:
+      friendly_name: "Number of NA Entities"
+      value_template: >-
+        {{ states | selectattr('state', 'eq', 'unavailable') | map(attribute='entity_id') | list | count }}
+    today_is:
+      friendly_name: "Today is"
+      value_template: "{{ ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][now().weekday()] }}"
+    month_is:
+      friendly_name: "Month is"
+      value_template: "{{ ['January','February','March','April','May','June','July','August','September','October','November','December'][now().month-1] }}"
+    holiday:
+      friendly_name: "Holiday"
+      value_template: >-
+        {% if is_state('calendar.holidays_in_united_states', 'on') %}
+          {{ state_attr('calendar.holidays_in_united_states','message') }}
+        {% elif is_state('calendar.mdl_holidays', 'on') %}
+          {{ state_attr('calendar.mdl_holidays','message') }}
+        {% else %}
+          none
+        {% endif %}
+    nat_holiday:
+      friendly_name: "Holiday"
+      value_template: >-
+        {% if is_state('calendar.national_day_calendar', 'on') %}
+          {%- set event = state_attr('calendar.national_day_calendar','message') %}
+          {% if 'Day' in event and 'National' in event%}
+            {{ event }}
+          {% endif %}
+        {% else %}
+          none
+        {% endif %}
+    # school_tomorrow:
+    #   friendly_name: "School Tomorrow"
+    #   value_template: >-
+    #     {%- set next_event=as_timestamp(state_attr('calendar.school','start_time')) | timestamp_custom("%Y-%m-%d",true) %}
+    #     {%- set tomorrow=as_timestamp(strptime(states('sensor.date'), "%Y-%m-%d") + timedelta(days=1)) | timestamp_custom("%Y-%m-%d",true) %}
+    #     {% if next_event == tomorrow %}
+    #       on
+    #     {% else %}
+    #       off
+    #     {% endif %}
+    outside_light_time:
+      friendly_name: "Outside Light Time"
+      value_template: >-
+        {% set time = (timedelta(hours=states('sensor.outside_lights')| float(0))| string) %} 
+        The outside lights were on for a total of {{time[:-6]}} hours and {{time[2:-3] | replace(":", "")}} mins in the last 24 hours.
+    washer_run_time:
+      friendly_name: "Weekly Washer Run Time"
+      value_template: >-
+        {% set time = (timedelta(hours=states('sensor.washer_time')| float(0))| string) %} 
+        the washing machine ran for a total of {{time[:-6]}} hours and {{time[2:-3] | replace(":", "") }} mins in the last Week.
+    battery_warning:
+      friendly_name: "Battery Warning"
+      value_template: >-
+        {% for state in  states.sensor | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') %}
+          {%- if 0 <= state.state | int(-1) <= 20 -%}
+              {%- if 'Battery' in state.name or 'battery' in state.name or 'Acurite' in state.name-%}
+              {{state.name}} - {{ state.state }}
+              {% endif -%}
+            {% endif -%}
+        {% endfor %}
+    battery_warning_count:
+      friendly_name: "Battery Warning Count"
+      value_template: >-
+        {% set count = namespace(value=0) %}
+        {% for state in  states.sensor | selectattr('attributes.device_class', 'defined') | selectattr('attributes.device_class', 'eq', 'battery') %}
+          {%- if 0 <= state.state | int(-1) <= 20 -%}
+              {%- if 'Battery' in state.name or 'battery' in state.name or 'Acurite' in state.name-%}
+                {% set count.value = count.value + 1 %}
+              {% endif -%}
+            {% endif -%}
+        {% endfor %}
+        {{ count.value }}
+    skylar_sleep_last_night_tts:
+      friendly_name: "Skylar Sleep Briefing"
+      unique_id: skylar_sleep_last_night_tts
+      value_template: >-
+        {% set time = (timedelta(hours=states('sensor.skylar_sleep_last_night')| float(0))| string) %}
+        {% set hours = time[:-6] %} 
+        {% set mins = time[2:-3] | replace(":", "") %}
+        {% if hours | int > 1 and mins | int == 1 %}
+          {% set timetts = hours | string + ' hours and ' + mins | string + ' minute' %}
+        {% elif hours | int == 1 and mins | int > 0 %}
+          {% set timetts = hours | string + ' hour and ' + mins | string + ' minutes' %}
+        {% elif hours | int == 1 and mins | int == 0 %}
+          {% set timetts = hours | string + ' hour' %}
+        {% elif hours | int == 0 and mins | int > 0 %}
+          {% set timetts = mins | string + ' minutes' %}
+        {% elif hours | int == 0 and mins | int ==1  %}
+          {% set timetts = mins | string + ' minute' %}
+        {% else %}
+          {% set timetts = hours | string + ' hours and ' + mins | string + ' minutes' %}
+        {% endif %}
+        {{ timetts }} of sleep last night.
+        {% if hours | int < 5 %}
+          {{[
+            'That is not enough sleep.'
+          ] | random}}
+        {% elif hours | int >=5 and hours | int < 7 %}
+          {{[
+            'That is ok sleep.'
+          ] | random}}
+          But not that impressive. 
+        {% elif hours | int > 9 %}
+          {{[
+            'You must have been tired!'
+          ] | random}}
+        {% else %}
+          {{[
+            'That is a perfect amount of sleep!'
+          ] | random}}
+          Well done, sir.
+        {% endif %}
+        
