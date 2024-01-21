@@ -1,0 +1,75 @@
+>
+  {# Event Report #}
+  {%- macro getReport() -%}
+    <p>
+    {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
+    {% set peoplecount = expand('group.family') | count %}
+    {% if peoplecount == 0 %}
+      <s>Welcome Home</s>
+    {% else %}
+      {% if peoplecount == 1 %}
+        {% set is_are = ' is ' %}
+        {% set has_have = ' has ' %}
+      {% else %}
+        {% set is_are = ' are ' %}
+        {% set has_have = ' have ' %}
+      {% endif %}
+      {%- macro greeting_sentence(person, is_are, has_have) -%}
+        {{ [
+        "Welcome back home " ~ person + ". ",
+        "Hello " ~ person + "! Good to see you are home again. ",
+        "Hello " ~ person + "! Its so good to have you back home again. "
+        ] | random }}
+      {%- endmacro -%}
+      {{greeting_sentence(person, is_are, has_have)}}
+    {% endif %}
+    {{ [
+      'It was pretty quiet while you were gone. ', 
+      'Glad to see you made it back. ',
+      'Hopefully nothing too crazy happened out there. ',
+      'There definitely were not any wild parties while you were out. ',
+      'I would love to hear about your adventures. <break time="1s"/> On second thoughts, no disrespect, perhaps not. '
+    ] | random }}
+    </p>
+
+    <p>
+    {%- if is_state('climate.my_ecobee','off') %}
+      <s>The internal climate control system is off. The temperature inside is {{ state_attr('climate.my_ecobee', 'current_temperature') }} degrees</s>
+    {%- elif is_state('climate.my_ecobee','heat_cool') %}
+      <s>The internal climate control system will try to keep the temperature between {{ state_attr('climate.my_ecobee', 'target_temp_low') }} and {{ state_attr('climate.my_ecobee', 'target_temp_high') }}</s>
+    {% else %}
+      <s>The internal climate control system is set to {{ states('climate.my_ecobee') }} with a current temperature of {{ state_attr('climate.my_ecobee', 'current_temperature') }} which is 
+      
+      {%- if state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int |round > 0 %}
+        {{ state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int }} degrees above 
+      {%- elif state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int |round < 0 %}
+        {{ (state_attr('climate.my_ecobee', 'current_temperature') | int - state_attr('climate.my_ecobee', 'temperature') | int) | abs }} degrees below
+      {% else %}
+        right at 
+      {% endif %}
+      the set point of {{ state_attr('climate.my_ecobee', 'temperature') }} degrees</s>
+    {%- endif -%}
+    </p>
+
+    <p>
+    {%- if states('sensor.front_door_motion_away_count') | int > 0 %}
+      While you were out I detected motion at the front door {{ states('sensor.front_door_motion_away_count') | int }} time{{ 's' if states('sensor.front_door_motion_away_count') | int > 1 }}.
+    {% endif %}
+    </p>
+
+  {%- endmacro -%}
+
+
+  {# a macro that removes all newline characters, empty spaces, and returns formatted text  #}
+  {%- macro cleanup(data) -%}
+    {%- for item in data.split("\n")  if item | trim != "" -%}
+      {{ item | trim }} {% endfor -%}
+  {%- endmacro -%}
+
+  {# a macro to call all macros :)  #}
+  {%- macro mother_of_all_macros() -%}
+    {{ getReport() }}
+  {%- endmacro -%}
+
+  {# Call the macro  #}
+  {{- cleanup(mother_of_all_macros()) -}}
