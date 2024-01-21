@@ -40,16 +40,25 @@
     </p>
 
     <p>
-      {%- if is_state('climate.downstairs','off') and is_state('climate.upstairs','off') %}
-        The heating is off. The temperature outside is {{ states('sensor.outside_temperature') }} degrees  while inside it is {{ states('sensor.average_indoor_temperature') }} degrees
-      {% if states('sensor.average_indoor_temperature') | float(0) <= 18 and is_state('input_boolean.winter_mode','on' )%}
-        So I have turned on the heating for your comfort.
+      {% if is_state('sensor.season','summer') or is_state('sensor.season','autumn') %}
+        The temperature indoors is {{ states('sensor.average_indoor_temperature') }} degrees.
+        {% if states('sensor.average_indoor_temperature') | float(0) > 20 %} 
+          You might want to consider opening some windows.
+        {% else %}
+          It might not yet be warm enough to open the windows, but I'll leave the choice to you.
+        {% endif %}
       {% else %}
-        If it gets too warm, you might have to open a window
+        {%- if is_state('climate.downstairs','off') and is_state('climate.upstairs','off') %}
+          The heating is off. The temperature outside is {{ states('sensor.outside_temperature') }} degrees  while inside it is {{ states('sensor.average_indoor_temperature') }} degrees
+        {% if states('sensor.average_indoor_temperature') | float(0) <= 18 and is_state('input_boolean.winter_mode','on' )%}
+          So I have turned on the heating for your comfort.
+        {% else %}
+          If it gets too warm, you might have to open a window
+        {% endif %}
+     {%- elif is_state('climate.downstairs','heat') and is_state('climate.upstairs','heat') %}
+       The heating is on so I will try to keep the temperature at a comfortable {{ states('input_number.heating_comfort_temperature') }} degrees.
+        {%- endif -%}
       {% endif %}
-      {%- elif is_state('climate.downstairs','heat') and is_state('climate.upstairs','heat') %}
-        The heating is on so I will try to keep the temperature at a comfortable {{ states('input_number.heating_comfort_temperature') }} degrees.
-      {%- endif -%}
     </p>
 
     <p>
