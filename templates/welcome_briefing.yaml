@@ -1,35 +1,42 @@
 >
   {# Event Report #}
   {%- macro getReport() -%}
-    <p>
-    {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
-    {% set peoplecount = expand('group.family') | count %}
-    {% if peoplecount == 0 %}
-      <s>Welcome Home</s>
-    {% else %}
-      {% if peoplecount == 1 %}
-        {% set is_are = ' is ' %}
-        {% set has_have = ' has ' %}
-      {% else %}
-        {% set is_are = ' are ' %}
-        {% set has_have = ' have ' %}
-      {% endif %}
-      {%- macro greeting_sentence(person, is_are, has_have) -%}
+      <p>
+        {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
+        {% if person == "Gem is in da hoose and Dave is in da hoose and Gem Forrester and David Forrester" %}
+        {% set person_home = "Mummy and Daddy" %}
+        {% elif person == "Gem is in da hoose and Gem Forrester" %}
+        {% set person_home = "Mummy" %}
+        {% else %}
+        {% set person_home = "Daddy" %}
+        {% endif %}
+        {% set peoplecount = expand('group.family') | count %}
+        {% if peoplecount == 0 %}
+          <s>Welcome Home</s>
+        {% else %}
+          {% if peoplecount == 1 %}
+            {% set is_are = ' is ' %}
+            {% set has_have = ' has ' %}
+          {% else %}
+            {% set is_are = ' are ' %}
+            {% set has_have = ' have ' %}
+          {% endif %}
+          {%- macro greeting_sentence(person_home, is_are, has_have) -%}
+            {{ [
+            "Welcome back home " ~ person_home + ". ",
+            "Hello " ~ person_home + "! Good to see you are home again. ",
+            "Hello " ~ person_home + "! Its so good to have you back home again. "
+            ] | random }}
+          {%- endmacro -%}
+          {{greeting_sentence(person_home, is_are, has_have)}}
+        {% endif %}
         {{ [
-        "Welcome back home " ~ person + ". ",
-        "Hello " ~ person + "! Good to see you are home again. ",
-        "Hello " ~ person + "! Its so good to have you back home again. "
+          'It was pretty quiet while you were gone. ', 
+          'Glad to see you made it back. ',
+          'Hopefully nothing too crazy happened out there. ',
+          'There definitely were not any wild parties while you were out. ',
+          'I would love to hear about your adventures. <break time="1s"/> On second thoughts, no disrespect, perhaps not. '
         ] | random }}
-      {%- endmacro -%}
-      {{greeting_sentence(person, is_are, has_have)}}
-    {% endif %}
-    {{ [
-      'It was pretty quiet while you were gone. ', 
-      'Glad to see you made it back. ',
-      'Hopefully nothing too crazy happened out there. ',
-      'There definitely were not any wild parties while you were out. ',
-      'I would love to hear about your adventures. <break time="1s"/> On second thoughts, no disrespect, perhaps not. '
-    ] | random }}
     </p>
 
     <p>
