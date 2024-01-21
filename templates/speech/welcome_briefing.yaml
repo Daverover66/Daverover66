@@ -2,60 +2,60 @@
   {# Event Report #}
   {%- macro getReport() -%}
     <p>
-        {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
-        {% if person == "Gem is in da hoose and Dave is in da hoose and Gem Forrester and David Forrester" %}
-        {% set person_home = "Mummy and Daddy" %}
-        {% elif person == "Gem is in da hoose and Gem Forrester" %}
-        {% set person_home = "Mummy" %}
-        {% else %}
-        {% set person_home = "Daddy" %}
-        {% endif %}
-        {% set peoplecount = expand('group.family') | count %}
-        {% if peoplecount == 0 %}
-          <s>Welcome Home</s>
-        {% else %}
-          {% if peoplecount == 1 %}
-            {% set is_are = ' is ' %}
-            {% set has_have = ' has ' %}
-          {% else %}
-            {% set is_are = ' are ' %}
-            {% set has_have = ' have ' %}
-          {% endif %}
-          {%- macro greeting_sentence(person_home, is_are, has_have) -%}
-            {{ [
-            "Welcome back home " ~ person_home + ". ",
-            "Hello " ~ person_home + "! Good to see you are home again. ",
-            "Hello " ~ person_home + "! Its so good to have you back home again. "
-            ] | random }}
-          {%- endmacro -%}
-          {{greeting_sentence(person_home, is_are, has_have)}}
-        {% endif %}
-        {{ [
-          'It was pretty quiet while you were gone. ', 
-          'Glad to see you made it back. ',
-          'Hopefully nothing too crazy happened out there. ',
-          'There definitely were not any wild parties while you were out. ',
-          'I would love to hear about your adventures. <break time="1s"/> On second thoughts, no disrespect, perhaps not. '
-        ] | random }}
-    </p>
-
-    <p>
-    {%- if is_state('climate.downstairs','off') and is_state('climate.upstairs','off') %}
-      The heating is off. The temperature outside is {{ states('sensor.outside_temperature') }} degrees  while inside it is {{ states('sensor.average_indoor_temperature') }} degrees
-      {% if states('sensor.average_indoor_temperature') | float(0) <= 18 and is_state('input_boolean.winter_mode','on' )%}
-      So I have turned on the heating for your comfort.
+      {% set person = expand('group.family')| selectattr('state', 'eq', 'home') | map(attribute='name')|join(' and ') %}
+      {% if person == "Gem is in da hoose and Dave is in da hoose and Gem Forrester and David Forrester" %}
+      {% set person_home = "Mummy and Daddy" %}
+      {% elif person == "Gem is in da hoose and Gem Forrester" %}
+      {% set person_home = "Mummy" %}
       {% else %}
-      If it gets too warm, you might have to open a window
+      {% set person_home = "Daddy" %}
       {% endif %}
-    {%- elif is_state('climate.downstairs','heat') and is_state('climate.upstairs','heat') %}
-      The heating is on so I will try to keep the temperature at a comfortable {{ states('input_number.heating_comfort_temperature') }} degrees.
-    {%- endif -%}
+      {% set peoplecount = expand('group.family') | count %}
+      {% if peoplecount == 0 %}
+        Welcome Home
+      {% else %}
+        {% if peoplecount == 1 %}
+          {% set is_are = ' is ' %}
+          {% set has_have = ' has ' %}
+        {% else %}
+          {% set is_are = ' are ' %}
+          {% set has_have = ' have ' %}
+        {% endif %}
+        {%- macro greeting_sentence(person_home, is_are, has_have) -%}
+          {{ [
+          "Welcome back home " ~ person_home + ". ",
+          "Hello " ~ person_home + "! Good to see you are home again. ",
+          "Hello " ~ person_home + "! Its so good to have you back home again. "
+          ] | random }}
+        {%- endmacro -%}
+        {{greeting_sentence(person_home, is_are, has_have)}}
+      {% endif %}
+      {{ [
+        'It was pretty quiet while you were gone. ', 
+        'Glad to see you made it back. ',
+        'Hopefully nothing too crazy happened out there. ',
+        'There definitely were not any wild parties while you were out. ',
+        'I would love to hear about your adventures. <break time="1s"/> On second thoughts, no disrespect, perhaps not. '
+      ] | random }}
     </p>
 
     <p>
-    {%- if states('sensor.front_door_motion_away_count') | int > 0 %}
-      While you were out I detected motion at the front door {{ states('sensor.front_door_motion_away_count') | int }} time{{ 's' if states('sensor.front_door_motion_away_count') | int > 1 }}.
-    {% endif %}
+      {%- if is_state('climate.downstairs','off') and is_state('climate.upstairs','off') %}
+        The heating is off. The temperature outside is {{ states('sensor.outside_temperature') }} degrees  while inside it is {{ states('sensor.average_indoor_temperature') }} degrees
+      {% if states('sensor.average_indoor_temperature') | float(0) <= 18 and is_state('input_boolean.winter_mode','on' )%}
+        So I have turned on the heating for your comfort.
+      {% else %}
+        If it gets too warm, you might have to open a window
+      {% endif %}
+      {%- elif is_state('climate.downstairs','heat') and is_state('climate.upstairs','heat') %}
+        The heating is on so I will try to keep the temperature at a comfortable {{ states('input_number.heating_comfort_temperature') }} degrees.
+      {%- endif -%}
+    </p>
+
+    <p>
+      {%- if states('sensor.front_door_motion_away_count') | int > 0 %}
+        While you were out I detected motion at the front door {{ states('sensor.front_door_motion_away_count') | int }} time{{ 's' if states('sensor.front_door_motion_away_count') | int > 1 }}.
+      {% endif %}
     </p>
 
   {%- endmacro -%}
