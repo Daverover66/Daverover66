@@ -79,6 +79,26 @@ group:
     name: Arriving
     entities: []
 
+  house_presence:
+    name: House Presence
+    entities: []
+
+  upstairs_presence:
+    name: Upstairs Presence
+    entities:
+
+  downstairs_presence:
+    name: Downstairs Presence
+    entities:
+
+  hallway_presence:
+    name: Hallway Presence
+    entities:
+
+  upstairs_landing_presence:
+    name: Upstairs Landing Presence
+    entities:
+
 ##############################
 #        Sensors             #
 ##############################
