@@ -1,13 +1,58 @@
-###############################################################################
-#   @author         :   Remko van der Veer (@Remko76)
-#   @date           :   March 2023
-#   @package        :   Energy.yaml
-#   @description    :   This one powers the energy dashboard
-# 
-#   @modified by    :   Dave Forrester(@Daverover66) 
-#   @description    :   Add battery time to charge and discharge
-#   @date           :   19/10/23
-############################################################################### template:
+################################################################################## 
+#   @author                 :   Remko Van Der Veer                               #
+#   @date                   :   11/4/2020                                        #
+#   @package                :   energy.yaml                                      #
+#   @description            :   All energy config for dashboard. Now includes    # 
+#                               time the battery will run out and if a daytime   #
+#                               topup is needed                                  #
+#                                                                                #
+#   @modified by            :   Ryan McLean                                      #
+#   @date                   :   05/12/2022                                       #    
+#                                                                                #
+#   @further modified by    :   Dave Forrester (@Daverover66)                    #
+#   @date                   :   23/01/2024                                       #
+##################################################################################
+
+###########################
+#        helpers          # 
+###########################
+
+###########################
+#        input text       # 
+###########################
+
+input_text:
+  # From/to would ideally use input_datetime, but we need the time in a different format
+  octopus_energy_target_from:
+    icon: mdi:clock-start 
+    name: Octopus Energy Target From
+    initial: "00:00"
+  octopus_energy_target_to:
+    icon: mdi:clock-end 
+    name: Octopus Energy Target To
+    initial: "00:00"
+  octopus_energy_target_offset:
+    name: Octopus Energy Target Offset
+    initial: "-00:00:00"
+
+###########################
+#     input number        # 
+###########################
+
+input_number:
+  octopus_energy_target_hours:
+    name: Octopus Energy Target Hours
+    initial: 0.5
+    step: 0.5
+    min: 0
+    max: 24
+    mode: box 
+    
+###########################
+#       sensors           # 
+########################### 
+
+template:
   - sensor:
       - name: "Solar Selfconsumption Ratio"
         unique_id: solar_selfconsumption_ratio
@@ -43,30 +88,30 @@
 
         availability: >
           {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+      
+      - name: "Total DC Power"
+        unique_id: total_dc_power
+        icon: mdi:solar-power
+        unit_of_measurement: "W"
+        state_class: "measurement"
+        device_class: "power"
+        state: >
+          {% set total_dc_power = (states('sensor.solaredge_i1_dc_power')|float(0) + states('sensor.solaredge_i2_dc_power')|float(0)) %}
+            {{ total_dc_power }}
+        availability: >
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number }}
 
-      -  name: "Total DC Power"
-         unique_id: total_dc_power
-         icon: mdi:solar-power
-         unit_of_measurement: "W"
-         state_class: "measurement"
-         device_class: "power"
-         state: >
-           {% set total_dc_power = (states('sensor.solaredge_i1_dc_power')|float(0) + states('sensor.solaredge_i2_dc_power')|float(0)) %}
-             {{ total_dc_power }}
-         availability: >
-           {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number }}
-
-       - name: "Total AC Power"
-         unique_id: total_ac_power
-         icon: mdi:solar-power
-         unit_of_measurement: "W"
-         state_class: "measurement"
-         device_class: "power"
-         state: >
-           {% set total_ac_power = (states('sensor.solaredge_i1_ac_power')|float(0) + states('sensor.solaredge_i2_ac_power')|float(0)) %}
-             {{ total_ac_power }}
-         availability: >
-           {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
+      - name: "Total AC Power"
+        unique_id: total_ac_power
+        icon: mdi:solar-power
+        unit_of_measurement: "W"
+        state_class: "measurement"
+        device_class: "power"
+        state: >
+          {% set total_ac_power = (states('sensor.solaredge_i1_ac_power')|float(0) + states('sensor.solaredge_i2_ac_power')|float(0)) %}
+            {{ total_ac_power }}
+        availability: >
+          {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
           
       - name: "Solar Selfsufficiency Ratio"
         unique_id: solar_selfsufficiency_ratio
@@ -148,8 +193,8 @@
           {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
           {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
           {% set battery_efficiency = states('sensor.solar_battery_efficiency') %}
-          
-          {% if (is_state('sensor.solar_battery_efficiency', 'unknown') or ('sensor.solar_battery_efficiency' == 0) or ('sensor.solar_battery_efficiency', 'unavailable')) %}
+
+          {% if (is_state('sensor.solar_battery_efficiency', 'unavailable') or is_state('sensor.solar_battery_efficiency', 'unknown') or (battery_efficiency == 0)) %}
             1
           {% elif (i1_dc_power + b1_dc_power <= 0) %}
             {% if (b1_dc_power >= 0 or i1_dc_power <= 0) %}
@@ -158,12 +203,10 @@
               {{ (1 - ((b1_dc_power * -1 - (i1_dc_power)) / b1_dc_power * -1)) }}
             {% endif %} 
           {% else %}
-            {{ battery_efficiency }}
+            1
           {% endif %}
         availability: >
-          {{ states('sensor.solaredge_i1_dc_power') | is_number 
-          and states('sensor.solaredge_i1_ac_power') | is_number 
-          and states('sensor.solaredge_b1_dc_power') | is_number }}
+          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
 
       - name: "Solar Panel Production W"
         unique_id: solar_panel_production_w
@@ -172,7 +215,7 @@
         state: >
           {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float (0)%}
           {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float (0)%}
-	  {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
+          {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
           {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float (0)%}
 
           {% if (is_state ('sensor.solaredge_i1_dc_power' + 'sensor.solaredge_i2_dc_power', 'unknown') or is_state ('sensor.solaredge_b1_dc_power','unknown')) %}
@@ -303,17 +346,17 @@
           {% set battery_to_grid_w = states('sensor.solar_battery_to_grid_w') | float (0) %}
           {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
 
-          {% if b1_dc_power < 0 %}  
-            {% if battery_to_grid_w > 0 and exported_power_w > 0 %} 
+          {% if b1_dc_power < 0 %} 
+            {% if battery_to_grid_w > 0 and exported_power_w > 0 %}
               {{ (b1_dc_power * -1) - battery_to_grid_w }}
-            {% elif exported_power_w > 0 %} 
+            {% elif exported_power_w > 0 %}
+              {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}} 
+            {% else %}
               {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
-            {% else %} 
-              {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
-            {% endif %} 
-          {% else %} 
+            {% endif %}
+          {% else %}
             0
-          {% endif %}
+          {% endif %}          
         availability: >
           {{ states('sensor.solaredge_b1_dc_power') | is_number }}
           
@@ -325,8 +368,7 @@
           {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
           {% set panel_to_grid_w = states('sensor.solar_panel_to_grid_w') | float(0) %}
 
-          {% if ((exported_power_w + 1) > panel_to_grid_w) %} 
-           #added 1 to exported power for when exported power = panel to grid#
+          {% if ((exported_power_w + 1) > panel_to_grid_w) %}
             {{ exported_power_w - panel_to_grid_w }}
           {% else %}
             0
@@ -428,6 +470,8 @@
         availability: >
           {{ states('sensor.solaredge_i1_ac_energy_kwh') | is_number }}
 
+####### Battery sensors ##########
+
       - name: "Battery State of Charge"
         unique_id: battery_state_of_charge
         unit_of_measurement: "%"
@@ -438,49 +482,156 @@
         availability: >
           {{ states('sensor.solaredge_b1_state_of_energy') | is_number }}
 
-   - name: "Solar Battery Time to Charge Grid"     
-      unique_id: battery_time_to_full_grid
-      state: >
-        {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
-        {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
-        {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
-        {% set hrs_to_full =  (energy_used_w / 3900) | round(2) %}
-          {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
-      availability: >
-        {{ 0 not in [ states('sensor.solaredge_b1_dc_power')|float] }}
+      - name: "Solar Battery Time to Charge Grid"     
+        unique_id: battery_time_to_full_grid
+        state: >
+          {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
+          {% if battery_power == 0 %}
+          {% set battery_power = 0.01 %}
+          {% endif %}
+          {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {% set hrs_to_full =  (energy_used_w / 3900) | round(2) %}
+          {%- if states('sensor.battery_state_of_charge') | float(0) == 100 %}
+            Not Needed 
+          {% else %}
+            {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
 
-    - name: "Solar Battery Time to Charge Solar"     
-      unique_id: battery_time_to_full_solar
-      state: >
-        {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
-        {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
-        {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
-        {% set hrs_to_full =  (energy_used_w / battery_power) | round(2) %}
-        {% if hrs_to_full < 1 %}
-          {{ '%02d:%02d' | format((hrs_to_full * -1 | int),((hrs_to_full*60) % 60) | round(0)) }}
-        {% else %}
-          Discharging
-        {% endif %}
-      availability: >
-        {{ 0 not in [ states('sensor.solaredge_b1_dc_power')|float] }}
+      - name: "Solar Battery Time to Charge Solar"     
+        unique_id: battery_time_to_full_solar
+        state: >
+          {%- set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- if battery_power == 0 %}
+            {%- set battery_power = 0.01 %}
+          {%- else %}
+            {% set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- endif %}
+          {%- set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {%- set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {%- set hrs_to_full =  (energy_used_w / battery_power) | round(2) %}
+          {% if states('sensor.battery_state_of_charge') | float(0) > 99.5 %}
+            Full
+          {% elif battery_power*-1 > 0.01 %}
+            Discharging   
+          {% elif battery_power <= 0.01 %}
+            Empty 
+          {% else %}
+            {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
+          {% endif %}  
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
 
-     - name: "Solar Battery Time to Empty"     
-      unique_id: battery_time_to_empty
-      state: >
-        {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
-        {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
-        {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
-        {% set energy_remaining_w = max_energy_w - energy_used_w %}
-        {% set hrs_to_empty =  (energy_remaining_w | float / battery_power | float) | round(2) %}
-        {% if hrs_to_empty < 1 %}
-          Charging
-        {% else %}
-          {{ '%02d:%02d' | format((hrs_to_empty | int),((hrs_to_empty*60) % 60) | round(0)) }}
-        {% endif %}
-      availability: >
-        {{ 0 not in [ states('sensor.solaredge_b1_dc_power')|float] }}
+      - name: "Solar Battery Time to Empty"     
+        unique_id: battery_time_to_empty
+        state: >
+          {%- set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- if battery_power == 0 %}
+            {%- set battery_power = 0.01 %}
+          {%- else %}
+            {% set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- endif %}
+          {%- set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {%- set energy_remaining = states('sensor.solaredge_b1_state_of_energy') | float(0)%}
+          {%- set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {%- set energy_remaining_w = max_energy_w - energy_used_w %}
+          {%- set hrs_to_empty =  (energy_remaining_w | float / battery_power | float) | round(2) %}
+          {%- if energy_remaining == 0 %}
+            Empty
+          {% elif hrs_to_empty < 1%}
+            {{ '%02d:%02d' | format((hrs_to_empty * -1| int),((hrs_to_empty*60) % 60) | round(0)) }}
+          {% elif states('sensor.battery_state_of_charge') | float(0) > 99.5 %}
+            Full
+          {% else %}
+            Charging 
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
 
-          
+      - name: "Solar Battery Daytime Topup Needed"
+        unique_id: solar_battery_daytime_topup_needed 
+        state: >
+          {%- set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)) %}
+          {%- if battery_power_watts == 0 %}
+          {%- set battery_power_watts = 0.01 %}
+          {%- else %}
+          {% set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)| round(0) | abs) %}
+          {%- endif %}
+          {%- set max_energy_kws = (float(states('sensor.solaredge_b1_maximum_energy'),0) * 1000) *3600 %}
+          {%- set energy_used_kws = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_kws %}
+          {%- set energy_remaining_kws = max_energy_kws - energy_used_kws %}
+          {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
+          {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
+          {%- set state = secs_to_empty - timetogosecs %}
+          {% if float(states('sensor.solaredge_b1_dc_power'),0) > 0 %}
+            false
+          {% elif state < 1800 %}
+            true
+          {% else -%}
+            false
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
+
+      - name: "Solar Battery Empty Time"  
+        unique_id: solar_battery_empty_time 
+        icon: mdi:clock-digital
+        state: >
+          {%- set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)) %}
+          {%- if battery_power_watts == 0 %}
+          {%- set battery_power_watts = 0.01 %}
+          {%- else %}
+          {% set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)| round(0) | abs) %}
+          {%- endif %}
+          {%- set max_energy_kws = (float(states('sensor.solaredge_b1_maximum_energy'),0) * 1000) *3600 %}
+          {%- set energy_used_kws = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_kws %}
+          {%- set energy_remaining_kws = max_energy_kws - energy_used_kws %}
+          {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
+          {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
+          {% if is_state('sensor.solar_battery_time_to_empty','Charging') %}
+            The end of the day. 
+          {% else %}
+            {{ (as_timestamp(now()) + (secs_to_empty)) | timestamp_custom ("%H:%M %p")}}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
+
+### Financials for Agile, best I can do, but the Octopus Integration does most of this
+
+      - name: "Electricity Bill Today"
+        unique_id: electricity_bill_today
+        icon: mdi:cash-plus
+        unit_of_measurement: "£"
+        state: >
+          {{ (states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost')|float(0)
+             - (states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate')|float(0) * states('sensor.solar_exported_power_daily') | float(0) ))|round(2)}}
+    
+      - name: "Solar Accounting Compensation Rate"
+        unique_id: solar_accounting_compensation_rate
+        icon: mdi:cash-minus
+        unit_of_measurement: "£/kWh"
+        state: >
+          {{ states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate') | float(0) }}
+
+      - name: "Solar Accounting Outgoing Fixed Compensation"
+        unique_id: solar_accounting_outgoing_fixed_compensation
+        icon: mdi:cash-minus
+        unit_of_measurement: "£"
+        state: >
+          {% set rate = states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate') | float(0) %}
+          {% set export  = states('sensor.solar_exported_power_daily') | float(0) %}
+            {{ (export * rate) | round(2) }}
+
+      - name: "Solar Accounting Cost Standing Charge"
+        unique_id: solar_accounting_cost_standing_charge
+        icon: mdi:cash-plus
+        unit_of_measurement: "£"
+        state: >
+          {{ states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_standing_charge') | float(0) }}
+
+
 ### Financials for Octopus Go (check tariffs)
   #    - name: "Solar Accounting Cost Rate Peak"
   #      unique_id: solar_accounting_cost_rate_peak
@@ -557,117 +708,117 @@
 
   ### Financials for Octopus Flux (check tariffs)
 
-      - name: "Solar Accounting Cost Rate Peak"
-        unique_id: solar_accounting_cost_rate_peak
-        icon: mdi:cash-plus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.41534
+  #    - name: "Solar Accounting Cost Rate Peak"
+  #      unique_id: solar_accounting_cost_rate_peak
+  #      icon: mdi:cash-plus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.41534
 
-      - name: "Solar Accounting Cost Rate Cheap"
-        unique_id: solar_accounting_cost_rate_cheap
-        icon: mdi:cash-plus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.1780
+  #    - name: "Solar Accounting Cost Rate Cheap"
+  #      unique_id: solar_accounting_cost_rate_cheap
+  #      icon: mdi:cash-plus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.17800
           
-      - name: "Solar Accounting Cost Rate Standard"
-        unique_id: solar_accounting_cost_rate_standard
-        icon: mdi:cash-plus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.29667
+  #    - name: "Solar Accounting Cost Rate Standard"
+  #      unique_id: solar_accounting_cost_rate_standard
+  #      icon: mdi:cash-plus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.29667
 
-      - name: "Solar Accounting Compensation Rate Peak"
-        unique_id: solar_accounting_compensation_rate_peak
-        icon: mdi:cash-minus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.30534
+  #    - name: "Solar Accounting Compensation Rate Peak"
+  #      unique_id: solar_accounting_compensation_rate_peak
+  #      icon: mdi:cash-minus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.30534
 
-      - name: "Solar Accounting Compensation Rate Cheap"
-        unique_id: solar_accounting_compensation_rate_cheap
-        icon: mdi:cash-minus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.0680
+  #    - name: "Solar Accounting Compensation Rate Cheap"
+  #      unique_id: solar_accounting_compensation_rate_cheap
+  #      icon: mdi:cash-minus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.06800
 
-      - name: "Solar Accounting Compensation Rate Standard"
-        unique_id: solar_accounting_compensation_rate_standard
-        icon: mdi:cash-minus
-        unit_of_measurement: "£/kWh"
-        state: >
-          0.18667
+  #    - name: "Solar Accounting Compensation Rate Standard"
+  #      unique_id: solar_accounting_compensation_rate_standard
+  #      icon: mdi:cash-minus
+  #      unit_of_measurement: "£/kWh"
+  #      state: >
+  #        0.18667
 
-      - name: "Solar Accounting Cost Standing Charge"
-        unique_id: solar_accounting_cost_standing_charge
-        icon: mdi:cash-plus
-        unit_of_measurement: "£"
-        state: >
-          0.60024
+  #    - name: "Solar Accounting Cost Standing Charge"
+  #      unique_id: solar_accounting_cost_standing_charge
+  #      icon: mdi:cash-plus
+  #      unit_of_measurement: "£"
+  #      state: >
+  #        0.60024
 
-      - name: "Solar Accounting Total Daily"
-        unique_id: solar_accounting_total_daily
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set peak_cost = (states('sensor.octopus_flux_import_peak_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
-          {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
-          {% set standard_cost = (states('sensor.octopus_flux_standard_import_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
-          {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
-          {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
-          {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
-          {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0) %}
-          {{ ((peak_cost + cheap_cost + standard_cost + standing_charge) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
+  #    - name: "Solar Accounting Total Daily"
+  #      unique_id: solar_accounting_total_daily
+  #      icon: mdi:currency-gbp
+  #      unit_of_measurement: "£"
+  #      state: >
+  #        {% set peak_cost = (states('sensor.octopus_flux_import_peak_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
+  #        {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
+  #        {% set standard_cost = (states('sensor.octopus_flux_standard_import_daily') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
+  #        {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
+  #        {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
+  #        {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_daily') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
+  #        {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0) %}
+  #        {{ ((peak_cost + cheap_cost + standard_cost + standing_charge) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
 
-      - name: "Solar Accounting Total Weekly"
-        unique_id: solar_accounting_total_weekly
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set peak_cost = (states('sensor.octopus_flux_import_peak_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
-          {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
-          {% set standard_cost = (states('sensor.octopus_flux_import_standard_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
-          {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
-          {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
-          {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
-          {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
-          {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * 7)) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
+  #    - name: "Solar Accounting Total Weekly"
+  #      unique_id: solar_accounting_total_weekly
+  #      icon: mdi:currency-gbp
+  #      unit_of_measurement: "£"
+  #      state: >
+  #        {% set peak_cost = (states('sensor.octopus_flux_import_peak_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
+  #        {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
+  #        {% set standard_cost = (states('sensor.octopus_flux_import_standard_weekly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
+  #        {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
+  #        {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
+  #        {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_weekly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
+  #        {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
+  #        {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * 7)) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
 
-      - name: "Solar Accounting Total Monthly"
-        unique_id: solar_accounting_total_monthly
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set peak_cost = (states('sensor.octopus_flux_import_peak_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %} 
-          {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
-          {% set standard_cost = (states('sensor.octopus_flux_import_standard_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
-          {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
-          {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
-          {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
-          {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
-          {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * (365/12))) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
+  #    - name: "Solar Accounting Total Monthly"
+  #      unique_id: solar_accounting_total_monthly
+  #      icon: mdi:currency-gbp
+  #      unit_of_measurement: "£"
+  #      state: >
+  #        {% set peak_cost = (states('sensor.octopus_flux_import_peak_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %} 
+  #        {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
+  #        {% set standard_cost = (states('sensor.octopus_flux_import_standard_monthly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
+  #        {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
+  #        {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
+  #        {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_monthly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
+  #        {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
+  #        {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * (365/12))) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
 
-      - name: "Solar Accounting Total Yearly"
-        unique_id: solar_accounting_total_yearly
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set peak_cost = (states('sensor.octopus_flux_import_peak_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
-          {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
-          {% set standard_cost = (states('sensor.octopus_flux_import_standard_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
-          {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
-          {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
-          {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
-          {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
-          {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * 365)) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
+  #    - name: "Solar Accounting Total Yearly"
+  #      unique_id: solar_accounting_total_yearly
+  #      icon: mdi:currency-gbp
+  #     unit_of_measurement: "£"
+  #      state: >
+  #        {% set peak_cost = (states('sensor.octopus_flux_import_peak_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_peak') | float(0)) %}
+  #        {% set cheap_cost = (states('sensor.octopus_flux_import_cheap_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_cheap') | float(0)) %}
+  #        {% set standard_cost = (states('sensor.octopus_flux_import_standard_yearly') | float(0)) * (states('sensor.solar_accounting_cost_rate_standard') | float(0)) %}
+  #        {% set compensation_cost_peak = (states('sensor.octopus_flux_export_peak_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_peak') | float(0)) %}
+  #        {% set compensation_cost_cheap = (states('sensor.octopus_flux_export_cheap_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_cheap') | float(0)) %}
+  #        {% set compensation_cost_standard = (states('sensor.octopus_flux_export_standard_yearly') | float(0)) * (states('sensor.solar_accounting_compensation_rate_standard') | float(0)) %}
+  #        {% set standing_charge = states('sensor.solar_accounting_cost_standing_charge') | float(0)%}
+  #        {{ ((peak_cost + cheap_cost + standard_cost + (standing_charge * 365)) - (compensation_cost_cheap + compensation_cost_peak + compensation_cost_standard) | round(2)) }}
       
       - name: "Gas Accounting Total"
         unique_id: gas_accounting_total
         icon: mdi:currency-gbp
         unit_of_measurement: "£"
         state: >
-          {% set gas_usage = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_previous_accumulative_consumption_kwh') | float (0) %}
+          {% set gas_usage = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption') | float (0) %}
           {% set gas_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_rate') | float (0) %}
           {% set gas_standing_charge_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_standing_charge') | float (0) %}
 
@@ -678,11 +829,9 @@
         icon: mdi:currency-gbp
         unit_of_measurement: "£"
         state: >
-          {% set gas_cost_daily = states('sensor.gas_accounting_total_daily_2') | float(0) %}
-          {% set elect_cost_daily = states('sensor.solar_accounting_total_daily') | float(0) %}
+          {% set gas_cost_daily = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_cost') | float(0) %}
+          {% set elect_cost_daily = states('sensor.electricity_bill_today') | float(0) %}
             {{ (gas_cost_daily + elect_cost_daily) | round(2) }}
-		  
-	
 
       - name: "Solar Inverter Efficiency Int"
         unique_id: solar_inverter_efficiency_int
@@ -790,6 +939,8 @@ sensor:
     entity_id: sensor.solar_inverter_efficiency
 
 utility_meter:
+
+### Daily
   solar_panel_production_daily:
     source: sensor.solar_panel_production_kwh
     name: Solar Panel Production Daily
@@ -822,7 +973,7 @@ utility_meter:
     source: sensor.solar_panel_to_house_kwh
     name: Solar Panel To House Daily
     cycle: daily
-
+### Weekly
   solar_panel_to_house_weekly:
     source: sensor.solar_panel_to_house_kwh
     name: Solar Panel To House Weekly
@@ -852,6 +1003,7 @@ utility_meter:
     name: Solar Exported Power Weekly
     cycle: weekly
 
+### Monthly
   solar_panel_to_house_monthly:
     source: sensor.solar_panel_to_house_kwh
     name: Solar Panel To House Monthly
@@ -881,6 +1033,7 @@ utility_meter:
     name: Solar Exported Power Monthly
     cycle: monthly
 
+### Annually
   solar_panel_to_house_yearly:
     source: sensor.solar_panel_to_house_kwh
     name: Solar Panel To House Yearly
@@ -909,5 +1062,8 @@ utility_meter:
     source: sensor.solar_exported_power_kwh
     name: Solar Exported Power Yearly
     cycle: yearly
+    
+      
+
     
       
