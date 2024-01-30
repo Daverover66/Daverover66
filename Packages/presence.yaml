@@ -86,23 +86,160 @@ group:
   upstairs_presence:
     name: Upstairs Presence
     entities:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+      - binary_sensor.guest_bedroom_camera_cell_motion_detection
+      - binary_sensor.jamie_s_room_camera_cell_motion_detection
+      - binary_sensor.sean_s_room_camera_cell_motion_detection
+      - binary_sensor.loft_camera_cell_motion_detection
+      - binary_sensor.guest_bedroom_motion_occupancy
+      - binary_sensor.jack_and_jill_presence_occupancy
+      - binary_sensor.jamie_room_presence_occupancy
+      - binary_sensor.sean_room_presence_occupancy
+      - binary_sensor.main_bathroom_presence_occupancy
+      - binary_sensor.office_presence_sensor_occupancy
+      - binary_sensor.upper_landing_presence_occupancy
+      
 
   downstairs_presence:
     name: Downstairs Presence
     entities:
+      - binary_sensor.hallway_camera_cell_motion_detection
+      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+      - binary_sensor.living_room_fp2_presence_sensor_1
+      - binary_sensor.hallway_presence_occupancy
+      - binary_sensor.hallway_presence_2_occupancy
+      - binary_sensor.cloakroom_presence_occupancy
+      - binary_sensor.dining_room_presence_sensor_occupancy
+      - binary_sensor.lower_landing_motion_occupancy
+      - binary_sensor.utility_room_presence_2_occupancy
 
-  hallway_presence:
-    name: Hallway Presence
-    entities:
-
-  upstairs_landing_presence:
-    name: Upstairs Landing Presence
-    entities:
 
 ##############################
 #        Sensors             #
 ##############################
 
+template:
+  - binary_sensor:
+    - name: "Daves Samsung Galaxy Home"
+      unique_id: daves_samsung_galaxy_home
+      state: >
+        {{ states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+
+    - name: "Gems Samsung Galaxy Home"
+      unique_id: gems_samsung_galaxy_home
+      state: >
+        {{ states('sensor.sm_s901b_wifi_connection') == "ForresterQ5G" or states('sensor.sm_s901b_wifi_connection') == "ForresterQ" }}
+
+    - name: "Seans Samsung Tablet Home"
+      unique_id: seans_samsung_galaxy_home
+      state: >
+        {{ states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+
+    - name: "Jamies Samsung Tablet Home"
+      unique_id: jamies_samsung_galaxy_home
+      state: >
+        {{ states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ5G" or states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ"}}
+
+    - name: "Dave Home"
+      unique_id: dave_home 
+      state: >-
+        {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_davessamsunggalaxys23', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
+
+    - name: "Gem Home"
+      unique_id: gem_home 
+      state: >- 
+        {{ is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
+      
+    - name: "Family Home"
+      unique_id: family_home 
+      state: >- 
+        {{ is_state('binary_sensor.gem_home','on') or is_state('binary_sensor.dave_home','on')}}
+ 
+  - sensor:
+  ### another location based sensor ###
+    - name: "Dave is in da hoose"
+      unique_id: dave_is_in_da_hoose
+      state: |-
+        {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
+        {% if dave_location == "on" %}
+          home
+        {% else %}
+        not_home
+        {% endif %}
+
+  ### yet another location based sensor ###
+    - name: "Gem is in da hoose"
+      unique_id: gem_is_in_da_hoose
+      state: |-
+        {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
+        {% if gem_location == "on" %}
+          home
+        {% else %}
+        not_home
+        {% endif %}     
+
+    - name: "Garage Door State"
+      unique_id: garage_door_state 
+      state: >- 
+          {% if is_state('binary_sensor.garage_doors_state','on') %}
+            {{"Open"}}
+          {% else %}
+            {{"Closed"}}
+          {% endif %}
+      icon: >- 
+        {% if is_state('binary_sensor.garage_doors_state','on') %}
+          mdi:garage-open-variant 
+        {% else %}
+          mdi:garage-variant 
+        {% endif %}
+
+    - name: "Hallway Motion"
+      unique_id: hallway_motion  
+      state: >- 
+          {% if is_state('binary_sensor.hallway_motion','on') %}
+            {{"Detected"}}
+          {% else %}
+            {{"Clear"}}
+          {% endif %}
+      icon: >- 
+        {% if is_state('binary_sensor.hallway_motion','on') %}
+          mdi:motion-sensor 
+        {% else %}
+          mdi:motion-sensor-off 
+        {% endif %}
+
+    - name: "Utility Room Motion"
+      unique_id: utility_room_motion  
+      state: >- 
+          {% if is_state('binary_sensor.utility_room_motion','on') %}
+            {{"Detected"}}
+          {% else %}
+            {{"Clear"}}
+          {% endif %}
+      icon: >- 
+        {% if is_state('binary_sensor.utility_room_motion','on') %}
+          mdi:motion-sensor 
+        {% else %}
+          mdi:motion-sensor-off 
+        {% endif %}
+
+    - name: "Upstairs Landing Motion"
+      unique_id: upstairs_landing_motion 
+      state: >- 
+          {% if is_state('binary_sensor.upstairs_landing_motion','on') %}
+            {{"Detected"}}
+          {% else %}
+            {{"Clear"}}
+          {% endif %}
+      icon: >- 
+        {% if is_state('binary_sensor.upstairs_landing_motion','on') %}
+          mdi:motion-sensor 
+        {% else %}
+          mdi:motion-sensor-off 
+        {% endif %}
+
+        
 ##############################
 #        MQTT                #
 ##############################
