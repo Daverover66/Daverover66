@@ -20,10 +20,6 @@ trigger:
     from: "on"
     to: "off"
     id: Turn On
-  - platform: sun
-    event: sunset
-    offset: "-00:30:00"
-    id: Dusk
 condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -33,70 +29,8 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - Dusk
-        sequence:
-          - if:
-              - condition: state
-                entity_id: light.corner_lamp
-                state: "off"
-            then:
-              - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness: 76
-                target:
-                  entity_id: light.corner_lamp
-          - service: scene.turn_on
-            data: {}
-            target:
-              entity_id: scene.stair_lights_autumn_50
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id: switch.under_shelf_lights_local
-          - service: scene.turn_on
-            data: {}
-            target:
-              entity_id: scene.bed_lights_autumn_5
-          - if:
-              - condition: state
-                entity_id: light.standard_lamp
-                state: "off"
-            then:
-              - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness: 76
-                target:
-                  entity_id: light.standard_lamp
-          - if:
-              - condition: state
-                entity_id: switch.living_room_tv
-                state: "on"
-            then:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
-      - conditions:
-          - condition: trigger
-            id:
               - Turn Off
         sequence:
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id: switch.guest_bedroom_camera_privacy
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id:
-                - switch.jamie_s_room_cam_privacy
-          - service: switch.turn_on
-            data: {}
-            target:
-              entity_id:
-                - switch.seans_room_camera_privacy
           - if:
               - condition: state
                 entity_id: light.corner_lamp
@@ -129,19 +63,6 @@ action:
             alias: If undershelf lights are on, turn them off
           - if:
               - condition: state
-                entity_id: light.dreamview_g1_pro
-                state: "on"
-              - condition: state
-                entity_id: switch.living_room_tv
-                state: "off"
-            then:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
-            alias: If TV mood lights are on, turn them off
-          - if:
-              - condition: state
                 entity_id: light.back_door_light
                 state: "on"
               - condition: state
@@ -153,21 +74,21 @@ action:
                 target:
                   entity_id: light.back_door_light
             alias: If back door light is on, turn it off
-          - if:
+          - alias: "If landing lights are on, turn them off "
+            if:
               - condition: state
-                entity_id: light.landing_lights
+                entity_id: light.landing_lights_2
                 state: "on"
             then:
               - service: light.turn_off
                 data: {}
                 target:
-                  entity_id: light.landing_lights
-            alias: "If landing lights are on, turn them off "
+                  entity_id:
+                    - light.landing_lights_2
           - service: input_boolean.turn_off
             data: {}
             target:
               entity_id:
-                - input_boolean.main_bedroom_bedside_lamps_active
                 - input_boolean.guest_bedroom_bedside_lamps_active
           - if:
               - condition: state
@@ -217,19 +138,24 @@ action:
                 target:
                   entity_id: light.back_door_zone_light
             alias: If back door zone light is on, turn it off
-          - if:
-              - condition: state
-                entity_id: light.utility_room_light
-                state: "on"
-              - condition: state
-                state: "off"
-                entity_id: binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
-            then:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.utility_room_light
-            alias: If back door zone light is on, turn it off
+          - service: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.guest_bedroom_camera_privacy
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.sean_s_room_camera_privacy
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id:
+                - switch.jamie_s_room_camera_privacy
       - conditions:
           - condition: trigger
             id:
@@ -237,31 +163,15 @@ action:
           - condition: state
             entity_id: binary_sensor.workday_sensor
             state: "on"
+          - condition: state
+            entity_id: calendar.gem_holidays
+            state: "off"
         sequence:
           - delay:
               hours: 0
               minutes: 13
               seconds: 0
               milliseconds: 0
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.guest_bedroom_camera_privacy
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.jamie_s_room_cam_privacy
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.seans_room_camera_privacy
-          - service: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id:
-                - input_boolean.main_bedroom_bedside_lamps_active
-                - input_boolean.guest_bedroom_bedside_lamps_active
-                - input_boolean.guest_bedroom_allow_lights_off
           - service: input_boolean.turn_off
             data: {}
             target:
@@ -270,31 +180,50 @@ action:
                 - input_boolean.kids_bedtime_announcement_played
                 - input_boolean.school_morning_announcement_played
                 - input_boolean.school_pick_up_announcement_played
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+                - switch.sean_s_room_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.guest_bedroom_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+                - switch.jamie_s_room_camera_privacy
+          - delay:
+              hours: 0
+              minutes: 40
+              seconds: 0
+              milliseconds: 0
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.main_bedroom_bedside_lamps_active
+                - input_boolean.guest_bedroom_bedside_lamps_active
+                - input_boolean.guest_bedroom_allow_lights_off
       - conditions:
           - condition: trigger
             id:
               - Turn On
-          - condition: state
-            entity_id: binary_sensor.workday_sensor
-            state: "off"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "off"
+              - condition: state
+                entity_id: calendar.gem_holidays
+                state: "on"
         sequence:
           - delay:
               hours: 1
               minutes: 13
               seconds: 0
               milliseconds: 0
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.guest_bedroom_camera_privacy
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.jamie_s_room_cam_privacy
-          - service: switch.turn_off
-            data: {}
-            target:
-              entity_id: switch.seans_room_camera_privacy
           - service: input_boolean.turn_on
             data: {}
             target:
@@ -310,4 +239,19 @@ action:
                 - input_boolean.kids_bedtime_announcement_played
                 - input_boolean.school_morning_announcement_played
                 - input_boolean.school_pick_up_announcement_played
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.guest_bedroom_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+                - switch.sean_s_room_camera_privacy
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id:
+                - switch.jamie_s_room_camera_privacy
 mode: restart
+
