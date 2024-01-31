@@ -5,8 +5,7 @@
 #   @description    :   All Kitchen config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   31/12/2023
-#   @modification   :   simplified lighting for adaptive lighting
+#   @date           :   14/09/2023
 ###############################################################################
 
 ###########################
@@ -151,16 +150,12 @@ automation:
         to: "on"
         id: Back Door Entry 
       - platform: state
-        entity_id:
-          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
-        from: "off"
-        to: "on"  
+        entity_id: sensor.utility_room_motion
+        to: "Detected"  
         id: Utility On
       - platform: state
-        entity_id:
-          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_4
-        from: "on"
-        to: "off"
+        entity_id: sensor.utility_room_motion
+        to: "Clear"
         id: Utility Off
         for:
           hours: 0
@@ -179,12 +174,26 @@ automation:
           - binary_sensor.lights_out
         to: "off"
         id: Allow Lights on
+      - platform: state 
+        entity_id: binary_sensor.day 
+        from: "on"
+        to: "off"
+        id: sunset 
     condition:
       - condition: state
         entity_id: input_boolean.holiday_mode
         state: "off"
     action:
       - choose:
+          - conditions:
+              - condition: trigger 
+                id:
+                  - sunset 
+            sequence: 
+              - service: switch.turn_on
+                data: {}
+                target:
+                  entity_id: switch.under_shelf_lights_local
           - conditions:
               - condition: trigger
                 id:
@@ -276,6 +285,9 @@ automation:
               - condition: trigger
                 id:
                   - Utility Off
+              - condition: state 
+                entity_id: light.utility_room_light
+                state: "on"
             sequence:
               - service: light.turn_off
                 data: {}
@@ -415,7 +427,7 @@ automation:
                 alias: Wait 4 minutes
               - service: script.status_annc
                 data:
-                  where: "{{states('sensor.room_audio')}}"
+                  where: kitchen 
                   call_interruption: 1
                   call_coffee_ready: 1
           - conditions:
@@ -579,10 +591,7 @@ automation:
                 id: Washing machine off
             sequence:
               - delay:
-                  hours: 0
-                  minutes: 1
-                  seconds: 0
-                  milliseconds: 0
+                  seconds: 30
               - service: input_boolean.turn_off
                 data: {}
                 target:
@@ -641,7 +650,7 @@ automation:
                     - 0
                   brightness: 5
                 target:
-                  entity_id: light.kitchen_aura_lamp 
+                  entity_id: light.kitchen_aura_lamp_2 
               - service: input_boolean.turn_on
                 data: {}
                 target:
@@ -736,7 +745,7 @@ automation:
                         - 255
                       brightness_pct: 1
                     target:
-                      entity_id: light.kitchen_aura_lamp
+                      entity_id: light.kitchen_aura_lamp_2 
                 else:
                   - if:
                       - condition: template
@@ -752,7 +761,7 @@ automation:
                             - 0
                           brightness_pct: 1
                         target:
-                          entity_id: light.kitchen_aura_lamp
+                          entity_id: light.kitchen_aura_lamp_2 
                     else:
                       - if:
                           - condition: template
@@ -768,7 +777,7 @@ automation:
                                 - 0
                               brightness_pct: 1
                             target:
-                              entity_id: light.kitchen_aura_lamp
+                              entity_id: light.kitchen_aura_lamp_2 
                         else:
                           - if:
                               - condition: template
@@ -784,11 +793,11 @@ automation:
                                     - 0
                                   brightness_pct: 1
                                 target:
-                                  entity_id: light.kitchen_aura_lamp
+                                  entity_id: light.kitchen_aura_lamp_2
                             else:
                               - service: light.turn_on
                                 target:
-                                  entity_id: light.kitchen_aura_lamp
+                                  entity_id: light.kitchen_aura_lamp_2
                                 data:
                                   rgb_color:
                                     - 255
