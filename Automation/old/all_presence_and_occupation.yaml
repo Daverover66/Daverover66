@@ -7,6 +7,8 @@
 #   @version        :   1.01                               #
 #   @modified       :   30/10/23                           #
 #   @mod descrip    :   correcting various actions         #
+#                   :   replaced by individual automations #
+#                   :   soon to be in a package            #
 ############################################################      
 
 alias: All Presence and Occupancy
