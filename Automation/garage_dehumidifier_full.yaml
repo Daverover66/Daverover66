@@ -5,8 +5,8 @@
 #   @description    :   Lets me know when it's full        #
 #                                                          #
 #                                                          #
-#   @version        :   1.01                               #
-#   @modified       :   16/09/2023                         #
+#   @version        :   1.02                               #
+#   @modified       :   31/01/2024                         #
 ############################################################
 
 alias: Garage Dehumdifier Water Tray Full
@@ -24,6 +24,21 @@ trigger:
     from: full
     to: not_full
     id: Not Full
+  - platform: numeric_state
+    entity_id:
+      - sensor.garage_thermometer_temperature
+    below: sensor.garage_thermal_comfort_dew_point
+    id: Rust Risk
+  - platform: numeric_state
+    entity_id:
+      - sensor.garage_thermometer_temperature
+    above: 6
+    id: Restart
+  - platform: state
+    entity_id:
+      - humidifier.garage_dehumidifier_2
+    to: "off"
+    id: "Off"
 condition: []
 action:
   - choose:
@@ -32,12 +47,12 @@ action:
             id:
               - Full
         sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+          - service: script.text_notify_dave
             data:
-              message: >-
-                {{['The garage dehumidifier is full','The garage rust prevention
-                system has stalled','The garage humidity level is increasing
-                exponentially']| random }}
+              message: |
+                {{[ 'The garage dehumidifier is full',
+                    'The garage rust prevention system has stalled',
+                    'The garage humidity level is increasing exponentially']|random }}
               title: GARAGE DEHUMIDIFIER
             alias: Send a notification based on an input text helper
           - if:
@@ -48,12 +63,8 @@ action:
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: script.set_announcements_volume
+              - service: script.speech_engine
                 data:
-                  where: "{{ states('sensor.room_audio') }}"
-              - service: script.speech_engine_for_tts
-                data:
-                  voice: Brian
                   where: "{{ states('sensor.room_audio') }}"
                   message: >-
                     {{ [  '<prosody pitch="high">Excuse me. This is an important
@@ -64,20 +75,24 @@ action:
                           '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
                           '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
                         ]|random }}
-              - service: script.1693070811673
-                data:
-                  where: "{{ states('sensor.room_audio') }}"
             alias: Broadcast message outside quiet time
           - service: light.turn_on
             data:
-              color_name: aqua
-              brightness_pct: 10
+              rgb_color:
+                - 133
+                - 255
+                - 255
+              brightness: 10
             target:
-              entity_id: light.kitchen_light_1
+              entity_id: light.kitchen_aura_lamp_2
           - service: input_boolean.turn_on
             data: {}
             target:
               entity_id: input_boolean.garage_dehumidifier_full
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_kitchen_aura_lamp
+            data: {}
       - conditions:
           - condition: trigger
             id:
@@ -95,12 +110,8 @@ action:
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: script.set_announcements_volume
+              - service: script.speech_engine
                 data:
-                  where: "{{ states('sensor.room_audio') }}"
-              - service: script.speech_engine_for_tts
-                data:
-                  voice: Brian
                   where: "{{ states('sensor.room_audio') }}"
                   message: >-
                     {{ [  '<prosody pitch="low">Well now. Whoever emptied the
@@ -109,38 +120,121 @@ action:
                           '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
                           '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
                         ]|random }}
-              - service: script.1693070811673
-                data:
-                  where: "{{ states('sensor.room_audio') }}"
             alias: Broadcast message outside quiet time
           - if:
-              - condition: state
-                entity_id: light.kitchen_lights_2
-                state: "off"
+              - condition: template
+                value_template: >-
+                  {{is_state('sensor.current_energy_rate','input_boolean.plunge_pricing')}}
+                alias: If Plunge Pricing
             then:
-              - service: light.turn_off
-                data: {}
+              - service: light.turn_on
+                data:
+                  rgb_color:
+                    - 0
+                    - 0
+                    - 255
+                  brightness_pct: 1
                 target:
-                  entity_id: light.kitchen_light_1
+                  entity_id: light.kitchen_aura_lamp_2
             else:
               - if:
-                  - condition: or
-                    conditions:
-                      - condition: state
-                        entity_id: binary_sensor.lunchtime
-                        state: "on"
-                      - condition: state
-                        entity_id: binary_sensor.dinner_time
-                        state: "on"
+                  - condition: template
+                    value_template: >-
+                      {{is_state('sensor.current_energy_rate','input_boolean.cheap_energy')}}
+                    alias: If Cheap Energy
                 then:
-                  - service: scene.turn_on
-                    data: {}
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 0
+                        - 255
+                        - 0
+                      brightness_pct: 1
                     target:
-                      entity_id: scene.kitchen_lights_mealtimes
+                      entity_id: light.kitchen_aura_lamp_2
                 else:
-                  - service: scene.turn_on
-                    data: {}
-                    target:
-                      entity_id: scene.kitchen_lights_normal
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{is_state('sensor.current_energy_rate','input_boolean.medium_cost_energy')}}
+                        alias: If Medium Cost Energy
+                    then:
+                      - service: light.turn_on
+                        data:
+                          rgb_color:
+                            - 255
+                            - 255
+                            - 0
+                          brightness_pct: 1
+                        target:
+                          entity_id: light.kitchen_aura_lamp_2
+                    else:
+                      - if:
+                          - condition: template
+                            value_template: >-
+                              {{is_state('sensor.current_energy_rate','input_boolean.expensive_energy')}}
+                            alias: If Expensive Energy
+                        then:
+                          - service: light.turn_on
+                            data:
+                              rgb_color:
+                                - 255
+                                - 153
+                                - 0
+                              brightness_pct: 1
+                            target:
+                              entity_id: light.kitchen_aura_lamp_2
+                        else:
+                          - service: light.turn_on
+                            target:
+                              entity_id: light.kitchen_aura_lamp
+                            data:
+                              rgb_color:
+                                - 255
+                                - 0
+                                - 0
+                              brightness_pct: 1
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_kitchen_aura_lamp
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Rust Risk
+        sequence:
+          - service: script.text_notify_dave
+            data:
+              message: Risk of condensation in the garage
+              title: RISK OF RUST FORMATION
+      - conditions:
+          - condition: trigger
+            id:
+              - Restart
+          - condition: state
+            entity_id: humidifier.garage_dehumidifier_2
+            state: "off"
+        sequence:
+          - service: humidifier.turn_on
+            target:
+              entity_id: humidifier.garage_dehumidifier_2
+            data: {}
+          - service: script.text_notify_dave
+            data:
+              message: The garage temp has risen enough to restart the dehumidifier
+              title: DEHUMIDIFIER ON
+      - conditions:
+          - condition: trigger
+            id:
+              - "Off"
+          - condition: numeric_state
+            entity_id: sensor.garage_thermometer_temperature
+            below: 6
+        sequence:
+          - service: script.text_notify_dave
+            data:
+              title: DEHUMIDIFIER OFF
+              message: The garage dehumdifier has turned off due to low temperature.
 mode: restart
+
 
