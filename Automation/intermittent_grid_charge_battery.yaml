@@ -6,9 +6,11 @@
 #                       using target time entity from       #
 #                       BottlecapDave Octopus Integration   #
 #                                                           #
-#                                                           #
-#   @version        :   1.01                                #
-#   @modified       :   08/12/23                            #
+#   @version        :   1.02                                #
+#   @modified       :   31/01/2024                          #
+#                   :   grid_control replaced by            #
+#                       advanced_power_control for modbus   #
+#                       multi ver 2.4.9                     #
 #############################################################
 
 alias: Intermittent Grid Charge Battery.
@@ -19,10 +21,12 @@ trigger:
     entity_id: sensor.energy_production_tomorrow_3
     below: input_number.solar_production_threshold_for_grid_charging_battery
     id: Grid Charge Allowed
+    enabled: false
   - platform: numeric_state
     entity_id: sensor.energy_production_tomorrow_3
     above: input_number.solar_production_threshold_for_grid_charging_battery
     id: Grid Charge Not Allowed
+    enabled: false
 ### I have a tod binary sensor that turns on at 10pm. This trigger turns on the grid charge battery ###
 ### master toggle to allow overnight grid charging if the automation is enabled. See Option 3 ###
   - platform: state
@@ -75,7 +79,7 @@ trigger:
 ### completes its reset. See Option 8 ###
   - platform: state
     entity_id:
-      - switch.solaredge_i1_grid_control
+      - switch.solaredge_i1_advanced_power_control
     from: unavailable
     to: "on"
     id: Inverter Reset
