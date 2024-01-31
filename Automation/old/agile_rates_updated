@@ -1,0 +1,14 @@
+alias: Agile rates updated
+description: ""
+trigger:
+  - platform: event
+    event_type: octopus_energy_electricity_next_day_rates
+condition: []
+action:
+  - service: persistent_notification.create
+    data:
+      title: Rates Updated
+      message: >
+        New rates available for {{ trigger.event.data.mpan }}. Starting value is
+        {{ trigger.event.data.rates[0]["value_inc_vat"] }}
+mode: single
