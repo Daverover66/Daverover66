@@ -5,7 +5,7 @@
 #   @description    :   Lets us know where people are       #
 #                                                           #
 #                                                           #
-#   @version        :   1.0                                 #
+#   @version        :   1.01                                #
 #   @modified       :                                       #
 #############################################################
 
@@ -42,6 +42,20 @@ trigger:
     alias: "Dave left his mum and dad's "
     id: "Dave left his mum and dad's "
     below: 1
+  - platform: zone
+    entity_id:
+      - person.gem_forrester
+      - person.david_forrester
+    zone: zone.doctors_surgery
+    event: enter
+    id: At the Doctors
+  - platform: zone
+    entity_id:
+      - person.gem_forrester
+      - person.david_forrester
+    zone: zone.doctors_surgery
+    event: leave
+    id: Left the Doctors
 condition: []
 action:
   - choose:
@@ -49,11 +63,10 @@ action:
           - condition: trigger
             id: Gem at work
         sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+          - service: script.text_notify_dave
             data:
-              message: Gem's got to work
+              message: Gem is got to work
               title: GEM AT WORK
-            alias: Send a notification based on an input text helper
           - if:
               - condition: state
                 entity_id: binary_sensor.quiet_time
@@ -62,20 +75,15 @@ action:
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine
                 data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >-
-                    <voice name="Brian"><prosody rate="110%"><prosody
-                    pitch="high">{{ ['Pardon me sir. Your good lady has arrived
-                    at work. Let the party begin', 'Attention, Gemma has arrived
-                    at work. Better get those jobs done now.', 'Information. My
-                    tracking system has detected the presence of Gemma at her
-                    work location']|random }}</prosody></prosody></voice>
-                  data:
-                    type: announce
-            alias: >-
-              If quiet time off and audible notificationsis on, announce on
-              Alexa everywhere group
+                    {{ ['Pardon me sir. Your good lady has arrived at work. Let
+                    the party begin', 'Attention, Gemma has arrived at work.
+                    Better get those jobs done now.', 'Information. My tracking
+                    system has detected the presence of Gemma at her work
+                    location']|random  }}
       - conditions:
           - condition: trigger
             id: Gem almost home
@@ -86,34 +94,20 @@ action:
             entity_id: input_boolean.audible_notifications
             state: "on"
         sequence:
-          - service: notify.alexa_media_everywhere_2
+          - service: script.speech_engine
             data:
-              message: >-
-                <voice name="Brian"><prosody pitch="high"><prosody
-                rate="110%">{{ ['Attention in the house. Mummy will be home
-                soon.  
-
-                Shes had a hard day and will probably need some wine.','<prosody
-                pitch="x-high">Proximity Alert.</prosody> My
-
-                tracking sensors have detected the presence of movement in the
-                area. Logic
-
-                circuits have determined that Mummy will be home soon.',
-                'Information.
-
-                Sensors have reported movement at a range of 1 mile from the
-                property. Logic
-
-                circuits surmise that Mummy will be home soon.']|random
-                }}</prosody></prosody></voice>
-              data:
-                type: announce
+              where: "{{ states('sensor.room_audio') }}"
+              message: >
+                {{ ['Attention in the house. Mummy will be home soon. Shes had a
+                hard day and will probably need some wine.',
+                    '<prosody pitch="x-high">Proximity Alert.</prosody> My tracking sensors have detected the presence of movement in the area. Logic circuits have determined that Mummy will be home soon.',
+                    'Information. Sensors have reported movement at a range of 1 mile from the property. Logic circuits surmise that Mummy will be home soon.']|random
+                }}
       - conditions:
           - condition: trigger
             id: Gem left work
         sequence:
-          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+          - service: script.text_notify_dave
             data:
               message: Gem has left work
               title: GEM LEFT WORK
@@ -126,16 +120,14 @@ action:
                 entity_id: binary_sensor.quiet_time
                 state: "off"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine
                 data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >-
-                    <voice name="Brian"><prosody pitch="high"><prosody
-                    rate="110%"> Information. Sensors have detected that Mummy
-                    has left the office and is on her way home. She will be home
-                    in {{ state_attr('sensor.gem_at_work' , 'duration') |
-                    round(0)}} minutes. </prosody></prosody></voice>
-                  data:
-                    type: announce
+                    Information. Sensors have detected that Mummy has left the
+                    office and is on her way home. She will be home in {{
+                    state_attr('sensor.gem_at_work' , 'duration') | round(0)}}
+                    minutes.
       - conditions:
           - condition: trigger
             id: Dave is at his mum and dad's
@@ -148,15 +140,11 @@ action:
                 entity_id: binary_sensor.quiet_time
                 state: "off"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine
                 data:
-                  message: >-
-                    <voice name="Brian"><prosody pitch="high"><prosody
-                    rate="110%"> Information. Dave has arrived in
-                    Dundee.</prosody></prosody></voice>
-                  data:
-                    type: announce
-          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: Information. Dave has arrived in Dundee.
+          - service: script.text_notify_gem
             data:
               message: "Dave is at his mum and dad's "
               title: DAVE IS IN DUNDEE
@@ -173,24 +161,19 @@ action:
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine
                 data:
-                  message: >-
-                    <voice name="Brian"><prosody pitch="high"><prosody
-                    rate="110%">{{ ['Attention in the house. Daddy will be home
-                    soon.  He has had a long journey and will probably need some
-                    beer.' ,'Proximity Alert. My tracking sensors have detected
-                    the presence of movement in the area. Logic circuits have
-                    determined that Daddy will be home soon.' ,'Information.
-                    Sensors have reported movement at a range of 1 mile from the
-                    property. Logic circuits surmise that Daddy will be home
-                    soon.']|random }}</prosody></prosody></voice>
-                  data:
-                    type: announce
+                  where: "{{ states('sensor.room_audio') }}"
+                  message: >
+                    {{ ['Attention in the house. Daddy will be home soon.  He
+                    has had a long journey and will probably need some beer.',
+                        'Proximity Alert. My tracking sensors have detected the presence of movement in the area. Logic circuits have determined that Daddy will be home soon.',
+                        'Information. Sensors have reported movement at a range of 1 mile from the property. Logic circuits surmise that Daddy will be home soon.']|random
+                    }}
             alias: >-
               If quiet time is off and audible notifications is on, announce on
               Alexa everywhere group.
-          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+          - service: script.text_notify_gem
             data:
               message: Dave is almost home
               title: DAVE 5 MINS AWAY
@@ -207,18 +190,105 @@ action:
                 entity_id: binary_sensor.quiet_time
                 state: "off"
             then:
-              - service: notify.alexa_media_everywhere_2
+              - service: script.speech_engine
                 data:
+                  where: "{{ states('sensor.room_audio') }}"
                   message: >-
-                    <voice name="Brian"><prosody pitch="high"><prosody
-                    rate="110%"> Daddy is on his way home. He'll be home in {{
+                    Daddy is on his way home. He'll be home in {{
                     state_attr('sensor.dave_in_dundee' , 'duration') |
-                    round(0)}} minutes.</prosody></prosody></voice>
-                  data:
-                    type: announce
-          - service: notify.mobile_app_{{states('input_text.gem_s_mobile_phone_id')}}
+                    round(0)}} minutes.
+          - service: script.text_notify_gem
             data:
               message: Dave has left Dundee
               title: DAVE LEFT
             alias: Notify Gem's phone
+      - conditions:
+          - condition: trigger
+            id: At the Doctors
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ \"gem\" in trigger.to_state.attributes.friendly_name }}"
+                alias: If Gem, message Dave.  If Dave,message Gem.
+            then:
+              - service: script.text_notify_dave
+                data:
+                  message: Gem is at the doctors
+                  title: GEM AT DOCTORS
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.speech_engine
+                    data:
+                      where: "{{ states('sensor.room_audio') }}"
+                      message: >-
+                        {{ "Pardon me daddy. mummy has arrived at the doctors"
+                        }}
+            else:
+              - service: script.text_notify_gem
+                data:
+                  message: Dave is at the doctors
+                  title: DAVE AT DOCTORS
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.speech_engine
+                    data:
+                      where: "{{ states('sensor.room_audio') }}"
+                      message: >-
+                        {{ "Pardon me mummy. daddy has arrived at the doctors"
+                        }}
+      - conditions:
+          - condition: trigger
+            id: Left the Doctors
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ \"gem\" in trigger.to_state.attributes.friendly_name }}"
+                alias: If Gem, message Dave.  If Dave,message Gem.
+            then:
+              - service: script.text_notify_dave
+                data:
+                  message: Gem has left the doctors
+                  title: GEM LEFT DOCTORS
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.speech_engine
+                    data:
+                      where: "{{ states('sensor.room_audio') }}"
+                      message: "{{ \"Pardon me daddy. mummy has left the doctors\" }}"
+            else:
+              - service: script.text_notify_gem
+                data:
+                  message: Dave has left the doctors
+                  title: DAVE LEFT DOCTORS
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                then:
+                  - service: script.speech_engine
+                    data:
+                      where: "{{ states('sensor.room_audio') }}"
+                      message: "{{ \"Pardon me mummy. daddy has left the doctors\" }}"
 mode: single
+
