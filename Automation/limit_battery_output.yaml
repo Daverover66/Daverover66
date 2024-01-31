@@ -15,33 +15,50 @@ description: Limit the output of the battery during overnight EV charging window
 trigger:
   - platform: time
     at: input_datetime.start_battery_output_limit
-    id: Start of Charge Period 1
+    id: Start of EV Charge Period 1
   - platform: time
     at: input_datetime.end_battery_output_limit
-    id: End of Charge Period 1
+    id: End of EV Charge Period 1
   - platform: time
     at: input_datetime.start_battery_output_limit_slot_2
-    id: Start of Charge Period 2
+    id: Start of EV Charge Period 2
   - platform: time
     at: input_datetime.end_battery_output_limit_slot_2
-    id: End of Charge Period 2
+    id: End of EV Charge Period 2
   - platform: time
     at: input_datetime.start_battery_output_limit_slot_3
-    id: Start of Charge Period 3
+    id: Start of EV Charge Period 3
   - platform: time
     at: input_datetime.end_battery_output_limit_slot_3
-    id: End of Charge Period 3
-condition: []
+    id: End of EV Charge Period 3
+  - platform: time
+    at: input_datetime.start_battery_output_limit_slot_4
+    id: Start of EV Charge Period 4
+  - platform: time
+    at: input_datetime.end_battery_output_limit_slot_4
+    id: End of EV Charge Period 4
+  - alias: When inverter resets
+    platform: state
+    entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+condition:
+  - condition: template
+    value_template: "{{ is_state('input_boolean.allow_battery_output_limit','on') }}"
+    alias: Is Allow Battery Output Limit On?
 action:
   - choose:
       - conditions:
           - condition: trigger
-            id: Start of Charge Period 1
+            id: Start of EV Charge Period 1
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
             above: >-
               input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -53,12 +70,12 @@ action:
               entity_id: number.solaredge_i1_storage_discharge_limit
       - conditions:
           - condition: trigger
-            id: End of Charge Period 1
+            id: End of EV Charge Period 1
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
-            below: >-
-              input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
+            below: input_number.default_battery_output_limit
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -69,12 +86,13 @@ action:
               entity_id: number.solaredge_i1_storage_discharge_limit
       - conditions:
           - condition: trigger
-            id: Start of Charge Period 2
+            id: Start of EV Charge Period 2
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
             above: >-
               input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -86,12 +104,12 @@ action:
               entity_id: number.solaredge_i1_storage_discharge_limit
       - conditions:
           - condition: trigger
-            id: End of Charge Period 2
+            id: End of EV Charge Period 2
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
-            below: >-
-              input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+            below: input_number.default_battery_output_limit
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -102,12 +120,13 @@ action:
               entity_id: number.solaredge_i1_storage_discharge_limit
       - conditions:
           - condition: trigger
-            id: Start of Charge Period 3
+            id: Start of EV Charge Period 3
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
             above: >-
               input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
         sequence:
           - service: number.set_value
             data:
@@ -119,18 +138,83 @@ action:
               entity_id: number.solaredge_i1_storage_discharge_limit
       - conditions:
           - condition: trigger
-            id: End of Charge Period 3
+            id: End of EV Charge Period 3
           - condition: numeric_state
             entity_id: number.solaredge_i1_storage_discharge_limit
-            below: >-
-              input_number.desired_battery_output_limit_for_overnight_ev_charging
-          - "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+            below: input_number.default_battery_output_limit
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
         sequence:
           - service: number.set_value
             data:
               value: >-
                 {{ states('input_number.default_battery_output_limit') |
                 float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: Start of EV Charge Period 4
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_4','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: End of EV Charge Period 4
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            below: input_number.default_battery_output_limit
+          - condition: template
+            value_template: "{{ is_state('input_boolean.battery_output_limit_slot_4','on') }}"
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: time
+            after: "01:00:00"
+            before: "05:45:00"
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: 100
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: "{{is_state('input_boolean.plunge_pricing','on')}}"
+              - condition: template
+                value_template: "{{is_state('input_boolean.cheap_energy','on')}}"
+              - condition: numeric_state
+                entity_id: >-
+                  sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                above: 0.1
+                below: 0.165
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
             target:
               entity_id: number.solaredge_i1_storage_discharge_limit
 mode: single
+
