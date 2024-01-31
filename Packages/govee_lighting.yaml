@@ -1,0 +1,740 @@
+###############################################################################
+#   @author         :   Dave Forrester (@Daverover66)
+#   @date           :   15/01/2024
+#   @package        :   Govee Lighting 
+#   @description    :   All Govee Lighting Config 
+#
+#   @modified by    :   Dave Forrester
+#   @date           :   15/01/2024
+###############################################################################
+
+###########################
+#     Helpers             #
+###########################
+
+###########################
+#      Toggle             #
+###########################
+
+############################
+#        Automations       #
+############################
+
+automation:
+  
+  #############################################
+  #  Show Agile Prices on Kitchen Aura Lamp   #
+  #############################################
+
+  - id: show_agile_prices_on_aura_lamp 
+    alias: Show Agile Prices on Aura Lamp
+    description: ""
+    mode: parallel
+    initial_state: true 
+    trigger:
+      - platform: sun
+        event: sunset
+        id: Sunset
+      - platform: numeric_state
+        entity_id:
+          - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        below: 0
+        id: Plunge
+      - platform: numeric_state
+        entity_id:
+          - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        below: 0.1
+        id: Cheap
+        above: 0
+      - platform: numeric_state
+        entity_id:
+          - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        below: 0.2
+        id: Medium
+        above: 0.1
+      - platform: numeric_state
+        entity_id:
+          - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        below: 0.35
+        id: Expensive
+        above: 0.2
+      - platform: numeric_state
+        entity_id:
+          - sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        id: Most Expensive
+        above: 0.35
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Sunset
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.allow_kitchen_aura_lamp
+                data: {}
+              - service: light.turn_on
+                target:
+                  entity_id: light.kitchen_aura_lamp_2
+                data:
+                  effect: Sunset
+              - delay:
+                  hours: 0
+                  minutes: 30
+                  seconds: 0
+                  milliseconds: 0
+              - service: light.turn_on
+                target:
+                  entity_id: light.kitchen_aura_lamp_2
+                data:
+                  effect: Firefly
+              - delay:
+                  hours: 2
+                  minutes: 30
+                  seconds: 0
+                  milliseconds: 0
+              - service: input_boolean.turn_on
+                target:
+                  entity_id:
+                    - input_boolean.allow_kitchen_aura_lamp
+                data: {}
+              - service: input_boolean.turn_off 
+                data: {}
+                target: 
+                  entity_id:
+                    - input_boolean.plunge_pricing
+                    - input_boolean.cheap_energy
+                    - input_boolean.medium_cost_energy 
+                    - input_boolean.expensive_energy 
+                    - input_boolean.most_expensive_energy 
+              - if:
+                  - condition: numeric_state
+                    entity_id: >-
+                      sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                    below: 0.01
+                then:
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+                    data:
+                      rgb_color:
+                        - 0
+                        - 0
+                        - 255
+                      brightness_pct: 1
+                  - service: input_boolean.turn_on 
+                    data: {}
+                    target: 
+                      entity_id: input_boolean.plunge_pricing 
+                else:
+                  - if:
+                      - condition: numeric_state
+                        entity_id: >-
+                          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                        above: 0
+                        below: 0.1
+                    then:
+                      - service: light.turn_on
+                        target:
+                          entity_id: light.kitchen_aura_lamp_2
+                        data:
+                          rgb_color:
+                            - 0
+                            - 255
+                            - 0
+                          brightness_pct: 1
+                      - service: input_boolean.turn_on 
+                        data: {}
+                        target: 
+                          entity_id: input_boolean.cheap_energy
+                    else:
+                      - if:
+                          - condition: numeric_state
+                            entity_id: >-
+                              sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                            above: 0.1
+                            below: 0.2
+                        then:
+                          - service: light.turn_on
+                            target:
+                              entity_id: light.kitchen_aura_lamp_2
+                            data:
+                              rgb_color:
+                                - 255
+                                - 255
+                                - 0
+                              brightness_pct: 1
+                          - service: input_boolean.turn_on 
+                            data: {}
+                            target: 
+                              entity_id: input_boolean.medium_cost_energy
+                        else:
+                          - if:
+                              - condition: numeric_state
+                                entity_id: >-
+                                  sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                                above: 0.2
+                                below: 0.35
+                            then:
+                              - service: light.turn_on
+                                target:
+                                  entity_id: light.kitchen_aura_lamp_2
+                                data:
+                                  rgb_color:
+                                    - 255
+                                    - 153
+                                    - 0
+                                  brightness_pct: 1
+                              - service: input_boolean.turn_on 
+                                data: {}
+                                target: 
+                                  entity_id: input_boolean.expensive_energy
+                            else:
+                              - service: light.turn_on
+                                target:
+                                  entity_id: light.kitchen_aura_lamp_2
+                                data:
+                                  rgb_color:
+                                    - 255
+                                    - 0
+                                    - 0
+                                  brightness_pct: 1
+                              - service: input_boolean.turn_on 
+                                data: {}
+                                target: 
+                                  entity_id: input_boolean.most_expensive_energy
+          - conditions:
+              - condition: trigger
+                id:
+                  - Plunge
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.allow_kitchen_aura_lamp
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 0
+                        - 0
+                        - 255
+                      brightness_pct: 1
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.plunge_pricing
+                data: {}
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: "{{ states('sensor.previous_energy_rate') }}"
+                data: {}
+                alias: Turn off last rate
+          - conditions:
+              - condition: trigger
+                id:
+                  - Cheap
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.allow_kitchen_aura_lamp
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 0
+                        - 255
+                        - 0
+                      brightness_pct: 1
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.cheap_energy
+                data: {}
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: "{{ states('sensor.previous_energy_rate') }}"
+                data: {}
+                alias: Turn off last rate
+          - conditions:
+              - condition: trigger
+                id:
+                  - Medium
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.allow_kitchen_aura_lamp
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 255
+                        - 255
+                        - 0
+                      brightness_pct: 1
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.medium_cost_energy
+                data: {}
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: "{{ states('sensor.previous_energy_rate') }}"
+                data: {}
+                alias: Turn off last rate
+          - conditions:
+              - condition: trigger
+                id:
+                  - Expensive
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.allow_kitchen_aura_lamp
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 255
+                        - 153
+                        - 0
+                      brightness_pct: 1
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.expensive_energy
+                data: {}
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: "{{ states('sensor.previous_energy_rate') }}"
+                data: {}
+                alias: Turn off last rate
+          - conditions:
+              - condition: trigger
+                id:
+                  - Most Expensive
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.allow_kitchen_aura_lamp
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data:
+                      rgb_color:
+                        - 255
+                        - 0
+                        - 0
+                      brightness_pct: 1
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.most_expensive_energy
+                data: {}
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: "{{ states('sensor.previous_energy_rate') }}"
+                data: {}
+                alias: Turn off last rate
+    
+  #####################################
+  #      All Other Govee Lighting     # 
+  #####################################
+
+  - id: all_govee_lighting 
+    alias: All Govee Lighting
+    description: ""
+    mode: parallel 
+    initial_state: true 
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.morning
+        from: "off"
+        to: "on"
+        id: Morning
+      - platform: state
+        entity_id:
+          - sun.sun
+        from: below_horizon
+        to: above_horizon
+        id: sunrise
+      - platform: state
+        entity_id:
+          - binary_sensor.afternoon
+        from: "off"
+        to: "on"
+        id: Afternoon
+      - platform: state
+        entity_id:
+          - binary_sensor.evening
+        from: "off"
+        to: "on"
+        id: Evening
+      - platform: state
+        entity_id:
+          - sun.sun
+        from: above_horizon
+        to: below_horizon
+        id: sunset
+      - platform: state
+        entity_id:
+          - binary_sensor.overnight
+        from: "off"
+        to: "on"
+        id: Overnight
+        for:
+          hours: 1
+          minutes: 0
+          seconds: 0
+      - platform: state
+        entity_id:
+          - switch.living_room_tv
+        from: "off"
+        to: "on"
+        id: TV on
+      - platform: state
+        entity_id:
+          - switch.living_room_tv
+        from: "on"
+        to: "off"
+        id: TV off
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Morning
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 1
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Morning
+          - conditions:
+              - condition: trigger
+                id:
+                  - Afternoon
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 1
+                  effect: Rustling Leaves
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Rustling Leaves
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Afternoon
+              - service: light.turn_on
+                target:
+                  entity_id: light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Afternoon
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Afternoon
+          - conditions:
+              - condition: trigger
+                id:
+                  - Evening
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 1
+                  effect: Candlelight
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Candlelight
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Dating 
+              - service: light.turn_on
+                target:
+                  entity_id: light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Dating 
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Gobi Desert
+          - conditions:
+              - condition: trigger
+                id:
+                  - Overnight
+            sequence:
+              - service: light.turn_off
+                target:
+                  entity_id:
+                    - light.glide_lights_right_2
+                    - light.govee_glide_left_2
+                    - light.xmas_string_lights_3_2
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - sunrise
+              - condition: state 
+                entity_id: binary_sensor.morning 
+                state: "on" 
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise 
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise 
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise  
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise        
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Sunrise 
+              - delay: 
+                  minutes: 30
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 1
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Morning
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Morning
+          - conditions:
+              - condition: trigger
+                id:
+                  - TV on
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.day
+                    state: "off"
+                  - condition: numeric_state 
+                    entity_id: sensor.living_room_fp2_light_sensor_light_level
+                    below: input_number.low_light_threshold
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.dreamview_g1_pro_2
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - TV off
+              - condition: state
+                entity_id: light.dreamview_g1_pro_2
+                state: "on"
+            sequence:
+              - service: light.turn_off
+                target:
+                  entity_id: light.dreamview_g1_pro_2
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - sunset
+            sequence:
+              - if:
+                  - condition: state
+                    entity_id: switch.living_room_tv
+                    state: "on"
+                then: 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.dreamview_g1_pro_2
+                    data: {}
+              - service: light.turn_on
+                target:
+                  entity_id: light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Warm
+              - service: light.turn_on
+                target:
+                  entity_id: light.stair_lights_2
+                data:
+                  brightness_pct: 5
+                  effect: Warm
+              - service: light.turn_on
+                target:
+                  entity_id: light.govee_glide_left_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunset Glow 
+              - service: light.turn_on
+                target:
+                  entity_id: light.glide_lights_right_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunset Glow      
+              - service: light.turn_on
+                target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Warm 
+              - delay: 
+                  minutes: 30
+              - if:
+                  - condition: state 
+                    entity_id: binary_sensor.afternoon 
+                    state: "on"
+                then: 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.glide_lights_right_2
+                    data:
+                      brightness_pct: 1
+                      effect: Rustling Leaves 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.govee_glide_left_2
+                    data:
+                      brightness_pct: 1
+                      effect: Rustling Leaves 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.stair_lights_2
+                    data:
+                      brightness_pct: 5
+                      effect: Afternoon 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.xmas_string_lights_3_2
+                    data:
+                      brightness_pct: 50
+                      effect: Afternoon 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.bed_lamps_3
+                    data:
+                      brightness_pct: 5
+                      effect: Afternoon 
+                else: 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.glide_lights_right_2
+                    data:
+                      brightness_pct: 1
+                      effect: Candlelight
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.govee_glide_left_2
+                    data:
+                      brightness_pct: 1
+                      effect: Candlelight
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.stair_lights_2
+                    data:
+                      brightness_pct: 5
+                      effect: Dating  
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.xmas_string_lights_3_2
+                    data:
+                      brightness_pct: 50
+                      effect: Gobi Desert 
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.bed_lamps_3
+                    data:
+                      brightness_pct: 5
+                      effect: Dating                    
+                    
+    
+
+
+
