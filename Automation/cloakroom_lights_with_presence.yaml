@@ -5,7 +5,7 @@
 #   @description    :                                      #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
+#   @version        :   1.02                               #
 #   @modified       :                                      #
 ############################################################
 
@@ -25,7 +25,7 @@ trigger:
     to: "off"
     for:
       hours: 0
-      minutes: 2
+      minutes: 0
       seconds: 0
     id: Light Off
   - platform: device
@@ -41,13 +41,15 @@ trigger:
     id: Cloakroom Light off
     alias: Cloakroom Light off with Timer
   - platform: numeric_state
-    entity_id: sensor.downstairs_light_level
-    below: 20
+    entity_id:
+      - sensor.main_bedroom_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
     id: Low Light
   - platform: numeric_state
-    entity_id: sensor.downstairs_light_level
+    entity_id:
+      - sensor.main_bedroom_fp2_light_sensor_light_level
     id: Good Light
-    above: 80
+    above: input_number.upper_light_threshold_level
 condition: []
 action:
   - choose:
@@ -79,9 +81,14 @@ action:
             id:
               - Light On
             alias: Turn on light with presence
-          - condition: numeric_state
-            entity_id: sensor.downstairs_light_level
-            below: 20
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+                below: input_number.daytime_light_needed
+              - condition: sun
+                before: sunrise
+                after: sunset
         sequence:
           - service: light.turn_on
             data: {}
@@ -126,4 +133,35 @@ action:
             data: {}
             target:
               entity_id: light.cloakroom_light_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+          - condition: state
+            entity_id: timer.cloakroom_light
+            state: active
+        sequence:
+          - service: timer.pause
+            target:
+              entity_id: timer.cloakroom_light
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off
+          - condition: state
+            entity_id: light.cloakroom_light_2
+            state: "on"
+          - condition: state
+            entity_id: timer.cloakroom_light
+            state: paused
+        sequence:
+          - service: timer.start
+            target:
+              entity_id: timer.cloakroom_light
+            data: {}
 mode: restart
+
