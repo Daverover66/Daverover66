@@ -5,7 +5,7 @@
 #   @description    :                                      #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
+#   @version        :   1.02                               #
 #   @modified       :                                      #
 ############################################################
 
@@ -40,7 +40,15 @@ trigger:
     from: "on"
     to: "off"
     id: Chime Off
-condition: []
+condition:
+  - condition: and
+    conditions:
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: "off"
 action:
   - choose:
       - conditions:
@@ -50,16 +58,23 @@ action:
           - condition: template
             value_template: "{{\"Back\" in trigger.to_state.attributes.friendly_name }}"
             alias: Filter Back Door
-          - condition: sun
-            after: sunset
-            before: sunrise
         sequence:
-          - service: light.turn_on
+          - service: script.alexa_voice
             data:
-              color_temp: 500
-              brightness_pct: 75
-            target:
-              entity_id: light.back_door_light
+              where: kitchen
+              message: >
+                <audio
+                src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
+          - if:
+              - condition: sun
+                after: sunset
+                before: sunrise
+            then:
+              - service: light.turn_on
+                target:
+                  entity_id: light.back_door_light
+                data:
+                  brightness_step: 255
       - conditions:
           - condition: trigger
             id:
@@ -67,13 +82,42 @@ action:
           - condition: template
             value_template: "{{\"Back\"  in trigger.to_state.attributes.friendly_name }}"
             alias: Filter Back Door
-          - condition: state
-            entity_id: light.back_door_light
-            state: "on"
         sequence:
-          - service: light.turn_off
+          - service: script.alexa_voice
             data:
-              transition: 300
-            target:
-              entity_id: light.back_door_light
+              where: kitchen
+              message: >
+                <audio
+                src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3'/>
+          - if:
+              - condition: state
+                entity_id: light.back_door_light
+                state: "on"
+            then:
+              - service: script.back_door_light_dim_when_door_closed
+                data: {}
+      - conditions:
+          - condition: trigger
+            id: Door Still Open
+        sequence:
+          - service: script.speech_engine
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+              message: >
+                Attention in the house.  The {{
+                trigger.to_state.attributes.friendly_name }} {{ [
+                  ' is standing open.',
+                  ' is open.',
+                  ' does not close on its own.',
+                  ' was left standing open.'
+                ] | random }} {{ [
+                    'Can a human be so kind and close it?',
+                    'The air quality in this house has actually improved.',
+                    'Closing the door would improve the internal climate of the house.',
+                    'Hey. The door was just opened and this is crazy. But now you know. So close it maybe.',
+                    'If at first you do not succeed in closing the door, please try again. Like, Right now seems like a good time to try again.',
+                    'And the automatic door closer appears to be broken. So, you know what to do. Time to get physical.',
+                    'I would close it for you. But I lack legs. And Arms.'
+                ] | random }}
 mode: restart
+
