@@ -37,9 +37,28 @@ trigger:
     event_data:
       entity_id: timer.rolec_4_hour_charge_period
     id: Stop Charge
+  - platform: time
+    at: "20:59:00"
+    id: Activate Charge Session
+  - platform: state
+    entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+    alias: When inverter resets
 condition: []
 action:
   - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate Charge Session
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_battery_master
       - conditions:
           - condition: trigger
             id:
@@ -147,7 +166,30 @@ action:
             data: {}
             target:
               entity_id: input_boolean.rolec_battery_master
-mode: single   
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: 100
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+          - condition: state
+            entity_id: timer.rolec_4_hour_charge_period
+            state: active
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+mode: single
+ 
 #  - platform: time
 #    at: input_datetime.rolec_wallbox_on
 #    id: Rolec On 1
