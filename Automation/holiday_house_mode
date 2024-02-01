@@ -1,0 +1,23 @@
+alias: Holiday House Mode
+description: ""
+trigger:
+  - platform: time
+    at: "07:30:00"
+    id: Morning
+  - platform: time
+    at: "12:00:00"
+    id: Lunchtime
+  - platform: time
+    at: "17:35:00"
+    id: Dinnertime
+  - platform: time
+    at: "20:45:00"
+    id: Evening
+condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "on"
+action:
+  - service: script.house_in_holiday_mode
+    data: {}
+mode: single
