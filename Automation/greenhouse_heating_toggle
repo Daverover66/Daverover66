@@ -1,0 +1,35 @@
+alias: Greenhouse Heating Toggle
+description: >-
+  Turn on and off the greenhouse heater to keep the temperature above 3 degrees
+  C
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.greenhouse_thermometer_temperature
+    below: 1
+    id: Greenhouse Heater On
+  - platform: numeric_state
+    entity_id:
+      - sensor.greenhouse_thermometer_temperature
+    above: 3
+    id: Greenhouse Heater Off
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Greenhouse Heater On
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.heater_greenhouse_s1
+      - conditions:
+          - condition: trigger
+            id: Greenhouse Heater Off
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.heater_greenhouse_s1
+mode: single
