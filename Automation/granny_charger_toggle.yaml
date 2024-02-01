@@ -1,0 +1,79 @@
+alias: Granny Charger Toggle
+description: Uses granny charger to charge EV when there is sufficient sunshine
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    id: Battery Charge Level
+  - platform: state
+    entity_id:
+      - sensor.solar_panel_production_w
+    id: Panel Power
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: trigger
+                id: Panel Power
+              - condition: state
+                entity_id: switch.valkyrie_switch_1
+                state: "on"
+                enabled: false
+              - condition: device
+                type: is_off
+                device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+                entity_id: switch.granny_charger_local
+                domain: switch
+              - type: is_battery_level
+                condition: device
+                device_id: fde0fef8291e927bf8ae0d38ba5e36ce
+                entity_id: sensor.solaredge_b1_state_of_energy
+                domain: sensor
+                above: 95
+                alias: Battery state of energy is more than 95%
+              - condition: numeric_state
+                entity_id: sensor.solar_exported_power_w
+                above: 2500
+                alias: Exported power is more than 2500W
+        sequence:
+          - type: turn_on
+            device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+            entity_id: switch.granny_charger_local
+            domain: switch
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: trigger
+                id: Battery Charge Level
+              - condition: numeric_state
+                entity_id: sensor.solar_house_consumption_w
+                above: sensor.solar_panel_production_w
+              - condition: device
+                type: is_on
+                device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+                entity_id: switch.granny_charger_local
+                domain: switch
+        sequence:
+          - type: turn_off
+            device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+            entity_id: switch.granny_charger_local
+            domain: switch
+      - conditions:
+          - condition: trigger
+            id: Battery Charge Level
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 97
+          - condition: device
+            type: is_on
+            device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+            entity_id: switch.granny_charger_local
+            domain: switch
+        sequence:
+          - type: turn_off
+            device_id: 3e12cbf22e7fcfd5924b41a20289cc2b
+            entity_id: switch.granny_charger_local
+            domain: switch
+mode: single
