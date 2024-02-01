@@ -1,98 +1,167 @@
 ###############################################################################
-#   @author         :   Rueben Gow (@reuben.guru)
-#   @date           :   March 2023
-#   @package        :   Home Battery Automations
-#   @description    :   Daily charge and discharge of home battery. 
-# 
-#   @modified by    :   Dave Forrester(@Daverover66) 
-#   @date           :   April 2023
+#   @author         :   Rueben Gow (@reuben.guru)                             #
+#   @date           :   March 2023                                            #
+#   @package        :   Home Battery Automations                              #
+#   @description    :   Controls home battery charge, discharge and output    # 
+#                       limit during EV charging                              #
+#                                                                             #
+#   @modified by    :   Dave Forrester(@Daverover66)                          #
+#   @date           :   01/02/2024                                            #
+#   @modification   :                                                         #
 ############################################################################### 
-  
+
+########################
+#       Helpers        #
+########################
+
+########################
+#       Datetime       #
+########################
+input_datetime:
+  get_desired_charge_notification_at:
+    name: Get Desired Charge Notification At
+    has_date: false
+    has_time: true 
+    
+########################
+#       Toggle         #
+########################
+input_boolean:
+  name:
+########################
+#       Number         #
+########################
+input_number:
+  default_battery_percentage:
+    name: Default Battery Charge %
+    min: 0
+    max: 100
+    initial: 100
+    step: 1
+    mode: box
+    unit_of_measurement: "%"
+    icon: mdi:battery-lock
+
+  desired_battery_percentage:
+    name: Desired Battery Charge %
+    min: 0
+    max: 100
+    initial: 100
+    step: 1
+    mode: box
+    unit_of_measurement: "%"
+    icon: mdi:battery-plus
+
+
+  default_battery_discharge_percentage:
+    name: Default Battery Discharge %
+    min: 0
+    max: 100
+    initial: 100
+    step: 1
+    mode: box
+    unit_of_measurement: "%"
+    icon: mdi:battery-minus
+
+
+    
+
+########################
+#       Text           #
+########################
+input_text:
+  name:
+
+########################
+#      Automations     #
+########################  
+automation:
 ###############################################################################
 ### Actionable notification to request charge level of battery overnight
 ###############################################################################
 
-alias: Get desired battery %
-description: Send a notification asking for desired battery percentage
-trigger:
-  - platform: time
-    at: input_datetime.get_desired_charge_notification_at
-condition: []
-action:
-  - alias: Send notification
-    service: notify.mobile_app_daves_samsung_galaxy
-    data:
-      message: >
-        What battery % do you want to charge to? (default {{
-        states('input_number.default_battery_percentage')|int }}%)
-      title: Set battery charge %
-      data:
-        actions:
-          - action: FULL
-            title: 100%
-          - action: HALF
-            title: 50%
-          - action: REPLY
-            title: Custom
-  - alias: Wait for a response
-    wait_for_trigger:
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: FULL
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: REPLY
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: HALF
-    timeout:
-      hours: 1
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-    continue_on_timeout: true
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ not wait.trigger }}"
-        sequence:
-          - service: input_number.set_value
-            target:
-              entity_id: input_number.desired_battery_percentage
-            data:
-              value: "{{ states('input_number.default_battery_percentage') | float }}"
-      - conditions:
-          - condition: template
-            value_template: "{{ wait.trigger.event.data.action == \"FULL\" }}"
-        sequence:
-          - service: input_number.set_value
-            target:
-              entity_id: input_number.desired_battery_percentage
-            data:
-              value: 100
-      - conditions:
-          - condition: template
-            value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
-        sequence:
-          - service: input_number.set_value
-            target:
-              entity_id: input_number.desired_battery_percentage
-            data:
-              value: |
-                {{ wait.trigger.event.data.reply_text | int(0) }}
-      - conditions:
-          - condition: template
-            value_template: "{{ wait.trigger.event.data.action == \"HALF\" }}"
-        sequence:
-          - service: input_number.set_value
-            target:
-              entity_id: input_number.desired_battery_percentage
-            data:
-              value: 50
-mode: single
+  # alias: Get desired battery %
+  # description: Send a notification asking for desired battery percentage
+  # trigger:
+  #   - platform: time
+  #     at: input_datetime.get_desired_charge_notification_at
+  # condition: []
+  # action:
+  #   - alias: Send a notification based on an input text helper
+  #     service: script.text_notify_dave
+  #     data:
+  #       message: >
+  #         What battery % do you want to charge to? (default {{
+  #         states('input_number.default_battery_percentage')|int }}%)
+  #       title: Set battery charge %
+  #       data:
+  #         actions:
+  #           - action: FULL
+  #             title: 100%
+  #           - action: HALF
+  #             title: 50%
+  #           - action: REPLY
+  #             title: Custom
+  #   - alias: Wait for a response
+  #     wait_for_trigger:
+  #       - platform: event
+  #         event_type: mobile_app_notification_action
+  #         event_data:
+  #           action: FULL
+  #       - platform: event
+  #         event_type: mobile_app_notification_action
+  #         event_data:
+  #           action: REPLY
+  #       - platform: event
+  #         event_type: mobile_app_notification_action
+  #         event_data:
+  #           action: HALF
+  #     timeout:
+  #       hours: 1
+  #       minutes: 0
+  #       seconds: 0
+  #       milliseconds: 0
+  #     continue_on_timeout: true
+  #   - choose:
+  #       - conditions:
+  #           - condition: template
+  #             value_template: "{{ not wait.trigger }}"
+  #         sequence:
+  #           - service: input_number.set_value
+  #             target:
+  #               entity_id: input_number.desired_battery_percentage
+  #             data:
+  #               value: "{{ states('input_number.default_battery_percentage') | float }}"
+  #       - conditions:
+  #           - condition: template
+  #             value_template: "{{ wait.trigger.event.data.action == \"FULL\" }}"
+  #         sequence:
+  #           - service: input_number.set_value
+  #             target:
+  #               entity_id: input_number.desired_battery_percentage
+  #             data:
+  #               value: 100
+  #       - conditions:
+  #           - condition: template
+  #             value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
+  #         sequence:
+  #           - service: input_number.set_value
+  #             target:
+  #               entity_id: input_number.desired_battery_percentage
+  #             data:
+  #               value: |
+  #                 {{ wait.trigger.event.data.reply_text | int(0) }}
+  #       - conditions:
+  #           - condition: template
+  #             value_template: "{{ wait.trigger.event.data.action == \"HALF\" }}"
+  #         sequence:
+  #           - service: input_number.set_value
+  #             target:
+  #               entity_id: input_number.desired_battery_percentage
+  #             data:
+  #               value: 50
+  # mode: single
+
 
 ###############################################################################
 ### Charge battery to desired level from the grid during off-peak
@@ -691,3 +760,7 @@ action:
             target:
               entity_id: input_boolean.desired_storage_control_mode_correct
 mode: single
+
+########################
+#       Scripts        #
+########################
