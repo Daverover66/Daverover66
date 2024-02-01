@@ -1,0 +1,233 @@
+alias: Octoplus Join Saving Session
+description: ""
+trigger:
+  - platform: event
+    event_type: octopus_energy_new_octoplus_saving_session
+    id: Event Fired
+  - platform: time
+    at: input_datetime.two_before_start_of_saving_session
+    id: Pre Charge Battery
+  - platform: time
+    at: input_datetime.saving_session_start
+    id: Start
+  - platform: time
+    at: input_datetime.saving_session_end
+    id: End
+  - platform: state
+    entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+  - platform: state
+    entity_id:
+      - switch.heater_greenhouse_s1
+    from: "off"
+    to: "on"
+    id: Greenhouse On
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Event Fired
+        sequence:
+          - service: octopus_energy.join_octoplus_saving_session_event
+            data:
+              event_code: "{{ trigger.event.data[\"event_code\"] }}"
+            target:
+              entity_id: event.octopus_energy_a_e0d4de23_octoplus_saving_session_events
+          - service: persistent_notification.create
+            data:
+              title: Saving Sessions Updated
+              message: >
+                Joined new Octopus Energy saving session. It starts at {{
+                trigger.event.data["event_start"].strftime('%H:%M') }} on {{
+                trigger.event.data["event_start"].day }}/{{
+                trigger.event.data["event_start"].month }} 
+          - service: script.text_notify_dave
+            data:
+              title: ALERT! SAVING SESSION IMMINENT
+              message: >
+                I have automagically enrolled you in an Octopus Energy Saving
+                Session.  It starts at
+                {{trigger.event.data["event_start"].strftime('%H:%M') }}  on
+                {{trigger.event.data["event_start"].day
+                }}/{{trigger.event.data["event_start"].month }}
+          - service: script.speech_engine
+            data:
+              where: "{{ states('sensor.room_audio')}}"
+              message: >
+                I have been informed by Greg Jackson, the CEO of Octopus
+                Energy,that there is to be a Saving Session on {{
+                trigger.event.data["event_start"].day
+                }}/{{trigger.event.data["event_start"].month }}. It starts at {{
+                trigger.event.data["event_start"].strftime('%H:%M') }} and ends
+                at {{ trigger.event.data["event_end"].strftime('%H:%M') }} so I
+                have automagically enrolled you. 
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.saving_session_enrolled
+            data: {}
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_battery_grid_discharge
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 2
+              seconds: 0
+              milliseconds: 0
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{
+                (as_timestamp(state_attr('binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions','next_joined_event_start'))
+                - 7200)|timestamp_custom ('%H:%M')}}
+            target:
+              entity_id: input_datetime.two_before_start_of_saving_session
+            alias: Set  time helper 2 hours before session starts
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{as_timestamp(state_attr('binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions','next_joined_event_start'))|timestamp_custom
+                ('%H:%M')}}
+            target:
+              entity_id: input_datetime.saving_session_start
+            alias: Set time helper for session start
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{as_timestamp(state_attr('binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions','next_joined_event_end'))|timestamp_custom
+                ('%H:%M')}}
+            target:
+              entity_id: input_datetime.saving_session_end
+            alias: Set time helper for session end
+      - conditions:
+          - condition: trigger
+            id:
+              - Pre Charge Battery
+          - condition: state
+            entity_id: input_boolean.saving_session_enrolled
+            state: "on"
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
+          - delay:
+              hours: 1
+              minutes: 0
+              seconds: 0
+              milliseconds: 0
+          - service: timer.cancel
+            target:
+              entity_id: timer.home_battery_3_hour_charge_period
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Start
+          - condition: state
+            entity_id: input_boolean.allow_battery_grid_discharge
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.saving_session_enrolled
+            state: "on"
+        sequence:
+          - service: script.force_discharge_battery
+            data: {}
+          - if:
+              - condition: state
+                entity_id: humidifier.garage_dehumidifier_2
+                state: "on"
+            then:
+              - service: humidifier.turn_off
+                target:
+                  entity_id:
+                    - humidifier.garage_dehumidifier_2
+                  device_id: []
+                  area_id: []
+                data: {}
+          - if:
+              - condition: state
+                entity_id: switch.heater_greenhouse_s1
+                state: "on"
+            then:
+              - service: switch.turn_off
+                data: {}
+                target:
+                  entity_id: switch.heater_greenhouse_s1
+      - conditions:
+          - condition: trigger
+            id:
+              - End
+        sequence:
+          - service: script.turn_off
+            target:
+              entity_id: script.force_discharge_battery
+            data: {}
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            target:
+              entity_id:
+                - input_boolean.allow_battery_grid_discharge
+                - input_boolean.saving_session_enrolled
+            data: {}
+          - service: humidifier.turn_on
+            target:
+              entity_id:
+                - humidifier.garage_dehumidifier_2
+              device_id: []
+              area_id: []
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - condition: numeric_state
+                entity_id: sensor.greenhouse_thermometer_temperature
+                below: 1
+            then:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.heater_greenhouse_s1
+                data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: state
+            entity_id: input_boolean.saving_session_enrolled
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.allow_battery_grid_discharge
+            state: "on"
+          - condition: time
+            after: input_datetime.saving_session_start
+            before: input_datetime.saving_session_end
+        sequence:
+          - service: script.force_discharge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Greenhouse On
+          - condition: state
+            entity_id: binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.heater_greenhouse_s1
+            data: {}
+mode: restart
