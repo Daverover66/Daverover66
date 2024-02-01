@@ -1,0 +1,106 @@
+alias: Heatwave Alert
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.outside_thermometer_temperature
+    above: sensor.living_room_thermometer_temperature
+    id: Hotting Up
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  - platform: numeric_state
+    entity_id: sensor.outside_temperature_and_humidity_sensor_2_temperature
+    id: Cooling Down
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    below: sensor.jamies_room_thermometer_temperature
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Hotting Up
+          - condition: state
+            entity_id: sun.sun
+            state: above_horizon
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{ states('input_number.alexa_volume_level_announcements') |
+                float(0) }}
+            alias: Set volume downstairs based on an input number helper
+            target:
+              area_id: downstairs
+          - service: media_player.play_media
+            data:
+              media_content_id: Hot in Herre [Explicit]
+              media_content_type: AMAZON_MUSIC
+              extra:
+                timer: 60
+            target:
+              entity_id:
+                - media_player.dave_s_2nd_echo_pop
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - service: media_player.media_stop
+            data: {}
+            target:
+              area_id: everywhere
+          - service: notify.alexa_media_everywhere_2
+            data:
+              data:
+                type: announce
+                method: all
+              message: >-
+                {{ [  'Phew! It is getting hot outside. Time to close the
+                windows and lower the blinds at the back of the house',
+                      'There is a potentially adverse temperature differential. For your comfort and safety, please close the windows and drop the blinds at the back of the house.',
+                      'The automatic window and blind closers have temporarily malfunctioned. Manual intervention is required imminently to prevent discomfort',
+                      'I have detected a thermal anomaly which may result in environmental conditions breaching normal human comfort levels. Please take immediate action.'
+                    ]|random }}
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_default_all')|float(0)}}
+            alias: Set volume everywhere to default
+            enabled: true
+            target:
+              area_id: everywhere
+      - conditions:
+          - condition: trigger
+            id: Cooling Down
+        sequence:
+          - service: media_player.volume_set
+            data:
+              volume_level: >-
+                {{states('input_number.alexa_volume_level_announcements')|float(0)}}
+            alias: Set volume downstairs based on an input number helper
+            target:
+              area_id: downstairs
+          - service: media_player.play_media
+            data:
+              media_content_type: Sound
+              media_content_id: amzn_sfx_trumpet_bugle_04
+              enqueue: play
+            target:
+              area_id: downstairs
+          - service: notify.alexa_media_everywhere_2
+            data:
+              data:
+                type: announce
+                method: all
+              message: >-
+                {{ [  'Aaaaah, it is starting to cool down again. You can open
+                the windows and blinds again',
+                      'There is a potentially beneficial temperature differential. For your continued comfort, please open the windows and raise the blinds at the back of the house.',  
+                      'The automatic window and blind openers have temporarily malfunctioned. Manual intervention is required imminently to ensure your continued comfort', 
+                      'I have detected a thermal anomaly which may result in environmental conditions that favor normal human comfort levels. Please take immediate action.'  
+                    ]|random }}
+mode: single
