@@ -1,0 +1,10 @@
+alias: Automations That Run When HA Starts
+description: ""
+trigger:
+  - platform: homeassistant
+    event: start
+condition: []
+action:
+  - service: script.update_critical_battery_group_2
+    data: {}
+mode: single
