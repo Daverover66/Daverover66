@@ -19,9 +19,81 @@
 ########################
 input_datetime:
   get_desired_charge_notification_at:
-    name: Get Desired Charge Notification At
+    name: Send Desired Charge Notification at
     has_date: false
     has_time: true 
+
+  get_desired_discharge_notification_at:
+    name: Send Desired Discharge Notification at
+    has_date: false
+    has_time: true
+
+  start_battery_discharge:
+    name: Start Battery Discharge at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-clock
+
+   end_battery_discharge:
+    name: End Battery Discharge at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-clock-outline
+
+  start_charge_from_clipped_solar:
+    name: Start Charge from Clipped Solar
+    has_date: false
+    has_time: true
+    icon: mdi:solar-power-variant
+
+  start_battery_output_limit:
+    name: Start Battery Output Limit Slot 1 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-minus-variant
+
+  end_battery_output_limit:
+    name: End Battery Output Limit Slot 1 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-plus-variant
+
+  start_battery_output_limit_slot_2:
+    name: Start Battery Output Limit Slot 2 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-minus-variant
+
+  end_battery_output_limit_slot_2:
+    name: End Battery Output Limit Slot 2 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-plus-variant
+
+  start_battery_output_limit_slot_3:
+    name: Start Battery Output Limit Slot 3 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-minus-variant
+
+  end_battery_output_limit_slot_3:
+    name: End Battery Output Limit Slot 3 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-plus-variant
+
+  start_battery_output_limit_slot_4:
+    name: Start Battery Output Limit Slot 4 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-minus-variant
+
+  end_battery_output_limit_slot_4:
+    name: End Battery Output Limit Slot 4 at
+    has_date: false
+    has_time: true
+    icon: mdi:battery-plus-variant
+
     
 ########################
 #       Toggle         #
