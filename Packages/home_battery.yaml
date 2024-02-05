@@ -99,7 +99,48 @@ input_datetime:
 #       Toggle         #
 ########################
 input_boolean:
-  name:
+  grid_charge_home_battery:
+    name: Grid Charge Home Battery
+
+  allow_battery_grid_discharge:
+    name: Allow Battery Grid Discharge
+
+  allow_battery_output_limit:
+    name: Allow Battery Output Limit
+    icon: mdi:battery-arrow-down
+
+  battery_output_limit_slot_1:
+    name: Battery Output Limit Slot 1
+
+  battery_output_limit_slot_2:
+    name: Battery Output Limit Slot 2
+
+    battery_output_limit_slot_3:
+    name: Battery Output Limit Slot 3
+
+  battery_output_limit_slot_4:
+    name: Battery Output Limit Slot 4
+
+  home_battery_grid_charging:
+    name: Home Battery Grid Charging
+    icon: mdi:battery-charging
+
+  desired_storage_cmd_mode_correct:
+    name: Desired Storage Cmd Mode Correct
+    icon: mdi:battery-check
+
+  desired_storage_default_mode_correct:
+    name: Desired Storage Default Mode Correct
+    icon: mdi:battery-check
+
+  desired_storage_control_mode_correct:
+    name: Desired Storage Control Mode Correct
+    icon: mdi:battery-check
+
+
+    
+
+
 ########################
 #       Number         #
 ########################
@@ -142,7 +183,9 @@ input_number:
 #       Text           #
 ########################
 input_text:
-  name:
+  current_random_light:
+    name: Current Random Light
+    icon: mdi:lightbulb
 
 ########################
 #      Automations     #
