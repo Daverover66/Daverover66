@@ -88,6 +88,94 @@ These are all the home battery related automations not currently in use
   #               value: 50
   # mode: single
 
+###############################################################################
+### Actionable notification to request discharge level of battery during peak export
+###############################################################################
+
+alias: Get Desired Battery Discharge %
+description: Send a notification asking for desired battery discharge percentage
+trigger:
+  - platform: time
+    at: input_datetime.get_desired_discharge_notification_at 
+condition: []
+action:
+  - alias: Send notification
+    service: script.text_notify_dave
+    data:
+      message: >
+        What battery % do you want to discharge to? (default {{
+        states('input_number.default_battery_discharge_percentage')|int }}%)
+        Current Battery Level is {{
+        states('sensor.solaredge_b1_state_of_energy') }}kWh
+      title: Set battery discharge %
+      data:
+        actions:
+          - action: FORTY
+            title: 40%
+          - action: THIRTY
+            title: 30%
+          - action: REPLY
+            title: Custom
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: FORTY 
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: REPLY
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: THIRTY 
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+            data:
+              value: "{{ states('input_number.default_battery_percentage') | float }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"FIFTYFIVE\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 40
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+            data:
+              value: |
+                {{ wait.trigger.event.data.reply_text | int(0) }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"FORTYFIVE\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 30
+            target:
+              entity_id: input_number.desired_battery_discharge_percentage
+mode: single
+
 alias: Discharge Battery to Desired %
 description: Discharge the Home Battery to the desired % during Flux peak time
 trigger:
