@@ -772,3 +772,98 @@ action:
 mode: queued
 max: 6
 
+alias: Set times for battery grid charge
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.overnight
+    from: "off"
+    to: "on"
+    id: Set
+    enabled: false
+  - platform: state
+    entity_id:
+      - binary_sensor.lunchtime
+    from: "off"
+    to: "on"
+    id: Reset
+    enabled: true
+condition:
+  - condition: state
+    entity_id: input_boolean.grid_charge_home_battery
+    state: "on"
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Set
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_battery_slot_1_active
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{states('sensor.home_battery_charge_start_time')}}"
+            target:
+              entity_id: input_datetime.start_battery_grid_charge
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{states('sensor.home_battery_charge_end_time')}}"
+            target:
+              entity_id: input_datetime.end_battery_grid_charge
+      - conditions:
+          - condition: trigger
+            id:
+              - Reset
+        sequence:
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_battery_slot_1_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_battery_slot_2_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_battery_slot_3_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.grid_charge_battery_slot_4_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_slot_1_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_slot_2_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_slot_3_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_slot_4_active
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.battery_output_limit_slot_1
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.battery_output_limit_slot_2
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.battery_output_limit_slot_3
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.battery_output_limit_slot_4
+mode: single
