@@ -137,10 +137,6 @@ input_boolean:
     name: Desired Storage Control Mode Correct
     icon: mdi:battery-check
 
-
-    
-
-
 ########################
 #       Number         #
 ########################
@@ -165,7 +161,6 @@ input_number:
     unit_of_measurement: "%"
     icon: mdi:battery-plus
 
-
   default_battery_discharge_percentage:
     name: Default Battery Discharge %
     min: 0
@@ -176,7 +171,79 @@ input_number:
     unit_of_measurement: "%"
     icon: mdi:battery-minus
 
+  desired_battery_discharge_percentage:
+    name: Desired Battery Discharge %
+    min: 0
+    max: 100
+    initial: 50
+    step: 1
+    mode: box
+    unit_of_measurement: "%"
+    icon: mdi:battery-minus  
 
+  solar_production_threshold_for_grid_charging_battery:
+    name: Solar Production Threshold For Grid Charging Battery
+    min: 0
+    max: 40
+    initial: 35
+    step: 1
+    mode: box
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power-variant
+
+  storage_command_timeout_period_for_clipped_solar:
+    name: Storage Command Timeout Period for Clipped Solar
+    min: 0
+    max: 86400
+    initial: 30600
+    step: 1
+    mode: box
+
+  storage_command_timeout_for_discharge_to_grid:
+    name: Storage Command Timeout Period for Discharge to Grid
+    min: 0
+    max: 86400
+    initial: 10800
+    step: 1
+    mode: box 
+
+  storage_command_timeout_default_period:
+    name: Storage Command Timeout Default Period
+    min: 0
+    max: 86400
+    initial: 3600
+    step: 1
+    mode: box   
+
+  default_battery_output_limit:
+    name: Default Battery Output Limit
+    min: 0
+    max: 7000
+    initial: 7000
+    step: 100
+    mode: box   
+    unit_of_measurement: "W"
+    icon: mdi:battery_lock
+
+  battery_output_limit:
+    name: Desired Battery Output Limit Day Discharge
+    min: 0
+    max: 7000
+    initial: 7000
+    step: 100
+    mode: box   
+    unit_of_measurement: "W"
+    icon: mdi:battery-lock
+
+  desired_battery_output_limit_for_overnight_ev_charging:
+    name: Desired Battery Output Limit for Overnight EV charging
+    min: 0
+    max: 300
+    initial: 5
+    step: 1
+    mode: box   
+    unit_of_measurement: "W"
+    icon: mdi:battery-lock
     
 
 ########################
