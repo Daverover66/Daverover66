@@ -952,3 +952,515 @@ action:
             target:
               entity_id: input_boolean.battery_output_limit_slot_4
 mode: single
+
+###############################################################################
+### Charge battery to desired level from the grid during off-peak
+###############################################################################
+
+alias: "Charge Battery to Desired % "
+description: Charge the Home Battery to the desired % from the grid during off-peak time
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    enabled: true
+    id: Battery State of Energy
+  - platform: time
+    at: input_datetime.start_battery_grid_charge
+    id: Start of off peak
+    alias: When off-peak period has started
+  - platform: time
+    at: input_datetime.end_battery_grid_charge
+    id: End of off peak
+    alias: When off-peak period has ended
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of off peak
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.desired_battery_percentage
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.storage_command_timeout_for_discharge_to_grid')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Input Number Helper Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Charge from Solar Power and Grid
+            alias: Set Storage Command Mode to Charge from Solar Power and Grid
+      - conditions:
+          - condition: trigger
+            id: Battery State of Energy
+          - condition: device
+            device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: selected_option
+            option: Charge from Solar Power and Grid
+            alias: Storage Command Mode is Charge from Solar Power and Grid
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.solaredge_b1_state_of_energy
+                above: input_number.desired_battery_percentage
+              - condition: numeric_state
+                entity_id: sensor.solaredge_b1_state_of_energy
+                above: 99.5
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+          - service: input_number.set_value
+            data:
+              value: 0
+            target:
+              entity_id: input_number.desired_battery_percentage
+            alias: Set Desired Battery % to zero
+      - conditions:
+          - condition: trigger
+            id: End of off peak
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: select.solaredge_i1_storage_command_mode
+                type: selected_option
+                option: Maximize Self Consumption
+            alias: Test if Storage Command Mode is MSC
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+mode: single
+
+
+
+###############################################################################
+### Discharge battery to desired level during peak export period
+###############################################################################
+
+alias: Discharge Battery to Desired %
+description: Disharge the Home Battery to the desired % during Flux peak time
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    enabled: true
+    id: Battery State of Energy
+  - platform: time
+    id: Start of peak
+    alias: At Start Discharge Helper Time
+    at: input_datetime.start_battery_discharge
+  - platform: time
+    at: input_datetime.end_battery_discharge
+    id: End of peak
+    alias: At End Discharge Helper Time
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of peak
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            above: input_number.desired_battery_discharge_percentage
+            alias: Confirm Battery State of Charge is above desired discharge %
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.storage_command_timeout_for_discharge_to_grid')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Input Number Helper Value
+          - service: number.set_value
+            data:
+              value: "{{ states('input_number.battery_output_limit') | float(0) }}"
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Discharge to Maximize Export
+            alias: Set Storage Command Mode to Discharge to Maximise Export
+      - conditions:
+          - condition: trigger
+            id: Battery State of Energy
+          - condition: device
+            device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: selected_option
+            option: Discharge to Maximize Export
+            alias: Storage Command Mode is Discharge to Maximise Export
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: input_number.desired_battery_discharge_percentage
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+      - conditions:
+          - condition: trigger
+            id: End of peak
+          - condition: not
+            conditions:
+              - condition: device
+                device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: select.solaredge_i1_storage_command_mode
+                type: selected_option
+                option: Maximize Self Consumption
+            alias: Test if Storage Command Mode is MSC
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float (0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            alias: Set Storage Command Timeout to Default Value
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_command_mode
+            type: select_option
+            option: Maximize Self Consumption
+            alias: Set Storage Command Mode to MSC
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+mode: single
+
+###################################################################################################
+### Actionable notification to ask if battery output is to be limited overnight during EV charging
+###################################################################################################
+
+alias: Get Battery Output Limit
+description: Send a notification asking if the battery output should be limited overnight
+trigger:
+  - platform: time
+    at: "22:05:00"
+condition: []
+action:
+  - alias: Send notification
+    service: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: |
+        Do you want to limit the battery output overnight?
+      title: Battery Output Limit
+      data:
+        actions:
+          - action: "YES"
+            title: "Yes"
+          - action: "NO"
+            title: "No"
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "YES"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "NO"
+    timeout:
+      hours: 0
+      minutes: 30
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') | float
+                }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 500
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
+        sequence:
+          - service: input_number.set_value
+            data:
+              value: 5000
+            target:
+              entity_id: >-
+                input_number.desired_battery_output_limit_for_overnight_ev_charging
+mode: single
+
+###############################################################################
+### Limit battery output overnight during EV charging 
+###############################################################################
+
+alias: Limit Battery Output
+description: Limit the output of the battery during overnight EV charging window
+trigger:
+  - platform: time
+    at: input_datetime.start_battery_output_limit
+    id: Start of Flux Period
+  - platform: time
+    at: input_datetime.end_battery_output_limit
+    id: End of Flux Period
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Start of Flux Period
+            alias: When triggered by start of limit period
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: >-
+              input_number.desired_battery_output_limit_for_overnight_ev_charging
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+      - conditions:
+          - condition: trigger
+            id: End of Flux Period
+            alias: When triggered by end of limit period
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            alias: Set Storage Discharge Limit to Input Number Helper Value
+mode: single
+
+###############################################################################
+### Set Battery to charge from Clipped Solar
+###############################################################################
+
+alias: Set battery to charge from clipped Solar ( normally after longer EV charge)
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.start_charge_from_clipped_solar
+condition: []
+action:
+  - service: number.set_value
+    data:
+      value: >-
+        {{
+        states('input_number.storage_command_timeout_period_for_clipped_solar')
+        | float(0)}}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Clipped Solar Input Number Helper
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: select.solaredge_i1_storage_command_mode
+    type: select_option
+    option: Charge from Clipped Solar Power
+    alias: Set Storage Command Mode to Charge from Clipped Solar
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: number.set_value
+    data:
+      value: >-
+        {{ states('input_number.storage_command_timeout_default_period') |
+        float(0)}}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to default
+mode: single
+
+###############################################################################
+### Check Battery Settings
+###############################################################################
+
+alias: Battery Settings Confirm
+description: checks to see if battery settings are correct and sets an input boolean toggle
+trigger:
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_default_mode
+    from: Maximize Self Consumption
+    id: Storage Default Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_default_mode
+    id: Storage Default Mode Correct
+    to: Maximize Self Consumption
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_command_mode
+    from: Maximize Self Consumption
+    id: Storage Cmd Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_command_mode
+    id: Storage Cmd Mode Correct
+    to: Maximize Self Consumption
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_control_mode
+    from: Remote Control
+    id: Storage Control Mode Wrong
+  - platform: state
+    entity_id:
+      - select.solaredge_i1_storage_control_mode
+    id: Storage Control Mode Correct
+    to: Remote Control
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "on"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "off"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
+mode: single
