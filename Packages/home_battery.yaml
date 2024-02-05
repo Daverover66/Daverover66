@@ -294,6 +294,10 @@ input_select:
 ########################  
 automation:
 
+##########################################
+#       Battery Settings Confirm         #
+##########################################
+
   - id: battery_settings_confirm 
     alias: Battery Settings Confirm
     description: checks to see if battery settings are correct and sets an input boolean toggle
@@ -399,6 +403,10 @@ automation:
                   entity_id: input_boolean.desired_storage_control_mode_correct
     mode: restart
 
+########################################################
+#       Grid Charge Battery During Agile Plunge        #
+########################################################
+
   - id: grid_charge_battery_during_plunge_pricing   
     alias: "Grid Charge Battery during Plunge Pricing "
     description: ""
@@ -448,6 +456,76 @@ automation:
                   title: Price Plunge Over
     mode: single
 
+##########################################
+#           Home Battery Watch           #
+##########################################
+
+ -  id: home_battery_watch
+    alias: Home Battery Watch
+    description: Notify me if there is a problem with the home battery
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.solaredge_b1_status
+        to: B_STATUS_IDLE
+        id: Home Battery Idle
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+      - platform: state
+        entity_id:
+          - sensor.solaredge_b1_status
+        to: unavailable
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+        id: Home Battery Unavailable
+      - platform: state
+        entity_id:
+          - sensor.solaredge_b1_status
+        to: unknown
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+        id: Home Battery Unknown
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Home Battery Idle
+              - condition: sun
+                after: sunset
+            sequence:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: The Home Battery is idle
+                  title: HOME BATTERY
+                alias: Send a notification based on an input text helper
+          - conditions:
+              - condition: or
+                conditions:
+                  - condition: trigger
+                    id: Home Battery Unavailable
+                  - condition: trigger
+                    id: Home Battery Unknown
+            sequence:
+              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+                data:
+                  message: There is a problem with the Home Battery
+                  title: HOME BATTERY
+                alias: Send a notification based on an input text helper
+              - service: notify.alexa_media_kitchen_echo_show
+                data:
+                  message: There is a problem with the home battery
+                  title: HOME BATTERY
+                  data:
+                    type: announce
+                    method: all
+    mode: single
 
 
 ########################
