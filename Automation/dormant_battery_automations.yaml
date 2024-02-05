@@ -542,4 +542,233 @@ action:
     alias: Set Storage Command Timeout to default
 mode: single
 
+alias: Charging Controls Work Together
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - input_boolean.grid_charge_battery_slot_1_active
+      - input_boolean.grid_charge_battery_slot_2_active
+      - input_boolean.grid_charge_battery_slot_3_active
+      - input_boolean.grid_charge_battery_slot_4_active
+    id: Grid Slot Active Change
+  - platform: state
+    entity_id:
+      - input_datetime.start_battery_grid_charge
+      - input_datetime.start_battery_grid_charge_slot_2_at
+      - input_datetime.start_battery_grid_charge_slot_3_at
+      - input_datetime.start_battery_output_limit_slot_4
+    id: Grid Slot Start Time Set
+  - platform: state
+    entity_id:
+      - input_datetime.end_battery_grid_charge
+      - input_datetime.end_battery_charge_grid_slot_2_at
+      - input_datetime.end_battery_charge_grid_slot_3_at
+      - input_datetime.end_battery_grid_charge_slot_4_at
+    id: Grid Slot End Time Set
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Active Change
+          - condition: template
+            value_template: "{{ \"1\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.rolec_slot_1_active
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Active Change
+          - condition: template
+            value_template: "{{ \"2\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.rolec_slot_2_active
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Active Change
+          - condition: template
+            value_template: "{{ \"3\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.rolec_slot_3_active
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Active Change
+          - condition: template
+            value_template: "{{ \"4\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_boolean.toggle
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.rolec_slot_4_active
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Start Time Set
+          - condition: template
+            value_template: "{{ \"1\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{ states('input_datetime.start_battery_grid_charge') }}"
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_on
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.start_battery_grid_charge'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.start_battery_grid_charge_slot_2_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Start Time Set
+          - condition: template
+            value_template: "{{ \"2\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{ states('input_datetime.start_battery_grid_charge_slot_2_at')
+                }}
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_2_on_at
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.start_battery_grid_charge_slot_2_at'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.start_battery_grid_charge_slot_3_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Start Time Set
+          - condition: template
+            value_template: "{{ \"3\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{ states('input_datetime.start_battery_grid_charge_slot_3_at')
+                }}
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_3_on_at
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.start_battery_grid_charge_slot_3_at'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.start_battery_grid_charge_slot_4_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot Start Time Set
+          - condition: template
+            value_template: "{{ \"4\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: >-
+                {{ states('input_datetime.start_battery_grid_charge_slot_4_at')
+                }}
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_4_on_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot End Time Set
+          - condition: template
+            value_template: "{{ \"1\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{ states('input_datetime.end_battery_grid_charge') }}"
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_off
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.end_battery_grid_charge'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.end_battery_charge_grid_slot_2_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot End Time Set
+          - condition: template
+            value_template: "{{ \"2\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{ states('input_datetime.end_battery_charge_grid_slot_2_at') }}"
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_2_off_at
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.end_battery_charge_grid_slot_2_at'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.end_battery_charge_grid_slot_3_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot End Time Set
+          - condition: template
+            value_template: "{{ \"3\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{ states('input_datetime.end_battery_charge_grid_slot_3_at') }}"
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_3_off_at
+          - service: input_datetime.set_datetime
+            data:
+              time: >
+                {{(as_timestamp(strptime(states('input_datetime.end_battery_charge_grid_slot_3_at'),
+                "%H:%M:%S")) + 1800)|timestamp_custom ("%H:%M")}}
+            target:
+              entity_id: input_datetime.end_battery_grid_charge_slot_4_at
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Slot End Time Set
+          - condition: template
+            value_template: "{{ \"4\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - service: input_datetime.set_datetime
+            data:
+              time: "{{ states('input_datetime.end_battery_grid_charge_slot_4_at') }}"
+            target:
+              entity_id:
+                - input_datetime.rolec_wallbox_slot_4_off_at
+mode: queued
+max: 6
 
