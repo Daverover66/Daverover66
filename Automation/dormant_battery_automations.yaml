@@ -2,6 +2,95 @@
 These are all the home battery related automations not currently in use
 ##########################
 
+alias: Get desired battery %
+description: Send a notification asking for desired battery percentage
+trigger:
+  - platform: time
+    at: "22:00:00"
+condition: []
+action:
+  - alias: Send notification
+    service: notify.mobile_app_pixel_5
+    data:
+      message: >
+        What battery % do you want to charge to? (default {{
+        states('input_number.default_battery_percentage')|int }}%)
+
+        Estimated Production Tomorrow: {{
+        states('sensor.energy_production_tomorrow') }}kWh
+
+        Estimated Peak Power At: {{
+        as_timestamp(states('sensor.power_highest_peak_time_tomorrow')) |
+        timestamp_custom("%H:%M", local=True, default="ERROR") }}
+      title: Set battery charge %
+      data:
+        actions:
+          - action: NINETY
+            title: 90%
+          - action: EIGHTY
+            title: 80%
+          - action: REPLY
+            title: Custom
+  - alias: Wait for a response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: NINETY
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: REPLY
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: EIGHTY
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ not wait.trigger }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: "{{ states('input_number.default_battery_percentage') | float }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"NINETY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: 90
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"REPLY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: |
+                {{ wait.trigger.event.data.reply_text | int(0) }}
+      - conditions:
+          - condition: template
+            value_template: "{{ wait.trigger.event.data.action == \"EIGHTY\" }}"
+        sequence:
+          - service: input_number.set_value
+            target:
+              entity_id: input_number.desired_battery_percentage
+            data:
+              value: 80
+mode: single
+
 alias: Discharge Battery to Desired %
 description: Discharge the Home Battery to the desired % during Flux peak time
 trigger:
