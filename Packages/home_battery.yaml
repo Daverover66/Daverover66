@@ -252,10 +252,42 @@ input_number:
 
 input_select:
   desired_battery_storage_command_mode:
-  name: Desired Battery Storage Command Mode
-  icon: mdi:home-battery
-  options:
-    - Solar Power Only (Off)
+    name: Desired Battery Storage Command Mode
+    icon: mdi:home-battery
+    options:
+      - Solar Power Only (Off)
+      - Charge from Clipped Solar Power
+      - Charge from Solar Power
+      - Charge from Solar Power and Grid
+      - Discharge to Maximize Export
+      - Discharge to Minimize Import
+      - Maximize Self Consumption
+    initial: Maximize Self Consumption
+
+  desired_battery_storage_control_mode:
+    name: Desired Battery Storage Control Mode
+    icon: mdi:battery-lock
+    options:
+      - Disabled
+      - Maximize Self Consumption
+      - Time of Use
+      - Backup Only
+      - Remote Control
+    initial: Remote Control
+
+  desired_battery_storage_default_mode:
+    name: Desired Battery Storage Default Mode
+    icon: mdi:battery-lock
+    options:
+      - Solar Power Only (Off)
+      - Charge from Clipped Solar Power
+      - Charge from Solar Power
+      - Charge from Solar Power and Grid
+      - Discharge to Maximize Export
+      - Discharge to Minimize Import
+      - Maximize Self Consumption
+    initial: Maximize Self Consumption
+  
 
 ########################
 #      Automations     #
