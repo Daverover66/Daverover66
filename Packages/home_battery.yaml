@@ -527,6 +527,227 @@ automation:
                     method: all
     mode: single
 
+####################################################
+#         Grid Charge Battery on Agile             #
+####################################################
+    
+  - id: intermittent_grid_charg_battery
+    alias: Intermittent Grid Charge Battery.
+    description: ""
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.energy_production_today_3
+        below: input_number.solar_production_threshold_for_grid_charging_battery
+        id: Grid Charge Allowed
+        enabled: false
+      - platform: numeric_state
+        entity_id: sensor.energy_production_today_3
+        above: input_number.solar_production_threshold_for_grid_charging_battery
+        id: Grid Charge Not Allowed
+        enabled: false
+      - platform: time
+        at: "21:00:00"
+        id: Activate Grid Charge
+      - platform: state
+        entity_id:
+          - >-
+            binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+        from: "off"
+        to: "on"
+        id: Start Grid Charge
+      - platform: state
+        entity_id:
+          - >-
+            binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+        from: "on"
+        to: "off"
+        id: Stop Grid Charge
+      - alias: End Charge With Timer
+        platform: event
+        event_type:
+          - timer.finished
+          - timer.cancelled
+        event_data:
+          entity_id: timer.home_battery_3_hour_charge_period
+        id: End Grid Charge
+        enabled: true
+      - platform: state
+        entity_id:
+          - binary_sensor.morning
+        from: "off"
+        to: "on"
+        id: Reset Timer
+        alias: Reset Timer when Morning turns on
+        enabled: true
+      - platform: state
+        entity_id:
+          - switch.solaredge_i1_advanced_power_control
+        from: unavailable
+        to: "on"
+        id: Inverter Reset
+      - platform: state
+        entity_id:
+          - binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+        from: "off"
+        to: "on"
+        id: Topup
+      - platform: state
+        entity_id:
+          - binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+        from: "on"
+        to: "off"
+        id: Topdown
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Grid Charge Allowed
+            sequence:
+              - service: automation.turn_on
+                target:
+                  entity_id:
+                    - automation.test_intermittent_charge_times
+                  device_id: []
+                  area_id: []
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Grid Charge Not Allowed
+            sequence:
+              - service: automation.turn_off
+                target:
+                  entity_id:
+                    - automation.test_intermittent_charge_times
+                  device_id: []
+                  area_id: []
+                data:
+                  stop_actions: true
+          - conditions:
+              - condition: trigger
+                id:
+                  - Activate Grid Charge
+            sequence:
+              - service: input_boolean.turn_on
+                target:
+                  entity_id:
+                    - input_boolean.grid_charge_home_battery
+                  device_id: []
+                  area_id: []
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Start Grid Charge
+              - condition: state
+                entity_id: input_boolean.grid_charge_home_battery
+                state: "on"
+            sequence:
+              - service: input_boolean.turn_on
+                data: {}
+                target:
+                  entity_id: input_boolean.home_battery_grid_charging
+              - service: script.grid_charge_battery
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Stop Grid Charge
+            sequence:
+              - service: script.turn_off
+                data: {}
+                target:
+                  entity_id: script.grid_charge_battery
+              - device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: 0bdfb19491b49722c2a94351b9a673aa
+                type: select_option
+                option: Maximize Self Consumption
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.home_battery_grid_charging
+              - service: timer.pause
+                data: {}
+                target:
+                  entity_id: timer.home_battery_3_hour_charge_period
+          - conditions:
+              - condition: trigger
+                id:
+                  - End Grid Charge
+            sequence:
+              - service: script.turn_off
+                data: {}
+                target:
+                  entity_id: script.grid_charge_battery
+              - device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: 0bdfb19491b49722c2a94351b9a673aa
+                type: select_option
+                option: Maximize Self Consumption
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.home_battery_grid_charging
+              - service: input_boolean.turn_off
+                data: {}
+                target:
+                  entity_id: input_boolean.grid_charge_home_battery
+          - conditions:
+              - condition: trigger
+                id:
+                  - Reset Timer
+            sequence:
+              - service: timer.cancel
+                data: {}
+                target:
+                  entity_id: timer.home_battery_3_hour_charge_period
+          - conditions:
+              - condition: trigger
+                id:
+                  - Inverter Reset
+              - condition: state
+                entity_id: input_boolean.grid_charge_home_battery
+                state: "on"
+              - condition: state
+                entity_id: >-
+                  binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+                state: "on"
+            sequence:
+              - service: script.grid_charge_battery
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Topup
+              - condition: state
+                entity_id: sensor.solar_battery_daytime_topup_needed
+                state: "true"
+              - condition: not
+                conditions:
+                  - condition: state
+                    entity_id: sensor.solar_battery_time_to_empty
+                    state: ""
+            sequence:
+              - service: script.battery_pre_peak_top_up
+                metadata: {}
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Topdown
+              - condition: state
+                entity_id: input_boolean.home_battery_grid_charging
+                state: "on"
+            sequence:
+              - service: script.battery_pre_peak_top_down
+                metadata: {}
+                data: {}
+    mode: restart
+
+
 
 ########################
 #       Scripts        #
