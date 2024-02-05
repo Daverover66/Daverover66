@@ -228,3 +228,229 @@ action:
             alias: Set Storage Command Mode to MSC
 mode: single
 
+alias: Grid Charge Battery to full
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.start_battery_grid_charge
+    id: Start of slot 1
+  - platform: time
+    at: input_datetime.end_battery_grid_charge
+    id: End of slot 1
+  - platform: time
+    at: input_datetime.start_battery_grid_charge_slot_2_at
+    id: Start of slot 2
+  - platform: time
+    at: input_datetime.end_battery_charge_grid_slot_2_at
+    id: End of slot 2
+  - platform: time
+    at: input_datetime.start_battery_grid_charge_slot_3_at
+    id: Start of slot 3
+  - platform: time
+    at: input_datetime.end_battery_charge_grid_slot_3_at
+    id: End of slot 3
+  - platform: time
+    at: input_datetime.start_battery_grid_charge_slot_4_at
+    id: Start of slot 4
+  - platform: time
+    at: input_datetime.end_battery_grid_charge_slot_4_at
+    id: End of slot 4
+  - platform: state
+    entity_id:
+      - switch.solaredge_i1_grid_control
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 1
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_1_active
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 1
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_1_active
+            state: "on"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 2
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_2_active
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 2
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_2_active
+            state: "on"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 3
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_3_active
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 3
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_3_active
+            state: "on"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Start of slot 4
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_4_active
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - service: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - End of slot 4
+          - condition: state
+            entity_id: input_boolean.grid_charge_battery_slot_4_active
+            state: "on"
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: 0bdfb19491b49722c2a94351b9a673aa
+            type: select_option
+            option: Maximize Self Consumption
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: state
+            entity_id: input_boolean.grid_charge_home_battery
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: time
+                after: input_datetime.start_battery_grid_charge
+                before: input_datetime.end_battery_grid_charge
+              - condition: time
+                after: input_datetime.start_battery_grid_charge_slot_2_at
+                before: input_datetime.end_battery_charge_grid_slot_2_at
+              - condition: time
+                after: input_datetime.start_battery_grid_charge_slot_3_at
+                before: input_datetime.end_battery_charge_grid_slot_3_at
+              - condition: time
+                after: input_datetime.start_battery_grid_charge_slot_4_at
+                before: input_datetime.end_battery_grid_charge_slot_4_at
+        sequence:
+          - service: script.grid_charge_battery
+            data: {}
+mode: restart
+
+
+alias: Set battery to charge from clipped Solar ( normally after longer EV charge)
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.start_charge_from_clipped_solar
+condition: []
+action:
+  - service: number.set_value
+    data:
+      value: >-
+        {{
+        states('input_number.storage_command_timeout_period_for_clipped_solar')
+        | float(0)}}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Clipped Solar Input Number Helper
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: select.solaredge_i1_storage_command_mode
+    type: select_option
+    option: Charge from Clipped Solar Power
+    alias: Set Storage Command Mode to Charge from Clipped Solar
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - service: number.set_value
+    data:
+      value: >-
+        {{ states('input_number.storage_command_timeout_default_period') |
+        float(0)}}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to default
+mode: single
+
+
