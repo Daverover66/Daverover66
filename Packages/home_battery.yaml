@@ -399,6 +399,56 @@ automation:
                   entity_id: input_boolean.desired_storage_control_mode_correct
     mode: restart
 
+  - id: grid_charge_battery_during_plunge_pricing   
+    alias: "Grid Charge Battery during Plunge Pricing "
+    description: ""
+    trigger:
+      - platform: state
+        entity_id: input_boolean.plunge_pricing
+        from: "off"
+        to: "on"
+        id: Start Charge
+      - platform: state
+        entity_id: input_boolean.plunge_pricing
+        from: "on"
+        to: "off"
+        id: Stop Charge
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id:
+                  - Start Charge
+              - condition: state
+                entity_id: input_boolean.home_battery_grid_charging
+                state: "off"
+            sequence:
+              - service: notify.persistent_notification
+                data:
+                  message: The home battery is charging
+                  title: Price Plunge Started
+              - service: script.grid_charge_battery
+                data: {}
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.home_battery_grid_charging
+                data: {}
+          - conditions:
+              - condition: trigger
+                id:
+                  - Stop Charge
+              - condition: state
+                entity_id: input_boolean.home_battery_grid_charging
+                state: "on"
+            sequence:
+              - service: notify.persistent_notification
+                data:
+                  message: The home battery has stopped charging
+                  title: Price Plunge Over
+    mode: single
+
+
 
 ########################
 #       Scripts        #
