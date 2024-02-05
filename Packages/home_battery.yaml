@@ -247,12 +247,15 @@ input_number:
     
 
 ########################
-#       Text           #
+#       Select         #
 ########################
-input_text:
-  current_random_light:
-    name: Current Random Light
-    icon: mdi:lightbulb
+
+input_select:
+  desired_battery_storage_command_mode:
+  name: Desired Battery Storage Command Mode
+  icon: mdi:home-battery
+  options:
+    - Solar Power Only (Off)
 
 ########################
 #      Automations     #
