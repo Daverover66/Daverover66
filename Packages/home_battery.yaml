@@ -747,8 +747,381 @@ automation:
                 data: {}
     mode: restart
 
+####################################################
+#              Limit Battery Output                #
+####################################################
+
+  - id: limit_battery-output
+    alias: Limit Battery Output
+    description: Limit the output of the battery during overnight EV charging window
+    trigger:
+      - platform: time
+        at: input_datetime.start_battery_output_limit
+        id: Start of EV Charge Period 1
+      - platform: time
+        at: input_datetime.end_battery_output_limit
+        id: End of EV Charge Period 1
+      - platform: time
+        at: input_datetime.start_battery_output_limit_slot_2
+        id: Start of EV Charge Period 2
+      - platform: time
+        at: input_datetime.end_battery_output_limit_slot_2
+        id: End of EV Charge Period 2
+      - platform: time
+        at: input_datetime.start_battery_output_limit_slot_3
+        id: Start of EV Charge Period 3
+      - platform: time
+        at: input_datetime.end_battery_output_limit_slot_3
+        id: End of EV Charge Period 3
+      - platform: time
+        at: input_datetime.start_battery_output_limit_slot_4
+        id: Start of EV Charge Period 4
+      - platform: time
+        at: input_datetime.end_battery_output_limit_slot_4
+        id: End of EV Charge Period 4
+      - alias: When inverter resets
+        platform: state
+        entity_id:
+          - switch.solaredge_i1_advanced_power_control
+        from: unavailable
+        to: "on"
+        id: Inverter Reset
+    condition:
+      - condition: template
+        value_template: "{{ is_state('input_boolean.allow_battery_output_limit','on') }}"
+        alias: Is Allow Battery Output Limit On?
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Start of EV Charge Period 1
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                above: >-
+                  input_number.desired_battery_output_limit_for_overnight_ev_charging
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{
+                    states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                    | float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: End of EV Charge Period 1
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                below: input_number.default_battery_output_limit
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_1','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{ states('input_number.default_battery_output_limit') |
+                    float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: Start of EV Charge Period 2
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                above: >-
+                  input_number.desired_battery_output_limit_for_overnight_ev_charging
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{
+                    states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                    | float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: End of EV Charge Period 2
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                below: input_number.default_battery_output_limit
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_2','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{ states('input_number.default_battery_output_limit') |
+                    float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: Start of EV Charge Period 3
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                above: >-
+                  input_number.desired_battery_output_limit_for_overnight_ev_charging
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{
+                    states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                    | float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: End of EV Charge Period 3
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                below: input_number.default_battery_output_limit
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_3','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{ states('input_number.default_battery_output_limit') |
+                    float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: Start of EV Charge Period 4
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                above: >-
+                  input_number.desired_battery_output_limit_for_overnight_ev_charging
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_4','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{
+                    states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                    | float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id: End of EV Charge Period 4
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                below: input_number.default_battery_output_limit
+              - condition: template
+                value_template: "{{ is_state('input_boolean.battery_output_limit_slot_4','on') }}"
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{ states('input_number.default_battery_output_limit') |
+                    float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+          - conditions:
+              - condition: trigger
+                id:
+                  - Inverter Reset
+              - condition: time
+                after: "01:00:00"
+                before: "05:45:00"
+              - condition: numeric_state
+                entity_id: number.solaredge_i1_storage_discharge_limit
+                above: 100
+              - condition: or
+                conditions:
+                  - condition: template
+                    value_template: "{{is_state('input_boolean.plunge_pricing','on')}}"
+                  - condition: template
+                    value_template: "{{is_state('input_boolean.cheap_energy','on')}}"
+                  - condition: numeric_state
+                    entity_id: >-
+                      sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+                    below: 0.05
+            sequence:
+              - service: number.set_value
+                data:
+                  value: >-
+                    {{
+                    states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                    | float(0) }}
+                target:
+                  entity_id: number.solaredge_i1_storage_discharge_limit
+    mode: single
 
 
 ########################
 #       Scripts        #
 ########################
+
+script:
+
+##########################################
+#       Battery Pre-Peak Top Down        #
+##########################################
+
+  - id: battery_pre_peak_top_down
+    alias: Battery pre-peak top down
+    sequence:
+      - service: script.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: script.grid_charge_battery
+      - device_id: 952193e87f675ba7f7e32eda5500c572
+        domain: select
+        entity_id: 0bdfb19491b49722c2a94351b9a673aa
+        type: select_option
+        option: Maximize Self Consumption
+      - service: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.home_battery_grid_charging
+      - service: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.home_battery_3_hour_charge_period
+      - service: script.speech_engine
+        metadata: {}
+        data:
+          where: "{{states('sensor.room_audio')}}"
+          message: >-
+            Attention in the house.  The home battery has completed a half hour pree
+            peak topup and its charge level is now a more healthy {{
+            states('sensor.battery_state_of_charge') }}%.
+    mode: single
+
+##########################################
+#       Battery Pre-Peak Top Up          #
+##########################################
+
+  - id: battery_pre_peak_top_up
+    alias: Battery pre-peak top up
+    sequence:
+      - service: input_boolean.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.home_battery_grid_charging
+      - service: script.grid_charge_battery
+        metadata: {}
+        data: {}
+      - service: script.speech_engine
+        metadata: {}
+        data:
+          where: "{{states('sensor.room_audio')}}"
+          message: >-
+            Attention in the house.  The home battery is performing a half hour pree
+            peak topup, as its charge level is {{
+            states('sensor.battery_state_of_charge') }}%.
+    mode: single
+
+##########################################
+#       Force Discharge Battery          #
+##########################################  
+
+  - id: force_discharge_battery
+    alias: Force Discharge Battery
+    sequence:
+      - service: number.set_value
+        data:
+          value: >-
+            {{ states('input_number.storage_command_timeout_for_discharge_to_grid')
+            | float(0) }}
+        target:
+          entity_id: number.solaredge_i1_storage_command_timeout
+        alias: "Set Storage Command Timeout to Input Helper value "
+      - device_id: 952193e87f675ba7f7e32eda5500c572
+        domain: select
+        entity_id: select.solaredge_i1_storage_command_mode
+        type: select_option
+        option: Discharge to Maximize Export
+        alias: Set Storage Command Mode to Discharge to Maximize Export
+      - service: number.set_value
+        data:
+          value: >-
+            {{ states('input_number.storage_command_timeout_default_period') |
+            float(0) }}
+        target:
+          entity_id: number.solaredge_i1_storage_command_timeout
+        alias: Set Storage Command Timeout to Default via helper
+    mode: single
+    icon: mdi:battery-minus
+
+##########################################
+#           Grid Charge Battery          #
+##########################################  
+
+  - id: grid_charge_battery
+    alias: Grid Charge Battery
+    sequence:
+      - service: number.set_value
+        data:
+          value: >-
+            {{ states('input_number.storage_command_timeout_for_discharge_to_grid')
+            | float(0) }}
+        target:
+          entity_id: number.solaredge_i1_storage_command_timeout
+        alias: Set Storage Command Timeout to Input Helper value
+      - device_id: 952193e87f675ba7f7e32eda5500c572
+        domain: select
+        entity_id: select.solaredge_i1_storage_command_mode
+        type: select_option
+        option: Charge from Solar Power and Grid
+        alias: Set Storage Command Mode to Charge from Solar Power and Grid
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.home_battery_3_hour_charge_period
+      - wait_for_trigger:
+          - platform: numeric_state
+            entity_id:
+              - sensor.solaredge_b1_state_of_energy
+            above: 99.5
+        timeout:
+          hours: 3
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - service: number.set_value
+        data:
+          value: >-
+            {{ states('input_number.storage_command_timeout_default_period') |
+            float(0) }}
+        target:
+          entity_id: number.solaredge_i1_storage_command_timeout
+        alias: Set Storage Command Timeout to Default via helper
+      - device_id: 952193e87f675ba7f7e32eda5500c572
+        domain: select
+        entity_id: 0bdfb19491b49722c2a94351b9a673aa
+        type: select_option
+        option: Maximize Self Consumption
+        alias: "Set Storage Command Mode to Maximize Self Consumption "
+    mode: restart
+    icon: mdi:battery-charging
+
+################################################
+#   Saving Session Prep and Export Battery     #
+################################################  
+
+  - id: saving_session_prep_and_export_battery
+    alias: Saving Session prep and export battery
+    sequence:
+      - variables:
+          saving_session_start: |
+            {{ states('binary_sensor.octopus_energy_saving_session') }}
+    mode: single
+
+    
