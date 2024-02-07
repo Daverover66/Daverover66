@@ -500,7 +500,7 @@ automation:
               - condition: sun
                 after: sunset
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
                   message: The Home Battery is idle
                   title: HOME BATTERY
@@ -513,7 +513,7 @@ automation:
                   - condition: trigger
                     id: Home Battery Unknown
             sequence:
-              - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+              - service: script.text_notify_dave
                 data:
                   message: There is a problem with the Home Battery
                   title: HOME BATTERY
@@ -970,7 +970,7 @@ script:
 #       Battery Pre-Peak Top Down        #
 ##########################################
 
-  - id: battery_pre_peak_top_down
+  - id: battery_pre_peak_top_down  
     alias: Battery pre-peak top down
     sequence:
       - service: script.turn_off
