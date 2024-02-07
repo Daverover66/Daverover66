@@ -298,7 +298,7 @@ automation:
 #       Battery Settings Confirm         #
 ##########################################
 
-  - id: battery_settings_confirm 
+  - id: decffc69-cdad-411d-b174-24cc91a05403
     alias: Battery Settings Confirm
     description: checks to see if battery settings are correct and sets an input boolean toggle
     trigger:
