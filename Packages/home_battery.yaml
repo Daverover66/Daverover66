@@ -407,7 +407,7 @@ automation:
 #       Grid Charge Battery During Agile Plunge        #
 ########################################################
 
-  - id: grid_charge_battery_during_plunge_pricing   
+  - id: 0cc88da6-4a42-48e0-ac13-676745243c6d
     alias: "Grid Charge Battery during Plunge Pricing "
     description: ""
     trigger:
@@ -460,7 +460,7 @@ automation:
 #           Home Battery Watch           #
 ##########################################
 
- -  id: home_battery_watch
+ -  id: 867c46f9-9ac2-42e5-bcd9-ec884f5eecf1
     alias: Home Battery Watch
     description: Notify me if there is a problem with the home battery
     trigger:
@@ -531,7 +531,7 @@ automation:
 #         Grid Charge Battery on Agile             #
 ####################################################
     
-  - id: intermittent_grid_charg_battery
+  - id: 52a4e3aa-c134-408c-b16d-6c5cffca3ac2
     alias: Intermittent Grid Charge Battery.
     description: ""
     trigger:
@@ -751,7 +751,7 @@ automation:
 #              Limit Battery Output                #
 ####################################################
 
-  - id: limit_battery-output
+  - id: 1a1efee6-b0b3-4500-a267-516388433043
     alias: Limit Battery Output
     description: Limit the output of the battery during overnight EV charging window
     trigger:
