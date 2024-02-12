@@ -700,6 +700,11 @@ automation:
                 id:
                   - Reset Timer
             sequence:
+              - delay:
+                  hours: 1
+                  minutes: 0
+                  seconds: 0
+                  milliseconds: 0
               - service: timer.cancel
                 data: {}
                 target:
@@ -746,6 +751,7 @@ automation:
                 metadata: {}
                 data: {}
     mode: restart
+
 
 ####################################################
 #              Limit Battery Output                #
@@ -1089,7 +1095,7 @@ script:
           - platform: numeric_state
             entity_id:
               - sensor.solaredge_b1_state_of_energy
-            above: 99.5
+            above: 99.9
         timeout:
           hours: 3
           minutes: 5
