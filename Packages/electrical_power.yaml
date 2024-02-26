@@ -173,58 +173,7 @@ template:
 
 
 
-### Financials for Agile, best I can do, but the Octopus Integration does most of this
 
-      - name: "Electricity Bill Today"
-        unique_id: electricity_bill_today
-        icon: mdi:cash-plus
-        unit_of_measurement: "£"
-        state: >
-          {{ (states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost')|float(0)
-             - (states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate')|float(0) * states('sensor.solar_exported_power_daily') | float(0) ))|round(2)}}
-    
-      - name: "Solar Accounting Compensation Rate"
-        unique_id: solar_accounting_compensation_rate
-        icon: mdi:cash-minus
-        unit_of_measurement: "£/kWh"
-        state: >
-          {{ states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate') | float(0) }}
-
-      - name: "Solar Accounting Outgoing Fixed Compensation"
-        unique_id: solar_accounting_outgoing_fixed_compensation
-        icon: mdi:cash-minus
-        unit_of_measurement: "£"
-        state: >
-          {% set rate = states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate') | float(0) %}
-          {% set export  = states('sensor.solar_exported_power_daily') | float(0) %}
-            {{ (export * rate) | round(2) }}
-
-      - name: "Solar Accounting Cost Standing Charge"
-        unique_id: solar_accounting_cost_standing_charge
-        icon: mdi:cash-plus
-        unit_of_measurement: "£"
-        state: >
-          {{ states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_standing_charge') | float(0) }}
-      
-      - name: "Gas Accounting Total"
-        unique_id: gas_accounting_total
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set gas_usage = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption') | float (0) %}
-          {% set gas_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_rate') | float (0) %}
-          {% set gas_standing_charge_rate = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_standing_charge') | float (0) %}
-
-          {{ ((gas_usage * gas_rate) + gas_standing_charge_rate) | round(2) }}
-
-      - name: "Total Energy Cost"
-        unique_id: total_energy_cost
-        icon: mdi:currency-gbp
-        unit_of_measurement: "£"
-        state: >
-          {% set gas_cost_daily = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_cost') | float(0) %}
-          {% set elect_cost_daily = states('sensor.electricity_bill_today') | float(0) %}
-            {{ (gas_cost_daily + elect_cost_daily) | round(2) }}
 
       - name: "Solar Inverter Efficiency Int"
         unique_id: solar_inverter_efficiency_int
