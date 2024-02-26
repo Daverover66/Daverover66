@@ -13,6 +13,8 @@
 
 ### Financials for Agile, best I can do, but the Octopus Integration does most of this
 
+template:
+  - sensor:
       - name: "Electricity Bill Today"
         unique_id: electricity_bill_today
         icon: mdi:cash-plus
