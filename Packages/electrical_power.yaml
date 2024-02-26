@@ -10,62 +10,13 @@
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
 #   @date                   :   26/02/2024                                       #
 ##################################################################################
-
-###########################
-#        helpers          # 
-###########################
-
-###########################
-#        input text       # 
-###########################
-
-input_text:
-  # From/to would ideally use input_datetime, but we need the time in a different format
-  octopus_energy_target_from:
-    icon: mdi:clock-start 
-    name: Octopus Energy Target From
-    initial: "00:00"
-  octopus_energy_target_to:
-    icon: mdi:clock-end 
-    name: Octopus Energy Target To
-    initial: "00:00"
-  octopus_energy_target_offset:
-    name: Octopus Energy Target Offset
-    initial: "-00:00:00"
-
-###########################
-#     input number        # 
-###########################
-
-input_number:
-  octopus_energy_target_hours:
-    name: Octopus Energy Target Hours
-    initial: 0.5
-    step: 0.5
-    min: 0
-    max: 24
-    mode: box 
-    
+   
 ###########################
 #       sensors           # 
 ########################### 
 
 template:
   - sensor:
-      - name: "Solar Selfconsumption Ratio"
-        unique_id: solar_selfconsumption_ratio
-        icon: mdi:percent-outline
-        state: >
-          {% set panel_to_house_daily = states('sensor.solar_panel_to_house_daily') | float(0) %}
-          {% set battery_in_daily = states('sensor.solar_battery_in_daily') | float(0) %}
-          {% set exported_power_daily = states('sensor.solar_exported_power_daily') | float(0) %}
-
-          {% if (panel_to_house_daily + battery_in_daily + exported_power_daily <= 0) %}
-            0
-          {% else %}
-            {{ ((panel_to_house_daily + battery_in_daily) / (panel_to_house_daily + battery_in_daily + exported_power_daily) * 100) | round (1) }}
-          {% endif %}
-
       - name: "Inverter 1 Production"
         unique_id: inverter_1_production
         icon: mdi:solar-power
@@ -111,100 +62,6 @@ template:
         availability: >
           {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
           
-      - name: "Solar Selfsufficiency Ratio"
-        unique_id: solar_selfsufficiency_ratio
-        icon: mdi:percent-outline
-        state: >
-          {% set house_consumption_daily = states('sensor.solar_house_consumption_daily') | float(0) %}
-          {% set imported_power_daily = states('sensor.solar_imported_power_daily') | float(0) %}
-
-          {% if (house_consumption_daily <= 0) %}
-            0
-          {% else %}
-            {{ (1 - (imported_power_daily / house_consumption_daily) * 100) | round (1) }}
-          {% endif %}
-
-      - name: "Solar Inverter Efficiency"
-        unique_id: solar_inverter_efficiency
-        icon: mdi:percent-outline
-        unit_of_measurement: "%"
-        state: >
-          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
-          {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float(0) %}
-          {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
-          {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float(0) %}
-          {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') %}
-
-          {% if (is_state('sensor.solar_inverter_efficiency', 'unknown')) %}
-            1
-          {% elif ((i1_dc_power + i2_dc_power) <= 100 or (i1_ac_power + i2_ac_power)  <= 100) %}
-            {{ inverter_efficiency }}
-          {% else %}
-            {{ (i1_ac_power + i2_ac_power ) / (i1_dc_power + i2_dc_power) }}
-          {% endif %}
-        availability: >
-          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number }}
-  
-      - name: "Inverter 1 Efficiency"
-        unique_id: inverter_1_efficiency
-        icon: mdi:percent-outline
-        unit_of_measurement: "%"
-        state: >
-          {% set i1_dc_output = states('sensor.solaredge_i1_dc_power') | float(0) %}
-          {% set i1_ac_output = states('sensor.solaredge_i1_ac_power') | float(0) %}
-          {% set inverter_1_efficiency = states('sensor.inverter_1_efficiency') %}
-
-          {% if is_state('sensor.inverter_1_efficiency', 'unknown') or is_state('sensor.inverter_1_efficiency','unavailable') %}
-            1
-          {% elif (i1_dc_output < 100 or i1_ac_output  < 100) %}
-            {{ inverter_1_efficiency }}
-          {% else %}
-            {{ (i1_ac_output ) / (i1_dc_output) }}
-          {% endif %}
-        availability: >
-          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number }}
-
-      - name: "Inverter 2 Efficiency"
-        unique_id: inverter_2_efficiency
-        icon: mdi:percent-outline
-        unit_of_measurement: "%"
-        state: >
-          {% set i2_dc_output = states('sensor.solaredge_i2_dc_power') | float (0) %}
-          {% set i2_ac_output = states('sensor.solaredge_i2_ac_power') | float (0) %}
-          {% set inverter_2_efficiency = states('sensor.inverter_2_efficiency') %}
-
-          {% if is_state('sensor.inverter_2_efficiency', 'unknown') or is_state('sensor.inverter_2_efficiency','unavailable') %}    
-            1
-          {% elif (i2_dc_output < 100 or i2_ac_output < 100) %} 
-            {{ inverter_2_efficiency }} 
-          {% else %}  
-            {{ (i2_ac_output) / (i2_dc_output) }}
-          {% endif %}
-        availability: >
-          {{ states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
-
-      - name: "Solar Battery Efficiency"
-        unique_id: solar_battery_efficiency
-        icon: mdi:percent-outline
-        unit_of_measurement: "%"
-        state: >
-          {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
-          {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
-          {% set battery_efficiency = states('sensor.solar_battery_efficiency') %}
-
-          {% if (is_state('sensor.solar_battery_efficiency', 'unavailable') or is_state('sensor.solar_battery_efficiency', 'unknown') or (battery_efficiency == 0)) %}
-            1
-          {% elif (i1_dc_power + b1_dc_power <= 0) %}
-            {% if (b1_dc_power >= 0 or i1_dc_power <= 0) %}
-              {{ battery_efficiency }}
-            {% else %}
-              {{ (1 - ((b1_dc_power * -1 - (i1_dc_power)) / b1_dc_power * -1)) }}
-            {% endif %} 
-          {% else %}
-            1
-          {% endif %}
-        availability: >
-          {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
 
 ##########################################################
 #    energy flow from Modbus config documentation 
