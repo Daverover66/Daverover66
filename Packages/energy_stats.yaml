@@ -288,3 +288,330 @@ template:
           {% endif %}
         availability: >
           {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
+
+
+      - name: "Solar Lifetime Production"
+        unique_id: solar_lifetime_production
+        unit_of_measurement: "MWh"
+        icon: mdi:solar-power
+        state: >
+          {% set ac_energy_i1_kwh = states('sensor.solaredge_i1_ac_energy_kwh') | float(0) %}
+          {% set ac_energy_i2_kwh = states('sensor.solaredge_i2_ac_energy_kwh') | float(0) %}
+          {{ (((ac_energy_i1_kwh + ac_energy_i2_kwh) / 1000) | round (2)) }}
+        availability: >
+          {{ states('sensor.solaredge_i1_ac_energy_kwh') | is_number }}
+
+      - name: "Solar Inverter Efficiency Int"
+        unique_id: solar_inverter_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_inverter_efficiency') | float(0)) * 100) | round(2) }}
+
+      - name: "Inverter 1 Production Int"
+        unique_id: inverter_1_production_int
+        icon: mdi:solar-power
+        unit_of_measurement: "W"
+        state: >
+          {{ (states('sensor.inverter_1_production') | float(0)) | round(2) }}
+
+      - name: "Inverter 1 Efficiency Int"
+        unique_id: inverter_1_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.inverter_1_efficiency') | float(0)) * 100) | round (2) }}
+
+      - name: "Inverter 2 Efficiency Int"
+        unique_id: inverter_2_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.inverter_2_efficiency') | float(0)) * 100) | round (2) }}
+
+
+      - name: "Solar Battery Efficiency Int"
+        unique_id: solar_battery_efficiency_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_battery_efficiency')| float(0)) * 100) | round(2) }}
+
+      - name: "Solar Inverter Efficiency Average Int"
+        unique_id: solar_inverter_efficiency_average_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_inverter_efficiency_average') | float(0)) * 100) | round(2) }}
+
+      - name: "Solar Battery Efficiency Average Int"
+        unique_id: solar_battery_efficiency_average_int
+        icon: mdi:percent-outline
+        unit_of_measurement: "%"
+        state: >
+          {{ ((states('sensor.solar_battery_efficiency_average')| float(0)) * 100) | round(2) }}
+
+sensor:
+  - platform: integration
+    source: sensor.power_solar_generation
+    method: left
+    unit_prefix: k
+    name: solar_panel_production_kwh
+  - platform: integration
+    source: sensor.power_battery_load
+    method: left
+    unit_prefix: k
+    name: solar_battery_out_kwh
+  - platform: integration
+    source: sensor.power_pv_battery
+    method: left
+    unit_prefix: k
+    name: solar_battery_in_kwh
+  - platform: integration
+    source: sensor.power_consumption
+    method: left
+    unit_prefix: k
+    name: solar_house_consumption_kwh
+  - platform: integration
+    source: sensor.power_grid_import
+    method: left
+    unit_prefix: k
+    name: solar_imported_power_kwh
+  - platform: integration
+    source: sensor.power_grid_export
+    method: left
+    unit_prefix: k
+    name: solar_exported_power_kwh
+  - platform: integration
+    source: sensor.power_pv_load
+    method: left
+    unit_prefix: k
+    name: solar_panel_to_house_kwh
+  - platform: integration 
+    source: sensor.power_grid_battery 
+    method: left 
+    unit_prefix: k
+    name: solar_grid_to_battery_kwh 
+  - platform: integration 
+    source: sensor.power_battery_grid  
+    method: left 
+    unit_prefix: k
+    name: solar_battery_to_grid_kwh 
+  - platform: integration 
+    source: sensor.power_battery_charging   
+    method: left 
+    unit_prefix: k
+    name: solar_battery_charge_kwh 
+  - platform: integration 
+    source: sensor.power_battery_discharging   
+    method: left 
+    unit_prefix: k
+    name: solar_battery_discharge_kwh 
+
+  - platform: statistics
+    name: "Solar Battery Efficiency Average"
+    unique_id: solar_battery_efficiency_average
+    state_characteristic: mean
+    sampling_size: 1200
+    max_age:
+      hours: 24
+    entity_id: sensor.solar_battery_efficiency
+
+  - platform: statistics
+    name: "Solar Inverter Efficiency Average"
+    unique_id: solar_inverter_efficiency_average
+    state_characteristic: mean
+    sampling_size: 1200
+    max_age:
+      hours: 24
+    entity_id: sensor.solar_inverter_efficiency
+
+utility_meter:
+
+### Daily
+  solar_panel_production_daily:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Daily
+    cycle: daily
+  solar_battery_in_daily:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Daily
+    cycle: daily
+  solar_battery_out_daily:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Daily
+    cycle: daily
+  solar_house_consumption_daily:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Daily
+    cycle: daily
+  solar_imported_power_daily:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Daily
+    cycle: daily
+  solar_imported_power_daily_solaredge:
+    source: sensor.solaredge_m1_imported_kwh
+    name: Solar Imported Power Daily Solar Edge
+    cycle: daily
+  solar_exported_power_daily:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Daily
+    cycle: daily
+  solar_panel_to_house_daily:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Daily
+    cycle: daily
+  solar_grid_to_battery_daily:
+    source: sensor.solar_grid_tobattery_kwh 
+    name: Solar Grid To Battery Daily 
+    cycle: daily 
+  solar_battery_to_grid_daily:
+    source: sensor.solar_battery_to_grid_kwh 
+    name: Solar Battery To Grid Daily 
+    cycle: daily 
+  solar_battery_charge_daily:
+    source: sensor.solar_battery_charging_kwh 
+    name: Solar Battery Charge Daily 
+    cycle: daily 
+  solar_battery_discharge_daily:
+    source: sensor.solar_battery_discharging_kwh 
+    name: Solar Battery Discharge Daily 
+    cycle: daily 
+
+### Weekly
+  solar_panel_to_house_weekly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Weekly
+    cycle: weekly
+  solar_imported_power_weekly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Weekly
+    cycle: weekly
+  solar_house_consumption_weekly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Weekly
+    cycle: weekly
+  solar_panel_production_weekly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Weekly
+    cycle: weekly
+  solar_battery_in_weekly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Weekly
+    cycle: weekly
+  solar_battery_out_weekly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Weekly
+    cycle: weekly
+  solar_exported_power_weekly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Weekly
+    cycle: weekly
+  solar_grid_to_battery_weekly:
+    source: sensor.solar_grid_to_battery_kwh 
+    name: Solar Grid To Battery Daily 
+    cycle: weekly 
+  solar_battery_to_grid_weekly:
+    source: sensor.solar_battery_to_grid_kwh 
+    name: Solar Battery To Grid Weekly  
+    cycle: weekly  
+  solar_battery_charge_weekly :
+    source: sensor.solar_battery_charging_kwh 
+    name: Solar Battery Charge Weekly  
+    cycle: weekly  
+  solar_battery_discharge_weekly:
+    source: sensor.solar_battery_discharging_kwh 
+    name: Solar Battery Discharge Weekly  
+    cycle: weekly 
+
+### Monthly
+  solar_panel_to_house_monthly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Monthly
+    cycle: monthly
+  solar_imported_power_monthly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Monthly
+    cycle: monthly
+  solar_house_consumption_monthly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Monthly
+    cycle: monthly
+  solar_panel_production_monthly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Monthly
+    cycle: monthly
+  solar_battery_in_monthly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Monthly
+    cycle: monthly
+  solar_battery_out_monthly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Monthly
+    cycle: monthly
+  solar_exported_power_monthly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Monthly
+    cycle: monthly
+  solar_grid_to_battery_monthly:
+    source: sensor.solar_grid_to_battery_kwh 
+    name: Solar Grid To Battery Weekly  
+    cycle: monthly 
+  solar_battery_to_grid_monthly:
+    source: sensor.solar_battery_to_grid_kwh 
+    name: Solar Battery To Grid Monthly 
+    cycle: monthly 
+  solar_battery_charge_monthly:
+    source: sensor.solar_battery_charging_kwh 
+    name: Solar Battery Charge Monthly  
+    cycle: monthly  
+  solar_battery_discharge_monthly:
+    source: sensor.solar_battery_discharging_kwh 
+    name: Solar Battery Discharge Monthly 
+    cycle: monthly  
+
+### Annually
+  solar_panel_to_house_yearly:
+    source: sensor.solar_panel_to_house_kwh
+    name: Solar Panel To House Yearly
+    cycle: yearly
+  solar_imported_power_yearly:
+    source: sensor.solar_imported_power_kwh
+    name: Solar Imported Power Yearly
+    cycle: yearly
+  solar_house_consumption_yearly:
+    source: sensor.solar_house_consumption_kwh
+    name: Solar House Consumption Yearly
+    cycle: yearly
+  solar_panel_production_yearly:
+    source: sensor.solar_panel_production_kwh
+    name: Solar Panel Production Yearly
+    cycle: yearly
+  solar_battery_in_yearly:
+    source: sensor.solar_battery_in_kwh
+    name: Solar Battery In Yearly
+    cycle: yearly
+  solar_battery_out_yearly:
+    source: sensor.solar_battery_out_kwh
+    name: Solar Battery Out Yearly
+    cycle: yearly
+  solar_exported_power_yearly:
+    source: sensor.solar_exported_power_kwh
+    name: Solar Exported Power Yearly
+    cycle: yearly
+  solar_grid_to_battery_yearly:
+    source: sensor.solar_grid_to_battery_kwh 
+    name: Solar Grid To Battery Yearly 
+    cycle: yearly 
+  solar_battery_to_grid_yearly:
+    source: sensor.solar_battery_to_grid_kwh 
+    name: Solar Battery To Grid Yearly 
+    cycle: yearly
+  solar_battery_charge_yearly:
+    source: sensor.solar_battery_charging_kwh 
+    name: Solar Battery Charge Yearly  
+    cycle: yearly 
+  solar_battery_discharge_yearly:
+    source: sensor.solar_battery_discharging_kwh 
+    name: Solar Battery Discharge Yearly 
+    cycle: yearly 
