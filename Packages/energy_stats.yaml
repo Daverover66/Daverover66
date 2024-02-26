@@ -1,1 +1,67 @@
-Stats here
+################################################################################## 
+#   @author                 :   Remko Van Der Veer                               #
+#   @date                   :   11/4/2020                                        #
+#   @package                :   energy_stats.yaml                                #
+#   @description            :   All energy stats for dashboard & analysis        # 
+#                                                                                #
+#   @modified by            :   Ryan McLean                                      #
+#   @date                   :   05/12/2022                                       #    
+#                                                                                #
+#   @further modified by    :   Dave Forrester (@Daverover66)                    #
+#   @date                   :   26/02/2024                                       #
+##################################################################################
+
+###########################
+#        helpers          # 
+###########################
+
+###########################
+#        input text       # 
+###########################
+
+input_text:
+  # From/to would ideally use input_datetime, but we need the time in a different format
+  octopus_energy_target_from:
+    icon: mdi:clock-start 
+    name: Octopus Energy Target From
+    initial: "00:00"
+  octopus_energy_target_to:
+    icon: mdi:clock-end 
+    name: Octopus Energy Target To
+    initial: "00:00"
+  octopus_energy_target_offset:
+    name: Octopus Energy Target Offset
+    initial: "-00:00:00"
+
+###########################
+#     input number        # 
+###########################
+
+input_number:
+  octopus_energy_target_hours:
+    name: Octopus Energy Target Hours
+    initial: 0.5
+    step: 0.5
+    min: 0
+    max: 24
+    mode: box 
+    
+###########################
+#       sensors           # 
+########################### 
+
+template:
+  - sensor:
+      - name: "Solar Selfconsumption Ratio"
+        unique_id: solar_selfconsumption_ratio
+        icon: mdi:percent-outline
+        state: >
+          {% set panel_to_house_daily = states('sensor.solar_panel_to_house_daily') | float(0) %}
+          {% set battery_in_daily = states('sensor.solar_battery_in_daily') | float(0) %}
+          {% set exported_power_daily = states('sensor.solar_exported_power_daily') | float(0) %}
+
+          {% if (panel_to_house_daily + battery_in_daily + exported_power_daily <= 0) %}
+            0
+          {% else %}
+            {{ ((panel_to_house_daily + battery_in_daily) / (panel_to_house_daily + battery_in_daily + exported_power_daily) * 100) | round (1) }}
+          {% endif %}
