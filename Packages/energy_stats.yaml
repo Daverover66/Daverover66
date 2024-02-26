@@ -160,3 +160,131 @@ template:
           {% endif %}
         availability: >
           {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
+
+####### Battery sensors ##########
+
+      - name: "Battery State of Charge"
+        unique_id: battery_state_of_charge
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        state: >
+          {{ states('sensor.solaredge_b1_state_of_energy' , rounded = true) }}
+        availability: >
+          {{ states('sensor.solaredge_b1_state_of_energy') | is_number }}
+
+      - name: "Solar Battery Time to Charge Grid"     
+        unique_id: battery_time_to_full_grid
+        state: >
+          {% set battery_power = (states('sensor.solaredge_b1_dc_power') | int * -1) %}
+          {% if battery_power == 0 %}
+          {% set battery_power = 0.01 %}
+          {% endif %}
+          {% set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {% set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {% set hrs_to_full =  (energy_used_w / 3900) | round(2) %}
+          {%- if states('sensor.battery_state_of_charge') | float(0) == 100 %}
+            Not Needed 
+          {% else %}
+            {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      - name: "Solar Battery Time to Charge Solar"     
+        unique_id: battery_time_to_full_solar
+        state: >
+          {%- set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- if battery_power == 0 %}
+            {%- set battery_power = 0.01 %}
+          {%- else %}
+            {% set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- endif %}
+          {%- set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {%- set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {%- set hrs_to_full =  (energy_used_w / battery_power) | round(2) %}
+          {% if states('sensor.battery_state_of_charge') | float(0) > 99.5 %}
+            Full
+          {% elif battery_power*-1 > 0.01 %}
+            Discharging   
+          {% elif battery_power <= 0.01 %}
+            Empty 
+          {% else %}
+            {{ '%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0)) }}
+          {% endif %}  
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      - name: "Solar Battery Time to Empty"     
+        unique_id: battery_time_to_empty
+        state: >
+          {%- set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- if battery_power == 0 %}
+            {%- set battery_power = 0.01 %}
+          {%- else %}
+            {% set battery_power = (states('sensor.solaredge_b1_dc_power') | float(0)) %}
+          {%- endif %}
+          {%- set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
+          {%- set energy_remaining = states('sensor.solaredge_b1_state_of_energy') | float(0)%}
+          {%- set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
+          {%- set energy_remaining_w = max_energy_w - energy_used_w %}
+          {%- set hrs_to_empty =  (energy_remaining_w | float / battery_power | float) | round(2) %}
+          {%- if energy_remaining == 0 %}
+            Empty
+          {% elif hrs_to_empty < 1%}
+            {{ '%02d:%02d' | format((hrs_to_empty * -1| int),((hrs_to_empty*60) % 60) | round(0)) }}
+          {% elif states('sensor.battery_state_of_charge') | float(0) > 99.5 %}
+            Full
+          {% else %}
+            Charging 
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }}
+
+      - name: "Solar Battery Daytime Topup Needed"
+        unique_id: solar_battery_daytime_topup_needed 
+        state: >
+          {%- set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)) %}
+          {%- if battery_power_watts == 0 %}
+          {%- set battery_power_watts = 0.01 %}
+          {%- else %}
+          {% set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)| round(0) | abs) %}
+          {%- endif %}
+          {%- set max_energy_kws = (float(states('sensor.solaredge_b1_maximum_energy'),0) * 1000) *3600 %}
+          {%- set energy_used_kws = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_kws %}
+          {%- set energy_remaining_kws = max_energy_kws - energy_used_kws %}
+          {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
+          {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
+          {%- set state = secs_to_empty - timetogosecs %}
+          {% if float(states('sensor.solaredge_b1_dc_power'),0) > 0 %}
+            false
+          {% elif state < 1800 %}
+            true
+          {% else -%}
+            false
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
+
+      - name: "Solar Battery Empty Time"  
+        unique_id: solar_battery_empty_time 
+        icon: mdi:clock-digital
+        state: >
+          {%- set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)) %}
+          {%- if battery_power_watts == 0 %}
+          {%- set battery_power_watts = 0.01 %}
+          {%- else %}
+          {% set battery_power_watts = (float(states('sensor.solaredge_b1_dc_power'),0)| round(0) | abs) %}
+          {%- endif %}
+          {%- set max_energy_kws = (float(states('sensor.solaredge_b1_maximum_energy'),0) * 1000) *3600 %}
+          {%- set energy_used_kws = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_kws %}
+          {%- set energy_remaining_kws = max_energy_kws - energy_used_kws %}
+          {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
+          {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
+          {% if is_state('sensor.solar_battery_time_to_empty','Charging') %}
+            The end of the day. 
+          {% else %}
+            {{ (as_timestamp(now()) + (secs_to_empty)) | timestamp_custom ("%I:%M %p")}}
+          {% endif %}
+        availability: >
+          {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
