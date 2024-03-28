@@ -5,8 +5,8 @@
 #   @description    :   not in a package file              #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.01                               #
+#   @modified       :   28/03/2024                         #
 ############################################################
 
 
@@ -38,21 +38,34 @@
   - name: "Dave Home"
     unique_id: dave_home 
     state: >-
-      {{ is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('device_tracker.dmforrester_davessamsunggalaxys23', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
+      {{ is_state('person.david_forrester', 'Home') or is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
 
 - binary_sensor: 
   - name: "Gem Home"
     unique_id: gem_home 
     state: >- 
-      {{ is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
+      {{ is_state('person.gem_forrester', 'Home') or is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
       
 - binary_sensor: 
   - name: "Family Home"
     unique_id: family_home 
     state: >- 
       {{ is_state('binary_sensor.gem_home','on') or is_state('binary_sensor.dave_home','on')}}
-        
 
+- binary_sensor:
+  - name: "Fridge Too Warm"
+    unique_id: fridge_too_warm_sensor
+    state: >
+      {{ states('sensor.fridge_thermometer_temperature')  | int > 10 }}
+    device_class: problem
+
+  - name: "Freezer Too Warm"
+    unique_id: freezer_too_warm_sensor
+    state: >
+      {{ states('sensor.freezer_thermometer_temperature') | int > 1 }}
+    device_class: problem
+
+        
 - sensor:
   ##### Low Battery List ######
   - name: "Low Battery Devices"
@@ -281,45 +294,176 @@
           {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
         {% endfor %}
         {{ ns.totalrainfall | float(0) | round(2) }}
+        
 
-################################
-#    More Days until sensors   #
-################################
+###################################
+#       Echo Volume Levels        #
+###################################
 
 - sensor:
-  - name: "Days Until Mum's Birthday"
-    unique_id: days_until_mums_birthday
+  ### Kitchen Echo Volume History ###
+  - name: "Kitchen Echo Volume"
+    unique_id: kitchen_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.kitchen_echo_show','volume_level') | float(0) }}"
+
+- sensor:
+  ### Living Room Echo Volume History ###
+  - name: "Living Room Echo Volume"
+    unique_id: living_room_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.dave_s_2nd_echo_pop','volume_level') | float(0) }}"
+
+- sensor:
+  ### Dining Room Echo Volume History ###
+  - name: "Dining Room Echo Volume"
+    unique_id: dining_room_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.dave_s_echo_pop','volume_level') | float(0) }}"
+
+- sensor:
+  ### Office Echo Volume History ###
+  - name: "Office Echo Volume"
+    unique_id: office_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.dave_s_2nd_echo_pop_2','volume_level') | float(0) }}"
+
+- sensor:
+  ### Main Bedroom Echo Volume History ###
+  - name: "Main Bedroom Echo Volume"
+    unique_id: main_bedroom_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.main_bedroom_dot','volume_level') | float(0) }}"
+
+- sensor:
+  ### Guest Bedroom Echo Volume History ###
+  - name: "Guest Bedroom Echo Volume"
+    unique_id: guest_bedroom_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.guest_bedroom_echo_dot','volume_level') | float(0) }}"
+
+- sensor:
+  ### Seans Room Echo Volume History ###
+  - name: "Seans Room Echo Volume"
+    unique_id: seans_room_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.seans_room_dot','volume_level') | float(0) }}"
+
+- sensor:
+  ### Jamies Room Echo Volume History ###
+  - name: "Jamies Room Echo Volume"
+    unique_id: jamies_room_echo_volume
+    icon: mdi:volume-equal
+    state:  "{{ state_attr('media_player.living_room_dot','volume_level') | float(0) }}"
+
+- sensor:
+  ### Critical Battery Count ####
+  - name: "Critical Battery Count" 
+    unique_id: critical_battery_count
+    state: >
+      {{ expand('group.critical_batteries') 
+      | rejectattr('state', 'eq', '100')
+      | selectattr('state', 'lt', '30') | list | count }}
+
+- sensor:
+  ### Rechargeable Battery Count ####
+  - name: "Rechargeable Battery Count" 
+    unique_id: rechargeable_battery_count
+    state: >
+      {{ expand('group.rechargeable_batteries') 
+      | rejectattr('state', 'eq', '100')
+      | selectattr('state', 'lt', '20') | list | count }}
+
+- sensor:
+  - name: "Garage Door State"
+    unique_id: garage_door_state 
+    state: >- 
+        {% if is_state('binary_sensor.garage_doors_state','on') %}
+          {{"Open"}}
+        {% else %}
+          {{"Closed"}}
+        {% endif %}
+    icon: >- 
+      {% if is_state('binary_sensor.garage_doors_state','on') %}
+        mdi:garage-open-variant 
+      {% else %}
+        mdi:garage-variant 
+      {% endif %}
+
+- sensor:
+  - name: "Hallway Motion"
+    unique_id: hallway_motion  
+    state: >- 
+        {% if is_state('binary_sensor.hallway_motion','on') %}
+          {{"Detected"}}
+        {% else %}
+          {{"Clear"}}
+        {% endif %}
+    icon: >- 
+      {% if is_state('binary_sensor.hallway_motion','on') %}
+        mdi:motion-sensor 
+      {% else %}
+        mdi:motion-sensor-off 
+      {% endif %}
+
+- sensor:
+  - name: "Utility Room Motion"
+    unique_id: utility_room_motion  
+    state: >- 
+        {% if is_state('binary_sensor.utility_room_motion','on') %}
+          {{"Detected"}}
+        {% else %}
+          {{"Clear"}}
+        {% endif %}
+    icon: >- 
+      {% if is_state('binary_sensor.utility_room_motion','on') %}
+        mdi:motion-sensor 
+      {% else %}
+        mdi:motion-sensor-off 
+      {% endif %}
+
+- sensor:
+  - name: "Upstairs Landing Motion"
+    unique_id: upstairs_landing_motion 
+    state: >- 
+        {% if is_state('binary_sensor.upstairs_landing_motion','on') %}
+          {{"Detected"}}
+        {% else %}
+          {{"Clear"}}
+        {% endif %}
+    icon: >- 
+      {% if is_state('binary_sensor.upstairs_landing_motion','on') %}
+        mdi:motion-sensor 
+      {% else %}
+        mdi:motion-sensor-off 
+      {% endif %}
+
+#########################
+#   Days to Birthdays   #
+#########################
+
+- sensor:
+  - name: "Days Until Gemma's Birthday"
+    unique_id: days_until_gemmas_birthday
     unit_of_measurement: Days
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=9, day=24)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=24))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=24))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=9, day=24)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
-
+        
 - sensor:
-  - name: "Days Until Dad's Birthday"
-    unique_id: days_until_dads_birthday
+  - name: "Days Until Dave's Birthday"
+    unique_id: days_until_daves_birthday
     unit_of_measurement: Days
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=9, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=30))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=30))) / 86400) | round(0)}}
       {% else %}
-        {{ ((as_timestamp(now().replace(month=9 day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until Sean's Birthday"
-    unique_id: days_until_seans_birthday
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=22))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+        {{ ((as_timestamp(now().replace(month=9, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
 - sensor:
@@ -329,9 +473,21 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=1, day=7)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=7))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=7))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=1, day=7)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until Sean's Birthday"
+    unique_id: days_until_seans_birthday
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=22))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
 - sensor:
@@ -341,7 +497,7 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=3, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=15))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=15))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=3, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
@@ -353,7 +509,7 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=11, day=9)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=11, day=9))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=11, day=9))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=11, day=9)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
@@ -365,7 +521,7 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=5, day=13)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=5, day=13))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=5, day=13))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=5, day=13)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
@@ -377,7 +533,7 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=1, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=15))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=15))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=1, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
@@ -389,7 +545,7 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=9, day=11)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=11))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=9, day=11))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=9, day=11)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
@@ -401,68 +557,86 @@
     state: >
       {% set daystogo = ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) %}
       {% if daystogo < 0 %}
-        {{ 365 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=7, day=22))) / 86400) | round(0)}}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=7, day=22))) / 86400) | round(0)}}
       {% else %}
         {{ ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
 - sensor:
-  - name: xxxxxx
-    unique_id: xxxxxx
+  - name: "Days Until Christmas"
+    unique_id: days_until_christmas
+    unit_of_measurement: Days
     state: >
-      {% set start_time = states('octopusagile.electric_vehicle') %}
-       # {{ (as_timestamp(start_time|as_datetime)) | timestamp_custom ('%H:%M %p')}}
-      {% set now = as_timestamp(now()) %}
-      {% set active =  (as_timestamp(start_time)|int) - (now|int) %}
-       # {{ active }}
-      {% if active <= 0 %}
-        Active
+      {% set daystogo = ((as_timestamp(now().replace(month=12, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=12, day=25))) / 86400) | round(0)}}
       {% else %}
-        Waiting
+        {{ ((as_timestamp(now().replace(month=12, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-### Battery Charge Times ### 
 - sensor:
-  - name: "Home Battery Charge Start Time"
-    unique_id: home_battery_charge_start_time
-    icon: mdi:clock-start
+  - name: "Days Until Halloween"
+    unique_id: days_until_halloween 
+    unit_of_measurement: Days
     state: >
-      {% set start_time = states('octopusagile.home_battery') %}
-        {{ as_timestamp(start_time)|timestamp_custom('%H:%M')}}
+      {% set daystogo = ((as_timestamp(now().replace(month=10, day=31)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=10, day=31))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=10, day=31)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
 
 - sensor:
-  - name: "Home Battery Charge End Time"
-    unique_id: home_battery_charge_end_time
-    icon: mdi:clock-end
+  - name: "Days Until St Andrews Day"
+    unique_id: days_until_standrews_day  
+    unit_of_measurement: Days
     state: >
-      {% set start_time = states('octopusagile.home_battery') %}
-      {% set end_in = state_attr('octopusagile.home_battery','end_in') %}
-      {% set start_in = state_attr('octopusagile.home_battery','start_in') %}
-      {% set duration_in_secs = (end_in|float(0) - start_in|float(0))*3600 %}  
-      {% set end_time = (as_timestamp(start_time) + duration_in_secs )|timestamp_custom ('%H:%M')%}
-        {{ end_time }}
-
-### EV Charge Times ### 
-- sensor:
-  - name: "EV Charge Start Time"
-    unique_id: ev_charge_start_time
-    icon: mdi:clock-start
-    state: >
-      {% set start_time = states('octopusagile.electric_vehicle') %}
-        {{ as_timestamp(start_time)|timestamp_custom('%H:%M')}}
+      {% set daystogo = ((as_timestamp(now().replace(month=11, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=11, day=30))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=11, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
 
 - sensor:
-  - name: "EV Charge End Time"
-    unique_id: ev_charge_end_time
-    icon: mdi:clock-end
+  - name: "Days Until Burns"
+    unique_id: days_until_burns 
+    unit_of_measurement: Days
     state: >
-      {% set start_time = states('octopusagile.electric_vehicle') %}
-      {% set end_in = state_attr('octopusagile.electric_vehicle','end_in') %}
-      {% set start_in = state_attr('octopusagile.electric_vehicle','start_in') %}
-      {% set duration_in_secs = (end_in|float(0) - start_in|float(0))*3600 %}  
-      {% set end_time = (as_timestamp(start_time) + duration_in_secs )|timestamp_custom ('%H:%M')%}
-        {{ end_time }}
+      {% set daystogo = ((as_timestamp(now().replace(month=1, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=25))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=1, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
 
+- sensor:
+  - name: "Days Until St Davids Day"
+    unique_id: days_until_stdavids_day  
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=3, day=1)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=1))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=3, day=1)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+- sensor:
+  - name: "Days Until St Georges Day"
+    unique_id: days_until_stgeorges_day 
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=4, day=23)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=4, day=23))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=4, day=23)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
+
+
+- sensor:
   - name: "Estimated Earliest Evening MODBUS Disconnect Times"
     unique_id: estimated_earliest_evening_modbus_disconnect_times
     icon: mdi:clock-start
@@ -472,15 +646,17 @@
       {% set time_pm_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
         {{ time_pm_earliest }}
       
+- sensor:
   - name: "Estimated Latest Evening MODBUS Disconnect Times"
     unique_id: estimated_latest_evening_modbus_disconnect_times
-    icon: mdi:clock-start
+    icon: mdi:clock-end 
     state: >
       {% set t1 = states('input_datetime.morning_modbus_disconnect_time') %}
       {% set t2 = '14:08:00' %}
       {% set time_pm_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
         {{ time_pm_latest }}
 
+- sensor:
   - name: "Estimated Earliest Morning MODBUS Disconnect Times"
     unique_id: estimated_earliest_morning_modbus_disconnect_times
     icon: mdi:clock-start
@@ -490,11 +666,70 @@
       {% set time_am_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
         {{ time_am_earliest }}
       
+- sensor:
   - name: "Estimated Latest Morning MODBUS Disconnect Times"
     unique_id: estimated_latest_morning_modbus_disconnect_times
-    icon: mdi:clock-start
+    icon: mdi:clock-end 
     state: >
       {% set t1 = states('input_datetime.evening_modbus_disconnect_time')  %}
       {% set t2 = '10:10:00' %}
       {% set time_am_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
         {{ time_am_latest }} 
+
+- sensor:
+  - name: "Current Energy Rate"
+    unique_id: current_energy_rate 
+    icon: mdi:transmission-tower-import 
+    state: >
+      {% set energy = expand('group.energy_cost_toggles') | selectattr('state','eq','on') | sort(attribute='last_changed') | last %}
+      {% if energy.name == "Plunge Pricing" %}
+        input_boolean.plunge_pricing 
+      {% elif energy.name == "Cheap Energy" %}
+        input_boolean.cheap_energy 
+      {% elif energy.name == "Medium Cost Energy" %}
+        input_boolean.medium_cost_energy 
+      {% elif energy.name == "Expensive Energy" %}
+        input_boolean.expensive_energy 
+      {% else %}
+        input_boolean.most_expensive_energy 
+      {% endif %}
+
+- sensor:
+  - name: "Previous Energy Rate"
+    unique_id: previous_energy_rate 
+    icon: mdi:transmission-tower-import 
+    state: >
+      {% set energy = expand('group.energy_cost_toggles') | selectattr('state','eq','on') | sort(attribute='last_changed') | first %}
+      {% if energy.name == "Plunge Pricing" %}
+        input_boolean.plunge_pricing 
+      {% elif energy.name == "Cheap Energy" %}
+        input_boolean.cheap_energy 
+      {% elif energy.name == "Medium Cost Energy" %}
+        input_boolean.medium_cost_energy 
+      {% elif energy.name == "Expensive Energy" %}
+        input_boolean.expensive_energy 
+      {% else %}
+        input_boolean.most_expensive_energy 
+      {% endif %}
+
+
+- sensor:
+  - name: "School Tomorrow"
+    unique_id: school_tomorrow
+    state: >
+      {% set next_event=as_timestamp(state_attr('calendar.school_day','start_time')) | timestamp_custom("%Y-%m-%d",true) %}
+      {% set tomorrow=(now().date() + timedelta(days=1)) | string %}
+      {{ next_event == tomorrow }} 
+
+
+
+
+
+
+
+
+
+                                                                    
+                                                                    
+
+
