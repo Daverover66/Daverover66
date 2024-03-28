@@ -5,7 +5,7 @@
 #   @description    :   text for morning briefing.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   27/12/2023
+#   @date           :   28/03/2024
 ###############################################################################
 
 >
@@ -148,11 +148,11 @@
       {{ ['My latest smart device sensor sweep has detected that','Smart device sensors have detected that','My smart device crystal ball has revealed that'] | random }} 
         {% set batts_count = expand('group.critical_batteries') 
           | rejectattr('state', 'eq', '100')
-          | selectattr('state', 'lt', '30') | list | count %}
+          | selectattr('state', 'lt', '20') | list | count %}
         {% if batts_count > 0 %}
         {% set batts = expand('group.critical_batteries') 
           | rejectattr('state', 'eq', '100')
-          | selectattr('state', 'lt', '30') | list %}
+          | selectattr('state', 'lt', '20') | list %}
         {% for bat in batts %}
           The {{ bat.name }} is at {{ bat.state }}%. 
           {{ ['This is lower than the minimum thresshold for satisfactory operation.',
@@ -163,9 +163,29 @@
               'So I guess you know what to do.' ] | random }}
           {% endfor %}
           {% else %} 
-          {{ ['all device batteries are within acceptable limits.',
-              'all battery operated devices are at full power.',
-              'you have no batteries to replace today.' ] | random }}
+              you have no batteries to replace today.
+          {% endif %}
+    </p>
+    <p>
+          As for your mobile device batteries. 
+        {% set batts_count = expand('group.rechargeable_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | selectattr('state', 'lt', '20') | list | count %}
+        {% if batts_count > 0 %}
+        {% set batts = expand('group.rechargeable_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | selectattr('state', 'lt', '20') | list %}
+        {% for bat in batts %}
+          {{ bat.name }} is at {{ bat.state }}%. 
+          {{ ['This is lower than the minimum thresshold for satisfactory operation.',
+              'Any lower and it will cease to function.',
+              'That is pretty low'] | random }}
+          {{ ['So perhaps you should recharge the battery before it dies.',
+              'So it might be time to recharge the battery',
+              'So I guess you know what to do.' ] | random }}
+          {% endfor %}
+          {% else %} 
+            you have no batteries to recharge at this time. 
           {% endif %}
     </p>
     <p>
