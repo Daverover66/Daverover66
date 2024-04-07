@@ -179,7 +179,7 @@
           {{ bat.name }} is at {{ bat.state }}%. 
           {{ ['This is lower than the minimum thresshold for satisfactory operation.',
               'Any lower and it will cease to function.',
-              'That is pretty low'] | random }}
+              'That is pretty low.'] | random }}
           {{ ['So perhaps you should recharge the battery before it dies.',
               'So it might be time to recharge the battery',
               'So I guess you know what to do.' ] | random }}
@@ -288,11 +288,11 @@
           {% if is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on')%}
             {{ ['Its the weekend and its a holiday, so come on mummy, get the big breakfast on',
               'The working week is done and its holiday time.  Time for all those weekend and holiday jobs',
-              '<emphasis_level="reduced">Hooray.</emphasis> Its the weekend and a holiday. So make the most of it '] | random }}
+              'Hooray! Its the weekend and a holiday. So make the most of it '] | random }}
           {% else %}
             {{ ['Its the weekend, so come on mummy, get the big breakfast on',
                 'The working week is done.  Time for all those weekend jobs',
-                '<emphasis_level="reduced">Hooray.</emphasis> Its the weekend. So make the most of it '] | random }}
+                'Hooray! Its the weekend. So make the most of it '] | random }}
           {% endif %}
         {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
           {{ ['Its a school holiday today and Mummy is off too',
