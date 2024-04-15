@@ -141,6 +141,7 @@ automation:
                 <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/{{now().strftime("%I")}}-hour.mp3'/>
               {% endif %}
             {% endif %}
+          msg_summary: "clock chime"
             
             
 
