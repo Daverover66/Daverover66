@@ -8,7 +8,7 @@
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   26/02/2024                                       #
+#   @date                   :   15/04/2024                                       #
 ##################################################################################
 
 ### Financials for Agile, best I can do, but the Octopus Integration does most of this
@@ -22,7 +22,15 @@ template:
         state: >
           {{ (states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost')|float(0)
              - (states('sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate')|float(0) * states('sensor.solar_exported_power_daily') | float(0) ))|round(2)}}
-    
+
+      - name: "Electricity Bill This Month"
+        unique_id: electricity_bill_this_month  
+        icon: mdi:cash-plus 
+        unit_of_measurement: "£"
+        state: >-
+          {{ (states('sensor.agile_import_cost_monthly')|float(0) -
+              states('sensor.export_compensation_outgoing_fixed_monthly')|float(0))|round(2)}} 
+              
       - name: "Solar Accounting Compensation Rate"
         unique_id: solar_accounting_compensation_rate
         icon: mdi:cash-minus
