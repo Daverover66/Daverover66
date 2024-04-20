@@ -7,4 +7,9 @@ condition: []
 action:
   - service: script.update_critical_battery_group_2
     data: {}
+  - service: script.update_rechargeable_battery_group
+    data: {}
+  - service: script.update_srv_critical_battery_group
+    data: {}
 mode: single
+
