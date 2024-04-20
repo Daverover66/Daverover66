@@ -1,0 +1,137 @@
+alias: Solar Hot Water Toggle
+description: >-
+  Turn on the immersion heater when the battery is full and solar export is more
+  than 1kW
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.electricity_bill_today
+    below: 0.01
+    id: Switch On
+  - platform: numeric_state
+    entity_id:
+      - sensor.power_battery_load
+    above: 1000
+    id: Switch Off
+  - platform: numeric_state
+    entity_id:
+      - sensor.power_grid_export
+    above: 2500
+    id: Switch On Again
+  - platform: state
+    entity_id:
+      - input_boolean.plunge_pricing
+    from: "off"
+    to: "on"
+    id: Hot Water On
+  - platform: state
+    entity_id:
+      - input_boolean.plunge_pricing
+    from: "on"
+    to: "off"
+    id: Hot Water Off
+  - platform: sun
+    event: sunset
+    offset: "-1:00:00"
+    id: sunset
+  - platform: time
+    at: "17:15:00"
+    id: Time On
+  - platform: time
+    at: "18:15:00"
+    id: Time Off
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Switch On
+          - condition: sun
+            after: sunrise
+            before: sunset
+          - alias: Confirm solar export is >2500W
+            condition: numeric_state
+            entity_id: sensor.power_grid_export
+            above: 2500
+        sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Switch On Again
+          - condition: sun
+            after: sunrise
+            before: sunset
+          - condition: numeric_state
+            entity_id: sensor.electricity_bill_today
+            below: 0.01
+        sequence:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Switch Off
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Hot Water On
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "off"
+        sequence:
+          - service: switch.turn_on
+            target:
+              entity_id:
+                - switch.valkyrie_solar_hot_water
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Hot Water Off
+              - sunset
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+      - conditions:
+          - condition: trigger
+            id:
+              - Time On
+          - condition: numeric_state
+            entity_id: sensor.electricity_bill_today
+            above: 0
+            alias: Electricity Bill above zero
+        sequence:
+          - service: water_heater.set_operation_mode
+            target:
+              entity_id: water_heater.hot_water
+            data:
+              operation_mode: auto
+      - conditions:
+          - condition: trigger
+            id:
+              - Time Off
+        sequence:
+          - service: water_heater.set_operation_mode
+            target:
+              entity_id: water_heater.hot_water
+            data:
+              operation_mode: "off"
+mode: single
