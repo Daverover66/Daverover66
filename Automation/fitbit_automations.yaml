@@ -1,0 +1,35 @@
+alias: FitBit Automations
+description: ""
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.sense_battery_level
+    below: 20
+    id: Low battery
+  - platform: numeric_state
+    entity_id:
+      - sensor.sense_battery_level
+    above: 99.9
+    id: Charged
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Low battery
+        sequence:
+          - service: script.text_notify_dave
+            data:
+              title: FITBIT ALERT
+              message: Your FitBit battery is low. Please charge.
+      - conditions:
+          - condition: trigger
+            id:
+              - Charged
+        sequence:
+          - service: script.text_notify_dave
+            data:
+              title: FITBIT ALERT
+              message: Your FitBit battery is charged.
+mode: single
