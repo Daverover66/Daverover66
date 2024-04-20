@@ -92,7 +92,7 @@
           {% elif is_state('weather.forecast_home','fog') %} foggy
           {% else %}
           {{ states('weather.forecast_home') }} 
-          {% endif %} weather. With a high of {{ states('sensor.overnight_high_temp')}} degrees celsius.
+          {% endif %} weather. With a high of {{ states('sensor.high_temperature_today')}} degrees celsius and a low of {{ states('sensor.low_temperature_today')}} degrees celsius.
         {% endif %}
     </p>
     <p>
