@@ -5,7 +5,7 @@
 #   @description    :   not in a package file              #
 #                                                          #
 #                                                          #
-#   @version        :   1.01                               #
+#   @version        :   1.02                               #
 #   @modified       :   28/03/2024                         #
 ############################################################
 
@@ -263,9 +263,21 @@
       not_home
       {% endif %}
 
-######################################
-#      Action Template Sensor        #
-######################################
+- sensor:
+  #### Number of HACS updates available ######
+  - name: "HACS Updates Available"
+    unique_id: hacs_updates_available 
+    icon: mdi:package 
+    state: >
+      {{ states.update | rejectattr('entity_id', 'in',  ['']) | selectattr('state', 'eq', 'on') | list | count }} 
+
+########################################
+#      Action Template Sensors         #
+########################################
+
+#########################################
+#     Gets total rainfall for the day   # 
+#########################################
 
 - trigger:
   - platform: time_pattern
@@ -295,6 +307,65 @@
         {% endfor %}
         {{ ns.totalrainfall | float(0) | round(2) }}
         
+#########################################
+#   Gets min and max temp for the day   # 
+#########################################
+
+- trigger:
+    - platform: state
+      entity_id: weather.openweathermap
+    - platform: homeassistant
+      event: start
+    - platform: event
+      event_type: event_template_reloaded
+  action:
+    - service: weather.get_forecasts
+      data:
+        type: daily
+      target:
+        entity_id: weather.openweathermap
+      response_variable: daily
+  sensor:
+    - name: Forecast Daily
+      unique_id: weather_forecast_daily
+      state: "{{ states('weather.openweathermap') }}"
+      attributes:
+        forecast: "{{ daily['weather.openweathermap'].forecast }}"
+
+- trigger:
+    - platform: state
+      entity_id: weather.openweathermap
+    - platform: homeassistant
+      event: start
+    - platform: event
+      event_type: event_template_reloaded
+  action:
+    - service: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.openweathermap
+      response_variable: hourly
+  sensor:
+    - name: Forecast Hourly
+      unique_id: weather_forecast_hourly
+      state: "{{ states('weather.openweathermap') }}"
+      attributes:
+        forecast: "{{ hourly['weather.openweathermap'].forecast }}"
+    
+- sensor:
+    - name: "High temperature today"
+      unique_id: high_temperature_today
+      unit_of_measurement: "°C" 
+      device_class: temperature
+      state: "{{ (state_attr('sensor.forecast_hourly', 'forecast')|selectattr('datetime', 'lt', (now().replace(hour=23,minute=59)).isoformat()))| map(attribute='temperature') | list | max }}"
+
+- sensor:
+    - name: "Low temperature today"
+      unique_id: low_temperature_today
+      unit_of_measurement: "°C" 
+      device_class: temperature
+      state: "{{ (state_attr('sensor.forecast_hourly', 'forecast')|selectattr('datetime', 'lt', (now().replace(hour=23,minute=59)).isoformat()))| map(attribute='temperature') | list | min }}"
 
 ###################################
 #       Echo Volume Levels        #
@@ -373,6 +444,14 @@
       {{ expand('group.rechargeable_batteries') 
       | rejectattr('state', 'eq', '100')
       | selectattr('state', 'lt', '20') | list | count }}
+
+- sensor:
+  ### SRV Critical Battery Count ###
+  - name: "SRV Critical Battery Count"
+    unique_id: srv_critical_battery_count
+    state: >
+      {{ expand('group.srv_critical_batteries') 
+      | selectattr('state', 'eq', 'on') | list | count }} 
 
 - sensor:
   - name: "Garage Door State"
@@ -720,6 +799,112 @@
       {% set next_event=as_timestamp(state_attr('calendar.school_day','start_time')) | timestamp_custom("%Y-%m-%d",true) %}
       {% set tomorrow=(now().date() + timedelta(days=1)) | string %}
       {{ next_event == tomorrow }} 
+
+- sensor:
+  - name: "Ground Floor Lights On"
+    unique_id: ground_floor_lights_on 
+    state: >
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Kitchen', 'Dining Room', 'Downstairs', 'Living Room', 'Hallway', 'Cloakroom', 'Utility Room' ] %}
+      {%- set ns = namespace(lights=[]) %}
+      {%- for light in states.light | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(light.entity_id) == area and "Gnd Floor" not in state_attr(light.entity_id, "friendly_name") %}
+            {%- set ns.lights = ns.lights + [ light.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.lights| list | length }}
+
+- sensor:
+  - name: "First Floor Lights On"
+    unique_id: first_floor_lights_on 
+    state: >
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Master Bedroom', 'Upstairs', 'Guest Bedroom', 'Office', 'Main Bathroom', 'En-suite Bathroom', 'jamie_s_room', 'Seans Room', 'Kids Bathroom' ] %}
+      {%- set ns = namespace(lights=[]) %}
+      {%- for light in states.light | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(light.entity_id) == area and "1st Floor" not in state_attr(light.entity_id, "friendly_name") %}
+            {%- set ns.lights = ns.lights + [ light.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.lights| list | length }}
+
+- sensor:
+  - name: "First Floor Switches On"
+    unique_id: first_floor_switches_on 
+    state: >
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Kitchen', 'Dining Room', 'Downstairs', 'Living Room', 'Hallway', 'Cloakroom', 'Utility Room' ] %}
+      {%- set ns = namespace(switch=[]) %}
+      {%- for switch in states.switch | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(switch.entity_id) == area and "1st Floor" not in state_attr(switch.entity_id, "friendly_name") %}
+            {%- set ns.switch = ns.switch + [ switch.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.switch| list | length }}
+
+- sensor:
+  - name: "Ground Floor Switches On"
+    unique_id: ground_floor_switches_on 
+    state: >
+      {%- set search_state = 'on' %}
+      {%- set search_areas = ['Master Bedroom', 'Upstairs', 'Guest Bedroom', 'Office', 'Main Bathroom', 'En-suite Bathroom', 'jamie_s_room', 'Seans Room', 'Kids Bathroom' ] %}
+      {%- set ns = namespace(switch=[]) %}
+      {%- for switch in states.switch | selectattr('state','eq', search_state) %}
+        {%- for area in search_areas %}
+          {% if area_name(switch.entity_id) == area and "1st Floor" not in state_attr(switch.entity_id, "friendly_name") %}
+            {%- set ns.switch = ns.switch + [ switch.entity_id ] %}
+          {% endif%}
+          {%- endfor %}
+      {%- endfor %}
+      {{ ns.switch| list | length }}
+
+- sensor:
+  - name: "Home Assistant Last Restart"
+    unique_id: ha_last_restart 
+    state: >
+      {{ relative_time(states.sensor.uptime.last_changed) }}
+
+- sensor:
+  - name: "Zigbee2MQTT Offline Devices"
+    unique_id: zigbee2mqtt_offline_devices 
+    state: >
+      {% set result = namespace(sensors=[]) %}
+      {% for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
+        {% if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
+          {% set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
+        {% endif %}
+      {% endfor %}
+        {{ result.sensors | join(', ') }}
+
+- sensor:
+  - name: "Zigbee2MQTT Offline Devices Count"
+    unique_id: zigbee2mqtt_offline_devices_count 
+    state: >
+      {% set result = namespace(sensors=[]) %}
+      {% for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
+        {% if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
+          {% set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
+        {% endif %}
+      {% endfor %}
+        {{ result.sensors | list | count }}
+
+
+
+
+
+
+
+
+                                                                    
+                                                                    
+
+ 
 
 
 
