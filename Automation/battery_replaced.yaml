@@ -1,0 +1,18 @@
+alias: Battery Replaced
+description: Battery Replaced
+trigger:
+  - platform: event
+    event_type: battery_notes_battery_increased
+condition: []
+action:
+  - service: battery_notes.set_battery_replaced
+    data:
+      device_id: "{{ trigger.event.data.device_id }}"
+  - service: persistent_notification.create
+    data:
+      title: |
+        {{ trigger.event.data.device_name }} Battery Increased
+      message: >
+        The battery level of this device has increased. I have marked it as
+        replaced, but you probably want to check.
+mode: queued
