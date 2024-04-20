@@ -1,0 +1,39 @@
+alias: Update Octopus Target Rate Lengths
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - input_number.home_battery_charge_length
+    id: Home Battery
+  - platform: state
+    entity_id:
+      - input_number.ev_charge_length_hrs
+    id: EV
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Home Battery
+        sequence:
+          - service: octopus_energy.update_target_config
+            target:
+              entity_id: >-
+                binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+            data:
+              target_hours: |
+                "{{ states('input_number.home_battery_charge_length')}}"
+      - conditions:
+          - condition: trigger
+            id:
+              - EV
+        sequence:
+          - service: octopus_energy.update_target_config
+            target:
+              entity_id: >-
+                binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            data:
+              target_hours: |
+                "{{ states('input_number.ev_charge_length_hrs')}}"
+mode: single
