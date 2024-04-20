@@ -1,0 +1,24 @@
+alias: Zigbee Device Watch and Notify
+description: 24 hour monitor of Zigbee devices
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.zigbee2mqtt_offline_device
+    from: null
+    to: null
+condition: []
+action:
+  - service: script.text_notify_dave
+    metadata: {}
+    data:
+      title: ZIGBEE DEVICE OFFLINE
+      message: >-
+        The following Zigbee devices are offline {{
+        states('sensor.zigbee2mqtt_offline_device')}}
+  - service: persistent_notification.create
+    data:
+      title: ZIGBEE DEVICE OFFLINE
+      message: >-
+        The following Zigbee devices are offline {{
+        states('sensor.zigbee2mqtt_offline_device')}}
+mode: single
