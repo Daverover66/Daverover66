@@ -17,6 +17,26 @@ script:
 #    It covers charge levels from 40% to 100%.                                                     #
 ####################################################################################################
 
+  set_car_battery_charge_level_100:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 100
+    mode: single
+    icon: mdi:battery
+ 
+  set_car_battery_charge_level_95:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 95
+    mode: single
+    icon: mdi:battery-90
+
   set_car_battery_charge_level_90:
     sequence:
       - service: input_number.set_value
@@ -26,3 +46,103 @@ script:
           value: 90
     mode: single
     icon: mdi:battery-90
+
+  set_car_battery_charge_level_85:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 85
+    mode: single
+    icon: mdi:battery-80
+
+  set_car_battery_charge_level_80:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 80
+    mode: single
+    icon: mdi:battery-80
+
+  set_car_battery_charge_level_75:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 75
+    mode: single
+    icon: mdi:battery-70
+
+  set_car_battery_charge_level_70:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 70
+    mode: single
+    icon: mdi:battery-70
+
+  set_car_battery_charge_level_65:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 65
+    mode: single
+    icon: mdi:battery-60
+
+  set_car_battery_charge_level_60:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 60
+    mode: single
+    icon: mdi:battery-60
+
+  set_car_battery_charge_level_55:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 55
+    mode: single
+    icon: mdi:battery-50
+
+  set_car_battery_charge_level_50:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 50
+    mode: single
+    icon: mdi:battery-50
+
+  set_car_battery_charge_level_45:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 45
+    mode: single
+    icon: mdi:battery-40
+
+  set_car_battery_charge_level_40:
+    sequence:
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.car_battery_charge_level
+        data:
+          value: 40
+    mode: single
+    icon: mdi:battery-40
