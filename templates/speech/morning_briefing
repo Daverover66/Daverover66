@@ -5,7 +5,7 @@
 #   @description    :   text for morning briefing.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   01/04/2024
+#   @date           :   23/04/2024
 ###############################################################################
 
 >
@@ -146,9 +146,8 @@
     </p>
     <p>
       {{ ['My latest smart device sensor sweep has detected that','Smart device sensors have detected that','My smart device crystal ball has revealed that'] | random }} 
-        {% set batts_count = expand('group.critical_batteries') 
-          | rejectattr('state', 'eq', '100')
-          | selectattr('state', 'lt', '20') | list | count %}
+        {% set batts_count = states('sensor.critical_battery_count')|float(0) %}
+        {% set srv_batts_count = states('sensor.srv_critical_battery_count')|float(0) %}
         {% if batts_count > 0 %}
         {% set batts = expand('group.critical_batteries') 
           | rejectattr('state', 'eq', '100')
@@ -162,15 +161,25 @@
               'So it might be time for replacement batteries',
               'So I guess you know what to do.' ] | random }}
           {% endfor %}
+        {% elif srv_batts_count > 0 %}  
+        {% set batts = expand('group.srv_critical_batteries')
+          | selectattr('state', 'eq', 'on') | list %}
+        {% for bat in batts %}
+          The {{ bat.name }} is less than 25%.
+          {{ ['This is lower than the minimum thresshold for satisfactory operation.',
+              'Any lower and it will cease to function.',
+              'That is pretty low'] | random }}
+          {{ ['So perhaps you should replace the batteries before it dies.',
+              'So it might be time for replacement batteries',
+              'So I guess you know what to do.' ] | random }}
+          {% endfor %}
           {% else %} 
               you have no batteries to replace today.
           {% endif %}
     </p>
     <p>
           As for your mobile device batteries. 
-        {% set batts_count = expand('group.rechargeable_batteries') 
-          | rejectattr('state', 'eq', '100')
-          | selectattr('state', 'lt', '20') | list | count %}
+        {% set batts_count = states('sensor.rechargeable_battery_count')|float(0) %}
         {% if batts_count > 0 %}
         {% set batts = expand('group.rechargeable_batteries') 
           | rejectattr('state', 'eq', '100')
@@ -187,6 +196,21 @@
           {% else %} 
             you have no batteries to recharge at this time. 
           {% endif %}
+    </p>
+    <p>
+          A scan of the zigbee network shows that 
+        {% if states('sensor.zigbee2mqtt_offline_devices_count')|float(0) <1 %}
+          the network is functioning at full capacity, with all devices reporting availability.
+        {% else %}
+          there
+          {% if states('sensor.zigbee2mqtt_offline_devices_count')| float(0) == 1 %}
+            is {{states('sensor.zigbee2mqtt_offline_devices_count')}} device offline.
+            Check your notifications for details.
+          {% else %}
+            are {{states('sensor.zigbee2mqtt_offline_devices_count')}} devices offline.
+            Check your notifications for details.
+          {% endif %}
+        {% endif %}
     </p>
     <p>
       {% set charge_level = states('sensor.battery_state_of_charge') | float(0) %}
@@ -254,17 +278,15 @@
       {% endif %}
       </p>
       <p>
-          {% set topup = states('sensor.rolec_energy_consumption_monthly') | float(0) %}
-          {{ ['My sensors are unable to determine the charge level of the battery in the car.',
-              'There is a damping field blocking access to the car battery.',
-              'My logic circuits are particularly fuzzy today and I am having trouble sensing the charge level of the car battery.'] | random }}
+          {% set topup = states('sensor.rolec_energy_consumption_weekly') | float(0) %}
+            Last time I checked, the battery in the car was at {{ states('input_number.car_battery_charge_level')|round }}%, 
           {% if topup > 5 %}
-              However, I have detected that it has been topped up this month with {{ topup | round(1) }}kWh of lovely cheap energy.
+              and sensors indicate that it has been topped up this week with {{ topup | round(1) }}kWh of lovely cheap energy.
               So it should be good for another {{ (topup * 3.5) | round()}} miles.
-          {% else %} I can tell you that the car has not been charged this month.
-          {{ ['So it might need a topup today.',
-              'If it has had a lot of use it might need a topup today.',
-              'If you have done a lot of mileage, the battery might need a topup today.'] | random }}
+          {% else %} and it appears that it has not been topped up this week.
+          {{ ['So it might need to be charged today.',
+              'If it has had a lot of use it might need to be charged today.',
+              'If you have done a lot of mileage since, the battery might need to be charged today.'] | random }}
           {% endif %}
             If you think that it needs it, the best time for a half hour topup is at 
             {% if is_state('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','on') %}
@@ -272,7 +294,7 @@
             {% else %}
             {% set time_start = state_attr('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','next_time')%}
               {{ as_timestamp(time_start) | timestamp_custom ('%I:%M %p')}}.  When the price will be {{ ((state_attr('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','next_min_cost'))*100)|round(1)}} pence per kWh.
-            {% endif %}   A full 4 hour charge can be started at
+            {% endif %}   A full charge can be started at
             {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','on') %}
               a time to be determined once the current period has ended.
             {% elif state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time') is none %}
@@ -290,22 +312,28 @@
               'The working week is done and its holiday time.  Time for all those weekend and holiday jobs',
               'Hooray! Its the weekend and a holiday. So make the most of it '] | random }}
           {% else %}
-            {{ ['Its the weekend, so come on mummy, get the big breakfast on',
-                'The working week is done.  Time for all those weekend jobs',
-                'Hooray! Its the weekend. So make the most of it '] | random }}
+            {{ ['Its the weekend, so come on mummy, get the big breakfast on.',
+                'The working week is done.  Time for all those weekend jobs.',
+                'Hooray! Its the weekend. So make the most of it.'] | random }}
           {% endif %}
         {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
-          {{ ['Its a school holiday today and Mummy is off too',
+          {{ ['Its a school holiday today and Mummy is off too.',
               'No school today and mummy too can play. Hooray!',
-              'schools out and mummy is in da hoose'] | random }}
+              'schools out and mummy is in da hoose.'] | random }}
         {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','off') %}
-          {{ ['Its a school holiday today and mummy is working',
-              'No school today, but mummy cant play',
-              'schools out, but mummy is not,sorry'] | random }}
+          {{ ['Its a school holiday today and mummy is working.',
+              'No school today, but mummy cannot play.',
+              'schools out, but I am afraid that mummy is not, sorry.'] | random }}
         {% elif is_state('calendar.school_holidays','off') and is_state('calendar.gem_holidays','off') %}
-          {{ ['There are no holidays today',
+          {{ ['There are no holidays today.',
               'Work and school for everyone today. Yippee!'] | random }}
         {% endif %}
+      </p>
+      <p>
+        {{ ['That about wraps it up for today. Have a good one.',   
+            'That concludes todays report. Tune in at the same time tomorrow for another thrilling report.',   
+            'Thats all folks. Perhaps you could give me something more meaningful to do before we do this all over again tomorrow? ',   
+            'Thats all for now. Have good day'] | random }}
       </p>
 
       {%- endmacro-%}
