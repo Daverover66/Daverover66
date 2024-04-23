@@ -1,2 +1,28 @@
-###############################
+###############################################################################
+#   @author         :   Dave Forrester
+#   @date           :   23/04/2024
+#   @package        :   Car
+#   @description    :   All car related.
 #
+#   @modified by    :   Dave Forrester (Daverover66)
+#   @date           :   23/04/2024
+###############################################################################
+
+####################
+#     Scripts      #
+####################
+script:
+####################################################################################
+#    This allows the battery level number helper to be set via Alexa routine.      #
+#    It covers charge levels from 40% to 100%.                                     #
+####################################################################################
+
+  alias: Set Car Battery Charge Level 90
+sequence:
+  - service: input_number.set_value
+    target:
+      entity_id: input_number.car_battery_charge_level
+    data:
+      value: 90
+mode: single
+icon: mdi:battery-90
