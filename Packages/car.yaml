@@ -15,9 +15,8 @@ automation:
 ####################################
 #  Car Charging with Agile Tariff  #
 ####################################
-
+  - id: rolec_ev_chargepoint_schedule
 alias: Rolec EV Chargepoint schedule
-description: Multiple Slots for Agile
 trigger:
   - platform: state
     entity_id:
