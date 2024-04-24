@@ -8,6 +8,246 @@
 #   @date           :   23/04/2024
 ###############################################################################
 
+###################
+#   Automations   #
+###################
+automation:
+####################################
+#  Car Charging with Agile Tariff  #
+####################################
+
+alias: Rolec EV Chargepoint schedule
+description: Multiple Slots for Agile
+trigger:
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+    from: "off"
+    to: "on"
+    id: "On"
+    enabled: true
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+    from: "on"
+    to: "off"
+    id: "Off"
+    enabled: true
+  - platform: state
+    entity_id:
+      - switch.shelly1_c45bbe7867c7
+    from: unavailable
+    id: Rolec Available
+  - alias: Rolec 4 Hour charge completed
+    platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.rolec_4_hour_charge_period
+    id: Stop Charge
+  - platform: time
+    at: "20:59:00"
+    id: Activate Charge Session
+  - platform: state
+    entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+    alias: When inverter resets
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+    from: "off"
+    to: "on"
+    id: "On"
+    enabled: false
+  - platform: state
+    entity_id:
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+    from: "on"
+    to: "off"
+    id: "Off"
+    enabled: false
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate Charge Session
+        sequence:
+          - service: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_battery_master
+      - conditions:
+          - condition: trigger
+            id:
+              - "On"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+          - service: timer.start
+            data: {}
+            target:
+              entity_id: timer.rolec_4_hour_charge_period
+      - conditions:
+          - condition: trigger
+            id:
+              - "Off"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+          - service: timer.pause
+            data: {}
+            target:
+              entity_id: timer.rolec_4_hour_charge_period
+      - conditions:
+          - condition: trigger
+            id: Rolec Available
+          - condition: state
+            entity_id: >-
+              binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            state: "on"
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: >-
+                The Rolec was turned on because it became available during a
+                charge period.
+              title: ROLEC ON
+            alias: Send a notification based on an input text helper
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id: Rolec Available
+          - condition: state
+            entity_id: >-
+              binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            state: "off"
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: >-
+                The Rolec was turned off because it was on outside of a charge
+                period.
+              title: ROLEC OFF
+            alias: Send a notification based on an input text helper
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop Charge
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+          - service: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.rolec_battery_master
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - service: number.set_value
+            data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: 100
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+          - condition: state
+            entity_id: timer.rolec_4_hour_charge_period
+            state: active
+        sequence:
+          - service: number.set_value
+            data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+mode: single
+
+
 ####################
 #     Scripts      #
 ####################
