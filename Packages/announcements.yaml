@@ -117,16 +117,13 @@ automation:
         to: 'home'
   
     action:
-      # This Group is defined in the groups directory.
+      # This Group is defined in the presence package.
   
       - service: group.set
         data:
           object_id: "arriving"
           add_entities: >-
             {{ trigger.to_state.entity_id }}
-  
-      - wait_template: "{{ states.binary_sensor.mcu1_gpio12.state == 'on' }}"
-        timeout: '00:05:00'
   
       - wait_template: "{{ states.binary_sensor.kitchen_door.state == 'on' }}"
         timeout: '00:1:00'
