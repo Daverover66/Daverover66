@@ -5,7 +5,7 @@
 #   @description    :   Daily Announcements.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   27/10/2023
+#   @date           :   09/05/2024
 ###############################################################################
 
 ###############################
@@ -98,6 +98,85 @@ automation:
   #  action:
   #    - service: input_boolean.turn_off
   #      entity_id: input_boolean.audible_notifications
+
+###########################
+#     Someone is home     #
+###########################
+
+  - alias: 'People Greeting'
+    id: 29c5c9dd-550a-4761-a224-78cdc3dd9f43
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - person.carlo
+          - person.stacey
+          - person.paige
+          - person.justin
+        from: 'not_home'
+        to: 'home'
+  
+    action:
+      # This Group is defined in the groups directory.
+  
+      - service: group.set
+        data:
+          object_id: "arriving"
+          add_entities: >-
+            {{ trigger.to_state.entity_id }}
+  
+      - wait_template: "{{ states.binary_sensor.mcu1_gpio12.state == 'on' }}"
+        timeout: '00:05:00'
+  
+      - wait_template: "{{ states.binary_sensor.kitchen_door.state == 'on' }}"
+        timeout: '00:1:00'
+  
+      - delay: '00:01:00'
+      - service: script.speech_engine
+        data:
+  #         {% set person = state_attr(trigger.entity_id, "friendly_name")%}      This is another way to do it.
+  #         {% set person = trigger.entity_id.split('.')[1]|replace('_', ' ')%}
+          personarriving: >
+            {% set person = expand('group.arriving')|map(attribute='name')|join(' and ') %}
+            {% set peoplecount = expand('group.arriving') | count %}
+            {% if peoplecount == 1 %}
+              {% set is_are = ' is ' %}
+            {% else %}
+              {% set is_are = ' are ' %}
+            {% endif %}
+            {%- macro greeting_sentence(person, is_are) -%}
+            {{ [
+            "Welcome back home " ~ person,
+            "You had me at hello " ~ person,
+            "Guess who is home?" ~ person ~ is_are ,
+            "The wifi just got a little more crowded.  Welcome Home" ~ person,
+            person  ~ is_are + " now in the house.",
+            "Welcome Home " ~ person + ".  We have missed you. Or at least Molly did.",
+            "Our home is now complete, Rest your head and relax your feet! Welcome Back " ~ person,
+            "Life is like a song, you’re back where you belong. Welcome home " ~ person,
+            "Hey there " ~ person + " Welcome Home!",
+            "Knock Knock. Who is There? "   ~ person  ~ is_are ,
+            "The garage door opener just told me that " ~ person  ~ is_are +" home.",
+            person + " can not hide from the system. Welcome home.",
+            person ~ "! You are home!",
+            "I know a secret! "  ~ person  ~ is_are +" home!",
+            "Hey "  ~ person +". Your arrival has been recorded by the Smartest house on the block.",
+            "Take note Molly! "  ~ person  ~ is_are +" home.",
+            "I am sensing a disturbance in the force. "  ~ person +" must be home!",
+            "And the house becomes a home. Welcome back " ~ person,
+            person  ~ is_are + " now here.  Hash tag Welcome Home.",
+            person  ~ is_are + " now here.  Hash tag Home.",
+            person  ~ is_are + " now here.  Hash tag Smart Home.",
+            "Just a quick announcement. " ~ person +" has arrived!",
+            "Hey" ~ person + "! High Five! Glad you are finally home.",
+            "Pardon the interruption but " ~ person ~ is_are +" home!",
+            "My systems are picking up the presence of additional humans. " ~ person  ~ is_are +" being identified as home.",
+            "Welcome home "~person + "! It is nice to see you again! Let me turn on the lights. ",
+            "It looks like "~person ~ is_are + " finally home! I will get the house ready for you. "
+            ] | random }}
+            {%- endmacro -%}
+  
+            {{greeting_sentence(person, is_are)}}
 
   #################################
   #    School Morning Routine     #
