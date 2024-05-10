@@ -5,7 +5,7 @@
 #   @description    :   text for morning briefing.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   23/04/2024
+#   @date           :   10/05/2024
 ###############################################################################
 
 >
@@ -37,11 +37,61 @@
       {% endif %}
     </p>
     <p>
+        {% set day_of_week = states('sensor.day_of_week') %}
+        {% set event = state_attr('calendar.forrester_events','message') %}
+        {% set time = state_attr('calendar.forrester_events','start_time') %}
+        {% if day_of_week == 'Wednesday' and event == 'Blue Bin' %}
+          It is {{ event }} day. So make sure all the recycling
+          has been emptied into the Blue Bin and the bin is out for collection. 
+        {% elif day_of_week == 'Thursday' and event == 'Black Bin' %}
+          It is {{ event }} day. So make sure all the rubbish
+          has been emptied into the Black Bin and the bin is out for collection. 
+        {% elif day_of_week == 'Friday' and event == 'Skype mum' %}
+          It is {{ event }} day and you are scheduled to {{ event }} this afternoon at 
+          {{ as_timestamp(time)|timestamp_custom ('%-I:%M%p') }} 
+        {% endif %}
+    </p>
+    <p>
         {% if is_state('sensor.days_until_christmas','0') %} 
-          we wish you a merry christmas, we wish you a merry christmas, we 
+          We wish you a merry christmas, we wish you a merry christmas, we 
           wish you a merry christmas, and a happy new year.
           Yes, today is christmas day.  Have a festive time and don't eat 
           too many mince pies.
+        {% elif is_state('sensor.days_until_burns','0') %}
+          Tonight is Burns Night. Make sure you have a wee dram on me.
+        {% elif is_state('sensor.days_until_st_andrews_day','0') %}
+          Happy Saint Andrews Day to all my Scots friends. Have you guys not freed yourselves 
+          from colonial rule yet?
+        {% elif is_state('sensor.days_until_st_georges_day','0') %}
+          Happy Saint Georges Day to all you Angles out there.  Rule Britannia and all that
+          nonsense.
+        {% elif is_state('sensor.days_until_st_davids_day','0') %}
+          Deethe gwill dowee happiss.  Or for all you uneducated sorts, Happy Saint
+          Davids Day
+        {% elif is_state('sensor.days_until_st_patricks_day','0') %}
+          Law ayl-uh pawrig sunuh deev.  Or for all you uneducated sorts, Happy Saint
+          Patricks Day 
+        {% endif %}
+    </p>
+    <p>
+        {% if states('sensor.mothers_day_countdown') | int(9999) == 14  %}
+          and don't forget, there are only two weeks until Mothers day!
+        {% elif states('sensor.fathers_day_countdown') | int(9999) == 14  %}
+            and don't forget, there are only two weeks until Fathers day!
+        {% elif states('sensor.easter_countdown') | int(9999) == 14  %}
+            and don't forget, there are two weeks until Easter.
+        {% elif states('sensor.halloween_countdown') | int(9999) == 14 and states('sensor.halloween_countdown') | int(9999)> 0 %}
+            and don't forget, there are two Spooky weeks until Halloween!
+        {% elif states('sensor.halloween_countdown') | int(9999) == 7 and states('sensor.halloween_countdown') | int(9999)> 0 %}
+            and don't forget, there is one Spooky week until Halloween!
+        {% elif states('sensor.halloween_countdown') | int(9999) == 1  %}
+            and don't forget, Tomorrow is Halloween!
+        {% elif states('sensor.days_until_christmas') | int(9999)< 28 and states('sensor.days_until_christmas') | int(9999)> 0  %}
+            and don't forget, there are four Merry weeks until Christmas!
+        {% elif states('sensor.days_until_christmas') | int(9999)< 14 and states('sensor.days_until_christmas') | int(9999)> 0  %}
+            and don't forget, there are two Merry weeks until Christmas!
+        {% elif states('sensor.days_until_christmas') | int(9999) == 1  %}
+            and don't forget, Santa Claus is coming tomorrow!
         {% endif %}
     </p>
     <p>
@@ -127,6 +177,15 @@
       {% endif %} 
     </p>
     <p>
+      {% if state_translated('sensor.moon_phase') == 'Full moon' %}
+        {{ ['Check out the full moon tonight!',
+            'By the way, tonight is a full moon. ',
+            'The moon is big and bright! And full. ',
+            'If you want to see the full moon tonight is the night.'
+            ] | random }}
+      {% endif %}
+    </p>
+    <p>
       {% set e_list = state_attr('sensor.calendar_events', 'calendar_response')['calendar.forrester_events']['events'] | sort(attribute= 'start') | list %}
             You have {{ e_list | count }}
       {% if (e_list | count) >1 or (e_list | count) <1 %} 
@@ -151,6 +210,7 @@
         {% if batts_count > 0 %}
         {% set batts = expand('group.critical_batteries') 
           | rejectattr('state', 'eq', '100')
+          | rejectattr('state', 'in', ['unavailable','unknown'])
           | selectattr('state', 'lt', '20') | list %}
         {% for bat in batts %}
           The {{ bat.name }} is at {{ bat.state }}%. 
@@ -183,6 +243,7 @@
         {% if batts_count > 0 %}
         {% set batts = expand('group.rechargeable_batteries') 
           | rejectattr('state', 'eq', '100')
+          | rejectattr('state', 'in', ['unavailable','unknown'])
           | selectattr('state', 'lt', '20') | list %}
         {% for bat in batts %}
           {{ bat.name }} is at {{ bat.state }}%. 
@@ -203,7 +264,7 @@
           the network is functioning at full capacity, with all devices reporting availability.
         {% else %}
           there
-          {% if states('sensor.zigbee2mqtt_offline_devices_count')| float(0) == 1 %}
+          {% if states('sensor.sensor.zigbee2mqtt_offline_devices_count')| float(0) == 1 %}
             is {{states('sensor.zigbee2mqtt_offline_devices_count')}} device offline.
             Check your notifications for details.
           {% else %}
@@ -247,9 +308,9 @@
         {% if time == "Charging" %} 
           currently charging from solar.  The estimated solar production for today is {{ states('sensor.energy_production_today_3') | round (2)}}kWh.
           {% if states('sensor.energy_production_today_3') | float(0) > 30 %}
-            {{ ['so there is a good chance the battery will be topped up with glorious sunshine today.',
-                'so I expect terawatts of energy to flow from sol to the battery.',
-                'so you could probably watch as lovely solar electrons slowly fill the battery.'] | random }} 
+            {{ ['so there is a good chance the battery will be topped up with glorious sunshine today and wont be needed.',
+                'so I expect terawatts of energy to flow from sol to the battery and power the house for the rest of the day.',
+                'so why not sit back and watch as lovely solar electrons slowly fill the battery, then power for the rest of the day.'] | random }} 
           {% endif %}
         {% else %} 
           estimated to last until {{ states('sensor.solar_battery_empty_time') }}, at the current rate of consumption.      
@@ -263,7 +324,7 @@
           {% else %}
                 {{ ['So there should be enough energy in the battery, to see you through the day.'] | random }}
           {% endif %}
-              Incidentally, 
+              Incidentally, if the battery does need a topup
               {{ ['The cheapest half hour charging slot is at,',
                   'The misers among you will most likely charge at,',
                   'The most carbon friendly slot is at,'] | random }}
@@ -278,32 +339,50 @@
       {% endif %}
       </p>
       <p>
-          {% set topup = states('sensor.rolec_energy_consumption_weekly') | float(0) %}
-            Last time I checked, the battery in the car was at {{ states('input_number.car_battery_charge_level')|round }}%, 
-          {% if topup > 5 %}
-              and sensors indicate that it has been topped up this week with {{ topup | round(1) }}kWh of lovely cheap energy.
-              So it should be good for another {{ (topup * 3.5) | round()}} miles.
-          {% else %} and it appears that it has not been topped up this week.
-          {{ ['So it might need to be charged today.',
-              'If it has had a lot of use it might need to be charged today.',
-              'If you have done a lot of mileage since, the battery might need to be charged today.'] | random }}
+      {% set topup = states('sensor.rolec_energy_consumption_weekly') | float(0)  %}
+      {% set level = states('input_number.car_battery_charge_level') | float(0) %} 
+        Last time I checked, the battery in the car was at {{ level|round(0) }}%. 
+      {% if level == 100 %}
+        So it doesn't need a topup charge and should be good for 
+        {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+        180 miles.
+        {% else %}
+        200 miles.
+        {% endif %}
+      {% else %}
+        {% if topup > 5 %}
+          Sensors indicate that it has been topped up this week with {{ topup | round(1) }}kWh of lovely cheap energy.
+          So it should be good for around
+          {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+          {{ ((level/100)* 57.4 * 3) | round()}} miles.
+          {% else %}
+          {{ ((level/100)* 57.4 * 3.5) | round()}} miles.
+          {% endif %}   
+        If you need to do a longer journey, it will need to be charged today.
+        {% else %}
+        It appears that it has not been topped up this week. That means it is probably good for around  
+          {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+          {{ ((level/100)* 57.4 * 3) | round()}} miles.
+          {% else %}
+          {{ ((level/100)* 57.4 * 3.5) | round()}} miles.
           {% endif %}
-            If you think that it needs it, the best time for a half hour topup is at 
-            {% if is_state('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','on') %}
-                a time to be determined once the currently active slot has closed.
-            {% else %}
-            {% set time_start = state_attr('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','next_time')%}
-              {{ as_timestamp(time_start) | timestamp_custom ('%I:%M %p')}}.  When the price will be {{ ((state_attr('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','next_min_cost'))*100)|round(1)}} pence per kWh.
-            {% endif %}   A full charge can be started at
-            {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','on') %}
-              a time to be determined once the current period has ended.
-            {% elif state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time') is none %}
-              a time to be determined once a new target sensor has been calculated. 
-            {% else %}
-              {{as_timestamp(state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time'))|timestamp_custom ('%I:%M %p') }}.  When the price will be {{ (state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_min_cost') *100) | round(1)}} pence per kWh.
-            {% endif %}
-            So if you want to charge it outside of that time,
-          {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
+        If you need to do a longer journey, it will need to be charged today.
+        {% endif %}
+      {% endif %}
+      {% if level != 100 %}
+        Just make sure it is plugged in before
+        {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','on') %}
+        a time to be determined once the current period has ended. Tell whats her face that the car is plugged in, and leave the rest to me.
+        {% elif state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time') is none %}
+        a time to be determined once a new target sensor has been calculated. Tell whats her face that the car is plugged in, and leave the rest to me.
+        {% else %}
+        {{as_timestamp(state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time'))|timestamp_custom ('%I:%M %p') }}, 
+        tell whats her face that the car is plugged in, and leave the rest to me.  
+        Incidentally, the price will be {{ (state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_min_cost') *100) | round(1)}} pence per kWh.
+        {% endif %}
+        If you want to charge it outside of that time,
+        {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
+      {% endif %}
       </p>
       <p>
         {% if is_state('binary_sensor.workday_sensor','off') %}
@@ -333,7 +412,110 @@
         {{ ['That about wraps it up for today. Have a good one.',   
             'That concludes todays report. Tune in at the same time tomorrow for another thrilling report.',   
             'Thats all folks. Perhaps you could give me something more meaningful to do before we do this all over again tomorrow? ',   
-            'Thats all for now. Have good day'] | random }}
+            'Thats all for now. Have a good day'] | random }}
+      </p>
+      <p>
+        {{ ["and one more thing, Life is about making an impact. Make it a positive one. ",
+            "and one more thing, I seek not to know the answer, but simply to understand the question. ",
+            "and one more thing, Whatever the mind of a person can conceive and believe, it can achieve. ",
+            "and one more thing, You miss one hundred percent of the shots you dont take. ",
+            "and one more thing, The most difficult thing is the decision to act, the rest is merely tenacity. ",
+            "and one more thing, The only difference between who you are and who you want to be, is what you do. ",
+            "and one more thing, Defining the purpose is the starting point of all achievement. ",
+            "and one more thing, Life is not about getting and having, its about giving and being. ",
+            "and one more thing, Be the change that you wish to see in the world. ",
+            "and one more thing, A wise man changes his mind. A fool never will. ",
+            "and one more thing, Life is short. Smile while you still have teeth.",
+            "and one more thing, Change is inevitable.  Growth is optional. ",
+            "and one more thing, Dont worry. Be happy. ",
+            "and one more thing, Every mountain top is within reach if you just keep climbing.",
+            "and one more thing, What you get by achieving your goals is not as important as what you become during the journey.",
+            "and one more thing, To live a creative life, we must first lose our fear of being wrong.",
+            "and one more thing, If you are not willing to risk the unusual, you will have to settle for the ordinary.",
+            "and one more thing, All our dreams can come true if we have the courage to pursue them.",
+            "and one more thing, Good things come to those who wait, but it can be better to just go out and get them.",
+            "and one more thing, If you do what you have always done, you will get what you have always got.",
+            "and one more thing, Success is the sum of small efforts, repeated day after day after day.",
+            "and one more thing, Only put off until tomorrow what you are willing to die having left undone.",
+            "and one more thing, People who are crazy enough to think they can change the world, are usually the ones who do.",
+            "and one more thing, Just when the caterpillar thought the world was ending, it turned into a butterfly.",
+            "and one more thing, Opportunities dont just happen, you have to create them.",
+            "and one more thing, Start by doing whats necessary; then do whats possible; and suddenly you are doing the impossible.",
+            "and one more thing, Some people dream of great accomplishments, while others stay awake and do them.",
+            "and one more thing, The distance between insanity and genius is measured only by success.",
+            "and one more thing, It does not matter how slowly you go, as long as you do not stop.",
+            "and one more thing, Positive thinking will let you do everything better, than negative thinking will.",
+            "and one more thing, Trust the process. ",
+            "and one more thing, There are far better things ahead of us, than behind us. ",
+            "and one more thing, If you want to go fast, go alone but if you want to go far, go with others. ",
+            "and one more thing, The key to success is to focus on goals not obstacles. ",
+            "and one more thing, Sometimes we are tested, not to show our weaknesses, but to discover our strengths. ",
+            "and one more thing, Do something today that your future self will thank you for. ",
+            "and one more thing, Life is ten percent what happens to you, and ninety percent of how you react to it. ",
+            "and one more thing, The most common way people give up their power, is by thinking they do not have any. ",
+            "and one more thing, The mind is everything. What you think, you can become.  ",
+            "and one more thing, Always try to Live your best life. ",
+            "and one more thing, When nothing goes right, go left. ",
+            "and one more thing, The best time to plant a tree was twenty years ago. The second best time is now. ",
+            "and one more thing, Eighty percent of success is showing up. ",
+            "and one more thing, Dont stop when you are tired. Stop when you are done. ",
+            "and one more thing, Luck is being prepared and ready for the opportunities when they come. ",
+            "and one more thing, Action is the foundation of success. ",
+            "and one more thing, All progress takes place outside the comfort zone. ",
+            "and one more thing, You can make mistakes, but dont ever quit. ",
+            "and one more thing, Dont let the fear of losing, be greater than the excitement of winning. ",
+            "and one more thing, The way to get started, is to quit talking and start doing. ",
+            "and one more thing, When you feel like giving up, remember why you started. ",
+            "and one more thing, The harder you work, the more luck people will think you have. ",
+            "and one more thing, The harder you work for something, the better you will feel when you achieve it. ",
+            "and one more thing, Your time is limited, so dont waste it living someone elses life. ",
+            "and one more thing, Winning is not everything, but it does feel pretty good. ",
+            "and one more thing, I am not a product of my circumstances. I am a product of my decisions. ",
+            "and one more thing, You can never cross the ocean, until you have the courage to lose sight of the shore. ",
+            "and one more thing, Either you run the day, or the day runs you. ",
+            "and one more thing, Whether you think you can or you think you cant, you will be right. ",
+            "and one more thing, The two most important days in your life are the day you are born and the day you find out why. ",
+            "and one more thing, Never ruin a good day, by thinking about a bad yesterday. ",
+            "and one more thing, Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it. ",
+            "and one more thing, The best revenge is massive success. ",
+            "and one more thing, The universe cant put good into your hands, unless you let go of the bad.",
+            "and one more thing, People often say that motivation does not last. Well, neither does bathing. That is why we recommend it daily. ",
+            "and one more thing, Life shrinks or expands in proportion to your courage. ",
+            "and one more thing, If you hear a voice within you say you cannot paint, then by all means paint and that voice will be silenced. ",
+            "and one more thing, Dont shout to prove a point. Improve your argument. ",
+            "and one more thing, There is only one way to avoid criticism: do nothing, say nothing, and be nothing. ",
+            "and one more thing, Ask and it will be given to you; search, and you will find; knock and the door will be opened for you. ",
+            "and one more thing, The only person you are destined to become, is the person you decide to be. ",
+            "and one more thing, Certain things catch your eye, but chase only those that capture the heart. ",
+            "and one more thing, Believe you can and you are halfway there. ",
+            "and one more thing, Good things take time. ",
+            "and one more thing, Feel the fear and do it anyway. ",
+            "and one more thing, There is no place like home. ",
+            "and one more thing, Life can be tough, but so are you. ",
+            "and one more thing, Everything you have ever wanted is on the other side of fear. ",
+            "and one more thing, Start where you are. Use what you have. Do what you can. ",
+            "and one more thing, Fall seven times and stand up eight. ",
+            "and one more thing, Everything has beauty, but not everyone can see. ",
+            "and one more thing, Life is like riding a bicycle. To keep your balance, you must keep moving. ",
+            "and one more thing, Life is not measured by the number of breaths we take, but by the moments that take our breath away. ",
+            "and one more thing, In any given moment, we can choose to move forward and grow, or retreat.",
+            "and one more thing, Happiness is not something ready made. It comes from your own actions. ",
+            "and one more thing, If you are offered a seat on a rocket ship, dont ask what seat! Just get on. ",
+            "and one more thing, If the wind will not move you forward, take to the oars. If the oars dont work, get yourself an outboard motor ",
+            "and one more thing, You cannot fall if you do not climb. But theres no joy in living your whole life on the ground. ",
+            "and one more thing, Challenges are what make life interesting and overcoming them is what makes life meaningful. ",
+            "and one more thing, Be nice to others, and nice things will happen to you.",
+            "and one more thing, Everyone has a plan, until they get punched in the face.  Be ready to duck, change direction, and adapt to the situation. ",
+            "and one more thing, You are the artist of your OWN life.  Dont hand the paint brush to anyone else. ",
+            "and one more thing, Try to be a rainbow for someone elses cloud. ",
+            "and one more thing, It is nice to be important, but more important to be nice.",
+            "and one more thing, You have within you, right now, everything you need to deal with whatever the world can throw at you.",
+            "and one more thing, The only way to do great work is to love what you do. If you havent found it yet, keep looking. Dont settle.",
+            "and one more thing, Life is too short to waste time hating anyone.",
+            "and one more thing, Be yourself, everyone else is already taken.",
+            "and one more thing, Be alert! Your country needs lerts!",
+            "and one more thing, What we fear doing most is usually what we need to do most.",
+            ] |random}}
       </p>
 
       {%- endmacro-%}
