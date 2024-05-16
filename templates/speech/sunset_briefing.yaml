@@ -1,17 +1,98 @@
 >
-  {# Event Report #}
-  {%- macro getReport() -%}
-    <p>
-      {% if now().strftime('%H')|int < 12 %} 
-        Good morning. 
-      {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17 %} 
-        Good afternoon. 
-      {% else %}  
-        Good evening. 
-      {% endif %} 
-    </p>
-    
 
+  {# Event Report #}
+  {%- macro getReport() -%}   
+    <p>
+      Good evening. 
+      {% if is_state('sun.sun', 'below_horizon') %} 
+        The sun has set on another day.  You now have 
+        {% set seconds = as_timestamp(states.sun.sun.attributes.next_rising)-now().timestamp() %} 
+        {% set hours = seconds / 60 %} 
+          {% if seconds / ( 60 * 60 ) > 1 %} 
+            {{ (seconds //  ( 60 * 60 )) | int }} hours 
+          {% else %} 
+            {{ (seconds // 60) | int }} minutes 
+          {% endif %} 
+            {{ [ 
+                'until the sun rises.', 
+                'until the sun is up.', 
+                'before the sun officially rises. ' 
+                ]|random }} 
+      {% else %} 
+        The sun has yet to set on this day. There are still
+        {% set seconds = as_timestamp(states.sun.sun.attributes.next_setting)-now().timestamp() %} 
+        {% set hours = seconds / 60 %} 
+          {% if seconds / ( 60 * 60 ) > 1 %} 
+            {{ (seconds //  ( 60 * 60 )) | int }} hours 
+          {% else %} 
+            {{ (seconds // 60) | int }} minutes 
+          {% endif %} 
+            {{ [ 
+                'until the day is officially done.', 
+                'until it finally slips below the horizon.', 
+                'before it does. ' 
+                ]|random }} 
+            {{ [ 
+                'So make the most of what daylight remains.', 
+                'Im sure there are still some garden jobs you could be getting on with.', 
+                'Perhaps you might like a glass of wine to end the day, or maybe a beer? ' 
+                ]|random }}
+      {% endif %} 
+      </p>
+      <p>
+        {% if state_translated('sensor.moon_phase') == 'Full moon' %}
+        {{ ['Check out the full moon tonight while ',
+            'By the way, tonight is a full moon and ',
+            'The moon is big and bright! And full. ',
+            'If you want to see the full moon tonight is the night.'
+            ] | random }}
+        {% else %}    
+          The moon is {{ state_translated('sensor.moon_phase') }} tonight and
+        {% endif %}
+        the temperature outside is {{states('sensor.outside_temperature')|round}} degrees celsius.
+      The overnight forecast says we can expect {{ states('weather.forecast_home') }} weather. With a low of {{ states('sensor.low_temperature_today')}} degrees celsius.
+      {% if  states('sensor.low_temperature_today')|float(0) < 2 or states('sensor.outdside_thermal_comfort_frost_risk') in ['probable','high'] %}
+      There is a chance of frost overnight. So you might want to think about protecting tender plants tonight.
+      {% endif %}
+      </p>
+      <p>
+      {% set generation = states('sensor.solar_panel_production_daily') | float(0) %}
+      {% set import = states('sensor.solar_imported_power_daily') | float(0) %}
+      {% set gas = states('sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption_kwh') %}
+      {% set export = states('sensor.solar_exported_power_daily') | float(0) %}
+      {% set import_cost = states('sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost') | float(0) %}
+      {% set export_cost = states('sensor.solar_accounting_outgoing_fixed_compensation') | float(0) %}
+      {% set energy_cost = states('sensor.electricity_bill_today') | float(0) %}
+      {% set season = states('sensor.season')%}
+      {% set bst = states('input_boolean.bst')%}
+      {% set gmt = states('input_boolean.gmt')%}
+      Your energy stats for the day are
+      {% if bst == 'on' %}
+        {% if generation > 50 %}
+        impressive, but not unexpected for this time of year.
+        {% elif generation > 30 %}
+        pretty good, but not especially brilliant for this time of year.
+        {% elif generation > 10 and season in ['spring','summer']%}
+        okay, but far less than expected for this time of year.
+        {% else %}
+        pretty rubbish for this time of year.
+        {% endif %}
+      {% elif gmt == 'on' %}      
+        {% if generation > 50 %}
+        bloody impressive for this time of year.
+        {% elif generation > 30 %}
+        very good for this time of year.
+        {% elif generation > 10 %}
+        okay for this time of year.
+        {% else %}
+        much to be expected this time of year.
+      {% endif %}
+    {% endif %}
+        You imported {{ import | round(1) }} kWh of electricity and {{ gas | round(1)  }} kWh of gas. 
+        You exported {{ export | round(1) }} kWh of electricity.
+        So your net energy use is {{ ((import + gas|int) - export) | round(1) }} kWh.
+        Your net energy cost is £{{ energy_cost }}
+        Your electricity bill so far this month is £{{states('sensor.electricity_bill_this_month')}} 
   {%- endmacro -%}
 
 
