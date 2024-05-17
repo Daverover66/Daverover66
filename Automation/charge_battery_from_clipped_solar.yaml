@@ -1,0 +1,179 @@
+alias: "Charge Battery from Clipped Solar "
+description: Charges battery from clipped DC power when solar production estimate is high.
+trigger:
+  - platform: state
+    entity_id:
+      - input_boolean.home_battery_grid_charging
+    to: "off"
+    from: "on"
+    id: Grid Charge Finished
+    alias: When battery finishes grid charge.
+  - alias: When excess DC Power Available.
+    platform: numeric_state
+    entity_id:
+      - sensor.inverter_1_production
+    above: 4100
+    id: Excess DC Available
+  - platform: numeric_state
+    entity_id:
+      - sensor.inverter_1_production
+    below: 4050
+    id: Excess DC not Available
+  - platform: numeric_state
+    entity_id:
+      - sensor.solaredge_b1_state_of_energy
+    above: 99.5
+    id: Charge Complete
+  - platform: time
+    at: "12:00:00"
+    id: Midday
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Charge Finished
+          - condition: template
+            value_template: >-
+              {{
+              is_state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','target_times',[])}}
+          - condition: numeric_state
+            entity_id: sensor.energy_production_today_3
+            above: 30
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 99
+        sequence:
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_charge_from_excess_dc
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - service: number.set_value
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+            data:
+              value: "14400"
+          - service: select.select_option
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+            data:
+              option: Discharge to Minimize Import
+      - conditions:
+          - condition: trigger
+            id:
+              - Excess DC Available
+          - condition: state
+            entity_id: input_boolean.allow_charge_from_excess_dc
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 99.5
+          - condition: sun
+            before: sunset
+            after: sunrise
+        sequence:
+          - service: number.set_value
+            metadata: {}
+            data:
+              value: "14400"
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+          - service: select.select_option
+            metadata: {}
+            data:
+              option: Charge from Clipped Solar Power
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+      - conditions:
+          - condition: trigger
+            id:
+              - Excess DC not Available
+          - condition: state
+            entity_id: input_boolean.allow_charge_from_excess_dc
+            state: "on"
+          - condition: sun
+            before: sunset
+            after: sunrise
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 99.5
+        sequence:
+          - service: number.set_value
+            metadata: {}
+            data:
+              value: "14400"
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+          - service: select.select_option
+            metadata: {}
+            data:
+              option: Discharge to Minimize Import
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+      - conditions:
+          - condition: trigger
+            id:
+              - Charge Complete
+          - condition: state
+            entity_id: input_boolean.allow_charge_from_excess_dc
+            state: "on"
+        sequence:
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_charge_from_excess_dc
+            data: {}
+          - service: number.set_value
+            metadata: {}
+            data:
+              value: >-
+                {{
+                states('input_number.storage_command_timeout_default_period')|float(0)
+                }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+          - service: select.select_option
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+            data:
+              option: Maximize Self Consumption
+      - conditions:
+          - condition: trigger
+            id:
+              - Midday
+          - condition: numeric_state
+            entity_id: sensor.solaredge_b1_state_of_energy
+            below: 99.5
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_command_mode
+                state: Charge from Clipped Solar Power
+              - condition: state
+                entity_id: select.solaredge_i1_storage_command_mode
+                state: Discharge to Minimize Import
+        sequence:
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_charge_from_excess_dc
+            data: {}
+          - service: number.set_value
+            metadata: {}
+            data:
+              value: >-
+                {{ states('input_number.storage_command_timeout_default_period')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_command_timeout
+          - service: select.select_option
+            metadata: {}
+            data:
+              option: Maximize Self Consumption
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+mode: single
