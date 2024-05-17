@@ -1,0 +1,29 @@
+alias: Clocks Changing
+description: ""
+trigger:
+  - platform: time
+    at: "10:00:00"
+  - platform: time
+    at: "19:00:00"
+condition:
+  - condition: template
+    value_template: "{{ states('sensor.daylight_savings_days_until') | int(0) in [7,1] }}"
+action:
+  - service: script.text_notify_dave
+    metadata: {}
+    data:
+      message: >
+        {%- set days = states('sensor.daylight_savings_days_until') | int(0) %}
+        {%- set plural = 's' if days | int(0) > 1 else '' %} Clocks change in {{
+        days }} day{{plural}}, you will {{
+        states('sensor.daylight_savings_phrase') }}!
+  - condition: template
+    value_template: "{{states('sensor.daylight_savings_days_until') | int(0)  == 0 }}"
+  - service: input_boolean.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+        - input_boolean.bst
+        - input_boolean.gmt
+mode: single
