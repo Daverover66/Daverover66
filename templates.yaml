@@ -5,8 +5,8 @@
 #   @description    :   not in a package file              #
 #                                                          #
 #                                                          #
-#   @version        :   1.02                               #
-#   @modified       :   28/03/2024                         #
+#   @version        :   1.03                               #
+#   @modified       :   17/05/2024                         #
 ############################################################
 
 
@@ -56,13 +56,13 @@
   - name: "Fridge Too Warm"
     unique_id: fridge_too_warm_sensor
     state: >
-      {{ states('sensor.fridge_thermometer_temperature')  | int > 10 }}
+      {{ states('sensor.fridge_thermometer_temperature')  | int(0) > 10 }}
     device_class: problem
 
   - name: "Freezer Too Warm"
     unique_id: freezer_too_warm_sensor
     state: >
-      {{ states('sensor.freezer_thermometer_temperature') | int > 1 }}
+      {{ states('sensor.freezer_thermometer_temperature') | int(0) > 1 }}
     device_class: problem
 
         
@@ -102,6 +102,13 @@
     unique_id: day_of_week
     state: >
       {{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A') }}
+
+- sensor:
+  #### day of the year #####
+  - name: "Day of Year"
+    unique_id: day_of_year 
+    state: >
+      {{ now().strftime('%j')|int(9999) }}
 
 
 - sensor:
@@ -203,27 +210,27 @@
       {% endif %}
 
 
-- sensor:
-  ### determine overnight low temperature for daily briefing ###
-  - name: "Overnight Low Temp"
-    unique_id: overnight_temp_low
-    state: |-
-      {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
-      {% set end = (start + timedelta(days=1)) %}
-      {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
-      {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
-        {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | min }}
+# - sensor:
+#   ### determine overnight low temperature for daily briefing ###
+#   - name: "Overnight Low Temp"
+#     unique_id: overnight_temp_low
+#     state: |-
+#       {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
+#       {% set end = (start + timedelta(days=1)) %}
+#       {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+#       {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+#         {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | min }}
 
-- sensor:
-  ### determine overnight high temperature for daily briefing ###
-  - name: "Overnight High Temp"
-    unique_id: overnight_temp_high
-    state: |-
-      {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
-      {% set end = (start + timedelta(days=1)) %}
-      {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
-      {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
-        {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}
+# - sensor:
+#   ### determine overnight high temperature for daily briefing ###
+#   - name: "Overnight High Temp"
+#     unique_id: overnight_temp_high
+#     state: |-
+#       {% set start = now().replace(hour=0,minute=0,second=0, microsecond=0) %}
+#       {% set end = (start + timedelta(days=1)) %}
+#       {% set start = start.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+#       {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
+#         {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}
 
 
   ### Trigger based sensor to store calendar events ###
@@ -306,31 +313,58 @@
           {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
         {% endfor %}
         {{ ns.totalrainfall | float(0) | round(2) }}
+
+- trigger:
+    - platform: time_pattern
+      hours: "/1"
+      minutes: 0
+  sensor:
+    - unique_id: z2m_last_seen_entities
+      name: "Z2M Last Seen Entities"
+      state: >
+        {% set lapsed_hours = 36 %}
+        {% set ns = namespace(count=0) %}
+        {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$')  %}
+          {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.count }}     
+      attributes:
+        devices: >
+          {% set lapsed_hours = 36 %}
+          {% set result = namespace(sensors=[]) %}
+          {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$') %}
+            {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
+              {% set result.sensors = result.sensors + [state.name | regex_replace(find='_last_seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
+            {% endif %}
+          {% endfor %}
+          {{ result.sensors }}
         
 #########################################
 #   Gets min and max temp for the day   # 
 #########################################
 
-- trigger:
-    - platform: state
-      entity_id: weather.openweathermap
-    - platform: homeassistant
-      event: start
-    - platform: event
-      event_type: event_template_reloaded
-  action:
-    - service: weather.get_forecasts
-      data:
-        type: daily
-      target:
-        entity_id: weather.openweathermap
-      response_variable: daily
-  sensor:
-    - name: Forecast Daily
-      unique_id: weather_forecast_daily
-      state: "{{ states('weather.openweathermap') }}"
-      attributes:
-        forecast: "{{ daily['weather.openweathermap'].forecast }}"
+# - trigger:
+#     - platform: state
+#       entity_id: weather.openweathermap
+#     - platform: homeassistant
+#       event: start
+#     - platform: event
+#       event_type: event_template_reloaded
+#   action:
+#     - service: weather.get_forecasts
+#       data:
+#         type: daily
+#       target:
+#         entity_id: weather.openweathermap
+#       response_variable: daily
+#   sensor:
+#     - name: Forecast Daily
+#       unique_id: weather_forecast_daily
+#       state: "{{ states('weather.openweathermap') }}"
+#       attributes:
+#         forecast: "{{ daily['weather.openweathermap'].forecast }}"
 
 - trigger:
     - platform: state
@@ -434,7 +468,8 @@
     state: >
       {{ expand('group.critical_batteries') 
       | rejectattr('state', 'eq', '100')
-      | selectattr('state', 'lt', '30') | list | count }}
+      | rejectattr('state', 'in', ['unavailable','unknown'])
+      | selectattr('state', 'lt', '20') | list | count }}
 
 - sensor:
   ### Rechargeable Battery Count ####
@@ -443,6 +478,7 @@
     state: >
       {{ expand('group.rechargeable_batteries') 
       | rejectattr('state', 'eq', '100')
+      | rejectattr('state', 'in', ['unavailable','unknown'])
       | selectattr('state', 'lt', '20') | list | count }}
 
 - sensor:
@@ -451,6 +487,7 @@
     unique_id: srv_critical_battery_count
     state: >
       {{ expand('group.srv_critical_batteries') 
+      | rejectattr('state', 'in', ['unavailable','unknown'])
       | selectattr('state', 'eq', 'on') | list | count }} 
 
 - sensor:
@@ -713,6 +750,18 @@
         {{ ((as_timestamp(now().replace(month=4, day=23)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
+- sensor:
+  - name: "Days Until St Patricks Day"
+    unique_id: days_until_st_patricks_day 
+    unit_of_measurement: Days
+    state: >
+      {% set daystogo = ((as_timestamp(now().replace(month=3, day=17)) - as_timestamp(now()) | int) / 86400) | round(0) %}
+      {% if daystogo < 0 %}
+        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=17))) / 86400) | round(0)}}
+      {% else %}
+        {{ ((as_timestamp(now().replace(month=3, day=17)) - as_timestamp(now()) | int) / 86400) | round(0) }}
+      {% endif %}
+
 
 
 - sensor:
@@ -872,14 +921,14 @@
 
 - sensor:
   - name: "Zigbee2MQTT Offline Devices"
-    unique_id: zigbee2mqtt_offline_devices 
+    unique_id: zigbee2mqtt_offline_devices
     state: >
       {% set result = namespace(sensors=[]) %}
-      {% for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
-        {% if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
-          {% set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
-        {% endif %}
-      {% endfor %}
+      {%- for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
+        {%- if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
+          {%- set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
+        {%- endif %}
+      {%- endfor -%}
         {{ result.sensors | join(', ') }}
 
 - sensor:
@@ -893,6 +942,166 @@
         {% endif %}
       {% endfor %}
         {{ result.sensors | list | count }}
+
+- sensor:
+  - name: "Car Battery Hours To Full"
+    unique_id: car_battery_hours_to_full 
+    icon: mdi:battery-clock 
+    state: >
+      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
+      {% set energy_remaining_kwh = (57.4 -(57.4 * battery_state)/100) %}
+      {% set hrs_to_full =  (energy_remaining_kwh / 7.2) | round(2) %}
+      {% set t1 = ('%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0))) %} 
+      {% set t2 = strptime(t1,'%H:%M') %}
+        {{ t2.hour}} hours {{ t2.minute}} minutes
+    availability: >
+      {{ hrs_to_full | is_number }}
+
+- sensor:
+  - name: "Set Octopus Time For Rolec"
+    unique_id: set_octopus_time_for_rolec
+    icon: mdi:battery-clock 
+    state: >
+      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
+      {% set energy_remaining_kwh = (57.4 -(57.4 * battery_state)/100) %}
+      {% set hrs_to_full =  (energy_remaining_kwh / 7) | round(2) %}
+        "{{ hrs_to_full | round + 1}}"
+
+- sensor:
+  - name: "Cost To Charge To Full 15p" 
+    unique_id: cost_to_charge_to_full_fifteen 
+    icon: mdi:currency-gbp 
+    state: >
+      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
+      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
+        {{ (energy_used_kwh|float(0) * 0.15) | round(2) }}
+
+- sensor:
+  - name: "Cost To Charge To Full 10p" 
+    unique_id: cost_to_charge_to_full_ten  
+    icon: mdi:currency-gbp 
+    state: >
+      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
+      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
+        {{ (energy_used_kwh|float(0) * 0.10) | round(2) }}
+
+- sensor:
+  - name: "Cost To Charge To Full 5p" 
+    unique_id: cost_to_charge_to_full_five  
+    icon: mdi:currency-gbp 
+    state: >
+      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
+      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
+        {{ (energy_used_kwh|float(0) * 0.05) | round(2) }}
+
+############################
+#     Clocks Changing      #
+############################
+- trigger:
+    - platform: time
+      at: "00:00:00"
+    - platform: homeassistant
+      event: start
+    - platform: event
+      event_type: call_service
+      event_data:
+        domain: template
+        service: reload
+  sensor:
+    - unique_id: dst_next
+      name: "Daylight Savings: Next"
+      device_class: timestamp
+      state: >
+        {%- macro hms(t) %}
+        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
+        {%- set h, m, s = dststr.split(':') | map('int') %}
+        {{- h * 60 * 60 + m * 60 + s }}   
+        {%- endmacro %}
+        
+        {%- macro is_dst(t) %}
+        {{- hms(t) | int != 0 }}
+        {%- endmacro %}
+        
+        {%- macro finddst(t, kwarg, rng) %}
+        {%- set ns = namespace(previous=is_dst(t), found=none) %}
+        {%- for i in range(rng) %}
+          {%- set ts = t + timedelta(**{kwarg:i}) %}
+          {%- if ns.previous != is_dst(ts) and ns.found is none %}
+            {%- set ns.found = i %}
+          {%- endif %}
+        {%- endfor %}
+        {{- ns.found }}
+        {%- endmacro %}
+        
+        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+        {%- set d = finddst(t, 'days', 366) | int - 1 %}
+        {%- set h = finddst(t + timedelta(days=d), 'hours', 25) | int - 1 %}
+        {%- set m = finddst(t + timedelta(days=d, hours=h), 'minutes', 61) | int %}
+        {{ (t + timedelta(days=d, hours=h, minutes=m)) }}
+
+    - unique_id: dst_phrase
+      name: "Daylight Savings: Phrase"
+      state: >
+        {%- macro hms(t) %}
+        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
+        {%- set h, m, s = dststr.split(':') | map('int') %}
+        {{- h * 60 * 60 + m * 60 + s }}   
+        {%- endmacro %}
+
+        {%- macro phrase(seconds, name, divisor, mod=None) %}
+          {%- set value = ((seconds | abs // divisor) % (mod if mod else divisor)) | int %}
+          {%- set end = 's' if value > 1 else '' %}
+          {{- '{} {}{}'.format(value, name, end) if value > 0 else '' }}
+        {%- endmacro %}
+
+        {%- macro total(seconds) %}
+        {%- set values = [ 
+          phrase(seconds, 'hour', 60*60, 60*60*24),
+          phrase(seconds, 'minute', 60, 60),
+          ] | select('!=','') | list %}
+        {{- values[:-1] | join(', ') ~ ' and ' ~ values[-1] if values | length > 1 else values | first | default}}
+        {%- endmacro %}
+
+        {%- macro finddelta(t, kwarg, rng) %}
+        {%- set ns = namespace(previous=hms(t), found=none) %}
+        {%- for i in range(rng) %}
+          {%- set ts = t + timedelta(**{kwarg:i}) %}
+          {%- if ns.previous != hms(ts) and ns.found is none %}
+            {%- set before = hms(ts - timedelta(days=1)) | int %}
+            {%- set after = hms(ts) | int %}
+            {%- set ns.found =  after - before %}
+          {%- endif %}
+        {%- endfor %}
+        {{ ns.found }}
+        {%- endmacro %}
+        
+        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+        {%- set delta = finddelta(t, 'days', 365) | int %}
+        {% if delta > 0 %}
+          lose {{ total(delta | abs) }}
+        {% else %}
+          gain {{ total(delta | abs) }}
+        {% endif %}
+
+- sensor:
+    - unique_id: dst_days
+      name: "Daylight Savings: Days Until"
+      unit_of_measurement: days
+      state: >
+        {% set next = states('sensor.daylight_savings_next') | as_datetime %}
+        {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+        {{ (next - today).days if next is not none else 0 }}
+      availability: >
+        {{ states('sensor.daylight_savings_next') not in ['unknown', 'unavailable'] }}
+
+
+
+
+
+                                                                    
+                                                                    
+
+
 
 
 
