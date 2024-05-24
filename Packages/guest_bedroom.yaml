@@ -5,7 +5,7 @@
 #   @description    :   All Spare Room config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   10/10/2023
+#   @date           :   24/05/24
 ###############################################################################
 
 ###########################
@@ -20,6 +20,10 @@ input_boolean:
   guest_bedroom_bedside_lamps_active:
     name: Guest Bedroom Bedside Lamps Active
     icon: mdi:lamp
+
+  guest_bedroom_allow_lights_off:
+    name: Guest Bedroom Allow Lights Off
+    icon: mdi:check
   
   
 ###########################
@@ -52,16 +56,16 @@ automation:
         id: Light off
         for:
           hours: 0
-          minutes: 1
-          seconds: 0
+          minutes: 0 
+          seconds: 30
       - platform: numeric_state
-        entity_id: sensor.upstairs_light_level
+        entity_id: sensor.average_light_level_upstairs
         below: input_number.low_light_threshold
         id: Low Light
       - platform: numeric_state
-        entity_id: sensor.upstairs_light_level
+        entity_id: sensor.average_light_level_upstairs
         id: Good Light
-       above: input_number.upper_light_threshold_level
+        above: input_number.upper_light_threshold_level
     condition:
       - condition: state
         entity_id: input_boolean.holiday_mode
@@ -74,9 +78,9 @@ automation:
               - condition: state
                 entity_id: binary_sensor.lights_out
                 state: "off"
-              - condition: numeric_state
-                entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
-                below: input_number.low_light_threshold
+              - condition: sun
+                before: sunrise 
+                after: sunset 
               - condition: state
                 entity_id: input_boolean.guest_bedroom_bedside_lamps_active
                 state: "on"
@@ -98,12 +102,9 @@ automation:
               - condition: trigger
                 id: Light off
               - condition: state
-                entity_id: light.guest_bedroom_bedside_lamp_left
-                state: "on"
-              - condition: state
-                entity_id: light.guest_bedroom_bedside_lamp_right
-                state: "on"
-             sequence:
+                entity_id: input_boolean.guest_bedroom_allow_lights_off
+                state: "on" 
+            sequence:
               - service: light.turn_off
                 data: {}
                 target:
@@ -125,7 +126,7 @@ automation:
                   - condition: state
                     entity_id: input_boolean.guest_bedroom_bedside_lamps_active
                     state: "on"
-              - condition: and
+              - condition: or
                 conditions:
                   - condition: state
                     entity_id: binary_sensor.guest_bedroom_motion_occupancy
@@ -150,7 +151,7 @@ automation:
                 id:
                   - Good Light
             sequence:
-             - service: light.turn_off
+              - service: light.turn_off
                 data: {}
                 target:
                   entity_id:
@@ -170,14 +171,9 @@ automation:
       - platform: state
         entity_id:
           - sensor.smart_button_upstairs_1_action
-        id: Casper & Sky on
+        id: Casper & Sky toggle 
         to: single
       - platform: state
-        entity_id:
-          - sensor.smart_button_upstairs_1_action
-        to: double
-        id: Casper & Sky off
-     - platform: state
         entity_id:
           - sensor.smart_button_upstairs_1_action
         attribute: action
@@ -188,78 +184,114 @@ automation:
       - choose:
           - conditions:
               - condition: trigger
-                id: Casper & Sky on
+                id: Casper & Sky toggle 
             sequence:
-              - service: switch.turn_on
-                data: {}
-                target:
-                  entity_id: switch.casper_switch_0
-              - service: media_player.turn_on
-                data: {}
-                target:
-                  entity_id: media_player.sky_q_guest_bedroom_mini
-              - if:
-                  - condition: state
-                    entity_id: binary_sensor.quiet_time
-                    state: "off"
-                  - condition: state
-                    entity_id: input_boolean.audible_notifications
-                    state: "on"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: Guest Bedroom
-                      call_interruption: 1
-                      call_media_system_on: 1
-          - conditions:
-              - condition: trigger
-                id: Casper & Sky off
-            sequence:
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.casper_switch_0
-              - service: media_player.turn_off
-                data: {}
-                target:
-                  entity_id: media_player.sky_q_guest_bedroom_mini
-              - if:
-                  - condition: state
-                    entity_id: binary_sensor.quiet_time
-                    state: "off"
-                  - condition: state
-                    entity_id: input_boolean.audible_notifications
-                    state: "on"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: Guest Bedroom
-                      call_interruption: 1
-                      call_media_system_off: 1          
+              - service: script.spare_room_tv_toggle
+                data: {} 
           - conditions:
               - condition: trigger
                 id: Night Lights
             sequence:
-              - service: input_boolean.turn_off
+              - service: scene.turn_on
                 data: {}
-                target:
-                  entity_id: input_boolean.guest_bedroom_bedside_lamps_active
-              - service: light.turn_on
-                data:
-                  rgb_color:
-                  - 255
-                  - 244
-                  - 4
-                  brightness: 5
-                target:
-                  entity_id: 
-                    - light.guest_bedroom_bedside_lamp_right
-                    - light.guest_bedroom_bedside_lamp_left
-                  
-                
+                target: 
+                  entity_id: scene.spare_room_night_lights
+
+#####################################
+#    TV and Sky Toggle on and off   #
+#####################################
+
+  - id: spare_room_tv_toggle_on_and_off 
+    alias: Spare Room TV Toggle On and Off 
+    description: ""
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.sky_q_guest_bedroom_mini
+        id: Casper & Sky toggle on 
+        to: playing 
+      - platform: state
+        entity_id:
+          - media_player.sky_q_guest_bedroom_mini 
+        id: Casper & Sky toggle off  
+        to: "off" 
+    condition: []
+    action:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: Casper & Sky toggle on 
+            sequence:
+              - service: script.spare_room_tv_toggle
+                data: {} 
+          - conditions:
+              - condition: trigger
+                id: Casper & Sky toggle off  
+            sequence:
+              - service: script.spare_room_tv_toggle
+                data: {} 
 
 
 ###########################
 #        Scripts          #
 ###########################
+script: 
+  ###########################
+  #   Toggle TV on and off  # 
+  ###########################
+  spare_room_tv_toggle:
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: switch.casper_switch_0
+                state: "off"
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.casper_switch_0
+                data: {}
+              - service: media_player.turn_on
+                target:
+                  entity_id: media_player.sky_q_guest_bedroom_mini
+                data: {}
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+              - service: script.status_annc
+                data:
+                  where: guest_bedroom
+                  call_interruption: 1
+                  call_media_system_on: 1
+        default:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.casper_switch_0
+            data: {}
+          - service: media_player.turn_off
+            target:
+              entity_id:
+                - media_player.sky_q_guest_bedroom_mini
+            data: {}
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+          - service: script.status_annc
+            data:
+              where: guest_bedroom
+              call_interruption: 1
+              call_media_system_off: 1
+    mode: single
 
