@@ -5,7 +5,7 @@
 #   @description    :   All Kitchen config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   14/09/2023
+#   @date           :   24/05/24
 ###############################################################################
 
 ###########################
@@ -28,11 +28,11 @@ automation:
     trigger:
       - platform: numeric_state
         entity_id: sensor.sm_t220_battery_level
-        below: 20
+        below: 30
         id: Kitchen Tablet Battery Low
       - platform: numeric_state
         entity_id: sensor.sm_t220_battery_level
-        above: 90
+        above: 95
         id: Kitchen Tablet Battery Charged
     condition: []
     action:
@@ -41,18 +41,18 @@ automation:
               - condition: trigger
                 id: Kitchen Tablet Battery Low
             sequence:
-              - type: turn_on
-                device_id: 6c0823361c0892af0cd9e2882f3e32b2
-                entity_id: switch.kitchen_tablet_socket_1
-                domain: switch
+              - service: switch.turn_on 
+                data: {}
+                target:
+                  entity_id: switch.kitchen_tablet_local 
           - conditions:
               - condition: trigger
                 id: Kitchen Tablet Battery Charged
             sequence:
-              - type: turn_off
-                device_id: 6c0823361c0892af0cd9e2882f3e32b2
-                entity_id: switch.kitchen_tablet_socket_1
-                domain: switch
+              - service: switch.turn_off  
+                data: {}
+                target:
+                  entity_id: switch.kitchen_tablet_local 
 
 ###########################
 #     Ad-Hoc Charging     #
@@ -60,7 +60,6 @@ automation:
 
   - id: ad_hoc_charging
     alias: Ad-Hoc Charging
-    initial_state: true
     mode: single
     trigger:
       - platform: state 
@@ -88,7 +87,7 @@ automation:
               - service: switch.turn_on
                 data: {}
                 target:
-                  entity_id: switch.ad_hoc_tou_charging_2_socket_1
+                  entity_id: switch.ad_hoc_charging_2_local 
           - conditions:
               - condition: trigger
                 id: 
@@ -101,7 +100,7 @@ automation:
               - service: switch.turn_off
                 data: {}
                 target:
-                  entity_id: switch.ad_hoc_tou_charging_2_socket_1
+                  entity_id: switch.ad_hoc_charging_2_local 
 
 ###########################
 #      Lighting           #
@@ -273,9 +272,14 @@ automation:
               - condition: state
                 entity_id: binary_sensor.lights_out
                 state: "off"
-              - condition: sun
-                after: sunset
-                before: sunrise 
+              - condition: or
+                conditions:
+                  - condition: sun
+                    after: sunset
+                    before: sunrise 
+                  - condition: numeric_state
+                    entity_id: sensor.utility_room_presence_2_illuminance_lux
+                    below: input_number.low_light_threshold
             sequence:
               - service: light.turn_on
                 data: {}
@@ -469,73 +473,53 @@ automation:
         entity_id:
           - sensor.smart_button_downstairs_2_action
         to: single
-        id: Ingrid & Sky On
-      - platform: state
-        entity_id:
-          - sensor.smart_button_downstairs_2_action
-        to: double
-        id: Ingrid & Sky Off
+        id: Ingrid & Sky toggle 
     condition: []
     action:
       - choose:
           - conditions:
               - condition: trigger
                 id:
-                  - Ingrid & Sky On
-              - condition: state
-                entity_id: switch.ingrid 
-                state: "off"
+                  - Ingrid & Sky toggle
             sequence:
-              - service: switch.turn_on
+              - service: script.kitchen_tv_toggle
                 data: {}
-                target:
-                  entity_id: switch.ingrid 
-              - service: media_player.turn_on
-                data: {}
-                target:
-                  device_id: 2285e887e55f34f8b3cfd7d7e8e58f6a
-              - if:
-                  - condition: state
-                    entity_id: binary_sensor.quiet_time
-                    state: "off"
-                  - condition: state
-                    entity_id: input_boolean.audible_notifications
-                    state: "on"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: kitchen
-                      call_interruption: 1
-                      call_media_system_on: 1
+
+#####################################
+#    TV and Sky Toggle on and off   #
+#####################################
+
+  - id: kitchen_tv_toggle_on_and_off 
+    alias: Kitchen TV Toggle On and Off 
+    description: ""
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.sky_q_kitchen_mini_2
+        id: Ingrid & Sky toggle on 
+        to: playing 
+      - platform: state
+        entity_id:
+          - media_player.sky_q_kitchen_mini_2
+        id: Ingrid & Sky toggle off  
+        to: "off" 
+    condition: []
+    action:
+      - choose:
           - conditions:
               - condition: trigger
-                id:
-                  - Ingrid & Sky Off
-              - condition: state
-                entity_id: switch.ingrid
-                state: "on"
+                id: Ingrid & Sky toggle on 
             sequence:
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.ingrid
-              - service: media_player.turn_off
-                data: {}
-                target:
-                  device_id: 2285e887e55f34f8b3cfd7d7e8e58f6a
-              - if:
-                  - condition: state
-                    entity_id: input_boolean.audible_notifications
-                    state: "on"
-                  - condition: state
-                    entity_id: binary_sensor.quiet_time
-                    state: "off"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: kitchen
-                      call_interruption: 1
-                      call_media_system_off: 1
+              - service: script.kitchen_tv_toggle
+                data: {} 
+          - conditions:
+              - condition: trigger
+                id: Ingrid & Sky toggle off  
+            sequence:
+              - service: script.kitchen_tv_toggle
+                data: {} 
 
 #################################################
 #        Washing Machine Automations            #
@@ -581,6 +565,9 @@ automation:
           - conditions:
               - condition: trigger
                 id: Washing Machine On
+              - condition: state
+                entity_id: input_boolean.washing_machine_on_off
+                state: "off"
             sequence:
               - service: input_boolean.turn_on
                 data: {}
@@ -589,6 +576,9 @@ automation:
           - conditions:
               - condition: trigger
                 id: Washing machine off
+              - condition: state
+                entity_id: binary_sensor.washing_machine_door_contact
+                state: "off"
             sequence:
               - delay:
                   seconds: 30
@@ -900,3 +890,64 @@ automation:
                     data: 
                       where: "{{ states('sensor.room_audio') }}"
                       call_freezer_closed: 1
+
+###########################
+#        Scripts          #
+###########################
+script: 
+  ###########################
+  #   Toggle TV on and off  # 
+  ###########################
+  kitchen_tv_toggle:
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: switch.ingrid
+                state: "off"
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.ingrid 
+                data: {}
+              - service: media_player.turn_on
+                target:
+                  entity_id: media_player.sky_q_kitchen_mini_2
+                data: {}
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+              - service: script.status_annc
+                data:
+                  where: kitchen 
+                  call_interruption: 1
+                  call_media_system_on: 1
+        default:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.ingrid 
+            data: {}
+          - service: media_player.turn_off
+            target:
+              entity_id:
+                - media_player.sky_q_kitchen_mini_2
+            data: {}
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+          - service: script.status_annc
+            data:
+              where: kitchen 
+              call_interruption: 1
+              call_media_system_off: 1
+    mode: single
