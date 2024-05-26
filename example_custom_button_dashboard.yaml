@@ -1,0 +1,634 @@
+    cards:
+      - type: vertical-stack
+        cards:
+          - text: Physical Switches / Lights
+            type: custom:text-divider-row
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - aspect_ratio: 1.2/1
+                color: rgb(252,255,158)
+                color_type: icon
+                entity: switch.kitchen_sink_light
+                icon: mdi:ceiling-light
+                name: Kitchen Sink
+                tap_action:
+                  action: toggle
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color: rgb(252,0,158)
+                color_type: card
+                entity: switch.family_room_lamp
+                icon: mdi:lamp
+                name: Family Room
+                tap_action:
+                  action: toggle
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color: rgb(252,255,158)
+                color_type: card
+                entity: switch.driveway_lights
+                icon: mdi:coach-lamp
+                name: Driveway
+                tap_action:
+                  action: toggle
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color: rgb(252,255,158)
+                color_type: card
+                entity: switch.master_bedroom_lamp
+                icon: mdi:lamp
+                name: Master BR
+                tap_action:
+                  action: toggle
+                type: custom:button-card
+          - text: Template (virtual) Switches
+            type: custom:text-divider-row
+          - type: grid
+            square: false
+            columns: 4
+            cards:
+              - aspect_ratio: 1.2/1
+                color: rgb(0,255,0)
+                color_type: card
+                entity: light.basement
+                show_name: false
+                show_state: true
+                state:
+                  - color: rgb(200,0,0)
+                    icon: mdi:lightbulb-off
+                    value: 'off'
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: card
+                entity: switch.sw_basement_100
+                icon: mdi:circle-slice-8
+                name: 100%
+                state:
+                  - color: rgb(0,128,0)
+                    value: 'on'
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: card
+                entity: switch.sw_basement_75
+                icon: mdi:circle-slice-6
+                name: 75%
+                state:
+                  - color: rgb(0,75,0)
+                    value: 'on'
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: card
+                entity: switch.sw_basement_50
+                icon: mdi:circle-slice-4
+                name: 50%
+                state:
+                  - color: rgb(0,50,0)
+                    value: 'on'
+                type: custom:button-card
+          - text: Binary Sensors
+            type: custom:text-divider-row
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - aspect_ratio: 1.2/1
+                color: rgb(0,255,0)
+                color_type: icon
+                entity: binary_sensor.garage_laundry_door
+                name: Laundry Door
+                show_name: true
+                show_state: false
+                state:
+                  - color: rgb(255,0,0)
+                    icon: mdi:door
+                    value: 'off'
+                  - color: rgb(0,255,0)
+                    icon: mdi:door-open
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 'on'
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color: rgb(0,255,0)
+                color_type: icon
+                entity: binary_sensor.garage_service_door
+                name: Service Door
+                show_name: true
+                show_state: false
+                state:
+                  - color: rgb(255,0,0)
+                    icon: mdi:door
+                    value: 'off'
+                  - color: rgb(0,255,0)
+                    icon: mdi:door-open
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 'on'
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color: rgb(0,255,0)
+                color_type: icon
+                entity: cover.garage_door
+                name: Garage Door
+                show_name: false
+                show_state: true
+                state:
+                  - color: rgb(255,0,0)
+                    icon: mdi:garage
+                    value: closed
+                  - color: rgb(0,255,0)
+                    icon: mdi:garage-open
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: open
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color-type: card
+                entity: binary_sensor.mailbox_zb
+                name: Door Status
+                show_state: true
+                state:
+                  - color: rgb(128,128,128)
+                    icon: mdi:mailbox-outline
+                    value: 'off'
+                  - color: rgb(0,255,0)
+                    icon: mdi:mailbox-open-up-outline
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 'on'
+                type: custom:button-card
+          - text: Input Booleans
+            type: custom:text-divider-row
+          - aspect_ratio: 5/1
+            color_type: card
+            entity: input_boolean.voice_notifications
+            name: Voice Notifications - ON
+            icon: mdi:account-voice
+            state:
+              - color: rgb(0,0,255)
+                value: 'on'
+              - color: rgb(50,50,50)
+                icon: mdi:account-voice-off
+                name: Voice Notifications - OFF
+                value: 'off'
+            type: custom:button-card
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - aspect_ratio: 1.3/1
+                color: rgb(3, 157, 252)
+                color_type: card
+                entity: input_boolean.notify_washer
+                icon: mdi:account-voice
+                name: Washer
+                state:
+                  - color: rgb(70,70,70)
+                    icon: mdi:account-voice-off
+                    value: 'off'
+                type: custom:button-card
+              - aspect_ratio: 1.3/1
+                color: rgb(3, 157, 252)
+                color_type: card
+                entity: input_boolean.notify_dryer
+                icon: mdi:account-voice
+                name: Dryer
+                state:
+                  - color: rgb(70,70,70)
+                    icon: mdi:account-voice-off
+                    value: 'off'
+                type: custom:button-card
+              - aspect_ratio: 1.3/1
+                color: rgb(3, 157, 252)
+                color_type: card
+                entity: input_boolean.notify_ender3
+                icon: mdi:account-voice
+                name: Printer
+                state:
+                  - color: rgb(70,70,70)
+                    icon: mdi:account-voice-off
+                    value: 'off'
+                type: custom:button-card
+              - aspect_ratio: 1.3/1
+                color: rgb(3, 157, 252)
+                color_type: card
+                entity: input_boolean.notify_mail
+                icon: mdi:account-voice
+                name: Mail
+                state:
+                  - color: rgb(70,70,70)
+                    icon: mdi:account-voice-off
+                    value: 'off'
+                type: custom:button-card
+      - type: vertical-stack
+        cards:
+          - text: Numeric Entities / Sensors
+            type: custom:text-divider-row
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - aspect_ratio: 1.2/1
+                entity: sensor.mailbox_zb_battery
+                name: Mailbox
+                show_state: true
+                state:
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery
+                    operator: '>='
+                    value: 95
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-90
+                    operator: '>='
+                    value: 85
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 75
+                    icon: mdi:battery-80
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 65
+                    icon: mdi:battery-70
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 55
+                    icon: mdi:battery-60
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-50
+                    operator: '>='
+                    value: 45
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-40
+                    operator: '>='
+                    value: 31
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-30
+                    operator: '>='
+                    value: 25
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-20
+                    operator: '>='
+                    value: 16
+                  - color: rgb(255,0,0)
+                    icon: mdi:battery-10
+                    operator: <
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 16
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                entity: sensor.garage_laundry_door_battery
+                name: Laundry Door
+                show_state: true
+                state:
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery
+                    operator: '>='
+                    value: 95
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-90
+                    operator: '>='
+                    value: 85
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 75
+                    icon: mdi:battery-80
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 65
+                    icon: mdi:battery-70
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 55
+                    icon: mdi:battery-60
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-50
+                    operator: '>='
+                    value: 45
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-40
+                    operator: '>='
+                    value: 31
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-30
+                    operator: '>='
+                    value: 25
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-20
+                    operator: '>='
+                    value: 16
+                  - color: rgb(255,0,0)
+                    icon: mdi:battery-10
+                    operator: <
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 16
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                entity: sensor.garage_service_door_battery
+                name: Service Door
+                show_state: true
+                state:
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery
+                    operator: '>='
+                    value: 95
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-90
+                    operator: '>='
+                    value: 85
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 75
+                    icon: mdi:battery-80
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 65
+                    icon: mdi:battery-70
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 55
+                    icon: mdi:battery-60
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-50
+                    operator: '>='
+                    value: 45
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-40
+                    operator: '>='
+                    value: 31
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-30
+                    operator: '>='
+                    value: 25
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-20
+                    operator: '>='
+                    value: 16
+                  - color: rgb(255,0,0)
+                    icon: mdi:battery-10
+                    operator: <
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 16
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                entity: sensor.galaxys10_battery_level
+                name: Galaxy S10
+                show_state: true
+                state:
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery
+                    operator: '>='
+                    value: 95
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-90
+                    operator: '>='
+                    value: 85
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 75
+                    icon: mdi:battery-80
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 65
+                    icon: mdi:battery-70
+                  - color: rgb(0,255,0)
+                    operator: '>='
+                    value: 55
+                    icon: mdi:battery-60
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-50
+                    operator: '>='
+                    value: 45
+                  - color: rgb(0,255,0)
+                    icon: mdi:battery-40
+                    operator: '>='
+                    value: 31
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-30
+                    operator: '>='
+                    value: 25
+                  - color: rgb(255,255,0)
+                    icon: mdi:battery-20
+                    operator: '>='
+                    value: 16
+                  - color: rgb(255,0,0)
+                    icon: mdi:battery-10
+                    operator: <
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: 16
+                type: custom:button-card
+          - text: Navigation
+            type: custom:text-divider-row
+          - type: grid
+            square: false
+            columns: 4
+            cards:
+              - aspect_ratio: 1.2/1
+                color_type: icon
+                icon: mdi:theater
+                name: Entertain.
+                tap_action:
+                  action: navigate
+                  navigation_path: /lovelace-tablet/home-theater
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: icon
+                icon: mdi:lightbulb
+                name: All Lights
+                tap_action:
+                  action: navigate
+                  navigation_path: /lovelace/all_lights
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: icon
+                icon: mdi:cast-audio
+                name: Media
+                tap_action:
+                  action: navigate
+                  navigation_path: /lovelace-tablet/media-players
+                type: custom:button-card
+              - aspect_ratio: 1.2/1
+                color_type: icon
+                icon: mdi:video
+                name: Security
+                tap_action:
+                  action: navigate
+                  navigation_path: /lovelace-tablet/security
+                type: custom:button-card
+          - text: Scripts / Automations / Services
+            type: custom:text-divider-row
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/espn.png
+                name: ESPN
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.espn
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/golf.jpg
+                name: Golf
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.golf
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/nfl.jpg
+                name: NFL
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.nfl
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/nhl.jpg
+                name: NHL
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.nhl
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/usa.png
+                name: USA
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.usa
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/history.jpg
+                name: History
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.history
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/paramount.png
+                name: Paramount
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.paramount
+                type: custom:button-card
+              - aspect_ratio: 1.7/1
+                entity_picture: /local/ifc.png
+                name: IFC
+                show_entity_picture: true
+                show_name: true
+                tap_action:
+                  action: call-service
+                  service: script.ifc
+                type: custom:button-card
+      - type: vertical-stack
+        cards:
+          - text: Animation and Styles
+            type: custom:text-divider-row
+          - square: false
+            columns: 4
+            type: grid
+            cards:
+              - type: custom:button-card
+                entity: sensor.thermostat_current_mode
+                aspect_ratio: 1.3/1
+                color_type: icon
+                name: HVAC - Idle
+                show_state: false
+                show_name: true
+                icon: mdi:fan
+                color: rgb(128,128,128)
+                 state:
+                  - value: heating
+                    name: HVAC - Heating
+                    styles:
+                      icon:
+                        - animation: rotating 2s linear infinite
+                        - color: rgb(255,0,0)
+                      name:
+                        - color: rgb(255,0,0)
+                  - value: cooling
+                    name: HVAC - Cooling
+                    styles:
+                      icon:
+                        - animation: rotating 2s linear infinite
+                        - color: rgb(0,217,255)
+                      name:
+                        - color: rgb(0,217,255)
+                  - value: 'off'
+                    name: HVAC - OFF
+                    styles:
+                      icon:
+                        - color: rgb(255,255,0)
+                      name:
+                        - color: rgb(255,255,0)
+              - type: custom:button-card
+                aspect_ratio: 1.2/1
+                color: rgb(0,255,0)
+                color_type: icon
+                entity: cover.garage_door
+                name: Garage Door
+                show_name: true
+                show_state: false
+                state:
+                  - color: rgb(255,0,0)
+                    icon: mdi:garage
+                    value: open
+                  - color: rgb(0,255,0)
+                    icon: mdi:garage-open
+                    styles:
+                      icon:
+                        - animation: blink 2s ease infinite
+                    value: closed
+          - type: custom:button-card
+            name: Change Background
+            aspect_ratio: 2/1
+            extra_styles: |
+              @keyframes bgswap1 {
+                0% {
+                  background-image: url("/local/scarlett_home.jpg");
+                }
+                25% {
+                  background-image: url("/local/scarlett_away.jpg");
+                }
+                50% {
+                  background-image: url("/local/mks_away.jpg");
+                }
+                75% {
+                  background-image: url("/local/mks_home.jpg");
+                }
+                100% {
+                  background-image: url("/local/scarlett_home.jpg");
+                }
+              }
+            styles:
+              card:
+                - animation: bgswap1 10s linear infinite
+                - background-size: cover
+              name:
+                - color: white
