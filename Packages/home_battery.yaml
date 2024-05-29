@@ -413,24 +413,12 @@ automation:
 ####################################################
 #         Grid Charge Battery on Agile             #
 ####################################################
-    
-  - id: 52a4e3aa-c134-408c-b16d-6c5cffca3ac2
     alias: Intermittent Grid Charge Battery.
     description: ""
     trigger:
-      - platform: numeric_state
-        entity_id: sensor.energy_production_today_3
-        below: input_number.solar_production_threshold_for_grid_charging_battery
-        id: Grid Charge Allowed
-        enabled: false
-      - platform: numeric_state
-        entity_id: sensor.energy_production_today_3
-        above: input_number.solar_production_threshold_for_grid_charging_battery
-        id: Grid Charge Not Allowed
-        enabled: false
       - platform: time
-        at: "21:00:00"
         id: Activate Grid Charge
+        at: "21:00:00"
       - platform: state
         entity_id:
           - >-
@@ -483,31 +471,6 @@ automation:
     condition: []
     action:
       - choose:
-          - conditions:
-              - condition: trigger
-                id:
-                  - Grid Charge Allowed
-            sequence:
-              - service: automation.turn_on
-                target:
-                  entity_id:
-                    - automation.test_intermittent_charge_times
-                  device_id: []
-                  area_id: []
-                data: {}
-          - conditions:
-              - condition: trigger
-                id:
-                  - Grid Charge Not Allowed
-            sequence:
-              - service: automation.turn_off
-                target:
-                  entity_id:
-                    - automation.test_intermittent_charge_times
-                  device_id: []
-                  area_id: []
-                data:
-                  stop_actions: true
           - conditions:
               - condition: trigger
                 id:
@@ -565,11 +528,6 @@ automation:
                 data: {}
                 target:
                   entity_id: script.grid_charge_battery
-              - device_id: 952193e87f675ba7f7e32eda5500c572
-                domain: select
-                entity_id: 0bdfb19491b49722c2a94351b9a673aa
-                type: select_option
-                option: Maximize Self Consumption
               - service: input_boolean.turn_off
                 data: {}
                 target:
@@ -578,14 +536,27 @@ automation:
                 data: {}
                 target:
                   entity_id: input_boolean.grid_charge_home_battery
+              - delay:
+                  hours: 0
+                  minutes: 1
+                  seconds: 0
+                  milliseconds: 0
+              - condition: state
+                entity_id: input_boolean.allow_charge_from_excess_dc
+                state: "off"
+              - device_id: 952193e87f675ba7f7e32eda5500c572
+                domain: select
+                entity_id: 0bdfb19491b49722c2a94351b9a673aa
+                type: select_option
+                option: Maximize Self Consumption
           - conditions:
               - condition: trigger
                 id:
                   - Reset Timer
             sequence:
               - delay:
-                  hours: 1
-                  minutes: 0
+                  hours: 0
+                  minutes: 33
                   seconds: 0
                   milliseconds: 0
               - service: timer.cancel
@@ -613,11 +584,6 @@ automation:
               - condition: state
                 entity_id: sensor.solar_battery_daytime_topup_needed
                 state: "true"
-              - condition: not
-                conditions:
-                  - condition: state
-                    entity_id: sensor.solar_battery_time_to_empty
-                    state: ""
             sequence:
               - service: script.battery_pre_peak_top_up
                 metadata: {}
@@ -634,6 +600,7 @@ automation:
                 metadata: {}
                 data: {}
     mode: restart
+
 
 
 
