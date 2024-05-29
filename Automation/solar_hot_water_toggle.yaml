@@ -6,67 +6,60 @@ trigger:
   - platform: numeric_state
     entity_id:
       - sensor.electricity_bill_today
-    below: 0.01
+    below: 0
+    id: Activate
+  - platform: numeric_state
+    entity_id:
+      - sensor.power_grid_export
+    above: 500
     id: Switch On
   - platform: numeric_state
     entity_id:
       - sensor.power_battery_load
     above: 1000
     id: Switch Off
-  - platform: numeric_state
-    entity_id:
-      - sensor.power_grid_export
-    above: 2500
-    id: Switch On Again
-  - platform: state
-    entity_id:
-      - input_boolean.plunge_pricing
-    from: "off"
-    to: "on"
-    id: Hot Water On
-  - platform: state
-    entity_id:
-      - input_boolean.plunge_pricing
-    from: "on"
-    to: "off"
-    id: Hot Water Off
   - platform: sun
     event: sunset
     offset: "-1:00:00"
-    id: sunset
+    id: Deactivate
   - platform: time
-    at: "17:15:00"
+    at: "17:00:00"
     id: Time On
   - platform: time
-    at: "18:15:00"
+    at: "17:45:00"
     id: Time Off
 condition: []
 action:
   - choose:
       - conditions:
           - condition: trigger
-            id: Switch On
+            id:
+              - Activate
           - condition: sun
             after: sunrise
             before: sunset
-          - alias: Confirm solar export is >2500W
-            condition: numeric_state
-            entity_id: sensor.power_grid_export
-            above: 2500
         sequence:
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_valkyrie_on
+            data: {}
           - service: switch.turn_on
             target:
               entity_id: switch.valkyrie_solar_hot_water
             data: {}
       - conditions:
           - condition: trigger
-            id: Switch On Again
+            id:
+              - Switch On
           - condition: sun
             after: sunrise
             before: sunset
           - condition: numeric_state
             entity_id: sensor.electricity_bill_today
-            below: 0.01
+            below: 0
+          - condition: state
+            entity_id: input_boolean.allow_valkyrie_on
+            state: "on"
         sequence:
           - service: switch.turn_on
             target:
@@ -86,44 +79,34 @@ action:
       - conditions:
           - condition: trigger
             id:
-              - Hot Water On
-          - condition: state
-            entity_id: switch.valkyrie_solar_hot_water
-            state: "off"
-        sequence:
-          - service: switch.turn_on
-            target:
-              entity_id:
-                - switch.valkyrie_solar_hot_water
-            data: {}
-      - conditions:
-          - condition: trigger
-            id:
-              - Hot Water Off
-              - sunset
-          - condition: state
-            entity_id: switch.valkyrie_solar_hot_water
-            state: "on"
+              - Deactivate
         sequence:
           - service: switch.turn_off
             metadata: {}
             data: {}
             target:
               entity_id: switch.valkyrie_solar_hot_water
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "on"
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_valkyrie_on
+            data: {}
       - conditions:
           - condition: trigger
             id:
               - Time On
-          - condition: numeric_state
+          - alias: Electricity Bill above -50p
+            condition: numeric_state
             entity_id: sensor.electricity_bill_today
-            above: 0
-            alias: Electricity Bill above zero
+            above: -0.5
         sequence:
           - service: water_heater.set_operation_mode
             target:
               entity_id: water_heater.hot_water
             data:
-              operation_mode: auto
+              operation_mode: heat
       - conditions:
           - condition: trigger
             id:
