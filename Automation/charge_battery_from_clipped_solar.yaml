@@ -4,6 +4,8 @@ trigger:
   - platform: state
     entity_id:
       - input_boolean.home_battery_grid_charging
+      - >-
+        binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
     to: "off"
     from: "on"
     id: Grid Charge Finished
@@ -25,7 +27,7 @@ trigger:
     above: 99.5
     id: Charge Complete
   - platform: time
-    at: "12:00:00"
+    at: input_datetime.end_charge_from_clipped_solar
     id: Midday
 condition: []
 action:
@@ -37,9 +39,9 @@ action:
           - condition: template
             value_template: >-
               {{
-              is_state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','target_times',[])}}
+              is_state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','next_duration_in_hours',0)}}
           - condition: numeric_state
-            entity_id: sensor.energy_production_today_3
+            entity_id: sensor.solcast_pv_forecast_forecast_today
             above: 30
           - condition: numeric_state
             entity_id: sensor.solaredge_b1_state_of_energy
@@ -58,7 +60,7 @@ action:
             target:
               entity_id: number.solaredge_i1_storage_command_timeout
             data:
-              value: "14400"
+              value: "21600"
           - service: select.select_option
             target:
               entity_id: select.solaredge_i1_storage_command_mode
@@ -81,7 +83,7 @@ action:
           - service: number.set_value
             metadata: {}
             data:
-              value: "14400"
+              value: "21600"
             target:
               entity_id: number.solaredge_i1_storage_command_timeout
           - service: select.select_option
@@ -107,7 +109,7 @@ action:
           - service: number.set_value
             metadata: {}
             data:
-              value: "14400"
+              value: "21600"
             target:
               entity_id: number.solaredge_i1_storage_command_timeout
           - service: select.select_option
