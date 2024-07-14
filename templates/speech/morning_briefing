@@ -5,7 +5,7 @@
 #   @description    :   text for morning briefing.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   10/05/2024
+#   @date           :   14/07/2024
 ###############################################################################
 
 >
@@ -21,17 +21,16 @@
     </p>
     <p>
       {% if is_state('binary_sensor.morning','on') %} 
-        {{ [
-            'Today is ',
-            'In case you have not been keeping track, today is ',
-            'Do you know what day of the week it is? <prosody pitch="high">No!</prosody> Well today is ',
+        {{ ['Is anyone there? Ah yes,there you are. Today is ',
+            'Wipe the sleep from your eyes humans, because today is ',
+            'In case you have not been keeping track, you might like to know that today is ',
+            'Well done for dragging yourself out of bed. Now that you are up, I can inform you that today is ',
             'This may or may not be good news, but today is '
               ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }}. The time is {{ now().strftime("%I:%M %p") }}.
       {% else %} 
-        {{ [
-            'You have missed half of ',
-            'In case you have not been keeping track today is ',
-            'Do you know what day of the week it is? No? Well today is ',
+        {{ ['Ahem! What time do you call this? You have missed half of ',
+            'The sun is well up passed the yard arm and in case you have not been keeping track today is ',
+            'Well! Better late than never I suppose.  Shall we do this?  Okay. Today is ',
             'Now that you are awake I can tell you that today is '
               ]|random }}{{states('sensor.day_of_week') }}, {{ as_timestamp(now()) | timestamp_custom('%d %B %Y') }} and it is now {{ now().strftime("%I:%M %p") }}.
       {% endif %}
@@ -49,6 +48,9 @@
         {% elif day_of_week == 'Friday' and event == 'Skype mum' %}
           It is {{ event }} day and you are scheduled to {{ event }} this afternoon at 
           {{ as_timestamp(time)|timestamp_custom ('%-I:%M%p') }} 
+        {% elif now().day  == 1  and event == 'Mini UPS Discharge' %}
+          Remember to turn off mains power to all three mini UPS to run the batteries down.  Then,perhaps more
+          importantly, remember to turn mains power to them back on.
         {% endif %}
     </p>
     <p>
@@ -142,7 +144,7 @@
           {% elif is_state('weather.forecast_home','fog') %} foggy
           {% else %}
           {{ states('weather.forecast_home') }} 
-          {% endif %} weather. With a high of {{ states('sensor.high_temperature_today')}} degrees celsius and a low of {{ states('sensor.low_temperature_today')}} degrees celsius.
+          {% endif %} weather. With a high of {{ states('sensor.high_temperature_today')}} degrees and a low of {{ states('sensor.low_temperature_today')}}.
         {% endif %}
     </p>
     <p>
@@ -276,13 +278,13 @@
     <p>
       {% set charge_level = states('sensor.battery_state_of_charge') | float(0) %}
       {% set time = states('sensor.solar_battery_time_to_empty')%}
-      {% set solar_forecast = states('sensor.energy_production_today_3') | float(0) | round (2) %}
-      {% set season =  states('sensor.season') %}
-      {% if charge_level >= 99.5 %} 
-        The home battery is full of lovely clean electrons. The estimated solar production for today is {{ solar_forecast }}kWh.
-        {% if season == "spring" or season == "summer" %}
-          As it is {{ season }}
-          {% if solar_forecast > 20 %}
+      {% set solar_forecast = states('sensor.solcast_pv_forecast_forecast_today') | float(0) | round (2) %}
+      {% set bst =  states('input_boolean.bst') %}
+      {% set season = states('sensor.season')%}
+      {% if charge_level > 99.5 %} 
+        The home battery is full of lovely clean electrons. The estimated solar production for today is {{ solar_forecast }}kWh. So
+        {% if bst == "on" %}
+          {% if solar_forecast > 30 %}
             {{ ['there should be plenty of sunshine for todays energy needs.',
                 'the energy stored in the battery should not be needed.',
                 'the rest of he world will benefit from your energy production.' ] | random }} 
@@ -292,8 +294,7 @@
                 'the rest of he world will benefit from your energy production.' ] | random }} 
           {% endif %}
         {% else %}
-          As it is {{ season }}
-          {% if solar_forecast > 20 %}
+          {% if solar_forecast > 30 %}
             {{ ['there should be plenty of sunshine for todays energy needs.',
                 'the energy stored in the battery should not be needed.',
                 'the rest of he world will benefit from your energy production.' ] | random }} 
@@ -303,18 +304,22 @@
                 'the rest of he world will benefit from your energy production.' ] | random }} 
           {% endif %}
         {% endif %}
-      {% elif charge_level < 99.5 %}
+      {% else %}
         The home battery has {{ charge_level }}% charge remaining, and is
-        {% if time == "Charging" %} 
-          currently charging from solar.  The estimated solar production for today is {{ states('sensor.energy_production_today_3') | round (2)}}kWh.
-          {% if states('sensor.energy_production_today_3') | float(0) > 30 %}
-            {{ ['so there is a good chance the battery will be topped up with glorious sunshine today and wont be needed.',
-                'so I expect terawatts of energy to flow from sol to the battery and power the house for the rest of the day.',
-                'so why not sit back and watch as lovely solar electrons slowly fill the battery, then power for the rest of the day.'] | random }} 
+          {% if time == "Charging" and is_state('input_boolean.charge_rate_limited','on') %} 
+            currently charging from solar at a reduced rate of {{states('number.solaredge_i1_storage_charge_limit')|int / 1000 | round }}kW. 
+            So the charge rate will be a little gentler than usual, but the estimated solar production for today is {{ states('sensor.solcast_pv_forecast_forecast_today') | round (2)}}kWh.
+            {{ ['So there is a good chance the battery will be topped up with glorious sunshine today and wont be needed.',
+                'So I expect terawatts of energy to flow from sol to the battery and power the house today.',
+                'So why not sit back and watch, as lovely solar electrons slowly fill the battery, then power the house today.'] | random }} 
+          {% elif time == "Charging" and is_state('input_boolean.charge_rate_limited','off') %} 
+            currently charging from solar at full charge rate. The estimated solar production for today is {{ states('sensor.solcast_pv_forecast_forecast_today') | round (2)}}kWh.
+              {{ ['so there is a good chance the battery will be topped up with glorious sunshine today and wont be needed.',
+                  'so I expect terawatts of energy to flow from sol to the battery and power the house.',
+                  'so why not sit back and watch as lovely solar electrons rapidly fill the battery, then power the house.'] | random }} 
+          {% else %} 
+            estimated to last until {{ states('sensor.solar_battery_empty_time') }}, at the current rate of consumption.      
           {% endif %}
-        {% else %} 
-          estimated to last until {{ states('sensor.solar_battery_empty_time') }}, at the current rate of consumption.      
-        {% endif %}
           {% if is_state('sensor.solar_battery_daytime_topup_needed','true') or states('sensor.battery_state_of_charge') | float(0) < 10 %}   
                 The battery may need a top up from the grid later. Leave it to me, and I will pick
                 the best time 
@@ -322,9 +327,9 @@
                   'to minimise the impact on your bank balance.',
                   'to prevent it running out in the middle of peak rate.'] | random }}
           {% else %}
-                {{ ['So there should be enough energy in the battery, to see you through the day.'] | random }}
+              Consequently, there should be enough local energy, to see you through the day.
           {% endif %}
-              Incidentally, if the battery does need a topup
+              Incidentally, if the battery should need a topup from the grid,
               {{ ['The cheapest half hour charging slot is at,',
                   'The misers among you will most likely charge at,',
                   'The most carbon friendly slot is at,'] | random }}
@@ -337,8 +342,8 @@
                 {{ ['you know what to do.','on your own head be it.','you had better get your credit card out.'] | random }}   
           {% endif %}   
       {% endif %}
-      </p>
-      <p>
+    </p>
+    <p>
       {% set topup = states('sensor.rolec_energy_consumption_weekly') | float(0)  %}
       {% set level = states('input_number.car_battery_charge_level') | float(0) %} 
         Last time I checked, the battery in the car was at {{ level|round(0) }}%. 
@@ -383,55 +388,58 @@
         If you want to charge it outside of that time,
         {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
       {% endif %}
-      </p>
-      <p>
-        {% if is_state('binary_sensor.workday_sensor','off') %}
-          {% if is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on')%}
-            {{ ['Its the weekend and its a holiday, so come on mummy, get the big breakfast on',
-              'The working week is done and its holiday time.  Time for all those weekend and holiday jobs',
-              'Hooray! Its the weekend and a holiday. So make the most of it '] | random }}
-          {% else %}
+    </p>
+    <p>
+        {% set day_of_week = states('sensor.day_of_week') %}
+        {% set school_holiday = states('calendar.school_holidays') %}
+        {% set gem_holiday = states('calendar.gem_holidays') %}
+        {% set schools_out = states('calendar.schools_out') %}
+        {% set work_day = states('binary_sensor.workday_sensor')%}
+        {% if work_day == 'on' %}
+          {% if school_holiday == 'off' and gem_holiday == 'off' %}
+            {{ ['There are no holidays today.',
+                'Work and school for everyone today. Yippee!'] | random }}
+          {% elif school_holiday == 'on' and gem_holiday == 'off' %}        
+            {{ ['Its a school holiday today and mummy is working.',
+                'No school today, but mummy cannot play.',
+                'schools out, but I am afraid that mummy is not, sorry.'] | random }}
+          {% else %}  
+            {{ ['Its a school holiday today and Mummy is off too.',
+                'No school today and mummy too can play. Hooray!',
+                'schools out and mummy is in da hoose.'] | random }}
+          {% endif %}
+        {% else %}
+          {% if work_day == 'off' and (day_of_week == 'Saturday' or day_of_week == 'Sunday') %}
             {{ ['Its the weekend, so come on mummy, get the big breakfast on.',
                 'The working week is done.  Time for all those weekend jobs.',
                 'Hooray! Its the weekend. So make the most of it.'] | random }}
+          {% elif work_day == 'off' %}  
+            {% if school_holiday == 'off' %}
+              School for the boys, but mummy is off.
+            {% else %}
+              {{ ['Its a holiday, so come on mummy, get the big breakfast on',
+                  'No work today. Time for all those holiday jobs',
+                  'Hooray! Its a holiday. So make the most of it '] | random }}
+            {% endif %}       
           {% endif %}
-        {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','on') %}
-          {{ ['Its a school holiday today and Mummy is off too.',
-              'No school today and mummy too can play. Hooray!',
-              'schools out and mummy is in da hoose.'] | random }}
-        {% elif is_state('calendar.school_holidays','on') and is_state('calendar.gem_holidays','off') %}
-          {{ ['Its a school holiday today and mummy is working.',
-              'No school today, but mummy cannot play.',
-              'schools out, but I am afraid that mummy is not, sorry.'] | random }}
-        {% elif is_state('calendar.school_holidays','off') and is_state('calendar.gem_holidays','off') %}
-          {{ ['There are no holidays today.',
-              'Work and school for everyone today. Yippee!'] | random }}
         {% endif %}
-      </p>
-      <p>
+    </p>
+    <p>
         {{ ['That about wraps it up for today. Have a good one.',   
+            'Well there you have it.  Ive expended terajoules of energy and gigabytes of processing power putting this report together for you.  Did you hear a word of it?  Oh well, theres always tomorrow.', 'Thats all for today. Shall we do it again tomorrow? Same time, same place?',
             'That concludes todays report. Tune in at the same time tomorrow for another thrilling report.',   
             'Thats all folks. Perhaps you could give me something more meaningful to do before we do this all over again tomorrow? ',   
             'Thats all for now. Have a good day'] | random }}
-      </p>
-      <p>
-        {{ ["and one more thing, Life is about making an impact. Make it a positive one. ",
-            "and one more thing, I seek not to know the answer, but simply to understand the question. ",
-            "and one more thing, Whatever the mind of a person can conceive and believe, it can achieve. ",
-            "and one more thing, You miss one hundred percent of the shots you dont take. ",
-            "and one more thing, The most difficult thing is the decision to act, the rest is merely tenacity. ",
-            "and one more thing, The only difference between who you are and who you want to be, is what you do. ",
-            "and one more thing, Defining the purpose is the starting point of all achievement. ",
-            "and one more thing, Life is not about getting and having, its about giving and being. ",
-            "and one more thing, Be the change that you wish to see in the world. ",
-            "and one more thing, A wise man changes his mind. A fool never will. ",
+    </p>
+    <p>
+        {{ ["and one more thing, I seek not to know the answer, but simply to understand the question.",
+            "and one more thing, You fail a hundred percent of the time you dont try.",
+            "and one more thing, The only difference between who you are and who you want to be, is what you do now.",
+            "and one more thing, A wise person changes their mind. A fool never does.",
             "and one more thing, Life is short. Smile while you still have teeth.",
-            "and one more thing, Change is inevitable.  Growth is optional. ",
-            "and one more thing, Dont worry. Be happy. ",
-            "and one more thing, Every mountain top is within reach if you just keep climbing.",
-            "and one more thing, What you get by achieving your goals is not as important as what you become during the journey.",
-            "and one more thing, To live a creative life, we must first lose our fear of being wrong.",
-            "and one more thing, If you are not willing to risk the unusual, you will have to settle for the ordinary.",
+            "and one more thing, Change is inevitable.  Growth is optional.",
+            "and one more thing, Dont worry. Be happy.",
+            "and one more thing, A journey of a thousand miles begins with a single step.",
             "and one more thing, All our dreams can come true if we have the courage to pursue them.",
             "and one more thing, Good things come to those who wait, but it can be better to just go out and get them.",
             "and one more thing, If you do what you have always done, you will get what you have always got.",
@@ -441,82 +449,51 @@
             "and one more thing, Just when the caterpillar thought the world was ending, it turned into a butterfly.",
             "and one more thing, Opportunities dont just happen, you have to create them.",
             "and one more thing, Start by doing whats necessary; then do whats possible; and suddenly you are doing the impossible.",
-            "and one more thing, Some people dream of great accomplishments, while others stay awake and do them.",
+            "and one more thing, Some people dream of great accomplishments, while others stay awake and get on with doing them.",
             "and one more thing, The distance between insanity and genius is measured only by success.",
-            "and one more thing, It does not matter how slowly you go, as long as you do not stop.",
-            "and one more thing, Positive thinking will let you do everything better, than negative thinking will.",
-            "and one more thing, Trust the process. ",
-            "and one more thing, There are far better things ahead of us, than behind us. ",
-            "and one more thing, If you want to go fast, go alone but if you want to go far, go with others. ",
-            "and one more thing, The key to success is to focus on goals not obstacles. ",
-            "and one more thing, Sometimes we are tested, not to show our weaknesses, but to discover our strengths. ",
-            "and one more thing, Do something today that your future self will thank you for. ",
-            "and one more thing, Life is ten percent what happens to you, and ninety percent of how you react to it. ",
-            "and one more thing, The most common way people give up their power, is by thinking they do not have any. ",
-            "and one more thing, The mind is everything. What you think, you can become.  ",
-            "and one more thing, Always try to Live your best life. ",
-            "and one more thing, When nothing goes right, go left. ",
-            "and one more thing, The best time to plant a tree was twenty years ago. The second best time is now. ",
-            "and one more thing, Eighty percent of success is showing up. ",
-            "and one more thing, Dont stop when you are tired. Stop when you are done. ",
-            "and one more thing, Luck is being prepared and ready for the opportunities when they come. ",
-            "and one more thing, Action is the foundation of success. ",
-            "and one more thing, All progress takes place outside the comfort zone. ",
-            "and one more thing, You can make mistakes, but dont ever quit. ",
-            "and one more thing, Dont let the fear of losing, be greater than the excitement of winning. ",
-            "and one more thing, The way to get started, is to quit talking and start doing. ",
-            "and one more thing, When you feel like giving up, remember why you started. ",
-            "and one more thing, The harder you work, the more luck people will think you have. ",
-            "and one more thing, The harder you work for something, the better you will feel when you achieve it. ",
-            "and one more thing, Your time is limited, so dont waste it living someone elses life. ",
-            "and one more thing, Winning is not everything, but it does feel pretty good. ",
-            "and one more thing, I am not a product of my circumstances. I am a product of my decisions. ",
-            "and one more thing, You can never cross the ocean, until you have the courage to lose sight of the shore. ",
-            "and one more thing, Either you run the day, or the day runs you. ",
-            "and one more thing, Whether you think you can or you think you cant, you will be right. ",
-            "and one more thing, The two most important days in your life are the day you are born and the day you find out why. ",
-            "and one more thing, Never ruin a good day, by thinking about a bad yesterday. ",
-            "and one more thing, Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it. ",
-            "and one more thing, The best revenge is massive success. ",
-            "and one more thing, The universe cant put good into your hands, unless you let go of the bad.",
-            "and one more thing, People often say that motivation does not last. Well, neither does bathing. That is why we recommend it daily. ",
-            "and one more thing, Life shrinks or expands in proportion to your courage. ",
-            "and one more thing, If you hear a voice within you say you cannot paint, then by all means paint and that voice will be silenced. ",
-            "and one more thing, Dont shout to prove a point. Improve your argument. ",
-            "and one more thing, There is only one way to avoid criticism: do nothing, say nothing, and be nothing. ",
-            "and one more thing, Ask and it will be given to you; search, and you will find; knock and the door will be opened for you. ",
-            "and one more thing, The only person you are destined to become, is the person you decide to be. ",
-            "and one more thing, Certain things catch your eye, but chase only those that capture the heart. ",
-            "and one more thing, Believe you can and you are halfway there. ",
-            "and one more thing, Good things take time. ",
-            "and one more thing, Feel the fear and do it anyway. ",
-            "and one more thing, There is no place like home. ",
-            "and one more thing, Life can be tough, but so are you. ",
-            "and one more thing, Everything you have ever wanted is on the other side of fear. ",
-            "and one more thing, Start where you are. Use what you have. Do what you can. ",
-            "and one more thing, Fall seven times and stand up eight. ",
-            "and one more thing, Everything has beauty, but not everyone can see. ",
-            "and one more thing, Life is like riding a bicycle. To keep your balance, you must keep moving. ",
-            "and one more thing, Life is not measured by the number of breaths we take, but by the moments that take our breath away. ",
-            "and one more thing, In any given moment, we can choose to move forward and grow, or retreat.",
-            "and one more thing, Happiness is not something ready made. It comes from your own actions. ",
-            "and one more thing, If you are offered a seat on a rocket ship, dont ask what seat! Just get on. ",
-            "and one more thing, If the wind will not move you forward, take to the oars. If the oars dont work, get yourself an outboard motor ",
-            "and one more thing, You cannot fall if you do not climb. But theres no joy in living your whole life on the ground. ",
-            "and one more thing, Challenges are what make life interesting and overcoming them is what makes life meaningful. ",
+            "and one more thing, It doesnt matter how slowly you go, as long as you dont stop.",
+            "and one more thing, Trust the process.",
+            "and one more thing, There are far better things ahead of us, than there are behind us.",
+            "and one more thing, Sometimes we are tested, not to show our weaknesses, but to discover our strengths.",
+            "and one more thing, Do something today that your future self will thank you for.",
+            "and one more thing, Life is ten percent what happens to you, and ninety percent of how you react to it.",
+            "and one more thing, The most common way people give up their power, is by thinking they dont have any.",
+            "and one more thing, Always try to Live your best life.",
+            "and one more thing, When nothing goes right, go left.",
+            "and one more thing, The best time to plant a tree was twenty years ago. The second best time is now.",
+            "and one more thing, Eighty percent of success is showing up.",
+            "and one more thing, Dont stop when you are tired. Stop when you are finished.",
+            "and one more thing, Its okay to make mistakes, but dont ever give up.",
+            "and one more thing, Dont let the fear of losing, be greater than the excitement of winning.",
+            "and one more thing, The way to get started, is to quit talking and start doing.",
+            "and one more thing, When you feel like giving up, remember why you started.",
+            "and one more thing, The harder you work, the more luck people will think you have.",
+            "and one more thing, The harder you work for something, the better you will feel when you achieve it.",
+            "and one more thing, Your time is limited, so dont waste it living someone elses life.",
+            "and one more thing, Winning is not everything, but it does feel pretty good.",
+            "and one more thing, Either you run the day, or the day runs you.",
+            "and one more thing, Whether you think you can or you think you cant, you will be right.",
+            "and one more thing, The two most important days in your life are the day you are born and the day you find out why.",
+            "and one more thing, Never ruin a good today, by thinking about a bad yesterday.",
+            "and one more thing, The best revenge is massive success.",
+            "and one more thing, People often say that motivation does not last. Well, neither does bathing. That is why we recommend doing it every day.",
+            "and one more thing, The only person you are destined to become, is the person you decide to be.",
+            "and one more thing, Certain things catch your eye, but chase only those that capture the heart.",
+            "and one more thing, Believe you can and you are halfway there.",
+            "and one more thing, Good things take time.",
+            "and one more thing, Feel the fear and do it anyway.",
+            "and one more thing, There really is no place like home.",
+            "and one more thing, Life can be tough, but so can you.",
+            "and one more thing, Life is not measured by the number of breaths we take, but by the moments that take our breath away.",
             "and one more thing, Be nice to others, and nice things will happen to you.",
-            "and one more thing, Everyone has a plan, until they get punched in the face.  Be ready to duck, change direction, and adapt to the situation. ",
-            "and one more thing, You are the artist of your OWN life.  Dont hand the paint brush to anyone else. ",
-            "and one more thing, Try to be a rainbow for someone elses cloud. ",
+            "and one more thing, Everyone has a plan, until they get punched in the face.  Be ready to duck, change direction, and adapt to the situation.",
             "and one more thing, It is nice to be important, but more important to be nice.",
-            "and one more thing, You have within you, right now, everything you need to deal with whatever the world can throw at you.",
-            "and one more thing, The only way to do great work is to love what you do. If you havent found it yet, keep looking. Dont settle.",
             "and one more thing, Life is too short to waste time hating anyone.",
             "and one more thing, Be yourself, everyone else is already taken.",
             "and one more thing, Be alert! Your country needs lerts!",
             "and one more thing, What we fear doing most is usually what we need to do most.",
             ] |random}}
-      </p>
+    </p>
 
       {%- endmacro-%}
             
