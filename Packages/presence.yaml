@@ -115,7 +115,7 @@ mqtt:
 ##############################
 
 template:      
-  sensor:
+  - sensor:
       - name: "Dave"
         unique_id: dave_location
         state: >-
