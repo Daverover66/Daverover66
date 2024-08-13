@@ -5,35 +5,29 @@
 #   @description    :   All Living Room config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   14/09/2023
+#   @date           :   13/08/2024
 ###############################################################################
 
 ###########################
 #     Helpers             #
 ###########################
-
-###########################################
-#     Input Number for threshold levels   #
-###########################################
-
 input_number:
   upper_light_threshold_level:
     name: Upper Light Threshold Level
-    initial: 80
+    initial: 90
     icon: mdi:brightness-4
-    min: 70
-    max: 90
+    min: 50
+    max: 150
     step: 1
-    mode: slider
- low_light_threshold:
-   name: Low Light Threshold
-   initial: 15
-   icon: mdi:brightness-3
-   min: 10
-   max: 30
-   step: 1
-   mode: slider
-    
+    mode: box 
+  low_light_threshold:
+    name: Low Light Threshold
+    initial: 50
+    icon: mdi:brightness-3
+    min: 5
+    max: 70
+    step: 1
+    mode: box 
 ###########################
 #     Sensors             #
 ###########################
@@ -53,6 +47,16 @@ automation:
     initial_state: true
     mode: restart
     trigger:
+      - platform: state 
+        entity_id: light.living_room_lights
+        from: "off"
+        to: "on"
+        id: Ceiling Light On 
+      - platform: state 
+        entity_id: light.living_room_lights
+        from: "on"
+        to: "off"
+        id: Ceiling Light Off 
       - platform: state
         entity_id:
           - binary_sensor.living_room_fp2_presence_sensor_1
@@ -69,30 +73,57 @@ automation:
           minutes: 1
           seconds: 0
         id: Light Off With No Presence
-      - platform: sun
-        event: sunset
-        offset: "-00:30:00"
-        id: Dusk
-      - platform: sun
-        event: sunrise
-        offset: "00:30:00"
-        id: Dawn 
-      - platform: state
-        entity_id: light.dreamview_g1_pro
-        from: "off"
-        to: "on"
-        id: TV Mood Lights On
-      - platform: state
-        entity_id: light.dreamview_g1_pro
-        from: "on"
-        to: "off"
-        id: TV Mood Lights Off
+      - platform: numeric_state 
+        entity_id: sensor.living_room_fp2_light_sensor_light_level
+        below: input_number.low_light_threshold
+        for:
+          seconds: 20
+        id: Low Light 
+      - platform: numeric_state
+        entity_id: sensor.living_room_fp2_light_sensor_light_level
+        above: input_number.upper_light_threshold_level 
+        for:
+          seconds: 20
+        id: Good Light 
     condition:
       - condition: state
         entity_id: input_boolean.holiday_mode
         state: "off"
     action:
       - choose:
+          - conditions:
+              - condition: trigger 
+                id:
+                  - Ceiling Light On 
+            sequence: 
+              - service: light.turn_off 
+                data: {}
+                target: 
+                  entity_id: 
+                    - light.corner_lamp_2
+                    - light.dreamview_g1_pro_2
+          - conditions:
+              - condition: trigger 
+                id:
+                  - Ceiling Light Off 
+              - condition: numeric_state 
+                entity_id: sensor.living_room_fp2_light_sensor_light_level 
+                below: input_number.low_light_threshold
+            sequence: 
+              - service: light.turn_on  
+                data: {}
+                target: 
+                  entity_id: 
+                    - light.corner_lamp_2
+              - if:
+                  - condition: state
+                    entity_id: switch.living_room_tv 
+                    state: "on"
+                then:
+                  - service: light.turn_on
+                    data: {}
+                    target:
+                      entity_id: light.dreamview_g1_pro_2
           - conditions:
               - condition: trigger
                 id:
@@ -101,17 +132,16 @@ automation:
               - condition: numeric_state
                 entity_id: sensor.living_room_fp2_light_sensor_light_level
                 below: input_number.low_light_threshold
-              - condition: state
-                entity_id: input_boolean.allow_corner_lamp_on
-                state: "on"
             sequence:
               - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness_pct: 30
-                target:
-                  entity_id:
-                    - light.corner_lamp
+                data: {}
+                target: 
+                  entity_id: 
+                    - light.corner_lamp_2
+              - service: light.turn_on
+                data: {}
+                target: 
+                  entity_id: 
                     - light.standard_lamp
           - conditions:
               - condition: trigger
@@ -123,66 +153,47 @@ automation:
                 data: {}
                 target:
                   entity_id:
-                    - light.corner_lamp
+                    - light.corner_lamp_2
+              - service: light.turn_off 
+                data: {}
+                target: 
+                  entity_id: 
                     - light.standard_lamp
           - conditions:
               - condition: trigger
                 id:
-                  - Dusk 
-                alias: Light on at Dusk and presence
+                  - Low Light 
+                alias: Light on when Low Light and Presence 
               - condition: state
-                entity_id: input_boolean.living_room_occupied
-                state: "on"
-              - condition: state
-                entity_id: input_boolean.allow_corner_lamp_on
+                entity_id: binary_sensor.living_room_fp2_presence_sensor_1
                 state: "on"
             sequence:
               - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness_pct: 30
-                target:
-                  entity_id:
-                    - light.corner_lamp
+                data: {}
+                target: 
+                  entity_id: 
+                    - light.corner_lamp_2
+              - service: light.turn_on
+                data: {}
+                target: 
+                  entity_id: 
                     - light.standard_lamp
           - conditions:
               - condition: trigger
                 id:
-                  - Dawn 
-                alias: Light off at Dawn 
+                  - Good Light 
+                alias: Light off with Good Light 
             sequence:
               - service: light.turn_off
                 data: {}
                 target:
                   entity_id:
-                    - light.corner_lamp
+                    - light.corner_lamp_2
+              - service: light.turn_off 
+                data: {}
+                target: 
+                  entity_id: 
                     - light.standard_lamp
-          - conditions:
-              - condition: trigger
-                id:
-                  - TV Mood Lights On
-            sequence:
-              - service: input_boolean.turn_off
-                data: {}
-                target:
-                  entity_id: input_boolean.allow_corner_lamp_on
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.corner_lamp
-          - conditions:
-              - condition: trigger
-                id:
-                  - TV Mood Lights Off
-            sequence:
-              - service: input_boolean.turn_on
-                data: {}
-                target:
-                  entity_id: input_boolean.allow_corner_lamp_on
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.corner_lamp
 
 #########################################
 #              Smart Button             #
@@ -195,9 +206,7 @@ automation:
     mode: restart
     trigger:
       - platform: state
-        entity_id:
-          - sensor.smart_button_downstairs_1_action
-        attribute: action
+        entity_id: sensor.smart_button_downstairs_1_action
         to: release
         id: Good Night
       - platform: state
@@ -210,16 +219,6 @@ automation:
           - sensor.smart_button_downstairs_1_action
         to: double
         id: TV & Sky off
-      - platform: numeric_state
-        entity_id: sensor.living_room_fp2_light_sensor_light_level
-        below: input_number.low_light_threshold
-        alias: Low Light
-        id: Low Light
-      - platform: numeric_state
-        entity_id: sensor.living_room_fp2_light_sensor_light_level
-        above: input_number.upper_light_threshold_level
-        id: High Light
-        alias: High Light
     condition: []
     action:
       - choose:
@@ -231,34 +230,7 @@ automation:
                 entity_id: binary_sensor.overnight
                 state: "on"
             sequence:
-              - service: script.status_annc
-                data:
-                  where: living_room
-                  call_goodnight: 1
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.living_room_tv
-              - service: media_player.turn_off
-                data: {}
-                target:
-                  device_id: 4aa503b5c01d5c68b0ad4341bdc9dd65
-                enabled: true
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
-              - service: switch.turn_off
-                data: {}
-                target:
-                  entity_id: switch.under_shelf_lights_local
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id:
-                    - light.corner_lamp
-                    - light.standard_lamp
-              - service: script.bed_lamps_dim_at_bedtime
+              - service: script.goodnight
                 data: {}
           - conditions:
               - condition: trigger
@@ -286,15 +258,6 @@ automation:
                       where: Living Room
                       call_interruption: 1
                       call_media_system_on: 1
-              - if:
-                  - condition: numeric_state
-                    entity_id: sensor.living_room_fp2_light_sensor_light_level
-                    below: input_number.low_light_threshold
-                then:
-                  - service: light.turn_on
-                    data: {}
-                    target:
-                      entity_id: light.dreamview_g1_pro
           - conditions:
               - condition: trigger
                 id: TV & Sky off
@@ -320,69 +283,171 @@ automation:
                       where: Living Room
                       call_interruption: 1
                       call_media_system_off: 1
-              - if:
-                  - condition: state
-                    entity_id: light.dreamview_g1_pro
-                    state: "on"
-                then:
-                  - service: light.turn_off
-                    data: {}
-                    target:
-                      entity_id: light.dreamview_g1_pro
-          - conditions:
-              - condition: trigger
-                id:
-                  - TV & Sky on
-              - condition: numeric_state
-                entity_id: sensor.living_room_fp2_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
-          - conditions:
-              - condition: trigger
-                id:
-                  - TV & Sky off
-              - condition: state
-                entity_id: light.dreamview_g1_pro
-                state: "on"
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-            sequence:
-              - if:
-                  - condition: state
-                    entity_id: switch.living_room_tv
-                    state: "on"
-                then:
-                  - service: light.turn_on
-                    data: {}
-                    target:
-                      entity_id: light.dreamview_g1_pro
-          - conditions:
-              - condition: trigger
-                id:
-                  - High Light
-              - condition: state
-                entity_id: light.dreamview_g1_pro
-                state: "on"
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.dreamview_g1_pro
 
- 
-    
+
+  # - id: smart_button_downstairs_1
+  #   alias: Smart Button Downstairs 1 Automations
+  #   initial_state: true
+  #   mode: restart
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - sensor.smart_button_downstairs_1_action
+  #       attribute: action
+  #       to: release
+  #       id: Good Night
+  #     - platform: state
+  #       entity_id:
+  #         - sensor.smart_button_downstairs_1_action
+  #       to: single
+  #       id: TV & Sky toggle
+  #   condition: []
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Good Night
+  #           sequence:
+  #             - service: script.goodnight
+  #               data: {} 
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - TV & Sky toggle 
+  #           sequence:
+  #             - service: media_player.toggle
+  #               data: {}
+  #               target:
+  #                 entity_id: media_player.sky_q_main
+
+
+#####################################
+#    TV and Sky Toggle on and off   #
+#####################################
+
+  # - id: living_room_tv_toggle_on_and_off 
+  #   alias: Living Room TV Toggle On and Off 
+  #   description: ""
+  #   initial_state: true
+  #   mode: single
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - media_player.sky_q_main
+  #       id: Sky toggle on 
+  #       from: "off"
+  #       to: playing 
+  #     - platform: state
+  #       entity_id:
+  #         - media_player.sky_q_main
+  #       id: Sky toggle off 
+  #       from: 
+  #         - playing 
+  #         - paused   
+  #       to: "off" 
+  #   condition: []
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Sky toggle on 
+  #           sequence:
+  #             - service: script.living_room_tv_toggle
+  #               data: {} 
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Sky toggle off  
+  #           sequence:
+  #             - service: script.living_room_tv_toggle
+  #               data: {} 
 
 ###########################
 #     Scripts             #
 ###########################
+
+script: 
+  ###########################
+  #   Toggle TV on and off  # 
+  ###########################
+  living_room_tv_toggle:
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "off"
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.living_room_tv 
+                data: {}
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time
+                    state: "off"
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+              - service: script.status_annc
+                data:
+                  where: living_room 
+                  call_interruption: 1
+                  call_media_system_on: 1
+        default:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.living_room_tv 
+            data: {}
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.quiet_time
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+          - service: script.status_annc
+            data:
+              where: living_room 
+              call_interruption: 1
+              call_media_system_off: 1
+    mode: single
+
+  ###################
+  #    Goodnight    #
+  ###################
+    
+  goodnight:
+    sequence:
+      - condition: state
+        entity_id: binary_sensor.overnight
+        state: "on"
+      - service: script.night_security_check
+        data: {}
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: media_player.sky_q_main
+      - service: switch.turn_off 
+        target:
+          entity_id: switch.living_room_tv 
+        data: {}
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.seans_morning_briefing_played
+        data: {}
+      - service: switch.turn_off
+        target:
+          entity_id: switch.under_shelf_lights_local
+        data: {}
+      - service: light.turn_off
+        target:
+          entity_id:
+            - light.standard_lamp
+            - light.corner_lamp_2
+        data: {}
+      - service: script.bed_lamps_dim_at_bedtime
+        data: {}
+    mode: single
