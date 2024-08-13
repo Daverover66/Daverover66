@@ -1094,6 +1094,18 @@
       availability: >
         {{ states('sensor.daylight_savings_next') not in ['unknown', 'unavailable'] }}
 
+# - sensor:
+#     - name: dave_room
+#       unique_id: dave_room
+#       state: >
+#         {% if states('sensor.daves_keys') != 'not_home' %}
+#           {{ states('sensor.daves_keys') }}
+#         {% elif states('sensor.daves_phone_espresence') != 'not_home' %}
+#           {{ states('sensor.daves_phone_espresence') }}
+#         {% else %}
+#           NA
+#         {% endif %}
+
 
 
 
