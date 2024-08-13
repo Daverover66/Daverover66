@@ -587,30 +587,7 @@ automation:
             data:
               where: "{{ states('sensor.room_audio') }}"
               call_interuption: 1
-              message: >
-                {% set person = expand('group.arriving')|map(attribute='name')|join(' and ') %}
-                {% set peoplecount = expand('group.arriving') | count %}
-                {% if peoplecount == 1 %}
-                  {% set is_are = ' is ' %}
-                  {% set has_have = ' has ' %}
-                {% else %}
-                  {% set is_are = ' are ' %}
-                  {% set has_have = ' have ' %}
-                {% endif %}
-                {%- macro greeting_sentence(person, is_are, has_have) -%}
-                  {{ [
-                  person ~ has_have + " arrived.",
-                  "My sensors are picking up the presence of additional humans. " ~ person ~ has_have + " been identified as home.",
-                  "Guess who is in the hub?" ~ person ~ is_are,
-                  "I am sensing a disturbance in the force. "  ~ person +" must be back!",
-                  person ~ is_are + "now in the house.",
-                  person  ~ is_are + " now here.  Welcome Home.",
-                  person  ~ is_are + " now here.",
-                  "Just a quick announcement. " ~ person ~ has_have + "  arrived!",
-                  person ~ has_have + " finally made it home."
-                  ] | random }}
-                {%- endmacro -%}
-                {{greeting_sentence(person, is_are, has_have)}}
+              call_greeting_sentence: 1
           - delay: 00:02:00
           - service: group.set
             data:
