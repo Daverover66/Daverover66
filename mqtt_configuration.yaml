@@ -1,0 +1,291 @@
+homeassistant: true
+advanced:
+  log_level: warn
+  last_seen: ISO_8601_local
+  transmit_power: 10
+  network_key:
+    - 49
+    - 98
+    - 234
+    - 26
+    - 106
+    - 144
+    - 116
+    - 239
+    - 6
+    - 42
+    - 114
+    - 146
+    - 182
+    - 226
+    - 52
+    - 203
+  pan_id: 3155
+  ext_pan_id:
+    - 74
+    - 194
+    - 14
+    - 235
+    - 9
+    - 169
+    - 71
+    - 179
+  homeassistant_legacy_entity_attributes: false
+  legacy_api: false
+  legacy_availability_payload: false
+mqtt:
+  server: mqtt://core-mosquitto:1883
+  user: xxxxxxxxx
+  password: xxxxxxxxxx
+serial:
+  port: tcp://192.168.0.168:6638
+  adapter: zstack
+  baudrate: 115200
+frontend:
+  port: 8099
+device_options:
+  homeassistant:
+    last_seen:
+      enabled_by_default: true
+legacy: false
+availability:
+  active:
+    timeout: 30
+  passive:
+    timeout: 1500
+devices:
+  '0xa4c13801646534de':
+    friendly_name: Loft Light
+  '0xa4c1388b707eb031':
+    friendly_name: Upstairs Landing Lights
+  '0xa4c13828c40bc0ed':
+    friendly_name: Landing Light 1
+  '0xa4c138aa24f846a1':
+    friendly_name: Landing Light 2
+  '0xa4c138b47bf469ce':
+    friendly_name: Landing Light 3
+  '0xa4c138b28e7af17c':
+    friendly_name: Landing Light 4
+  '0xa4c138346fa3493f':
+    friendly_name: Kids Bathroom Light
+  '0xa4c138b0f06beb90':
+    friendly_name: Main Bathroom Light
+  '0xe0798dfffed1fece':
+    friendly_name: Guest Bedroom Router
+  '0x7cb94c788e760000':
+    friendly_name: Guest Bedroom Bedside Lamp Left
+  '0xe0798dfffed1cd02':
+    friendly_name: Dining Room Router
+  '0xa4c138eac8f98292':
+    friendly_name: Kitchen Light 5
+  '0xa4c138440dfc91bf':
+    friendly_name: Kitchen Light 4
+  '0xa4c13819c2db3f2a':
+    friendly_name: Kitchen Light 2a
+  '0xa4c1389bcb69576d':
+    friendly_name: Kitchen Light 1
+  '0xa4c1383371178713':
+    friendly_name: Kitchen Light 3
+  '0xa4c1389c55b12d2f':
+    friendly_name: Standard Lamp Light 1
+  '0xa4c1384d966a9a5c':
+    friendly_name: Standard Lamp Light 2
+  '0xa4c1383b8a2d069c':
+    friendly_name: Standard Lamp Light 3
+  '0xa4c138ebf99af862':
+    friendly_name: Corner Lamp Light 1
+  '0xa4c1381279737f0a':
+    friendly_name: Corner Lamp Light 2
+  '0xa4c1385f3a321fd3':
+    friendly_name: Corner Lamp Light 3
+  '0xa4c13883fe218adb':
+    friendly_name: Hallway Light 1
+  '0xa4c138e1655234fe':
+    friendly_name: Hallway Light 2
+  '0xa4c1383da7585cf6':
+    friendly_name: Hallway Light 3
+  '0xa4c138480595cb16':
+    friendly_name: Hallway Light 4
+  '0xa4c1387c25653084':
+    friendly_name: Cloakroom Light 2
+  '0x7cb94c7895910000':
+    friendly_name: Ingrid
+  '0xa4c1384da9f6197e':
+    friendly_name: Garage Lights
+  '0x001788010bf7eba0':
+    friendly_name: Back Door Zone Light
+  '0x001788010bf79113':
+    friendly_name: Utility Room Light
+  '0x001788010e1bb59c':
+    friendly_name: Back Door Light
+  '0x00158d00091c7226':
+    friendly_name: Loft Hatch Sensor
+  '0x00158d00097521c0':
+    friendly_name: Office Temperature and Humidity
+  '0x54ef441000729e98':
+    friendly_name: Office Presence Sensor
+  '0x00124b0029358512':
+    friendly_name: Office Window Sensor
+  '0x00158d000977768a':
+    friendly_name: Guest Bedroom Temperature and Humidity
+  '0x54ef441000a71413':
+    friendly_name: Guest Bedroom Motion
+  '0x00124b002a4f8327':
+    friendly_name: Guest Bedroom Window Left
+  '0x00158d00091c9d9a':
+    friendly_name: Guest Bedroom Window Right
+  '0x00158d0008d0a546':
+    friendly_name: Main Bathroom Temperature and Humidity
+  '0x54ef4410009ef6c9':
+    friendly_name: Main Bathroom Presence
+  '0x00158d00091c9ec2':
+    friendly_name: Bathroom Window
+  '0x00158d00094cf3ad':
+    friendly_name: Main Bathroom Leak Detector
+  '0x54ef441000a71160':
+    friendly_name: Jamie Room Presence
+  '0x00124b00293521e0':
+    friendly_name: Jamie's Bedroom Window Right
+  '0x00124b0029348641':
+    friendly_name: Jamie's Bedroom Window Left
+  '0x54ef4410006bbe21':
+    friendly_name: Jamies Room Blind
+  '0x00158d0008975b56':
+    friendly_name: Kids Bathroom Temperature and Humidity
+  '0x54ef44100077331a':
+    friendly_name: Jack and Jill Presence
+  '0x00158d00094cf2c0':
+    friendly_name: Kids Bathroom Leak Detector
+  '0x00158d000a843fdd':
+    friendly_name: Smart Button Upstairs 2
+  '0x00158d0009465465':
+    friendly_name: Smart Button Upstairs 1
+  '0x00124b0029348b03':
+    friendly_name: Kids Bathroom Window Left
+  '0x00124b00292ac167':
+    friendly_name: Kids Bathroom Window Right
+  '0x00124b002a4eb4db':
+    friendly_name: Sean's Bedroom Window Right
+  '0x00124b00293595df':
+    friendly_name: Sean's Bedroom Window Left
+  '0x00158d0008f331da':
+    friendly_name: Seans Room Temperature and Humidity
+  '0x54ef44100078253a':
+    friendly_name: Seans Room Blind
+  '0x00158d00091e6986':
+    friendly_name: En-Suite Temperature and Humidity
+  '0x54ef441000a70608':
+    friendly_name: Sean Room Presence
+  '0x00124b0029347e6f':
+    friendly_name: Main Bedroom Window Left
+  '0x00124b0029348054':
+    friendly_name: Main Bedroom Window Right
+  '0x00124b002935498e':
+    friendly_name: En-Suite Window Sensor
+  '0x54ef441000775efb':
+    friendly_name: Upper Landing Presence
+  '0x00124b002a64c54e':
+    friendly_name: Lower Landing Motion
+  '0x00124b0029352aa0':
+    friendly_name: Kitchen Window Right
+  '0x00158d000942021e':
+    friendly_name: Smart Button Downstairs 2
+  '0x54ef4410006a46eb':
+    friendly_name: Magic Cube
+  '0x00158d0008d0a706':
+    friendly_name: Kitchen Temperature and Humidity
+  '0x54ef441000a70f6c':
+    friendly_name: Utility Room Presence 2
+  '0x00124b002a4eb4ef':
+    friendly_name: Kitchen Window Left
+  '0x00124b002a4f81de':
+    friendly_name: Freezer Door Sensor
+  '0x00124b0029347b6a':
+    friendly_name: Fridge Door Sensor
+  '0x00124b0029359173':
+    friendly_name: Washing Machine Door
+  '0x54ef44100089ab45':
+    friendly_name: Hallway Presence
+  '0x54ef44100081d389':
+    friendly_name: Hallway Presence 2
+  '0x00124b002935133a':
+    friendly_name: Dining Room Window Right
+  '0x00124b0029356b5b':
+    friendly_name: Dining Room Window Left
+  '0x54ef441000729c01':
+    friendly_name: Dining Room Presence Sensor
+  '0x00158d0009466ea9':
+    friendly_name: Smart Button Downstairs 1
+  '0x00124b002a4eb878':
+    friendly_name: Living Room Window Right
+  '0x00124b002934acf5':
+    friendly_name: Living Room Window Left
+  '0x00124b002a5076cc':
+    friendly_name: Hallway Window
+  '0x00124b002935137f':
+    friendly_name: Cloakroom Window
+  '0x54ef4410009f135e':
+    friendly_name: Cloakroom Presence
+  '0x00158d000acaf831':
+    friendly_name: Letterbox
+  '0x282c02bfffe8e120':
+    friendly_name: Back Door Sensor
+  '0x282c02bfffe8ee29':
+    friendly_name: Side Door Sensor
+  '0x282c02bfffe8edb9':
+    friendly_name: Front Door Sense
+  '0x00124b002a4f7feb':
+    friendly_name: Garage Door Left
+  '0x00124b002a4eba6c':
+    friendly_name: Garage Door Right
+  '0x00158d0009413b80':
+    friendly_name: Outside Temperature and Humidity Sensor 2
+  '0x00158d0009d34532':
+    friendly_name: Vibration Sensor 1
+  '0x00158d0009173344':
+    friendly_name: Leak Detector Washing Machine
+  '0x00158d0009cf780f':
+    friendly_name: Leak Detector Dishwasher
+  '0x54ef441000a6fb83':
+    friendly_name: En-Suite Presence
+  '0xe0798dfffea8390c':
+    friendly_name: Living Room Router
+  '0x00124b002a688ae3':
+    friendly_name: Guest Bed Right Motion
+  '0x00124b002a6883a1':
+    friendly_name: Guest Bed Left Motion
+groups:
+  '1':
+    friendly_name: Kitchen Lights
+    devices:
+      - 0xa4c1389bcb69576d/1
+      - 0xa4c13819c2db3f2a/1
+      - 0xa4c1383371178713/1
+      - 0xa4c138440dfc91bf/1
+      - 0xa4c138eac8f98292/1
+  '2':
+    friendly_name: Landing Lights
+    devices:
+      - 0xa4c13828c40bc0ed/1
+      - 0xa4c138aa24f846a1/1
+      - 0xa4c138b47bf469ce/1
+      - 0xa4c138b28e7af17c/1
+  '3':
+    friendly_name: Standard Lamp
+    devices:
+      - 0xa4c1389c55b12d2f/1
+      - 0xa4c1384d966a9a5c/1
+      - 0xa4c1383b8a2d069c/1
+  '4':
+    friendly_name: Corner Lamp
+    devices:
+      - 0xa4c138ebf99af862/1
+      - 0xa4c1381279737f0a/1
+      - 0xa4c1385f3a321fd3/1
+  '5':
+    friendly_name: Hallway Lights
+    devices:
+      - 0xa4c13883fe218adb/1
+      - 0xa4c138e1655234fe/1
+      - 0xa4c1383da7585cf6/1
+      - 0xa4c138480595cb16/1
