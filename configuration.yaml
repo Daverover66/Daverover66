@@ -1,19 +1,22 @@
 ##################################################
 #              Current configuration             #     
-#                 September 2023                 #
+#                 August 2024                    #
 ##################################################
+                  
 # Loads default set of integrations. Do not remove.
 default_config:
 
 # Load frontend themes from the themes folder
 frontend:
   themes: !include_dir_merge_named themes
+  extra_module_url:
+    - /local/community/lovelace-card-mod/card-mod.js #or wherever you ended up putting card-mod.js
   
 # Activate config editor
 config:
 
 http:
-  ip_ban_enabled: true
+  ip_ban_enabled: false
   login_attempts_threshold: 5
 
 # Text to speech
@@ -48,15 +51,7 @@ homeassistant:
     sounds: /media/sounds
     disney: /media/disney
     books: /media/books
-    
 
-  # Proximity sensor
-proximity:
-  home:
-    devices:
-      - device_tracker.daves_samsung_galaxy
-    tolerance: 50
-    unit_of_measurement: mi
         
 # influx db
 #influxdb:
@@ -78,35 +73,25 @@ alexa_media:
       password: !secret amazon_password
       url: "amazon.co.uk"
 
-# Octopus Agile
-octopusagile:
-  region_code: "N"
-  mpan: !secret mpan
-  serial: !secret serial
-  auth: !secret API
-  startdate: "2023-10-06"
-  run_devices:
-  - energy_time: 2.5
-    entity_id: dishwasher
-    icon: mdi:dishwasher
-    run_before: '06:00:00'
-    run_time: 3
-  - energy_time: 2.5
-    entity_id: washing_machine
-    icon: mdi:washing-machine
-    run_before: '06:00:00'
-    run_time: 2.5
-  - energy_time: 3
-    entity_id: home_battery
-    icon: mdi:battery
-    run_before: '06:00:00'
-    run_time: 3
-  - energy_time: 4
-    entity_id: electric_vehicle
-    icon: mdi:ev-station
-    run_before: '06:00:00'
-    run_time: 4
-  moneymakers:
-  - switch.shelly1_e45bbe7867c7
-  - switch.valkyrie_switch_1
+# Battery Notes Config 
+battery_notes:
+  enable_autodiscovery: true
+  show_all_devices: false
+  enable_replaced: true
+  default_battery_low_threshold: 15
+  battery_increase_threshold: 25
+  hide_battery: false
+  round_battery: false
+
+######## Command Line stuff ############# 
+
+command_line:
+  - sensor:
+      name: 'Lines of Code'
+      unique_id: lines_of_code
+      command: "find /config -name '*.yaml' | xargs cat | wc -l"
+      scan_interval: 20000
+
+
+
       
