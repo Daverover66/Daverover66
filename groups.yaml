@@ -2,10 +2,6 @@
 #                All Groups                     #
 #################################################
 
-#################################################
-#            Presence and Occupancy             #
-#################################################
-
 family:
   name: Family
   entities:
@@ -14,25 +10,130 @@ family:
     - sensor.dave_is_in_da_hoose
     - sensor.gem_is_in_da_hoose
 
+arriving:
+  name: Arriving 
+  entities: []
+
+living_room_occupancy:
+  icon: mdi:sofa  
+  name: "Living Room Occupancy"
+  entities: []
+
+kitchen_occupancy:
+  icon: mdi:stove 
+  name: "Kitchen Occupancy"
+  entities: []
+
+dining_room_occupancy:
+  icon: mdi:silverware-fork-knife 
+  name: "Dining Room Occupancy"
+  entities: []
+
+utility_room_occupancy:
+  icon: mdi:washing-machine 
+  name: "Utility Room Occupancy"
+  entities: []
+
+master_bedroom_occupancy:
+  icon: mdi:bed-queen 
+  name: "Master Bedroom Occupancy"
+  entities: []
+
+guest_bedroom_occupancy:
+  icon: mdi:bed-double 
+  name: "Guest Bedroom Occupancy"
+  entities: []
+
+seans_room_occupancy:
+  icon: mdi:bunk-bed 
+  name: "Seans Room Occupancy"
+  entities: []
+
+jamies_room_occupancy:
+  icon: mdi:bed 
+  name: "Jamies Room Occupancy"
+  entities: []
+
+office_occupancy:
+  icon: mdi:desk 
+  name: "Office Occupancy"
+  entities: []
+
+hallway_occupancy:
+  icon: mdi:walk 
+  name: "Hallway Occupancy"
+  entities: []
+
+en_suite_occupancy:
+  icon: mdi:shower-head 
+  name: "En-Suite Occupancy"
+  entities: []
+
+garage_occupancy:
+  icon: mdi:garage-variant 
+  name: "Garage Occupancy"
+  entities: []
+
+cloakroom_occupancy:
+  icon: mdi:toilet 
+  name: "Cloakroom Occupancy"
+  entities: []
+
+loft_occupancy:
+  icon: mdi:home-roof 
+  name: "Loft Occupancy"
+  entities: []
+
+landing_occupancy:
+  icon: mdi:stairs-up 
+  name: "Landing Occupancy"
+  entities: []
+
+dave_room:
+  name: "Dave Room"
+  entities: 
+    - sensor.daves_keys
+    - sensor.daves_phone_espresence
+
+gem_room:
+  name: "Gem Room"
+  entities:
+    - sensor.gems_phone_espresence
+
+max_room:
+  name: "Max Room"
+  entities:
+    - sensor.max 
+
+huxley_room:
+  name: "Huxley Room"
+  entities:
+    - sensor.huxley 
 
 room_presence:
-  name: Room Presence
+  - sensor.dave_room 
+  - sensor.gem_room
+
+
+rooms:
+  name: Rooms 
   icon: mdi:location-enter
   entities:
-    - input_boolean.living_room_occupied
-    - input_boolean.room_occupied_dining_room
-    - input_boolean.room_occupied_garage
-    - input_boolean.room_occupied_guest_bedroom
-    - input_boolean.room_occupied_hallway
-    - input_boolean.room_occupied_jamie_s_room
-    - input_boolean.room_occupied_kitchen
-    - input_boolean.room_occupied_main_bedroom
-    - input_boolean.room_occupied_sean_s_room
-    - input_boolean.room_occupied_office
-    - input_boolean.room_occupied_cloakroom
-    - input_boolean.room_occupied_main_bathroom
-    - input_boolean.room_occupied_jack_jill
-    - input_boolean.upper_landing_occupied
+    - binary_sensor.living_room_occupied
+    - binary_sensor.dining_room_occupied
+    - binary_sensor.kitchen_occupied
+    - binary_sensor.hallway_occupied
+    - binary_sensor.cloakroom_occupied
+    - binary_sensor.master_bedroom_occupied
+    - binary_sensor.main_bathroom_occupied
+    - binary_sensor.guest_bedroom_occupied
+    - binary_sensor.office_occupied 
+    - binary_sensor.jamies_room_occupied 
+    - binary_sensor.seans_room_occupied 
+    - binary_sensor.kids_bathroom_occupied 
+    - binary_sensor.garage_occupied
+    - binary_sensor.loft_occupied
+    - binary_sensor.landing_occupied  
 
 occupancy:
   name: Occupancy
@@ -41,45 +142,42 @@ occupancy:
     - binary_sensor.daves_samsung_galaxy_home
     - binary_sensor.gems_samsung_galaxy_home
 
-#################################################
-#                   Lighting                    #
-#################################################
-
 living_room_lights:
   name: "Living Room Lights"
-  icon: mdi:bulb
+  icon: mdi:lightbulb
   entities:
     - light.living_room_lights
-    - light.corner_lamp
+    - light.corner_lamp_2
 
 kitchen_lights:
   name: "Kitchen Lights"
-  icon: mdi:bulb
+  icon: mdi:lightbulb
   entities:
     - light.kitchen_lights_2
 
 main_bedroom_lights:
   name: "Main Bedroom Lights"
-  icon: mdi:bulb
+  icon: mdi:lightbulb
   entities:
-    - switch.daddys_bedside_lamp_socket_1
-    - switch.mummys_bedside_lamp_socket_1
- 
+    - light.sonoff_1001f6d982
+    - light.sonoff_1001f6d950
+
 guest_bedroom_lights:
   name: "Guest Bedroom Lights"
-  icon: mdi:bulb
+  icon: mdi:lightbulb
   entities:
     - light.guest_bedroom_bedside_lamp_left
     - light.guest_bedroom_bedside_lamp_right
-    
+
 lamps:
   name: "Lamps"
   icon: mdi:lamp
   entities:
-    - light.corner_lamp
-    - switch.daddys_bedside_lamp_socket_1
-    - switch.mummys_bedside_lamp_socket_1
+    - light.corner_lamp_2
     - light.standard_lamp
+    - light.kitchen_aura_lamp_2
+    - light.sonoff_1001f6d982
+    - light.sonoff_1001f6d950
     - light.guest_bedroom_bedside_lamp_left
     - light.guest_bedroom_bedside_lamp_right
 
@@ -88,37 +186,123 @@ lights:
   icon: mdi:lightbulb-group
   entities:
     - switch.loft_light
-    - switch.under_shelf_lights_socket_1
+    - switch.under_shelf_lights_local
     - switch.cloakroom_light
     - light.living_room_lights
     - light.kitchen_lights_2
     - switch.garage_lights
     - light.landing_lights_2
+    - light.hallway_lights 
+    - light.utility_room_light
+    - light.back_door_zone_light
+    - light.back_door_light 
+    - light.bed_lamps_3
+    - light.stair_lights_2
+    - light.dreamview_g1_pro_2
+    - light.glide_lights_right_2
+    - light.govee_glide_left_2
+    - light.xmas_light_string_1_2
+    - light.xmas_light_string_2_2
+    - light.xmas_string_lights_3_2
+    - light.main_bathroom_light
+    - light.kids_bathroom_light
+
+gnd_floor_lights:
+  name: "Ground Floor Lights"
+  icon: mdi:lightbulb-group
+  entities:
+    - switch.under_shelf_lights_local
+    - switch.cloakroom_light
+    - light.living_room_lights
+    - light.kitchen_lights_2
+    - switch.garage_lights
+    - light.hallway_lights 
+    - light.utility_room_light
+    - light.back_door_zone_light
+    - light.back_door_light
+    - light.stair_lights_2
+    - light.dreamview_g1_pro_2
+    - light.glide_lights_right_2
+    - light.govee_glide_left_2
+    - light.xmas_light_string_1_2
+    - light.xmas_light_string_2_2
+    - light.xmas_string_lights_3_2
+
+first_floor_lights:
+  name: "First FloorLights"
+  icon: mdi:lightbulb-group
+  entities:
+    - switch.loft_light
+    - light.landing_lights_2
+    - light.bed_lamps_3
+    - light.stair_lights_2
+    - light.main_bathroom_light
+    - light.kids_bathroom_light
 
 sockets:
   name: "Sockets"
   icon: mdi:power-socket-uk
   entities:
-    - switch.under_shelf_lights_socket_1
-    - switch.kitchen_tablet_socket_1
-    - switch.ingrid_socket_1
-    - switch.ad_hoc_charging_socket_1
-    - switch.ad_hoc_tou_charging_2_socket_1
-    - switch.office_echo_pop_socket_1
-    - switch.home_assistant_server
+    - switch.under_shelf_lights_local
     - switch.bert_local
+    - switch.bob
     - switch.eric_local
-    - switch.ernie_local
+    - switch.ernie_local 
+    - switch.granny_charger_local 
+    - switch.home_assistant_server 
+    - switch.ad_hoc_charging_local 
+    - switch.ad_hoc_charging_2_local
+    - switch.kitchen_tablet_socket_1 
+    - switch.office_echo_pop_socket_1
 
 holiday_lights:
   name: "Holiday Lights"
   icon: mdi:lightbulb-multiple
   entities:
-    - light.corner_lamp
-    - light.standard_lamp
+    - light.corner_lamp_2
+    - light.standard_lamp 
     - light.landing_lights_2
     - light.guest_bedroom_bedside_lamp_left
     - light.guest_bedroom_bedside_lamp_right
     - light.kitchen_lights_2
-    - switch.daddys_bedside_lamp_socket_1
-    - switch.mummys_bedside_lamp_socket_1
+    - light.sonoff_1001f6d982
+    - light.sonoff_1001f6d950
+
+energy_cost_toggles: 
+  name: "Energy Cost Toggles"
+  entities:
+    - input_boolean.cheap_energy
+    - input_boolean.plunge_pricing
+    - input_boolean.medium_cost_energy
+    - input_boolean.expensive_energy
+    - input_boolean.most_expensive_energy 
+
+seans_room_motion:
+  name: Seans Room Motion 
+  icon: mdi:motion-sensor 
+  entities:
+    - binary_sensor.sean_s_room_camera_cell_motion_detection
+    - binary_sensor.sean_room_presence_occupancy
+
+jamies_room_motion:
+  name: Jamies Room Motion 
+  icon: mdi:motion-sensor 
+  entities:
+    - binary_sensor.jamie_s_room_camera_cell_motion_detection
+    - binary_sensor.jamie_room_presence_occupancy
+
+spare_room_motion:
+  name: Spare Room Motion 
+  icon: mdi:motion-sensor 
+  entities:
+    - binary_sensor.guest_bedroom_motion_occupancy 
+
+spare_room_lights:
+  name: Spare Room Lights 
+  icon: mdi:ceiling-light-multiple 
+  entities:
+    - light.spare_room_light_1
+    - light.spare_room_light_2
+    - light.spare_room_light_3
+
+
