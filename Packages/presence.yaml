@@ -531,6 +531,92 @@ sensor:
     timeout: 10
     away_timeout: 120
 
+###########################
+#    Automations          #
+###########################
+automation:
+
+##### Welcome Home ########
+
+  - id: welcome_home
+    alias: Welcome Home
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - person.david_forrester
+          - person.gem_forrester
+        from: "not_home"
+        to: "home"
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.welcome_home
+                state: "on"
+            sequence:
+              - wait_for_trigger:
+                  - platform: state
+                    entity_id: binary_sensor.front_door_sense_contact
+                    from: "off"
+                    to: "on"
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 10
+                  milliseconds: 0
+              - service: script.welcome_briefing
+                data:{}
+        default:
+          - service: group.set
+            data:
+              object_id: "arriving"
+              add_entities: >-
+                {{ trigger.to_state.entity_id }}
+          - wait_for_trigger:
+              - platform: state
+                entity_id: binary_sensor.front_door_sense_contact
+                from: "off"
+                to: "on"
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - service: script.status_annc
+            data:
+              where: "{{ states('sensor.room_audio') }}"
+              call_interuption: 1
+              message: >
+                {% set person = expand('group.arriving')|map(attribute='name')|join(' and ') %}
+                {% set peoplecount = expand('group.arriving') | count %}
+                {% if peoplecount == 1 %}
+                  {% set is_are = ' is ' %}
+                  {% set has_have = ' has ' %}
+                {% else %}
+                  {% set is_are = ' are ' %}
+                  {% set has_have = ' have ' %}
+                {% endif %}
+                {%- macro greeting_sentence(person, is_are, has_have) -%}
+                  {{ [
+                  person ~ has_have + " arrived.",
+                  "My sensors are picking up the presence of additional humans. " ~ person ~ has_have + " been identified as home.",
+                  "Guess who is in the hub?" ~ person ~ is_are,
+                  "I am sensing a disturbance in the force. "  ~ person +" must be back!",
+                  person ~ is_are + "now in the house.",
+                  person  ~ is_are + " now here.  Welcome Home.",
+                  person  ~ is_are + " now here.",
+                  "Just a quick announcement. " ~ person ~ has_have + "  arrived!",
+                  person ~ has_have + " finally made it home."
+                  ] | random }}
+                {%- endmacro -%}
+                {{greeting_sentence(person, is_are, has_have)}}
+          - delay: 00:02:00
+          - service: group.set
+            data:
+              object_id: "arriving"
+              entities: []
+
 #################
 #    Scripts    # 
 ################# 
