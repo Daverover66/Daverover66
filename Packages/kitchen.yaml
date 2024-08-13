@@ -5,7 +5,7 @@
 #   @description    :   All Kitchen config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   24/05/24
+#   @date           :   13/08/2024
 ###############################################################################
 
 ###########################
@@ -102,240 +102,276 @@ automation:
                 target:
                   entity_id: switch.ad_hoc_charging_2_local 
 
-###########################
-#      Lighting           #
-###########################
+#################################################### 
+#      Lighting     migrated to UI 07/08/2024      #
+#################################################### 
 
-  - id: kitchen_lights_with_presence
-    alias: Kitchen Lights with Presence
-    description: ""
-    trigger:
-      - platform: state
-        entity_id:
-          - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-        from: "off"
-        to: "on"
-        id: Lights On
-      - platform: state
-        entity_id:
-          - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-        from: "on"
-        to: "off"
-        id: Lights Off
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 30
-      - platform: state
-        entity_id:
-          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
-        from: "off"
-        to: "on"
-        id: BDZ On 
-      - platform: state
-        entity_id:
-          - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
-        from: "on"
-        to: "off"
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 30
-        id: BDZ Off
-      - platform: state
-        entity_id:
-          - binary_sensor.back_door_sensor_contact
-        from: "off"
-        to: "on"
-        id: Back Door Entry 
-      - platform: state
-        entity_id: sensor.utility_room_motion
-        to: "Detected"  
-        id: Utility On
-      - platform: state
-        entity_id: sensor.utility_room_motion
-        to: "Clear"
-        id: Utility Off
-        for:
-          hours: 0
-          minutes: 0
-          seconds: 30
-      - platform: numeric_state
-        entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-        below: input_number.low_light_threshold
-        id: Low Light
-      - platform: numeric_state
-        entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-        above: input_number.upper_light_threshold_level
-        id: Good Light
-      - platform: state
-        entity_id:
-          - binary_sensor.lights_out
-        to: "off"
-        id: Allow Lights on
-      - platform: state 
-        entity_id: binary_sensor.day 
-        from: "on"
-        to: "off"
-        id: sunset 
-    condition:
-      - condition: state
-        entity_id: input_boolean.holiday_mode
-        state: "off"
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger 
-                id:
-                  - sunset 
-            sequence: 
-              - service: switch.turn_on
-                data: {}
-                target:
-                  entity_id: switch.under_shelf_lights_local
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights On
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
-          - conditions:
-              - condition: trigger
-                id:
-                  - Lights Off
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
-          - conditions:
-              - condition: trigger
-                id:
-                  - Back Door Entry
-              - condition: sun
-                before: sunrise
-                after: sunset
-              - condition: state
-                entity_id: light.back_door_zone_light
-                state: "off"
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.back_door_zone_light
-          - conditions:
-              - condition: trigger
-                id:
-                  - BDZ On
-              - condition: or 
-                conditions:
-                  - condition: numeric_state
-                    entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                    below: input_number.low_light_threshold
-                  - condition: and 
-                    conditions:
-                      - condition: or 
-                        conditions:
-                          - condition: state 
-                            entity_id: sensor.season 
-                            state: "autumn"
-                          - condition: state 
-                            entity_id: sensor.season 
-                            state: "winter"
-                      - condition: time 
-                        after: "17:35:00"
-                        before: "21:00:00"
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.back_door_zone_light
-          - conditions:
-              - condition: trigger
-                id:
-                  - BDZ Off
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.back_door_zone_light
-          - conditions:
-              - condition: trigger
-                id:
-                  - Utility On
-              - condition: state
-                entity_id: binary_sensor.lights_out
-                state: "off"
-              - condition: or
-                conditions:
-                  - condition: sun
-                    after: sunset
-                    before: sunrise 
-                  - condition: numeric_state
-                    entity_id: sensor.utility_room_presence_2_illuminance_lux
-                    below: input_number.low_light_threshold
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.utility_room_light
-          - conditions:
-              - condition: trigger
-                id:
-                  - Utility Off
-              - condition: state 
-                entity_id: light.utility_room_light
-                state: "on"
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.utility_room_light
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: state
-                entity_id: light.kitchen_lights_2
-                state: "off"
-              - condition: state 
-                entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-                state: "on"
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
-          - conditions:
-              - condition: trigger
-                id:
-                  - Good Light
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
-          - conditions:
-              - condition: trigger
-                id:
-                  - Allow Lights on
-              - condition: state
-                entity_id: input_boolean.room_occupied_kitchen
-                state: "on"
-              - condition: numeric_state
-                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
-                below: input_number.low_light_threshold
-            sequence:
-              - service: light.turn_on
-                data: {}
-                target:
-                  entity_id: light.kitchen_lights_2
+  # - id: kitchen_lights_with_presence
+  #   alias: Kitchen Lights with Presence
+  #   mode: parallel 
+  #   trace:
+  #     stored_traces: 20
+  #   description: ""
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+  #       from: "off"
+  #       to: "on"
+  #       id: Lights On
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+  #       from: "on"
+  #       to: "off"
+  #       id: Lights Off
+  #       for:
+  #         hours: 0
+  #         minutes: 0
+  #         seconds: 30
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+  #       from: "off"
+  #       to: "on"
+  #       id: BDZ On 
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+  #       from: "on"
+  #       to: "off"
+  #       for:
+  #         hours: 0
+  #         minutes: 0
+  #         seconds: 30
+  #       id: BDZ Off
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.back_door_sensor_contact
+  #       from: "off"
+  #       to: "on"
+  #       id: Back Door Entry 
+  #     - platform: state
+  #       entity_id: sensor.utility_room_motion
+  #       to: "Detected"  
+  #       id: Utility On
+  #     - platform: state
+  #       entity_id: sensor.utility_room_motion
+  #       to: "Clear"
+  #       id: Utility Off
+  #       for:
+  #         hours: 0
+  #         minutes: 0
+  #         seconds: 30
+  #     - platform: numeric_state
+  #       entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+  #       below: input_number.low_light_threshold
+  #       id: Low Light
+  #       for:
+  #         hours: 0
+  #         minutes: 0
+  #         seconds: 20
+  #     - platform: numeric_state
+  #       entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+  #       above: input_number.upper_light_threshold_level
+  #       id: Good Light
+  #       for:
+  #         hours: 0
+  #         minutes: 0
+  #         seconds: 30
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.lights_out
+  #       to: "off"
+  #       id: Allow Lights on
+  #     - platform: state 
+  #       entity_id: binary_sensor.day 
+  #       from: "on"
+  #       to: "off"
+  #       id: sunset 
+  #   condition:
+  #     - condition: state
+  #       entity_id: input_boolean.holiday_mode
+  #       state: "off"
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger 
+  #               id:
+  #                 - sunset 
+  #           sequence: 
+  #             - service: switch.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: switch.under_shelf_lights_local
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Lights On
+  #             - condition: numeric_state
+  #               entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+  #               below: input_number.low_light_threshold
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.kitchen_lights_2
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Lights Off
+  #             - condition: or 
+  #               conditions:
+  #                 - condition: not 
+  #                   conditions:
+  #                     - condition: state  
+  #                       entity_id: sensor.daves_phone_espresence
+  #                       state: kitchen 
+  #                     - condition: state 
+  #                       entity_id: sensor.gems_phone_espresence
+  #                       state: kitchen 
+  #                 - condition: or
+  #                   conditions:
+  #                     - condition: and
+  #                       conditions:
+  #                         - condition: state
+  #                           entity_id: sensor.daves_samsung_galaxy_battery_state
+  #                           state: charging
+  #                         - condition: state  
+  #                           entity_id: sensor.daves_phone_espresence
+  #                           state: kitchen 
+  #                     - condition: and
+  #                       conditions:
+  #                         - condition: state
+  #                           entity_id: sensor.sm_s901b_battery_state
+  #                           state: charging
+  #                         - condition: state  
+  #                           entity_id: sensor.gems_phone_espresence
+  #                           state: kitchen 
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id: light.kitchen_lights_2
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Back Door Entry
+  #             - condition: sun
+  #               before: sunrise
+  #               after: sunset
+  #             - condition: state
+  #               entity_id: light.back_door_zone_light
+  #               state: "off"
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.back_door_zone_light
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - BDZ On
+  #             - condition: or 
+  #               conditions:
+  #                 - condition: numeric_state
+  #                   entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+  #                   below: input_number.low_light_threshold
+  #                 - condition: and 
+  #                   conditions:
+  #                     - condition: or 
+  #                       conditions:
+  #                         - condition: state 
+  #                           entity_id: sensor.season 
+  #                           state: "autumn"
+  #                         - condition: state 
+  #                           entity_id: sensor.season 
+  #                           state: "winter"
+  #                     - condition: time 
+  #                       after: "17:35:00"
+  #                       before: "21:00:00"
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.back_door_zone_light
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - BDZ Off
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id: light.back_door_zone_light
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Utility On
+  #             - condition: or
+  #               conditions:
+  #                 - condition: sun
+  #                   after: sunset
+  #                   before: sunrise 
+  #                 - condition: numeric_state
+  #                   entity_id: sensor.utility_room_presence_2_illuminance_lux
+  #                   below: input_number.low_light_threshold
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.utility_room_light
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Utility Off
+  #             - condition: state 
+  #               entity_id: light.utility_room_light
+  #               state: "on"
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id: light.utility_room_light
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Low Light
+  #             - condition: state
+  #               entity_id: light.kitchen_lights_2
+  #               state: "off"
+  #             - condition: state 
+  #               entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+  #               state: "on"
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.kitchen_lights_2
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Good Light
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id: light.kitchen_lights_2
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Allow Lights on
+  #             - condition: state
+  #               entity_id: input_boolean.room_occupied_kitchen
+  #               state: "on"
+  #             - condition: numeric_state
+  #               entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+  #               below: input_number.low_light_threshold
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: light.kitchen_lights_2
 
 ########################
 #    Magic Cube        #
@@ -499,11 +535,15 @@ automation:
         entity_id:
           - media_player.sky_q_kitchen_mini_2
         id: Ingrid & Sky toggle on 
+        from: "off"
         to: playing 
       - platform: state
         entity_id:
           - media_player.sky_q_kitchen_mini_2
-        id: Ingrid & Sky toggle off  
+        id: Ingrid & Sky toggle off 
+        from: 
+          - playing
+          - paused   
         to: "off" 
     condition: []
     action:
@@ -796,100 +836,100 @@ automation:
                                   brightness_pct: 1
                 
 
-#################################################
-#      Fridge and Freezer Door Watch            #
-#################################################
+###################################################################
+#      Fridge and Freezer Door Watch - migrated to UI 06/08/2024  #
+###################################################################
 
-  - id: fridge_and_freezer_door_watch
-    alias: Fridge & Freezer Door Watch
-    description: Warn me when the fridge or freezer door has been left open
-    initial_state: true
-    mode: parallel
-    max: 4
-    trigger:
-      - platform: state 
-        entity_id:
-          - binary_sensor.fridge_door_sensor_contact
-        from: "off"
-        to: "on"
-        for:
-          hours: 0
-          minutes: 2
-          seconds: 0
-        id: Fridge Door Open
-      - platform: state
-        entity_id:
-          - binary_sensor.freezer_door_door_sensor_contact
-        from: "off"
-        to: "on"
-        for:
-          hours: 0
-          minutes: 2
-          seconds: 0
-        id: Freezer Door Open
-    condition: []
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Fridge Door Open
-              - condition: state
-                entity_id: input_boolean.audible_notifications
-                state: "on"
-            sequence:
-              - service: script.status_annc
-                data:
-                  where: "{{ states('sensor.room_audio') }}"
-                  call_fridge_warning: 1
-              - delay:
-                  hours: 0
-                  minutes: 2
-                  seconds: 0
-                  milliseconds: 0
-              - if:
-                  - condition: state
-                    entity_id: binary_sensor.fridge_door_sensor_contact
-                    state: "on"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: "{{ states('sensor.room_audio') }}"
-                      call_fridge_warning_again: 1
-                else:
-                  - service: script.status_annc
-                    data:
-                      where: "{{ states('sensor.room_audio') }}"
-                      call_fridge_closed: 1
-          - conditions:
-              - condition: trigger
-                id: Freezer Door Open
-              - condition: state
-                entity_id: input_boolean.audible_notifications
-                state: "on"
-            sequence:
-              - service: script.status_annc
-                data:
-                  where: "{{ states('sensor.room_audio') }}"
-                  call_freezer_warning: 1
-              - delay:
-                  hours: 0
-                  minutes: 1
-                  seconds: 0
-                  milliseconds: 0
-              - if:
-                  - condition: state
-                    entity_id: binary_sensor.freezer_door_door_sensor_contact
-                    state: "on"
-                then:
-                  - service: script.status_annc
-                    data:
-                      where: "{{ states('sensor.room_audio') }}"
-                      call_freezer_warning_again: 1
-                else:
-                  - service: script.status_annc
-                    data: 
-                      where: "{{ states('sensor.room_audio') }}"
-                      call_freezer_closed: 1
+  # - id: fridge_and_freezer_door_watch
+  #   alias: Fridge & Freezer Door Watch
+  #   description: Warn me when the fridge or freezer door has been left open
+  #   initial_state: true
+  #   mode: parallel
+  #   max: 4
+  #   trigger:
+  #     - platform: state 
+  #       entity_id:
+  #         - binary_sensor.fridge_door_sensor_contact
+  #       from: "off"
+  #       to: "on"
+  #       for:
+  #         hours: 0
+  #         minutes: 2
+  #         seconds: 0
+  #       id: Fridge Door Open
+  #     - platform: state
+  #       entity_id:
+  #         - binary_sensor.freezer_door_door_sensor_contact
+  #       from: "off"
+  #       to: "on"
+  #       for:
+  #         hours: 0
+  #         minutes: 2
+  #         seconds: 0
+  #       id: Freezer Door Open
+  #   condition: []
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Fridge Door Open
+  #             - condition: state
+  #               entity_id: input_boolean.audible_notifications
+  #               state: "on"
+  #           sequence:
+  #             - service: script.status_annc
+  #               data:
+  #                 where: "{{ states('sensor.room_audio') }}"
+  #                 call_fridge_warning: 1
+  #             - delay:
+  #                 hours: 0
+  #                 minutes: 2
+  #                 seconds: 0
+  #                 milliseconds: 0
+  #             - if:
+  #                 - condition: state
+  #                   entity_id: binary_sensor.fridge_door_sensor_contact
+  #                   state: "on"
+  #               then:
+  #                 - service: script.status_annc
+  #                   data:
+  #                     where: "{{ states('sensor.room_audio') }}"
+  #                     call_fridge_warning_again: 1
+  #               else:
+  #                 - service: script.status_annc
+  #                   data:
+  #                     where: "{{ states('sensor.room_audio') }}"
+  #                     call_fridge_closed: 1
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Freezer Door Open
+  #             - condition: state
+  #               entity_id: input_boolean.audible_notifications
+  #               state: "on"
+  #           sequence:
+  #             - service: script.status_annc
+  #               data:
+  #                 where: "{{ states('sensor.room_audio') }}"
+  #                 call_freezer_warning: 1
+  #             - delay:
+  #                 hours: 0
+  #                 minutes: 1
+  #                 seconds: 0
+  #                 milliseconds: 0
+  #             - if:
+  #                 - condition: state
+  #                   entity_id: binary_sensor.freezer_door_door_sensor_contact
+  #                   state: "on"
+  #               then:
+  #                 - service: script.status_annc
+  #                   data:
+  #                     where: "{{ states('sensor.room_audio') }}"
+  #                     call_freezer_warning_again: 1
+  #               else:
+  #                 - service: script.status_annc
+  #                   data: 
+  #                     where: "{{ states('sensor.room_audio') }}"
+  #                     call_freezer_closed: 1
 
 ###########################
 #        Scripts          #
@@ -910,10 +950,6 @@ script:
                 target:
                   entity_id: switch.ingrid 
                 data: {}
-              - service: media_player.turn_on
-                target:
-                  entity_id: media_player.sky_q_kitchen_mini_2
-                data: {}
               - condition: and
                 conditions:
                   - condition: state
@@ -931,11 +967,6 @@ script:
           - service: switch.turn_off
             target:
               entity_id: switch.ingrid 
-            data: {}
-          - service: media_player.turn_off
-            target:
-              entity_id:
-                - media_player.sky_q_kitchen_mini_2
             data: {}
           - condition: and
             conditions:
