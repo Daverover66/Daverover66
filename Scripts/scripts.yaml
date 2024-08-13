@@ -1,0 +1,1729 @@
+heating_turn_off_all_radiators:
+  alias: 'Heating: Turn OFF all radiators'
+  sequence:
+  - service: climate.turn_off
+    data: {}
+    target:
+      entity_id:
+      - climate.cloakroom
+      - climate.dining_room
+      - climate.downstairs
+      - climate.en_suite_bathroom
+      - climate.guest_bedroom
+      - climate.kids_bathroom
+      - climate.master_bedroom
+      - climate.office
+      - climate.upstairs
+  mode: single
+  icon: mdi:radiator-off
+heating_turn_on_all_radiators:
+  alias: 'Heating: Turn ON all radiators'
+  sequence:
+  - service: climate.turn_on
+    data: {}
+    target:
+      entity_id:
+      - climate.cloakroom
+      - climate.dining_room
+      - climate.downstairs
+      - climate.en_suite_bathroom
+      - climate.guest_bedroom
+      - climate.kids_bathroom
+      - climate.master_bedroom
+      - climate.office
+      - climate.upstairs
+  mode: single
+  icon: mdi:radiator
+heating_resume_schedule_all_radiators:
+  alias: 'Heating: RESUME schedule all radiators'
+  sequence:
+  - service: climate.set_hvac_mode
+    data:
+      hvac_mode: auto
+    target:
+      entity_id:
+      - climate.cloakroom
+      - climate.dining_room
+      - climate.downstairs
+      - climate.en_suite_bathroom
+      - climate.guest_bedroom
+      - climate.kids_bathroom
+      - climate.master_bedroom
+      - climate.office
+      - climate.upstairs
+  mode: single
+  icon: mdi:calendar-refresh
+hot_water_on:
+  alias: 'Hot Water: Turn On'
+  sequence:
+  - service: water_heater.turn_on
+    data: {}
+  mode: single
+  icon: mdi:water-boiler
+hot_water_off:
+  alias: 'Hot Water: Turn Off'
+  sequence:
+  - service: water_heater.turn_off
+    data: {}
+  mode: single
+  icon: mdi:water-boiler-off
+notify_and_log:
+  alias: Notify and Log
+  sequence:
+  - if:
+    - condition: template
+      value_template: '{{is_state(''input_boolean.debug_flag'', ''on'')}}'
+    then:
+    - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+      data:
+        title: '{{ title }}'
+        message: '{{ message }}'
+    - service: system_log.write
+      data:
+        message: '{{ message }}'
+        level: warning
+  mode: single
+grid_charge_battery:
+  alias: Grid Charge Battery
+  sequence:
+  - service: number.set_value
+    data:
+      value: '{{ states(''input_number.storage_command_timeout_for_discharge_to_grid'')
+        | float(0) }}'
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Input Helper value
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: select.solaredge_i1_storage_command_mode
+    type: select_option
+    option: Charge from Solar Power and Grid
+    alias: Set Storage Command Mode to Charge from Solar Power and Grid
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.home_battery_3_hour_charge_period
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id:
+      - sensor.solaredge_b1_state_of_energy
+      above: 99.9
+    timeout:
+      hours: 3
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - service: number.set_value
+    data:
+      value: '{{ states(''input_number.storage_command_timeout_default_period'') |
+        float(0) }}'
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Default via helper
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: 0bdfb19491b49722c2a94351b9a673aa
+    type: select_option
+    option: Maximize Self Consumption
+    alias: 'Set Storage Command Mode to Maximize Self Consumption '
+  mode: restart
+  icon: mdi:battery-charging
+force_discharge_battery:
+  alias: Force Discharge Battery
+  sequence:
+  - service: number.set_value
+    data:
+      value: '{{ states(''input_number.storage_command_timeout_for_discharge_to_grid'')
+        | float(0) }}'
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: 'Set Storage Command Timeout to Input Helper value '
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: select.solaredge_i1_storage_command_mode
+    type: select_option
+    option: Discharge to Maximize Export
+    alias: Set Storage Command Mode to Discharge to Maximize Export
+  - service: number.set_value
+    data:
+      value: '{{ states(''input_number.storage_command_timeout_default_period'') |
+        float(0) }}'
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Default via helper
+  mode: single
+  icon: mdi:battery-minus
+stair_lights_with_level:
+  alias: Stair Lights with level
+  sequence:
+  - service: light.turn_on
+    entity_id: light.stair_lights
+    data:
+      brightness: "{{ level | int }} \n"
+  mode: single
+stair_lights_fade_at_bedtime:
+  alias: Stair Lights Fade at bedtime
+  sequence:
+  - repeat:
+      while:
+      - condition: template
+        value_template: '{{ states("input_number.stair_lights_fade") | int > 0 }}'
+      sequence:
+      - service: script.stair_lights_with_level
+        data:
+          level: '{{ states("input_number.stair_lights_fade") }}'
+      - service: input_number.decrement
+        target:
+          entity_id:
+          - input_number.stair_lights_fade
+        data: {}
+      - delay:
+          hours: 1
+          minutes: 0
+          seconds: 0
+          milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.stair_lights
+  - service: input_number.set_value
+    data:
+      value: 40
+    target:
+      entity_id:
+      - input_number.stair_lights_fade
+  mode: single
+get_room_services:
+  alias: get_room_services
+  sequence:
+  - variables:
+      room_services: "{% set jarvis_speaker = states.media_player | \n    selectattr('entity_id',
+        'in', area_entities(room)) |\n    rejectattr('attributes.last_called', 'undefined')
+        |\n    map(attribute='entity_id') |\n  list | first %}\n\n{% set audio_speaker
+        = states.media_player | \n    selectattr('entity_id', 'in', area_entities(room))
+        |\n    rejectattr('attributes.device_class', 'undefined') |\n    selectattr('attributes.device_class',
+        'search', '(speaker)') | \n    map(attribute='entity_id') |\n  list | first
+        %}\n\n{% set tts = 'amp' %} {\"area\":\"{{room}}\",\"jarvis_speaker\":\"{{jarvis_speaker}}\",\"jarvis_tts\":\"{{tts}}\",\"audio_speaker\":\"{{audio_speaker}}\"}"
+  - stop: ok, Im done.
+    response_variable: room_services
+restart_home_assistant:
+  alias: Restart Home Assistant
+  sequence:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.audible_notifications
+  - service: homeassistant.restart
+    data: {}
+  mode: single
+  icon: mdi:home-assistant
+speech_engine_for_tts:
+  alias: Speech Engine for TTS
+  sequence:
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.family_home
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: 'off'
+  - service: notify.alexa_media
+    data:
+      message: '<voice name="{{ voice }}"> <amazon:auto-breaths> <prosody rate="105%">
+        {{
+
+        message }} </prosody> </amazon:auto-breaths> </voice>'
+      target: "{% if where in ['Kitchen','kitchen','kitchen_echo_show'] %}\n      media_player.kitchen_echo_show\n
+        \   {% elif where in ['Main Bedroom','main_bedroom_dot'] %}\n      media_player.main_bedroom_dot\n
+        \   {% elif where in ['Guest Bedroom','guest_bedroom_echo_dot']\n    %}\n
+        \     media_player.guest_bedroom_echo_dot\n    {% elif where in ['Living Room','dave_s_2nd_echo_pop']
+        %}\n      media_player.dave_s_2nd_echo_pop\n    {% elif where in ['Dining
+        Room','dave_s_echo_pop'] %}\n      media_player.dave_s_echo_pop\n    {% elif
+        where in ['Office','dave_s_2nd_echo_pop_2'] %}\n      media_player.dave_s_2nd_echo_pop_2\n
+        \   {% elif where in ['Jamies Room','living_room_dot'] %}\n      media_player.living_room_dot\n
+        \   {% elif where in ['Seans Room','seans_room_dot'] %}\n      media_player.seans_room_dot\n
+        \   {% elif where in ['Everywhere','everywhere_2'] %}\n      media_player.everywhere_2\n
+        \   {% elif where in ['Upstairs','upstairs'] %}\n      media_player.upstairs\n
+        \   {% elif where in ['Downstairs','downstairs'] %}\n      media_player.downstairs\n
+        \   {% else %}\n      media_player.dave_s_2nd_echo_pop\n    {% endif %}"
+      data:
+        type: "{% if where in\n['Downstairs','Upstairs','Everywhere','media_player.downstairs','media_player.upstairs','media_player.everywhere_2']%}\n
+          \ announce\n{% else %}\n  tts\n{% endif %}"
+  - service: mqtt.publish
+    data_template:
+      topic: house/alexa/lastmsg
+      payload: "{% if msg_summary == 'recall' %}\n  {% set msg_summary = '{{states(''sensor.jarvis_last_msg'')}}'
+        %}\n{% else %}\n  {% if msg_summary %}\n    {% set message = msg_summary %}\n
+        \ {% endif %}\n  {%- macro cleanup(data) -%}\n    {%- for item in data.split(\"\\n\")
+        \ if item | trim != \"\" -%}\n      {{ item | trim }} {% endfor -%}\n  {%-
+        endmacro -%}\n      {{- cleanup( message | striptags | truncate(220) ) -}}\n{%
+        endif %}\n"
+  - service: mqtt.publish
+    data_template:
+      topic: house/alexa/msgtime
+      payload: '{{ now().strftime("%-I") }}:{{ now().strftime("%M") }} {{ now().strftime("%p")
+        }}
+
+        '
+      retain: true
+  - service: mqtt.publish
+    data_template:
+      topic: house/alexa/lastloc
+      payload: '{{ where }}'
+      retain: true
+  mode: single
+  icon: mdi:account-tie-voice
+randomised_holiday_lighting:
+  alias: Randomised Holiday Lighting
+  sequence:
+  - repeat:
+      until:
+      - condition: state
+        entity_id: sun.sun
+        state: above_horizon
+      sequence:
+      - service: notify.mobile_app_daves_samsung_galaxy
+        data:
+          message: Holiday Lights Running
+      - service: homeassistant.toggle
+        data:
+          entity_id: '{{ expand(''group.holiday_lights'') | map(attribute=''entity_id'')
+            | list | random }}
+
+            '
+      - delay:
+          minutes: '{{ range(1,3) | random | int }}'
+      - service: homeassistant.turn_off
+        data: {}
+        target:
+          entity_id: group.holiday_lights
+  mode: single
+  icon: mdi:lightbulb-multiple
+house_in_holiday_mode:
+  alias: Holiday House
+  sequence:
+  - if:
+    - condition: state
+      entity_id: binary_sensor.morning
+      state: 'on'
+    then:
+    - service: media_player.turn_on
+      data: {}
+      target:
+        entity_id: media_player.sky_q_main
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.living_room_tv
+    - delay:
+        hours: 0
+        minutes: 30
+        seconds: 0
+        milliseconds: 0
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.sky_q_main
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.living_room_tv
+    alias: Turn on Living Room TV in the morning
+  - alias: Turn on kitchen TV at luncthime
+    if:
+    - condition: state
+      entity_id: binary_sensor.lunchtime
+      state: 'on'
+    then:
+    - service: media_player.turn_on
+      data: {}
+      target:
+        entity_id: media_player.sky_q_kitchen_mini_2
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.ingrid
+    - delay:
+        hours: 0
+        minutes: 30
+        seconds: 0
+        milliseconds: 0
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.ingrid
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.sky_q_kitchen_mini_2
+  - if:
+    - condition: state
+      entity_id: binary_sensor.dinner_time
+      state: 'on'
+    then:
+    - service: media_player.turn_on
+      data: {}
+      target:
+        entity_id: media_player.sky_q_kitchen_mini_2
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.ingrid
+    - delay:
+        hours: 0
+        minutes: 30
+        seconds: 0
+        milliseconds: 0
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.ingrid
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.sky_q_kitchen_mini_2
+    alias: Turn on kitchen TV at dinner time
+  - if:
+    - condition: state
+      entity_id: binary_sensor.evening
+      state: 'on'
+    then:
+    - service: media_player.turn_on
+      data: {}
+      target:
+        entity_id: media_player.sky_q_main
+    - service: switch.turn_on
+      data: {}
+      target:
+        entity_id: switch.living_room_tv
+    - delay:
+        hours: 1
+        minutes: 30
+        seconds: 0
+        milliseconds: 0
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.sky_q_main
+    - service: switch.turn_off
+      data: {}
+      target:
+        entity_id: switch.living_room_tv
+    alias: Turn on Living Room TV at night
+  - if:
+    - condition: time
+      after: '22:00:00'
+    then:
+    - service: script.stair_lights_fade_at_bedtime
+      data: {}
+    - service: script.bed_lamps_dim_at_bedtime
+      data: {}
+    alias: Start lights dimming
+  mode: single
+'1693070811673':
+  alias: Set Standard Volume
+  sequence:
+  - service: media_player.volume_mute
+    data:
+      is_volume_muted: true
+    target:
+      entity_id: "{% if where in ['Kitchen','media_player.kitchen_echo_show'] %}\n
+        \ media_player.kitchen_echo_show\n{% elif where in ['Main Bedroom','media_player.main_bedroom_dot']
+        %}\n  media_player.main_bedroom_dot\n{% elif where in ['Guest Bedroom','media_player.guest_bedroom_echo_dot']
+        %}\n  media_player.guest_bedroom_echo_dot\n{% elif where in ['Living Room','media_player.dave_s_2nd_echo_pop']
+        %}\n  media_player.dave_s_2nd_echo_pop\n{% elif where in ['Dining Room','media_player.dave_s_echo_pop']
+        == \"Dining Room\"%}\n  media_player.dave_s_echo_pop\n{% elif where in ['Office','media_player.dave_s_2nd_echo_pop_2']
+        %}\n  media_player.dave_s_2nd_echo_pop_2\n{% elif where in ['Jamies Room','media_player.living_room_dot']
+        %}\n  media_player.living_room_dot\n{% elif where in ['Seans Room','media_player.seans_room_dot']
+        %}\n  media_player.seans_room_dot\n{% elif where in ['Everywhere','media_player.everywhere_2']
+        %}\n  media_player.everywhere_2\n{% elif where in ['Upstairs','media_player.upstairs']
+        %}\n  media_player.upstairs\n{% elif where in ['Downstairs','media_player.downstairs']
+        %}\n  media_player.downstairs\n{% else %}\n  media_player.dave_s_2nd_echo_pop\n{%
+        endif %}"
+  - service: media_player.volume_set
+    data:
+      volume_level: '{{ states(''input_number.alexa_volume_level_default_all'') |
+        float(0) }}'
+    target:
+      entity_id: "{% if where in ['Kitchen','media_player.kitchen_echo_show'] %}\n
+        \ media_player.kitchen_echo_show\n{% elif where in ['Main Bedroom','media_player.main_bedroom_dot']
+        %}\n  media_player.main_bedroom_dot\n{% elif where in ['Guest Bedroom','media_player.guest_bedroom_echo_dot']
+        %}\n  media_player.guest_bedroom_echo_dot\n{% elif where in ['Living Room','media_player.dave_s_2nd_echo_pop']
+        %}\n  media_player.dave_s_2nd_echo_pop\n{% elif where in ['Dining Room','media_player.dave_s_echo_pop']
+        == \"Dining Room\"%}\n  media_player.dave_s_echo_pop\n{% elif where in ['Office','media_player.dave_s_2nd_echo_pop_2']
+        %}\n  media_player.dave_s_2nd_echo_pop_2\n{% elif where in ['Jamies Room','media_player.living_room_dot']
+        %}\n  media_player.living_room_dot\n{% elif where in ['Seans Room','media_player.seans_room_dot']
+        %}\n  media_player.seans_room_dot\n{% elif where in ['Everywhere','media_player.everywhere_2']
+        %}\n  media_player.everywhere_2\n{% elif where in ['Upstairs','media_player.upstairs']
+        %}\n  media_player.upstairs\n{% elif where in ['Downstairs','media_player.downstairs']
+        %}\n  media_player.downstairs\n{% else %}\n  media_player.dave_s_2nd_echo_pop\n{%
+        endif %}"
+  mode: single
+test_alexa_voice_script:
+  alias: Test Alexa Voice Script
+  sequence:
+  - variables:
+      echo: "{% set loc = states('sensor.room_with_alexa_presence') if where in ['presence','room_with_alexa_presence','current','current_room']
+        else where %}\n{% if loc in ['kitchen_echo_show','media_player.kitchen_echo_show','kitchen']
+        %}\n  kitchen_echo_show\n{% elif loc in ['dave_s_2nd_echo_pop','media_player.dave_s_2nd_echo_pop','living_room']
+        %}\n  dave_s_2nd_echo_pop\n{% elif loc in ['dave_s_echo_pop','media_player.dave_s_echo_pop','dining_room']
+        %}\n  dave_s_echo_pop\n{% elif loc in ['main_bedroom_dot','media_player.main_bedroom_dot','main_bedroom']
+        %}\n  main_bedroom_dot\n{% elif loc in ['guest_bedroom_echo_dot','media_player.guest_bedroom_echo_dot','guest_bedroom']
+        %}\n  guest_bedroom_echo_dot\n{% elif loc in ['living_room_dot','media_player.living_room_dot','jamies_room','jamie']
+        %}\n  living_room_dot\n{% elif loc in ['seans_room_dot','media_player.seans_room_dot','seans_room','sean']
+        %}\n  seans_room_dot\n{% elif loc in ['dave_s_2nd_echo_pop_2','media_player.dave_s_2nd_echo_pop_2','office']
+        %}\n  dave_s_2nd_echo_pop_2\n{% elif loc in ['everywhere'] %}\n  everywhere_2\n{%
+        elif loc in ['upstairs'] %}\n  upstairs\n{% elif loc in ['downstairs'] %}\n
+        \ downstairs\n{% else %}\n  dave_s_2nd_echo_pop\n{% endif %}"
+      volume: "{%- set default = '0.5' if states('input_boolean.audible_notifications')
+        == 'on' else '0.3' -%}\n{%- if volume_override is float -%}\n  {{ volume_override
+        }}\n{%- else -%}\n  {{ default }}\n{%- endif -%}"
+  - alias: Save your message for recall
+    service: mqtt.publish
+    data_template:
+      topic: house/alexa/lastmsg
+      payload: "{% if msg_summary == 'recall' %}\n  {{- states('sensor.jarvis_last_msg')
+        -}}\n{% else %}\n  {% if msg_summary %}\n    {% set message = msg_summary
+        %}\n  {% endif %}\n  {%- macro cleanup(data) -%}\n    {%- for item in data.split(\"\\n\")
+        \ if item | trim != \"\" -%}\n      {{ item | trim }} {% endfor -%}\n  {%-
+        endmacro -%}\n  {{- cleanup( message | striptags | truncate(220) ) -}}\n{%
+        endif %}"
+  - alias: Save time of last message
+    service: mqtt.publish
+    data_template:
+      topic: house/alexa/msgtime
+      payload: '{{ now().strftime("%-I") }}:{{ now().strftime("%M") }} {{ now().strftime("%p")
+        }}'
+      retain: true
+  - alias: Save location
+    service: mqtt.publish
+    data_template:
+      topic: house/alexa/lastloc
+      payload: '{{ echo }}'
+      retain: true
+  - alias: Set echo volume if needed
+    if:
+    - condition: not
+      conditions:
+      - condition: template
+        value_template: '{{ is_state_attr(''media_player.'' + echo, ''volume_level'',
+          volume | float) }}'
+    then:
+    - service: media_player.volume_set
+      data:
+        volume_level: '{{ volume | float }}'
+      target:
+        entity_id: media_player.{{ echo }}
+  - alias: Send the notification
+    service: notify.alexa_media
+    data:
+      message: '<voice name="Brian">
+
+        <amazon:auto-breaths>
+
+        <prosody rate="105%">
+
+        {{ message }}
+
+        </prosody>
+
+        </amazon:auto-breaths>
+
+        </voice>'
+      target: media_player.{{ echo }}
+      data:
+        type: tts
+update_critical_battery_group_2:
+  alias: Update Battery Group
+  sequence:
+  - service: group.set
+    data:
+      object_id: critical_batteries
+      entities: []
+  - service: group.set
+    data:
+      object_id: critical_batteries
+      add_entities: "{{ states.sensor | \n  selectattr('entity_id', 'in', area_entities('Critical
+        Battery')) |\n  map(attribute='entity_id') | list  | join(',') }} "
+  mode: single
+'1697198903698':
+  alias: Ashley’s Light Fader
+  description: 'Fades a lamp over time. If you have any questions or comments about
+    this script, feel free to tweet Ashley Bischoff at @FriendlyAshley. Released under
+    the Apache 2.0 license. (v1.1)
+
+    '
+  fields:
+    light:
+      name: "\U0001F4A1 Light"
+      description: entity_id of the lamp.
+      selector:
+        entity:
+          domain: light
+      example: light.kitchen
+      required: true
+    lampBrightnessScale:
+      name: The lamp’s internal brightness scale
+      description: 'Most lamps seem to internally use a 0 to 255 brightness scale,
+        but some lamps internally use a 0% to 100% brightness scale. Either of these
+        settings will still fade the lamp, but if you happen to match this setting
+        to the lamp’s internal brightness scale, the resulting fade may be smoother.
+        (If you’re not sure, you can just leave this as is.)
+
+        '
+      advanced: true
+      required: true
+      selector:
+        select:
+          options:
+          - label: 0% to 100%
+            value: zeroToOneHundred
+          - label: 0 to 255
+            value: zeroToTwoFiftyFive
+      default: zeroToTwoFiftyFive
+    transitionTime:
+      name: ⏱ Fade time
+      description: Fade duration.
+      selector:
+        duration:
+      required: true
+    easingTypeInput:
+      name: Easing type
+      description: The easing function that you’d like the fade to use. As a starting
+        point—you can’t go wrong with any of the “Ease-In-Out X” easings as those
+        will always look pretty good whenever you’re fading between two nonzero brightness
+        values. As well, the “Ease-Out X” easings often tend to look good if you might
+        be fading up very quickly from zero to another brightness, and the “Ease-In
+        X” easings are mostly only included for completeness as those tend to only
+        look good if you might be fading down to zero very quickly. (See also https://easings.net
+        for visual demos of each of these easing types.)
+      selector:
+        select:
+          mode: list
+          options:
+          - label: Try to automatically select the easing type
+            value: auto
+          - label: Ease-In-Out Sine [a good all-rounder]
+            value: easeInOutSine
+          - label: Ease-In-Out Quad
+            value: easeInOutQuad
+          - label: Ease-In-Out Cubic
+            value: easeInOutCubic
+          - label: Ease-In-Out Quart
+            value: easeInOutQuart
+          - label: Ease-Out Sine
+            value: easeOutSine
+          - label: Ease-Out Quad
+            value: easeOutCubic
+          - label: Ease-Out Cubic
+            value: easeOutCubic
+          - label: Ease-Out Quart
+            value: easeOutQuart
+          - label: Ease-In Sine
+            value: easeInSine
+          - label: Ease-In Quad
+            value: easeInCubic
+          - label: Ease-In Cubic
+            value: easeInCubic
+          - label: Ease-In Quart
+            value: easeInQuart
+          - label: Linear [somewhat unnatural to the human eye; not recommended]
+            value: linear
+      default: auto
+      required: true
+    endBrightnessPercent:
+      name: End brightness level
+      description: Percentage from 0 to 100 representing the final brightness level.
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
+          unit_of_measurement: '%'
+      default: 50
+      example: '50'
+      required: true
+    autoCancelThreshold:
+      name: "\U0001F6AB (optional) Brightness-change threshold that auto-cancels the
+        fade"
+      description: You can optionally have the script automatically cancel its fade
+        if the lamp’s brightness were to be manually changed by a certain amount.
+        For example, let’s suppose that you were to set this value to 5% and then
+        you were to run this script. If there comes a point within the fade where
+        this script is expecting the lamp to be at, say, 22% brightness—but you’ve
+        just manually set that lamp to 30% brightness—this script will automatically
+        cancel its fade since that 8% difference is >= 5%. Note—if you use this, Ashley
+        doesn’t recommend setting this to anything less than about 3; that’s just
+        because it can be normal for there to be an occasional difference of 1 or
+        2 since not all lamps instantly reflect newly assigned brightness values due
+        to processing lag and other factors. In Ashley’s home, she personally uses
+        a value of about 5 for this.
+      selector:
+        number:
+          min: 2
+          max: 100
+          step: 1
+          mode: slider
+          unit_of_measurement: '%'
+      default: 10
+      example: '10'
+      required: false
+    endBrightnessEntity:
+      name: (optional) Use an entity instead for the end-brightness value?
+      description: You can optionally have the script ignore the end-brightness value
+        above and instead use the numeric value of another entity that you select
+        here, such as an input-number helper, an input-select helper, an input-text
+        helper, or a numeric sensor.
+      selector:
+        entity:
+          domain:
+          - input_number
+          - input_select
+          - input_text
+          - sensor
+      example: input_number.dining_room_entertaining_level
+      required: false
+      advanced: true
+    endBrightnessEntityScale:
+      name: The end-brightness entity’s brightness scale (if used)
+      description: If you enable the “Use an entity for the end-brightness value instead”
+        option, select here whether your chosen entity represents brightness with
+        a 0% to 100% scale or a 0 to 255 scale. (Note—in either case, this script
+        will expect that entity to solely have an integer value without any nonnumeric
+        characters such as “%”.)
+      advanced: true
+      selector:
+        select:
+          options:
+          - label: 0% to 100%
+            value: zeroToOneHundred
+          - label: 0 to 255
+            value: zeroToTwoFiftyFive
+      default: zeroToOneHundred
+      required: true
+    stopEntity:
+      name: "\U0001F6D1 (optional) Stop if a certain entity is turned on during the
+        fade?"
+      description: 'You can optionally have the script keep an eye on an input boolean
+        or a binary sensor. And if that entity is then turned on during the fade,
+        the script will automatically stop. So for example, if you create a “Stop
+        Everything” input boolean, and if you set that entity here, you can stop your
+        fade at any time by turning on that “Stop Everything” entity. '
+      selector:
+        entity:
+          domain:
+          - input_boolean
+          - binary_sensor
+      example: input_boolean.stop_everything
+      required: false
+      advanced: true
+    shouldResetTheStopEntityToOffAtStart:
+      name: (optional) Reset that stop entity to “off” just before starting the fade?
+      description: If you make use of the stop entity (above), you can also optionally
+        have the script automatically reset that entity to “off” at the start of the
+        fade. (By default, the script won’t change the value of the stop entity.)
+      selector:
+        boolean:
+      advanced: true
+      required: true
+      default: false
+    minimumStepDelayInMilliseconds:
+      name: Minimum delay per step
+      description: The minimum delay between sending each brightness command. Some
+        lamps only accept commands every X milliseconds—so while you can probably
+        leave this as is, if by chance your lamp were to behave strangely, you might
+        try bumping up this number by another ten or twenty milliseconds.
+      advanced: true
+      required: true
+      selector:
+        number:
+          min: 50
+          max: 1000
+          step: 10
+          mode: slider
+          unit_of_measurement: ms
+      default: 100
+      example: '100'
+    isDebugMode:
+      name: "\U0001F41B Enable debugging mode?"
+      description: If this is enabled, the script will output status messages to your
+        Home Assistant log along the way. Unless something were to be acting weirdly,
+        you can leave this off.
+      selector:
+        boolean:
+      advanced: true
+      required: true
+      default: false
+  mode: parallel
+  sequence:
+  - variables:
+      lightFriendlyName: '{{ state_attr(light, ''friendly_name'') }}'
+      startTimestamp: '{{ as_timestamp(now()) }}'
+      transitionTimeInSeconds: '{{ ((transitionTime.hours | int) * 60 * 60) + ((transitionTime.minutes
+        | int) * 60) + (transitionTime.seconds | int) }}
+
+        '
+      endTimestamp: '{{ startTimestamp + transitionTimeInSeconds }}'
+      transitionTimeInMilliseconds: '{{ transitionTimeInSeconds * 1000 }}'
+      ignoreTheEndBrightnessValueAndUseAnEntityForTheEndBrightnessInstead: "{% if
+        (endBrightnessEntity is defined) and (has_value(endBrightnessEntity)) %}\n
+        \ {{ true }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
+      stopEntityIsEnabled: "{% if (stopEntity is defined) and (has_value(stopEntity))
+        %}\n  {{ true }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
+      stopEntityIsEditable: "{% if stopEntityIsEnabled %}\n  {% set stopEntityEditableAttribute
+        = state_attr(stopEntity, 'editable') %}\n  {% if stopEntityEditableAttribute
+        %}\n    {{ true}}\n  {% else %}\n    {{ false }}\n  {% endif %}\n{% else %}\n
+        \ {{ false }}\n{% endif %}\n"
+      stopEntityFriendlyName: "{% if stopEntityIsEnabled %}\n  {{ state_attr(stopEntity,
+        'friendly_name') }}\n{% else %}\n  {{ \"\" }}\n{% endif %}\n"
+      startBrightness: "{% set rawLightLevel = state_attr(light, 'brightness') %}\n{##
+        If a light is off, its brightness will return \"None\"? So first check if
+        there's a valid brightness before setting the value ##} {% if rawLightLevel
+        %}\n\t{% set currentLightLevel = rawLightLevel | int %}\n{% else %}\n\t{%
+        set currentLightLevel = 0 %}\n{% endif %} {% if lampBrightnessScale == \"zeroToOneHundred\"
+        %}\n  {% set currentLightLevel = (currentLightLevel / 2.55) | round(0) %}\n{%
+        endif %} {{ currentLightLevel }}\n"
+      endBrightness: "{% if ignoreTheEndBrightnessValueAndUseAnEntityForTheEndBrightnessInstead
+        %}\n\n  {% set entityBrightnessValue = states(endBrightnessEntity) | round
+        (0) %}\n  {% if (endBrightnessEntityScale == lampBrightnessScale) %}\n    {%
+        set endBrightness = entityBrightnessValue %}\n  {% elif (lampBrightnessScale
+        == \"zeroToTwoFiftyFive\") and (endBrightnessEntityScale == \"zeroToOneHundred\")
+        %}\n    {% set endBrightness = (entityBrightnessValue * 2.55) | round(0) %}\n
+        \ {% elif (lampBrightnessScale == \"zeroToOneHundred\") and (endBrightnessEntityScale
+        == \"zeroToTwoFiftyFive\") %}\n    {% set endBrightness = (entityBrightnessValue
+        / 2.55) | round(0) %}\n  {% endif %}\n{% else %}\n  {## branch for ignoreTheEndBrightnessValueAndUseAnEntityForTheEndBrightnessInstead
+        being off ##}\n  {% if lampBrightnessScale == \"zeroToOneHundred\" %}\n  \t{%
+        set endBrightness = endBrightnessPercent %}\n  {% else %}\n    {% set endBrightness
+        = (endBrightnessPercent * 2.55) | round(0) %}\n  {% endif %}\n{% endif %}
+        {{ endBrightness }}\n"
+      brightnessSpan: '{{ endBrightness - startBrightness }}'
+      absoluteBrightnessSpan: '{{ brightnessSpan | abs }}'
+      autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged: "{% if (autoCancelThreshold
+        is defined) and (is_number(autoCancelThreshold)) %}\n  {{ true }}\n{% else
+        %}\n  {{ false }}\n{% endif %}\n"
+      normalizedAutoCancelThreshold: "{% if not autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged
+        %}\n  {## exit early if autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged
+        isn’t even enabled ##}\n  {{ 255 }}\n{% elif (lampBrightnessScale == \"zeroToTwoFiftyFive\")
+        %}\n  {{ (autoCancelThreshold * 2.55) | round (0) }}\n{% else %}\n  {{ autoCancelThreshold
+        }}\n{% endif %}\n"
+      expectedBrightness: '{{ startBrightness }}'
+  - if:
+    - condition: template
+      value_template: "{{ stopEntityIsEnabled and stopEntityIsEditable and shouldResetTheStopEntityToOffAtStart
+        }}        \n"
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: '{{ stopEntity }}'
+  - if:
+    - condition: template
+      value_template: "{{ (absoluteBrightnessSpan | int) == 0 }}        \n"
+    then:
+    - variables:
+        stopMessage: '{% set stopMessage = "Stopped Ashley’s Fader because " + (lightFriendlyName
+          | string) + "’s starting brightness is the same as its ending brightness."
+          %} {{ stopMessage }}
+
+          '
+    - if:
+      - condition: template
+        value_template: '{{ isDebugMode }}
+
+          '
+      then:
+      - service: system_log.write
+        data_template:
+          message: '{{ stopMessage }}
+
+            '
+          level: warning
+    - stop: '{{ stopMessage }}
+
+        '
+  - if:
+    - condition: template
+      value_template: "{## init ##} {% set stopEntityStatus = false %} {% if stopEntityIsEnabled
+        %}\n  {% if bool(states(stopEntity), false) %}\n    {% set stopEntityStatus
+        = true %}\n  {% endif %}\n{% endif %} {{ stopEntityStatus }}\n"
+    then:
+    - variables:
+        stopMessage: '{% set stopMessage = "Stopped Ashley’s Fader because " + (stopEntityFriendlyName
+          | string) + " is on." %} {{ stopMessage }}
+
+          '
+    - if:
+      - condition: template
+        value_template: '{{ isDebugMode }}
+
+          '
+      then:
+      - service: system_log.write
+        data_template:
+          message: '{{ stopMessage }}
+
+            '
+          level: warning
+    - stop: '{{ stopMessage }}
+
+        '
+  - variables:
+      timestampBeforeServiceCall: '{{ as_timestamp(now()) }}'
+  - if:
+    - condition: template
+      value_template: '{{ (lampBrightnessScale == "zeroToTwoFiftyFive") }}
+
+        '
+    then:
+    - service: light.turn_on
+      target:
+        entity_id: '{{ light }}'
+      data:
+        brightness: '{{ expectedBrightness }}'
+    else:
+    - service: light.turn_on
+      target:
+        entity_id: '{{ light }}'
+      data:
+        brightness_pct: '{{ expectedBrightness }}'
+  - variables:
+      processingDelayInMilliseconds: '{{ (as_timestamp(now()) -  timestampBeforeServiceCall)
+        * 1000 }}'
+      easingType: "{% if \"auto\" in easingTypeInput %}\n  {% if (startBrightness
+        == 0) and (transitionTimeInSeconds <= 20) %}\n    {{ \"easeOutCubic\" }}\n
+        \ {% elif (startBrightness == 0) and (transitionTimeInSeconds <= 55) %}\n
+        \   {{ \"easeOutQuad\" }}\n  {% elif (endBrightness == 0) and (transitionTimeInSeconds
+        <= 20) %}\n    {{ \"easeInCubic\" }}\n  {% elif (endBrightness == 0) and (transitionTimeInSeconds
+        <= 55) %}\n    {{ \"easeInQuad\" }}\n  {% else %}\n    {{ \"easeInOutSine\"
+        }}\n  {% endif %}\n{% else %}\n  {{ easingTypeInput }}\n{% endif %}\n"
+      remainingTimeInMilliseconds: '{% set nowTimestamp = as_timestamp(now()) %} {{
+        (endTimestamp - nowTimestamp) * 1000 }}
+
+        '
+      delayInMilliseconds: "{% set totalExpectedRemainingProcessingDelay = processingDelayInMilliseconds
+        * absoluteBrightnessSpan %} {% set idealDelay = ((remainingTimeInMilliseconds
+        - totalExpectedRemainingProcessingDelay) / absoluteBrightnessSpan) | round(0)
+        %}\n{% if \"auto\" in easingType %}\n  {% if (startBrightness == 0) and (transitionTimeInSeconds
+        < 20) %}\n    {% set easingType = \"easeOutCubic\" %}\n  {% elif (endBrightness
+        == 0) and (transitionTimeInSeconds < 20) %}\n    {% set easingType = \"easeInCubic\"
+        %}\n  {% else %}\n    {% set easingType = \"easeInOutQuad\" %}\n  {% endif
+        %}\n{% endif %}\n{% if \"Circ\" in easingType %}\n  {## Four as many frames
+        for Circ-type easing ##}\n  {% set idealDelay = (idealDelay / 4) | round(0)
+        %}\n{% elif (\"Cubic\" in easingType) or (\"Quart\" in easingType) %}\n  {##
+        Three as many frames for Cubic-type or Quart-type easing ##}\n  {% set idealDelay
+        = (idealDelay / 3) | round(0) %}\n{% elif \"ease\" in easingType %}\n  {##
+        Twice as many frames for other easing types ##}\n  {% set idealDelay = (idealDelay
+        / 2) | round(0) %}\n{% endif %}\n{## Make sure that the delay isn’t below
+        the minimum delay ##} {% if idealDelay < minimumStepDelayInMilliseconds %}\n
+        \ {{ minimumStepDelayInMilliseconds }}\n{% else %}\n  {{ idealDelay }}\n{%
+        endif %}\n"
+  - if:
+    - condition: template
+      value_template: '{{ isDebugMode }}
+
+        '
+    then:
+    - service: system_log.write
+      data_template:
+        message: '{{ easingType }} easing type with {{ delayInMilliseconds | int }}
+          ms delay. remainingTimeInMilliseconds = {{ remainingTimeInMilliseconds |
+          round(0) }}, and absoluteBrightnessSpan = {{ absoluteBrightnessSpan }}
+
+          '
+        level: warning
+    - service: system_log.write
+      data_template:
+        message: 'startBrightness = {{ startBrightness }}, endBrightness = {{ endBrightness
+          }}, and  processingDelayInMilliseconds = {{ processingDelayInMilliseconds
+          | int }}
+
+          '
+        level: warning
+  - repeat:
+      sequence:
+      - variables:
+          timestampBeforeServiceCall: '{{ as_timestamp(now()) }}'
+          percentageOfTimeCompleted: "{% set nowTimestamp = as_timestamp(now()) %}
+            {% set percentageOfTimeCompleted = ((nowTimestamp - startTimestamp) /
+            transitionTimeInSeconds) %} {% if (percentageOfTimeCompleted < 0) %}\n
+            \ {% set percentageOfTimeCompleted = 0 %}\n{% elif (percentageOfTimeCompleted
+            > 1) %}\n  {% set percentageOfTimeCompleted = 1 %}\n{% endif %} {{ percentageOfTimeCompleted
+            }}\n"
+          easingAdjustedPercentageCompleted: "{% set percentageOfTimeCompleted = percentageOfTimeCompleted
+            | float(0) %} {% if easingType == \"easeInSine\" %}\n  {## https://easings.net/#easeInSine
+            ##}\n  {{  1 - cos((percentageOfTimeCompleted * pi) / 2) }}\n\n{% elif
+            easingType == \"easeInQuad\" %}\n  {## https://easings.net/#easeInQuad
+            ##}\n  {{ percentageOfTimeCompleted * percentageOfTimeCompleted }} \n\n{%
+            elif easingType == \"easeInCubic\" %}\n  {## https://easings.net/#easeInCubic
+            ##}\n  {{ percentageOfTimeCompleted * percentageOfTimeCompleted * percentageOfTimeCompleted
+            }}\n\n{% elif easingType == \"easeInQuart\" %}\n  {## https://easings.net/#easeInQuart
+            ##}\n  {{ percentageOfTimeCompleted * percentageOfTimeCompleted * percentageOfTimeCompleted
+            * percentageOfTimeCompleted }}\n  \n{% elif easingType == \"easeOutSine\"
+            %}\n  {## https://easings.net/#easeOutSine ##}\n  {{ sin((percentageOfTimeCompleted
+            * pi) / 2) }}\n\n{% elif easingType == \"easeOutQuad\" %}\n  {## https://easings.net/#easeOutQuad
+            ##}\n  {{ 1 - (1 - percentageOfTimeCompleted)* (1 - percentageOfTimeCompleted)
+            }} \n\n{% elif easingType == \"easeOutCubic\" %}\n  {## https://easings.net/#easeOutCubic
+            ##}\n  {{ 1 - ((1 - percentageOfTimeCompleted) ** 3) }}\n\n{% elif easingType
+            == \"easeOutQuart\" %}\n  {## https://easings.net/#easeOutQuart ##}\n
+            \ {{ 1 - ((1 - percentageOfTimeCompleted) ** 4) }}\n\n{% elif easingType
+            == \"easeInOutSine\" %}\n  {## https://easings.net/#easeInOutSine ##}\n
+            \ {{ -1 * ((cos(pi * percentageOfTimeCompleted) - 1) / 2) }}\n  \n{% elif
+            easingType == \"easeInOutQuad\" %}\n  {## https://easings.net/#easeInOutQuad
+            ##}\n  {% if (percentageOfTimeCompleted < 0.5) %}\n    {{ 2 * percentageOfTimeCompleted
+            * percentageOfTimeCompleted }} \n  {% else %}\n    {{ 1- (((-2 * percentageOfTimeCompleted
+            + 2) ** 2) / 2) }} \n  {% endif %}\n  \n{% elif easingType == \"easeInOutCubic\"
+            %}\n  {## https://easings.net/#easeInOutCubic ##}\n  {% if (percentageOfTimeCompleted
+            < 0.5) %}\n    {{ 4 * percentageOfTimeCompleted * percentageOfTimeCompleted
+            * percentageOfTimeCompleted }} \n  {% else %}\n    {{ 1- (((-2 * percentageOfTimeCompleted
+            + 2) ** 3) / 2) }} \n  {% endif %}\n    \n{% elif easingType == \"easeInOutQuart\"
+            %}\n  {## https://easings.net/#easeInOutQuart ##}\n  {% if (percentageOfTimeCompleted
+            < 0.5) %}\n    {{ 8 * percentageOfTimeCompleted * percentageOfTimeCompleted
+            * percentageOfTimeCompleted * percentageOfTimeCompleted }} \n  {% else
+            %}\n    {{ 1 - (((-2 * percentageOfTimeCompleted + 2) ** 4) / 2) }} \n
+            \ {% endif %}\n{% else %}\n  {## linear ##}\n  {{ percentageOfTimeCompleted
+            }}\n{% endif %}\n"
+          expectedBrightness: "{% set startBrightness = startBrightness | int %} {%
+            set brightnessSpan = brightnessSpan | int %} {% set easingAdjustedPercentageCompleted
+            = easingAdjustedPercentageCompleted | float(0) %}\n{% set calculatedBrightness
+            = (startBrightness + (brightnessSpan * easingAdjustedPercentageCompleted))
+            | round(0) %}\n{% if (calculatedBrightness < 0) %}\n  {% set calculatedBrightness
+            = 0 %}\n{% elif (calculatedBrightness > 255) %}\n  {% set calculatedBrightness
+            = 255 %}\n{% endif %}\n{% if (endBrightness >= startBrightness) and (calculatedBrightness
+            > endBrightness) %}\n  {% set calculatedBrightness = endBrightness %}\n{%
+            elif (endBrightness < startBrightness) and (calculatedBrightness < endBrightness)
+            %}\n  {% set calculatedBrightness = endBrightness %}\n{% endif %}\n{{
+            calculatedBrightness }}\n"
+          linearExpectedBrightness: "{% set startBrightness = startBrightness | int
+            %} {% set brightnessSpan = brightnessSpan | int %} {% set percentageOfTimeCompleted
+            = percentageOfTimeCompleted | float(0) %}\n{% set calculatedBrightness
+            = (startBrightness + (brightnessSpan * percentageOfTimeCompleted)) | round(0)
+            %} \n{% if (calculatedBrightness < 0) %}\n  {% set calculatedBrightness
+            = 0 %}\n{% elif (calculatedBrightness > 255) %}\n  {% set calculatedBrightness
+            = 255 %}\n{% endif %}\n{% if (endBrightness >= startBrightness) and (calculatedBrightness
+            > endBrightness) %}\n  {% set calculatedBrightness = endBrightness %}\n{%
+            elif (endBrightness < startBrightness) and (calculatedBrightness < endBrightness)
+            %}\n  {% set calculatedBrightness = endBrightness %}\n{% endif %}\n{{
+            calculatedBrightness }}\n"
+          currentBrightness: "{% set rawLightLevel = state_attr(light, 'brightness')
+            %}\n{## If a light is off, its brightness will return 'None'. So first
+            check if there's a valid brightness before getting the value ##}\n{% if
+            rawLightLevel %}\n  {% set currentLightLevel = rawLightLevel | int %}\n{%
+            else %}\n  {% set currentLightLevel = 0 %}\n{% endif %} {% if lampBrightnessScale
+            == \"zeroToOneHundred\" %}\n  {% set currentLightLevel = (currentLightLevel
+            / 2.55) | round(0) %}\n{% endif %} {{ currentLightLevel }}\n"
+      - if:
+        - condition: template
+          value_template: '{{ (currentBrightness | int) != (endBrightness | int) }}
+
+            '
+        then:
+        - if:
+          - condition: template
+            value_template: '{{ (lampBrightnessScale == "zeroToTwoFiftyFive") }}
+
+              '
+          then:
+          - service: light.turn_on
+            target:
+              entity_id: '{{ light }}'
+            data:
+              brightness: '{{ expectedBrightness }}'
+          else:
+          - service: light.turn_on
+            target:
+              entity_id: '{{ light }}'
+            data:
+              brightness_pct: '{{ expectedBrightness }}'
+        - if:
+          - condition: template
+            value_template: '{{ isDebugMode }}
+
+              '
+          then:
+          - service: system_log.write
+            data_template:
+              message: 'Set {{ lightFriendlyName }} to {{ expectedBrightness | int
+                }} brightness. (Linear brightness would have been {{ linearExpectedBrightness
+                | int }}.) Delay is {{ delayInMilliseconds | int }} ms. Elapsed time
+                is {{ (as_timestamp(now()) - startTimestamp) | round(2) }} seconds.
+                (endBrightness is {{ endBrightness}}.)
+
+                '
+              level: warning
+      - delay:
+          milliseconds: '{{ delayInMilliseconds | float(0) }}'
+      - variables:
+          currentBrightness: "{% set rawLightLevel = state_attr(light, 'brightness')
+            %} {## If a light is off, its brightness will return \"None\"? So first
+            check if there's a valid brightness before getting the value ##} {% if
+            rawLightLevel %}\n\t{% set currentLightLevel = rawLightLevel | int %}\n{%
+            else %}\n\t{% set currentLightLevel = 0 %}\n{% endif %} {% if lampBrightnessScale
+            == \"zeroToOneHundred\" %}\n  {% set currentLightLevel = (currentLightLevel
+            / 2.55) | round(0) %}\n{% endif %} {{ currentLightLevel }}\n"
+          brightnessDifferenceFromExpected: '{{ ( (currentBrightness | int) - (expectedBrightness
+            | int) ) | abs }}
+
+            '
+          isBrightnessDifferenceAboveAutoCancelThreshold: "{% if autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged
+            %}\n  {{ (brightnessDifferenceFromExpected | int) >= (normalizedAutoCancelThreshold
+            | int) }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
+      - if:
+        - condition: template
+          value_template: '{{ autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged
+            and isBrightnessDifferenceAboveAutoCancelThreshold }}
+
+            '
+        then:
+        - variables:
+            stopMessage: "{% if lampBrightnessScale == \"zeroToTwoFiftyFive\" %}\n
+              \ {% set currentBrightnessAsPercentage = (currentBrightness / 2.55)
+              | round(0) %}\n  {% set expectedBrightnessAsPercentage = (expectedBrightness
+              / 2.55) | round(0) %}\n  {% set differenceFromExpectedAsPercentage =
+              (brightnessDifferenceFromExpected / 2.55) | round(0) %}\n{% else %}\n
+              \ {% set currentBrightnessAsPercentage = currentBrightness %}\n  {%
+              set expectedBrightnessAsPercentage = expectedBrightness %}\n  {% set
+              differenceFromExpectedAsPercentage = brightnessDifferenceFromExpected
+              %}\n{% endif %}\n{% set stopMessage = \"Stopped Ashley’s Fader because
+              \" + (lightFriendlyName | string) + \" was found to be at \" + (currentBrightnessAsPercentage
+              | string) + \"%, a difference of \" + (differenceFromExpectedAsPercentage
+              | string) + \" percentage points from the expected brightness of \"
+              + (expectedBrightnessAsPercentage | string) + \"%, which is higher than
+              the auto-cancel threshold of \" + (autoCancelThreshold | string) + \"
+              percentage points.\" %} {{ stopMessage }}\n"
+        - if:
+          - condition: template
+            value_template: '{{ isDebugMode }}
+
+              '
+          then:
+          - service: system_log.write
+            data_template:
+              message: '{{ stopMessage }}
+
+                '
+              level: warning
+        - stop: '{{ stopMessage }}
+
+            '
+      - if:
+        - condition: template
+          value_template: "{## init ##} {% set stopEntityStatus = false %} {% if stopEntityIsEnabled
+            %}\n  {% if bool(states(stopEntity), false) %}\n    {% set stopEntityStatus
+            = true %}\n  {% endif %}\n{% endif %} {{ stopEntityStatus }}\n"
+        then:
+        - variables:
+            stopMessage: '{% set stopMessage = "Stopped Ashley’s Fader because " +
+              (stopEntityFriendlyName | string) + " is on." %} {{ stopMessage }}
+
+              '
+        - if:
+          - condition: template
+            value_template: '{{ isDebugMode }}
+
+              '
+          then:
+          - service: system_log.write
+            data_template:
+              message: '{{ stopMessage }}
+
+                '
+              level: warning
+        - stop: '{{ stopMessage }}
+
+            '
+      until:
+      - condition: template
+        value_template: "{{ (as_timestamp(now()) >= endTimestamp) \n  or ((endBrightness
+          >= startBrightness) and (expectedBrightness >= endBrightness))\n  or ((endBrightness
+          < startBrightness) and (expectedBrightness <= endBrightness)) }}\n"
+  - variables:
+      currentBrightness: "{% set rawLightLevel = state_attr(light, 'brightness') %}\n{##
+        If a light is off, its brightness will return 'None'. So first check if there's
+        a valid brightness before getting the value ##} {% if rawLightLevel %}\n\t{%
+        set currentLightLevel = rawLightLevel | int %}\n{% else %}\n\t{% set currentLightLevel
+        = 0 %}\n{% endif %} {% if lampBrightnessScale == \"zeroToOneHundred\" %}\n
+        \ {% set currentLightLevel = (currentLightLevel / 2.55) | round(0) %}\n{%
+        endif %} {{ currentLightLevel }}\n"
+      brightnessDifferenceFromExpected: '{{ ( (currentBrightness | int) - (endBrightness
+        | int) ) | abs }}
+
+        '
+      isBrightnessDifferenceAboveAutoCancelThreshold: "{% if autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged
+        %}\n  {{ (brightnessDifferenceFromExpected | int) > (normalizedAutoCancelThreshold
+        | int) }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
+  - if:
+    - condition: template
+      value_template: '{{ ((currentBrightness | int) != (endBrightness | int))  and
+        ((not autoCancelTheFadeIfTheLampBrightnessIsManuallyChanged) or (not isBrightnessDifferenceAboveAutoCancelThreshold))
+        }}
+
+        '
+    then:
+    - if:
+      - condition: template
+        value_template: '{{ (lampBrightnessScale == "zeroToTwoFiftyFive") }}
+
+          '
+      then:
+      - service: light.turn_on
+        target:
+          entity_id: '{{ light }}'
+        data:
+          brightness: '{{ endBrightness }}'
+      else:
+      - service: light.turn_on
+        target:
+          entity_id: '{{ light }}'
+        data:
+          brightness_pct: '{{ endBrightness }}'
+  max: 10
+  icon: mdi:lightbulb-on-50
+back_door_light_with_level:
+  alias: Back Door Light With Level
+  sequence:
+  - service: light.turn_on
+    entity_id: light.back_door_light
+    data:
+      brightness: "{{ level | int }} \n"
+  mode: single
+back_door_light_dim_when_door_closed:
+  alias: Back Door Light Dim When Door Closed
+  sequence:
+  - service: input_number.set_value
+    data:
+      value: 255
+    target:
+      entity_id: input_number.back_door_light_level
+  - repeat:
+      while:
+      - condition: template
+        value_template: '{{ states("input_number.back_door_light_level") | int > 0
+          }}'
+      sequence:
+      - service: script.back_door_light_with_level
+        data:
+          level: '{{ states("input_number.back_door_light_level") }}'
+      - service: input_number.decrement
+        target:
+          entity_id: input_number.back_door_light_level
+        data: {}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.back_door_light
+  - service: input_number.set_value
+    data:
+      value: 255
+    target:
+      entity_id: input_number.back_door_light_level
+  mode: single
+saving_session_prep_and_export_battery:
+  alias: Saving Session prep and export battery
+  sequence:
+  - variables:
+      saving_session_start: '{{ states(''binary_sensor.octopus_energy_saving_session'')
+        }}
+
+        '
+  mode: single
+battery_pre_peak_top_up:
+  alias: Battery pre-peak top up
+  sequence:
+  - service: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.home_battery_grid_charging
+  - service: script.grid_charge_battery
+    metadata: {}
+    data: {}
+  - service: script.speech_engine
+    metadata: {}
+    data:
+      where: '{{states(''sensor.room_audio'')}}'
+      message: Attention in the house.  The home battery is performing a half hour
+        pree peak topup, as its charge level is {{ states('sensor.battery_state_of_charge')
+        }}%.
+  mode: single
+battery_pre_peak_top_down:
+  alias: Battery pre-peak top down
+  sequence:
+  - service: script.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: script.grid_charge_battery
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: 0bdfb19491b49722c2a94351b9a673aa
+    type: select_option
+    option: Maximize Self Consumption
+  - service: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.home_battery_grid_charging
+  - service: timer.cancel
+    metadata: {}
+    data: {}
+    target:
+      entity_id: timer.home_battery_3_hour_charge_period
+  - service: script.speech_engine
+    metadata: {}
+    data:
+      where: '{{states(''sensor.room_audio'')}}'
+      message: Attention in the house.  The home battery has completed a half hour
+        pree peak topup and its charge level is now a more healthy {{ states('sensor.battery_state_of_charge')
+        }}%.
+  mode: single
+update_rechargeable_battery_group:
+  alias: Update Rechargeable Battery Group
+  sequence:
+  - service: group.set
+    data:
+      object_id: rechargeable_batteries
+      entities: []
+  - service: group.set
+    data:
+      object_id: rechargeable_batteries
+      add_entities: "{{ states.sensor | \n  selectattr('entity_id', 'in', area_entities('Rechargeable
+        Battery')) |\n  map(attribute='entity_id') | list  | join(',') }} "
+  mode: single
+update_srv_critical_battery_group:
+  alias: Update SRV Critical Battery Group
+  sequence:
+  - service: group.set
+    data:
+      object_id: srv_critical_batteries
+      entities: []
+  - service: group.set
+    data:
+      object_id: srv_critical_batteries
+      add_entities: "{{ states.binary_sensor | \n  selectattr('entity_id', 'in', area_entities('SRV
+        Critical Battery')) |\n  map(attribute='entity_id') | list  | join(',') }} "
+  mode: single
+gem_s_phone_location:
+  alias: Gem's phone location
+  sequence:
+  - service: alexa_media.update_last_called
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: script.speech_engine
+    data:
+      where: '{{ states(''sensor.room_audio'')}}'
+      message: "{% if states('sensor.gems_phone_espresence')  == 'not_home' %} \n
+        \ I am unble to determine the exact location of Gemmas phone at this time.
+        \n{% else %}\n  Gemmas phone is in the \"{{ states('sensor.gems_phone_espresence')}}\"\n{%
+        endif %}\n"
+  description: ''
+dave_s_phone_location:
+  alias: Dave's phone location
+  sequence:
+  - service: alexa_media.update_last_called
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: script.speech_engine
+    data:
+      where: '{{ states(''sensor.room_audio'')}}'
+      message: "{% if states('sensor.daves_phone_espresence')  == 'not_home' %} \n
+        \ I am unble to determine the exact location of Daves phone at this time.
+        \n{% else %}\n  Daves phone is in the \"{{ states('sensor.daves_phone_espresence')}}\"\n{%
+        endif %}\n"
+  description: ''
+spare_room_night_light:
+  alias: Spare Room Night Light
+  sequence:
+  - service: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.guest_bedroom_allow_lights_off
+      - input_boolean.guest_bedroom_bedside_lamps_active
+    data: {}
+  - service: light.turn_off
+    target:
+      entity_id: light.spare_room_lights
+    data: {}
+  - service: light.turn_off
+    target:
+      entity_id:
+      - light.guest_bedroom_bedside_lamp_right
+    data: {}
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.guest_bedroom_bedside_lamp_left
+    data:
+      rgb_color:
+      - 255
+      - 0
+      - 0
+      brightness_pct: 1
+  description: ''
+ironing_lights:
+  alias: Ironing Lights
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ state_attr(''light.spare_room_lights'',''brightness'')
+          == 255 }}
+
+          '
+      sequence:
+      - service: input_boolean.toggle
+        target:
+          entity_id: input_boolean.guest_bedroom_allow_lights_off
+        data: {}
+      - service: switch.toggle
+        target:
+          entity_id: switch.adaptive_lighting_spare_room_ceiling_lights
+        data: {}
+      - service: light.turn_off
+        target:
+          entity_id: light.spare_room_lights
+        data: {}
+    default:
+    - service: input_boolean.toggle
+      target:
+        entity_id: input_boolean.guest_bedroom_allow_lights_off
+      data: {}
+    - service: switch.toggle
+      target:
+        entity_id: switch.adaptive_lighting_spare_room_ceiling_lights
+      data: {}
+    - service: light.turn_on
+      target:
+        entity_id: light.spare_room_lights
+      data:
+        brightness_pct: 100
+        kelvin: 6500
+  description: Spare Room Lights to Full Brightness
+update_occupancy_groups:
+  alias: Update Occupancy Groups
+  sequence:
+  - service: group.set
+    data:
+      object_id: living_room_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: living_room_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('living room')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: kitchen_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: kitchen_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('kitchen')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|running|door)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: dining_room_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: dining_room_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('dining room')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: utility_room_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: utility_room_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('utility room')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: cloakroom_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: cloakroom_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('cloakroom')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: hallway_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: hallway_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('hallway')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: master_bedroom_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: master_bedroom_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('master bedroom')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: guest_bedroom_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: guest_bedroom_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('guest bedroom')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: seans_room_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: seans_room_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities(\"sean's room\")) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: jamies_room_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: jamies_room_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities(\"jamie's room\")) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: office_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: office_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('office')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: en_suite_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: en_suite_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('en-suite bathroom')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: garage_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: garage_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('garage')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: cloakroom_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: cloakroom_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('cloakroom')) \n    | rejectattr('attributes.device_class',
+        'undefined') \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: loft_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: loft_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('loft')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  - service: group.set
+    data:
+      object_id: landing_occupancy
+      entities: []
+  - service: group.set
+    data:
+      object_id: landing_occupancy
+      add_entities: "{{ states.binary_sensor\n    | selectattr('entity_id', 'in',
+        area_entities('landing')) \n    | rejectattr('attributes.device_class', 'undefined')
+        \n    | selectattr('attributes.device_class', 'search', '(occupancy|motion)')\n
+        \   | map(attribute='entity_id')\n    | list | join(' , ')}}"
+  mode: single
+  description: ''
+max_location:
+  alias: Max Location
+  sequence:
+  - service: alexa_media.update_last_called
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: script.speech_engine
+    data:
+      where: '{{ states(''sensor.room_audio'')}}'
+      message: "{% if states('sensor.max')  == 'not_home' %} \n  I am unble to determine
+        the exact location of Max at this time. \n{% else %}\n  Max is in the \"{{
+        states('sensor.max')}}\"\n{% endif %}\n"
+  description: ''
+hux_location:
+  alias: Hux Location
+  sequence:
+  - service: alexa_media.update_last_called
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: script.speech_engine
+    data:
+      where: '{{ states(''sensor.room_audio'')}}'
+      message: "{% if states('sensor.huxley')  == 'not_home' %} \n  I am unble to
+        determine the exact location of Huxley at this time. \n{% else %}\n  Huxley
+        is in the \"{{ states('sensor.huxley')}}\"\n{% endif %}\n"
+  description: ''
+get_room_presence:
+  alias: Get Room Presence
+  sequence:
+  - variables:
+      occupied_rooms: "{% set rooms = ['living_room'] %} {% if is_state('input_boolean.audible_notifications',
+        'on') %}\n  {% if expand('group.rooms') \n  | selectattr('state', 'eq', 'on')
+        | list | count >= 1 %}\n  {% set rooms = expand('group.rooms') \n  | selectattr('state',
+        'eq', 'on') \n  | sort(attribute='last_changed', reverse=True)\n  | map(attribute='name')
+        | list %}\n  {%- endif -%}\n{% else -%}\n  {%- if expand('group.rooms')\n
+        \ | rejectattr('name', 'search', 'bedroom') \n  | selectattr('state', 'eq',
+        'on') | list | count >= 1 %}\n  {%- set rooms = expand('group.rooms') \n  |
+        rejectattr('name', 'search', 'bedroom') \n  | selectattr('state', 'eq', 'on')
+        \n  | sort(attribute='last_changed', reverse=True) \n  | map(attribute='name')|
+        list %}\n  {%- endif -%}\n{% endif %} {{ rooms | replace('_occupied','') }}\n"
+      occupied_rooms_cnt: "{% if is_state('input_boolean.audible_notifications', 'on')
+        %}\n  {{ expand('group.rooms') \n    | selectattr('state', 'eq', 'on') | list
+        | count }}\n{% else %}\n  {{ expand('group.rooms') \n    | rejectattr('name',
+        'search', 'bedroom') \n    | selectattr('state', 'eq', 'on') | list | count
+        }}\n{% endif %}\n"
+      room_presence: '{"occupied_rooms":"{{occupied_rooms}}", "occupied_rooms_cnt":"{{occupied_rooms_cnt}}"}'
+  - stop: ok, Im done.
+    response_variable: room_presence
+  description: ''
+get_room_audio:
+  alias: Get Room Audio
+  sequence:
+  - service: script.get_room_presence
+    response_variable: presence
+    data: {}
+  - variables:
+      type: "{% if type == 'alert' %}\n  alert\n{% elif room in ['dave','gem'] or
+        type in ['priority','briefing'] %}\n  priority\n{% else %}\n  normal\n{% endif
+        %}\n"
+      room_priority: "{% if room is defined %}\n  {% if room in ['dave','gem']%}\n
+        \   {{ states('sensor.'~room~'_room') }}\n  {% else %}\n    {{ room }}          \n
+        \ {% endif %}\n{% else %}\n  NA         \n{% endif %}\n"
+      rooms: "{{ presence.occupied_rooms |\n  replace('living_room','Living Room')
+        |\n  replace('kitchen','Kitchen') |\n  replace('hallway','Kitchen') |\n  replace('cloakroom','Kitchen')
+        |\n  replace('garage','Kitchen') |\n  replace('loft','Kitchen') |\n  replace('utility','Kitchen')
+        |\n  replace('dining_room','Dining Room') |\n  replace('guest_bedroom','Guest
+        Bedroom') |\n  replace('jamies_room','Jamies Bedroom') |\n  replace('seans_room','Seans
+        Bedroom') |\n  replace('master_bedroom','Master Bedroom') |\n  replace('en_suite','Master
+        Bedroom') |\n  replace('office','Office') |\n  replace('landing','Master Bedroom')
+        |\n  replace('main_bathroom','Guest Bedroom') |\n  replace('kids_bathroom','Guest
+        Bedroom') }}\n"
+      room_services: "{% if type == 'alert'%}\n  {% set jarvis_speaker = states.media_player
+        | \n    rejectattr('attributes.last_called', 'undefined') |\n    rejectattr('entity_id',
+        'search', '(boys|fire|upstairs|downstairs|this_device|everywhere)') |\n    map(attribute='entity_id')
+        |\n    list | join(',') %}\n  {% set audio_speaker = 'none' %}\n  {% set tts
+        = 'amp' %}\n  {% set room = 'all' %}\n{% elif type in ['priority','briefing']
+        %} \n  {% set room = room_priority |\n  replace('living_room','Living Room')
+        |\n  replace('kitchen','Kitchen') |\n  replace('hallway','Kitchen') |\n  replace('cloakroom','Kitchen')
+        |\n  replace('garage','Kitchen') |\n  replace('loft','Kitchen') |\n  replace('utility','Kitchen')
+        |\n  replace('dining_room','Dining Room') |\n  replace('guest_bedroom','Guest
+        Bedroom') |\n  replace('jamies_room','Jamies Bedroom') |\n  replace('seans_room','Seans
+        Bedroom') |\n  replace('master_bedroom','Master Bedroom') |\n  replace('en_suite','Master
+        Bedroom') |\n  replace('office','Office') |\n  replace('landing','Master Bedroom')
+        |\n  replace('main_bathroom','Guest Bedroom') |\n  replace('kids_bathroom','Guest
+        Bedroom') %}\n\n  {% set jarvis_speaker = states.media_player | \n      rejectattr('attributes.last_called',
+        'undefined') |\n      selectattr('entity_id', 'in', area_entities(room)) |\n
+        \     map(attribute='entity_id') |\n    list | first %}\n\n  {% set audio_speaker
+        = states.media_player | \n      rejectattr('attributes.device_class', 'undefined')
+        |\n      selectattr('entity_id','in',label_entities('Speaker')) | \n      selectattr('entity_id',
+        'in', area_entities(room)) |\n      map(attribute='entity_id') |\n    list
+        | first %}\n  \n  {% set tts = 'amp' %}\n{% elif type in ['normal','weather-alert','weather-advisory']
+        %}\n  {% set ns = namespace(area_speakers = []) %}\n  {% for room in rooms
+        %}\n    {% set ns.area_speakers = ns.area_speakers + states.media_player |
+        \n    rejectattr('attributes.last_called', 'undefined') |\n    selectattr('entity_id',
+        'in', area_entities(room))|\n    map(attribute='entity_id') | list %}\n  {%
+        endfor %} \n  {% set jarvis_speaker = ns.area_speakers | join(',') %}\n  {%
+        set room = rooms | join(',') %}\n  {% set audio_speaker = '' %}\n  {% set
+        tts = 'amp' %}\n{% else %} \n  {% set room = 'none' %}\n  {% set jarvis_speaker
+        = 'none' %}\n  {% set audio_speaker = 'none' %}\n  {% set tts = 'none' %}\n{%
+        endif %} {\"area\":\"{{room}}\", \"jarvis_speaker\":\"{{jarvis_speaker}}\",
+        \"jarvis_tts\":\"{{tts}}\", \"audio_speaker\":\"{{audio_speaker}}\", \"type\":\"{{type}}\"}\n"
+  - stop: ok, Im done.
+    response_variable: room_services
+  description: ''
+night_security_check:
+  alias: Night Security Check
+  sequence:
+  - condition: state
+    entity_id: binary_sensor.all_secure_night
+    state: 'off'
+  - choose:
+    - conditions: []
+      sequence:
+      - service: script.status_annc
+        data:
+          where: living_room
+          call_goodnight_secure: 1
+    default:
+    - service: script.status_annc
+      data:
+        where: living_room
+        call_goodnight_not_secure: 1
+  description: ''
