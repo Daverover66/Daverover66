@@ -1094,6 +1094,27 @@
       availability: >
         {{ states('sensor.daylight_savings_next') not in ['unknown', 'unavailable'] }}
 
+- sensor:
+    - unique_id: dave_room
+      name: dave_room
+      state: >
+        {% set weight_values = {
+            'sensor.daves_phone_espresence': 0.8,
+            'sensor.daves_keys': 1.0
+          } %}
+          {% set ns = namespace(presence=[]) %}
+          {% for entity_id, weight in weight_values.items() %}
+            {% set key = states(entity_id) %}
+            {% set td = dict.from_keys(ns.presence) %}
+            {% set new_weight = weight if key not in td.keys() else td[key] + weight %}
+            {% set ns.presence = td.items() | rejectattr('0', 'eq', key) | list + [(key, new_weight)] %}
+          {% endfor %}
+          {% if ns.presence | length > 0 %}
+            {{ (ns.presence | sort(attribute='1', reverse=True) | first) | first }}
+          {% else %}
+            unknown
+          {% endif %}
+
 # - sensor:
 #     - name: dave_room
 #       unique_id: dave_room
