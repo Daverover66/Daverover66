@@ -5,8 +5,8 @@
 #   @description    :   not in a package file              #
 #                                                          #
 #                                                          #
-#   @version        :   1.03                               #
-#   @modified       :   17/05/2024                         #
+#   @version        :   1.04                               #
+#   @modified       :   13/08/2024                         #
 ############################################################
 
 ###########################
@@ -1091,6 +1091,217 @@
 #         {% else %}
 #           NA
 #         {% endif %}
+
+########################################
+#      Action Template Sensors         #
+########################################
+
+#########################################
+#     Gets total rainfall for the day   # 
+#########################################
+
+- trigger:
+  - platform: time_pattern
+    hours: /1
+  action: 
+    - service: weather.get_forecasts 
+      target: 
+        entity_id: weather.openweathermap
+      data: 
+        type: hourly
+      response_variable: my_forecast
+  sensor:
+    - name: Weather Total Expected Rainfall 24 Hours
+      unique_id: weather_total_expected_rainfall_24_hrs
+      icon: mdi:weather-pouring
+      unit_of_measurement: mm
+      state: >
+        {% set ns = namespace() %}
+        {% set ns.totalrainfall = 0 %}
+        {% for daypart in range(0,7) %}
+          {% set rainfall = my_forecast["weather.openweathermap"].forecast[daypart].precipitation %}
+          {% set rainfall_probability = my_forecast["weather.openweathermap"].forecast[daypart].precipitation_probability / 100 %}
+          {% if rainfall_probability > 0 %}
+            {% set rainfall = rainfall * rainfall_probability %}
+          {% endif %}
+          {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
+        {% endfor %}
+        {{ ns.totalrainfall | float(0) | round(2) }}
+
+- trigger:
+    - platform: time_pattern
+      hours: "/1"
+      minutes: 0
+  sensor:
+    - unique_id: z2m_last_seen_entities
+      name: "Z2M Last Seen Entities"
+      state: >
+        {% set lapsed_hours = 36 %}
+        {% set ns = namespace(count=0) %}
+        {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$')  %}
+          {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.count }}     
+      attributes:
+        devices: >
+          {% set lapsed_hours = 36 %}
+          {% set result = namespace(sensors=[]) %}
+          {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$') %}
+            {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
+              {% set result.sensors = result.sensors + [state.name | regex_replace(find='_last_seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
+            {% endif %}
+          {% endfor %}
+          {{ result.sensors }}
+        
+#########################################
+#   Gets min and max temp for the day   # 
+#########################################
+
+# - trigger:
+#     - platform: state
+#       entity_id: weather.openweathermap
+#     - platform: homeassistant
+#       event: start
+#     - platform: event
+#       event_type: event_template_reloaded
+#   action:
+#     - service: weather.get_forecasts
+#       data:
+#         type: daily
+#       target:
+#         entity_id: weather.openweathermap
+#       response_variable: daily
+#   sensor:
+#     - name: Forecast Daily
+#       unique_id: weather_forecast_daily
+#       state: "{{ states('weather.openweathermap') }}"
+#       attributes:
+#         forecast: "{{ daily['weather.openweathermap'].forecast }}"
+
+- trigger:
+    - platform: state
+      entity_id: weather.openweathermap
+    - platform: homeassistant
+      event: start
+    - platform: event
+      event_type: event_template_reloaded
+  action:
+    - service: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.openweathermap
+      response_variable: hourly
+  sensor:
+    - name: Forecast Hourly
+      unique_id: weather_forecast_hourly
+      state: "{{ states('weather.openweathermap') }}"
+      attributes:
+        forecast: "{{ hourly['weather.openweathermap'].forecast }}"
+
+############################
+#     Clocks Changing      #
+############################
+- trigger:
+    - platform: time
+      at: "00:00:00"
+    - platform: homeassistant
+      event: start
+    - platform: event
+      event_type: call_service
+      event_data:
+        domain: template
+        service: reload
+  sensor:
+    - unique_id: dst_next
+      name: "Daylight Savings: Next"
+      device_class: timestamp
+      state: >
+        {%- macro hms(t) %}
+        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
+        {%- set h, m, s = dststr.split(':') | map('int') %}
+        {{- h * 60 * 60 + m * 60 + s }}   
+        {%- endmacro %}
+        
+        {%- macro is_dst(t) %}
+        {{- hms(t) | int != 0 }}
+        {%- endmacro %}
+        
+        {%- macro finddst(t, kwarg, rng) %}
+        {%- set ns = namespace(previous=is_dst(t), found=none) %}
+        {%- for i in range(rng) %}
+          {%- set ts = t + timedelta(**{kwarg:i}) %}
+          {%- if ns.previous != is_dst(ts) and ns.found is none %}
+            {%- set ns.found = i %}
+          {%- endif %}
+        {%- endfor %}
+        {{- ns.found }}
+        {%- endmacro %}
+        
+        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+        {%- set d = finddst(t, 'days', 366) | int - 1 %}
+        {%- set h = finddst(t + timedelta(days=d), 'hours', 25) | int - 1 %}
+        {%- set m = finddst(t + timedelta(days=d, hours=h), 'minutes', 61) | int %}
+        {{ (t + timedelta(days=d, hours=h, minutes=m)) }}
+
+    - unique_id: dst_phrase
+      name: "Daylight Savings: Phrase"
+      state: >
+        {%- macro hms(t) %}
+        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
+        {%- set h, m, s = dststr.split(':') | map('int') %}
+        {{- h * 60 * 60 + m * 60 + s }}   
+        {%- endmacro %}
+
+        {%- macro phrase(seconds, name, divisor, mod=None) %}
+          {%- set value = ((seconds | abs // divisor) % (mod if mod else divisor)) | int %}
+          {%- set end = 's' if value > 1 else '' %}
+          {{- '{} {}{}'.format(value, name, end) if value > 0 else '' }}
+        {%- endmacro %}
+
+        {%- macro total(seconds) %}
+        {%- set values = [ 
+          phrase(seconds, 'hour', 60*60, 60*60*24),
+          phrase(seconds, 'minute', 60, 60),
+          ] | select('!=','') | list %}
+        {{- values[:-1] | join(', ') ~ ' and ' ~ values[-1] if values | length > 1 else values | first | default}}
+        {%- endmacro %}
+
+        {%- macro finddelta(t, kwarg, rng) %}
+        {%- set ns = namespace(previous=hms(t), found=none) %}
+        {%- for i in range(rng) %}
+          {%- set ts = t + timedelta(**{kwarg:i}) %}
+          {%- if ns.previous != hms(ts) and ns.found is none %}
+            {%- set before = hms(ts - timedelta(days=1)) | int %}
+            {%- set after = hms(ts) | int %}
+            {%- set ns.found =  after - before %}
+          {%- endif %}
+        {%- endfor %}
+        {{ ns.found }}
+        {%- endmacro %}
+        
+        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+        {%- set delta = finddelta(t, 'days', 365) | int %}
+        {% if delta > 0 %}
+          lose {{ total(delta | abs) }}
+        {% else %}
+          gain {{ total(delta | abs) }}
+        {% endif %}
+
+
+  ### Trigger based sensor to store calendar events ###
+- trigger:
+  - platform: event
+    event_type: calendar_poll
+  sensor:
+    - name: "Calendar Events"
+      unique_id: calendar_events
+      state: "{{ trigger.event.data.calendar_response.events | count() }}"
+      attributes:
+        calendar_response: "{{ trigger.event.data.calendar_response }}"
+      icon: mdi:calendar
 
 
 
