@@ -5,12 +5,31 @@
 #   @description    :   All Spare Room config
 #
 #   @modified by    :   Dave Forrester
-#   @date           :   24/05/24
+#   @date           :   13/08/2024
 ###############################################################################
 
 ###########################
 #     Helpers             #
 ###########################
+
+############################################
+#     Groups   moved to Groups 09/08/2024  # 
+############################################
+
+# group:
+#   spare_room_motion:
+#     name: Spare Room Motion 
+#     icon: mdi:motion-sensor 
+#     entities:
+#       - binary_sensor.guest_bedroom_motion_occupancy 
+
+#   spare_room_lights:
+#     name: Spare Room Lights 
+#     icon: mdi:ceiling-light-multiple 
+#     entities:
+#       - light.spare_room_light_1
+#       - light.spare_room_light_2
+#       - light.spare_room_light_3
 
 ###########################
 #      Toggle             #
@@ -18,8 +37,8 @@
 
 input_boolean:
   guest_bedroom_bedside_lamps_active:
-    name: Guest Bedroom Bedside Lamps Active
-    icon: mdi:lamp
+    name: Guest Bedroom Lights Active
+    icon: mdi:ceiling-light-multiple 
 
   guest_bedroom_allow_lights_off:
     name: Guest Bedroom Allow Lights Off
@@ -31,207 +50,288 @@ input_boolean:
 ###########################
 automation:
 
-###########################
-#     Bedside Lamps       #
-###########################
-  - id: guest_bedroom_lights_with_presence
-    alias: Guest Bedroom Lights with presence
-    description: ""
-    initial_state: true
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id:
-          - binary_sensor.guest_bedroom_motion_occupancy
-          - binary_sensor.guest_bedroom_camera_cell_motion_detection
-        from: "off"
-        to: "on"
-        id: Light on
-      - platform: state
-        entity_id:
-          - binary_sensor.guest_bedroom_motion_occupancy
-          - binary_sensor.guest_bedroom_camera_cell_motion_detection
-        from: "on"
-        to: "off"
-        id: Light off
-        for:
-          hours: 0
-          minutes: 0 
-          seconds: 30
-      - platform: numeric_state
-        entity_id: sensor.average_light_level_upstairs
-        below: input_number.low_light_threshold
-        id: Low Light
-      - platform: numeric_state
-        entity_id: sensor.average_light_level_upstairs
-        id: Good Light
-        above: input_number.upper_light_threshold_level
-    condition:
-      - condition: state
-        entity_id: input_boolean.holiday_mode
-        state: "off"
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Light on
-              - condition: state
-                entity_id: binary_sensor.lights_out
-                state: "off"
-              - condition: sun
-                before: sunrise 
-                after: sunset 
-              - condition: state
-                entity_id: input_boolean.guest_bedroom_bedside_lamps_active
-                state: "on"
-            sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness_pct: 5
-                target:
-                  entity_id: light.guest_bedroom_bedside_lamp_left
-              - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness_pct: 5
-                target:
-                  entity_id:
-                    - light.guest_bedroom_bedside_lamp_right
-          - conditions:
-              - condition: trigger
-                id: Light off
-              - condition: state
-                entity_id: input_boolean.guest_bedroom_allow_lights_off
-                state: "on" 
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id:
-                    - light.guest_bedroom_bedside_lamp_left
-                    - light.guest_bedroom_bedside_lamp_right
-          - conditions:
-              - condition: trigger
-                id:
-                  - Low Light
-              - condition: and
-                conditions:
-                  - condition: state
-                    entity_id: light.guest_bedroom_bedside_lamp_left
-                    state: "off"
-                  - condition: state
-                    entity_id: light.guest_bedroom_bedside_lamp_right
-                    state: "off"
-                  - condition: state
-                    entity_id: input_boolean.guest_bedroom_bedside_lamps_active
-                    state: "on"
-              - condition: or
-                conditions:
-                  - condition: state
-                    entity_id: binary_sensor.guest_bedroom_motion_occupancy
-                    state: "on"
-                  - condition: state
-                    entity_id: binary_sensor.guest_bedroom_camera_cell_motion_detection
-                    state: "on"
-              - condition: state
-                entity_id: binary_sensor.lights_out
-                state: "off"
-            sequence:
-              - service: light.turn_on
-                data:
-                  color_temp: 500
-                  brightness_pct: 5
-                target:
-                  entity_id:
-                    - light.guest_bedroom_bedside_lamp_left
-                    - light.guest_bedroom_bedside_lamp_right
-          - conditions:
-              - condition: trigger
-                id:
-                  - Good Light
-            sequence:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id:
-                    - light.guest_bedroom_bedside_lamp_left
-                    - light.guest_bedroom_bedside_lamp_right
+##########################################
+#     Bedside Lamps    migrated to UI    #
+##########################################
+  # - id: guest_bedroom_lights_with_presence
+  #   alias: Guest Bedroom Lights with presence
+  #   description: ""
+  #   initial_state: true
+  #   mode: restart
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - group.spare_room_motion
+  #       from: "off"
+  #       to: "on"
+  #       id: Light on
+  #     - platform: state
+  #       entity_id:
+  #         - group.spare_room_motion
+  #       from: "on"
+  #       to: "off"
+  #       id: Light off
+  #       for:
+  #         hours: 0
+  #         minutes: 0 
+  #         seconds: 30
+  #     - platform: numeric_state
+  #       entity_id: sensor.guest_bedroom_motion_illuminance_lux
+  #       below: input_number.low_light_threshold
+  #       id: Low Light
+  #     - platform: numeric_state
+  #       entity_id: sensor.guest_bedroom_motion_illuminance_lux
+  #       id: Good Light
+  #       above: input_number.upper_light_threshold_level
+  #   condition:
+  #     - condition: state
+  #       entity_id: input_boolean.holiday_mode
+  #       state: "off"
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Light on
+  #             - condition: state
+  #               entity_id: binary_sensor.lights_out
+  #               state: "off"
+  #             - condition: or
+  #               conditions:
+  #                 - condition: sun
+  #                   before: sunrise 
+  #                   after: sunset 
+  #                 - condition: numeric_state
+  #                   entity_id: sensor.guest_bedroom_motion_illuminance_lux
+  #                   below: input_number.low_light_threshold
+  #             - condition: state
+  #               entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+  #               state: "on"
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id: 
+  #                   - light.guest_bedroom_bedside_lamp_left
+  #                   - light.guest_bedroom_bedside_lamp_right
+  #                   - light.spare_room_lights
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Light off
+  #             - condition: state
+  #               entity_id: input_boolean.guest_bedroom_allow_lights_off
+  #               state: "on" 
+  #             - condition: not 
+  #               conditions:
+  #                 - condition: state  
+  #                   entity_id: sensor.daves_phone_espresence
+  #                   state: spareroom  
+  #                 - condition: state 
+  #                   entity_id: sensor.gems_phone_espresence
+  #                   state: spareroom  
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id:
+  #                   - light.guest_bedroom_bedside_lamp_left
+  #                   - light.guest_bedroom_bedside_lamp_right
+  #                   - light.spare_room_lights
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Low Light
+  #             - condition: and
+  #               conditions:
+  #                 - condition: state
+  #                   entity_id: light.guest_bedroom_bedside_lamp_left
+  #                   state: "off"
+  #                 - condition: state
+  #                   entity_id: light.guest_bedroom_bedside_lamp_right
+  #                   state: "off"
+  #                 - condition: state
+  #                   entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+  #                   state: "on"
+  #             - condition: state
+  #               entity_id: binary_sensor.guest_bedroom_motion_occupancy
+  #               state: "on"
+  #             - condition: state
+  #               entity_id: binary_sensor.lights_out
+  #               state: "off"
+  #           sequence:
+  #             - service: light.turn_on
+  #               data: {}
+  #               target:
+  #                 entity_id:
+  #                   - light.guest_bedroom_bedside_lamp_left
+  #                   - light.guest_bedroom_bedside_lamp_right
+  #         - conditions:
+  #             - condition: trigger
+  #               id:
+  #                 - Good Light
+  #           sequence:
+  #             - service: light.turn_off
+  #               data: {}
+  #               target:
+  #                 entity_id:
+  #                   - light.guest_bedroom_bedside_lamp_left
+  #                   - light.guest_bedroom_bedside_lamp_right
+  #                   - light.spare_room_lights
 
-###############################
-#    Smart Button Upstairs 1  #
-###############################
+##############################################
+#    Smart Button Upstairs 1 migrated to UI  #
+##############################################
 
-  - id: smart_button_upstairs_1_automations
-    alias: Smart Button Upstairs 1 Automations
-    description: ""
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: state
-        entity_id:
-          - sensor.smart_button_upstairs_1_action
-        id: Casper & Sky toggle 
-        to: single
-      - platform: state
-        entity_id:
-          - sensor.smart_button_upstairs_1_action
-        attribute: action
-        to: release 
-        id: Night Lights
-    condition: []
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Casper & Sky toggle 
-            sequence:
-              - service: script.spare_room_tv_toggle
-                data: {} 
-          - conditions:
-              - condition: trigger
-                id: Night Lights
-            sequence:
-              - service: scene.turn_on
-                data: {}
-                target: 
-                  entity_id: scene.spare_room_night_lights
+  # - id: smart_button_upstairs_1_automations
+  #   alias: Smart Button Upstairs 1 Automations
+  #   description: ""
+  #   initial_state: true
+  #   mode: single
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - sensor.smart_button_upstairs_1_action
+  #       id: Casper & Sky toggle 
+  #       to: single
+  #     - platform: state
+  #       entity_id:
+  #         - sensor.smart_button_upstairs_1_action
+  #       id: Ironing 
+  #       to: double 
+  #     - platform: state
+  #       entity_id: sensor.smart_button_upstairs_1_action
+  #       to: release 
+  #       id: Night Lights
+  #   condition: []
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Casper & Sky toggle 
+  #           sequence:
+  #             - service: script.spare_room_tv_toggle
+  #               data: {} 
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Night Lights
+  #           sequence:
+  #             - service: script.spare_room_night_light
+  #               data: {}
+  #         - conditions:
+  #             - condition: trigger 
+  #               id: Ironing
+  #           sequence:
+  #             - service: script.ironing_lights
+  #               data: {} 
+              
 
-#####################################
-#    TV and Sky Toggle on and off   #
-#####################################
+###############################################################
+#    TV and Sky Toggle on and off   migrated to UI 09/08/2024 #
+###############################################################
 
-  - id: spare_room_tv_toggle_on_and_off 
-    alias: Spare Room TV Toggle On and Off 
-    description: ""
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: state
-        entity_id:
-          - media_player.sky_q_guest_bedroom_mini
-        id: Casper & Sky toggle on 
-        to: playing 
-      - platform: state
-        entity_id:
-          - media_player.sky_q_guest_bedroom_mini 
-        id: Casper & Sky toggle off  
-        to: "off" 
-    condition: []
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Casper & Sky toggle on 
-            sequence:
-              - service: script.spare_room_tv_toggle
-                data: {} 
-          - conditions:
-              - condition: trigger
-                id: Casper & Sky toggle off  
-            sequence:
-              - service: script.spare_room_tv_toggle
-                data: {} 
+  # - id: spare_room_tv_toggle_on_and_off 
+  #   alias: Spare Room TV Toggle On and Off 
+  #   description: ""
+  #   initial_state: true
+  #   mode: single
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - media_player.sky_q_guest_bedroom_mini
+  #       id: Casper & Sky toggle on 
+  #       from: "off"
+  #       to: playing 
+  #     - platform: state
+  #       entity_id:
+  #         - media_player.sky_q_guest_bedroom_mini 
+  #       id: Casper & Sky toggle off  
+  #       from: 
+  #         - playing
+  #         - paused  
+  #       to: "off" 
+  #   condition: []
+  #   action:
+  #     - choose:
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Casper & Sky toggle on 
+  #           sequence:
+  #             - service: script.spare_room_tv_toggle
+  #               data: {} 
+  #         - conditions:
+  #             - condition: trigger
+  #               id: Casper & Sky toggle off  
+  #           sequence:
+  #             - service: script.spare_room_tv_toggle
+  #               data: {} 
+
+######################################
+# Camera Privacy Toggle on and off   #
+######################################
+
+  # - id: '1717432463815'
+  #   alias: 'Spare Room Camera Control'
+  #   description: ''
+  #   trigger:
+  #   - platform: state
+  #     entity_id: group.spare_room_motion
+  #     from: 'off'
+  #     to: 'on'
+  #     id: Spare Room Motion
+  #     for:
+  #       hours: 0
+  #       minutes: 0
+  #       seconds: 5
+  #   - platform: state
+  #     entity_id: group.spare_room_motion
+  #     from: 'on'
+  #     to: 'off'
+  #     id: Spare Room No Motion
+  #     for:
+  #       hours: 0
+  #       minutes: 3
+  #       seconds: 0
+  #   - platform: state
+  #     entity_id:
+  #       - camera.guest_bedroom_camera_hd_stream
+  #       - camera.guest_bedroom_camera_sd_stream
+  #     to: unavailable
+  #     id: Stream Unavailable
+  #   for:
+  #     hours: 0
+  #     minutes: 1
+  #     seconds: 0
+  #   condition: []
+  #   action:
+  #   - choose:
+  #     - conditions:
+  #       - condition: trigger
+  #         id:
+  #         - Spare Room Motion
+  #       - condition: state
+  #         entity_id: input_boolean.allow_spare_room_camera_view
+  #         state: 'off'
+  #       - condition: state
+  #         entity_id: switch.guest_bedroom_camera_privacy
+  #         state: 'on'
+  #       sequence:
+  #       - service: switch.turn_off
+  #         data: {}
+  #         target:
+  #           entity_id: switch.guest_bedroom_camera_privacy
+  #     - conditions:
+  #       - condition: trigger
+  #         id:
+  #         - Spare Room No Motion
+  #       - condition: state
+  #         entity_id: switch.guest_bedroom_camera_privacy
+  #         state: 'off'
+  #       sequence:
+  #       - service: switch.turn_on
+  #         target:
+  #           entity_id: switch.guest_bedroom_camera_privacy
+  #         data: {}
+  #   mode: parallel 
+  #   max: 10
 
 
 ###########################
@@ -294,4 +394,3 @@ script:
               call_interruption: 1
               call_media_system_off: 1
     mode: single
-
