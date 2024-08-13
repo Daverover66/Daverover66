@@ -1,420 +1,540 @@
 ###############################################################################
-#   @author               :   Jeffrey Stone
-#   @date                 :   02/19/2019
-#   @package              :   Presence
-#   @description          :   A Collection of Presence Related Trackers and Sensors
+#   @author         :   Jeffrey Stone
+#   @date           :   02/19/2019
+#   @package        :   Presence
+#   @description    :   A Collection of Presence Related Trackers and Sensors
 #
-#   @modified by          :   Chris Heder (@chrisron95)
-#   @date                 :   05/12/2022
-#  
-#   @further modified by  :   Dave Forrester (@Daverover66)
-#   @date                 :   20/01/2024
-###############################################################################    
-
-##############################
-#        Helpers             #
-##############################
-    
-##############################
-#        Datetime            #
-##############################
-
-input_datetime:
-  last_time_home_dave:
-    name: Dave Last Seen
-    has_date: true
-    has_time: true
-  last_time_home_gem:
-    name: Gem Last Seen
-    has_date: true
-    has_time: true
-#  last_time_home_kaitlyn:
-#    name: Kaitlyn Last Seen
-#    has_date: true
-#    has_time: true
-
-##############################
-#        Text                #
-##############################
-
-##############################
-#        Group               #
-##############################
-
-group:
-  family:
-    name: Family
-    entities:
-      - person.david_forrester
-      - person.gem_forrester
-      - sensor.dave_is_in_da_hoose
-      - sensor.gem_is_in_da_hoose
-
-  arriving:
-    name: Arriving
-    entities: []
-
-  house_presence:
-    name: House Presence
-    entities: []
-
-  upstairs_presence:
-    name: Upstairs Presence
-    entities:
-      - binary_sensor.main_bedroom_fp2_presence_sensor_1
-      - binary_sensor.guest_bedroom_camera_cell_motion_detection
-      - binary_sensor.jamie_s_room_camera_cell_motion_detection
-      - binary_sensor.sean_s_room_camera_cell_motion_detection
-      - binary_sensor.loft_camera_cell_motion_detection
-      - binary_sensor.guest_bedroom_motion_occupancy
-      - binary_sensor.jack_and_jill_presence_occupancy
-      - binary_sensor.jamie_room_presence_occupancy
-      - binary_sensor.sean_room_presence_occupancy
-      - binary_sensor.main_bathroom_presence_occupancy
-      - binary_sensor.office_presence_sensor_occupancy
-      - binary_sensor.upper_landing_presence_occupancy
-      
-
-  downstairs_presence:
-    name: Downstairs Presence
-    entities:
-      - binary_sensor.hallway_camera_cell_motion_detection
-      - binary_sensor.camera_hub_g3_ddd9_motion_sensor
-      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-      - binary_sensor.living_room_fp2_presence_sensor_1
-      - binary_sensor.hallway_presence_occupancy
-      - binary_sensor.hallway_presence_2_occupancy
-      - binary_sensor.cloakroom_presence_occupancy
-      - binary_sensor.dining_room_presence_sensor_occupancy
-      - binary_sensor.lower_landing_motion_occupancy
-      - binary_sensor.utility_room_presence_2_occupancy
+#   @modified       :   David Forrester 
+#   @date           :   02/07/2024
+###############################################################################
 
 
-##############################
-#        Sensors             #
-##############################
+#############################
+#     Template Sensors      # 
+#############################
+template:
+####################################### 
+#    Room Occupancy Binary Sensors    # 
+####################################### 
+  - binary_sensor:
+    - name: kitchen_occupied
+      unique_id: kitchen_occupied
+      icon: mdi:stove 
+      state: >
+        {{ states.binary_sensor | 
+              selectattr('entity_id', 'in', area_entities('kitchen')) |
+              rejectattr('attributes.device_class', 'undefined') |
+              selectattr('attributes.device_class', 'search', '(occupancy|motion|door|running)') | 
+              selectattr('state', 'eq', 'on') | 
+              map(attribute='entity_id') |
+              list | count > 0}}
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'kitchen') 
+          | list 
+          | count }}
 
-template:        
-##############################
-#        MQTT                #
-##############################
+    - name: living_room_occupied
+      unique_id: living_room_occupied
+      icon: mdi:sofa 
+      state: >
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('living room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'livingroom') 
+          | list 
+          | count }}
 
-mqtt:
-  sensor:
-    - name: "Family Arrived"
-      state_topic: "house/family/arrived"
-      payload_available: "online"
-      payload_not_available: "offline"
-    - name: "Family Arrived"
-      state_topic: "house/family/arrived"
-      payload_available: "online"
-      payload_not_available: "offline"
+    - name: utility_room_occupied
+      unique_id: utility_room_occupied
+      icon: mdi:washing-machine 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('utility room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
 
-##############################
-#        Template            #
-##############################
+    - name: cloakroom_occupied
+      unique_id: cloakroom_occupied
+      icon: mdi:toilet 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('cloakroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
 
-template:      
+    - name: dining_room_occupied
+      unique_id: dining_room_occupied
+      icon: mdi:silverware-fork-knife 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('dining room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'diningroom') 
+          | list 
+          | count }}
+
+    - name: hallway_occupied
+      unique_id: hallway_occupied
+      icon: mdi:walk 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('hallway')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: landing_occupied
+      unique_id: landing_occupied
+      icon: mdi:stairs-up 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('landing')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: loft_occupied
+      unique_id: loft_occupied
+      icon: mdi:home-roof  
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('loft')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: en_suite_occupied
+      unique_id: en_suite_occupied
+      icon: mdi:shower-head 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('en-suite bathroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: guest_bedroom_occupied
+      unique_id: guest_bedroom_occupied
+      icon: mdi:bed-double 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('guest bedroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'spareroom') 
+          | list 
+          | count }}
+
+    - name: jamies_room_occupied
+      unique_id: jamies_room_occupied
+      icon: mdi:bed 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities("jamie's room")) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', "jamiesroom") 
+          | list 
+          | count }}
+
+    - name: kids_bathroom_occupied
+      unique_id: kids_bathroom_occupied
+      icon: mdi:bathtub 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('kids bathroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: main_bathroom_occupied
+      unique_id: main_bathroom_occupied
+      icon: mdi:shower 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('main bathroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+
+    - name: master_bedroom_occupied
+      unique_id: master_bedroom_occupied
+      icon: mdi:bed-queen 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('master bedroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'mainbedroom') 
+          | list 
+          | count }}
+
+    - name: office_occupied
+      unique_id: office_occupied
+      icon: mdi:desk 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('office')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'office') 
+          | list 
+          | count }}
+
+    - name: seans_room_occupied
+      unique_id: seans_room_occupied
+      icon: mdi:bunk-bed 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities("sean's room")) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', "seansroom") 
+          | list 
+          | count }}
+
+    - name: garage_occupied
+      unique_id: garage_occupied
+      icon: mdi:garage-variant 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('garage')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0}}
+      delay_off: '00:01:00'
+      attributes: 
+        people_count: >
+          {{ expand('group.room_presence') 
+          | selectattr('state', 'eq', 'garage') 
+          | list 
+          | count }}
+  
+
+    - name: living_room_tv_status 
+      unique_id: living_room_tv_status
+      state: >
+        {{ is_state('media_player.sky_q_main','playing') and is_state('switch.living_room_tv','on')}}
+      device_class: running
+
+    - name: kitchen_tv_status 
+      unique_id: kitchen_tv_status
+      state: >
+        {{ is_state('media_player.sky_q_kitchen_mini_2','playing') and is_state('switch.ingrid','on')}}
+      device_class: running
+
+    - name: main_bedroom_tv_status 
+      unique_id: main_bedroom_tv_status
+      state: >
+        {{ is_state('media_player.32_sharp_roku_tv','on') }}
+      device_class: running
+
+    - name: guest_bedroom_tv_status 
+      unique_id: guest_bedroom_tv_status
+      state: >
+        {{ is_state('media_player.sky_q_guest_bedroom_mini','playing') and is_state('switch.casper','on')}}
+      device_class: running
+
   - sensor:
-      - name: "Dave"
-        unique_id: dave_location
-        state: >-
-          {% set person = states('person.david_forrester') %}
-          {%- if person in ['abbotsford','abbotsford_house'] %}
-            Abbotsford House
-          {% elif person in ['Asda'] %}
-            Asda
-          {% elif person in ['dave_s_mum_and_dad'] %}
-            Daves Mum and Dad
-          {% elif person in ['dawn','john','dawn_john'] %}
-            The Winpennys
-          {% elif person in ['dentist'] %}
-            Penicuik Dentist
-          {% elif person in ['doctors','surgery','doctors_surgery'] %}
-            St Ronans Health Centre
-          {% elif person in ['galashiels','playpark','galashiels_playpark'] %} 
-            Galashiels Playpark
-          {% elif person in ['gem_s_mum_and_dad'] %}
-            Moxo and Poxo
-          {% elif person in ['gem_work'] %}
-            Gems Work
-          {% elif person in ['harestanes'] %}
-            Harestanes Adventure Park
-          {% elif person in ['tesco'] %} 
-            Tesco
-          {% elif person in ['karen'] %}
-            Karens Place
-          {% elif person in ['swimming'] %}
-            Galashiels Swimming Pool
+    - name: dave_location 
+      unique_id: dave_location 
+      state: >
+        {% if states('sensor.dave_room') in ['not_home','NA'] %}
+        {% set person = states('person.david_forrester') %}
+        {% else %}
+        {% set person = states('sensor.dave_room') %}
+        {% endif %}
+          {%- if person in ['Asda','Tesco'] %}
+                  Supermarket
+          {% elif person in ['B&Q Galashiels'] %}
+                  B&Q
+          {% elif person in ['BGH','Dentist','Doctors Surgery'] %}
+                  Medical Appointment
+          {% elif person in ["Dave's mum and dad",'Dawn & John',"Gem's mum and dad",'Karen'] %}
+                  Visiting Family
+          {% elif person in ['Clovenfords PS'] %}
+                  School
+          {% elif person in ['Gala Vet'] %}
+                  Vet Appointment
+          {% elif person in ['Peebles Playpark','Galashiels Playpark','Harestanes'] %}
+                  Playpark
+          {% elif person in ['Swimming'] %}
+                  Swimming
+          {% elif person in ['McDonalds'] %}
+                  Fast Food
           {% else %}
-            {% if person in ['not_home','away'] %}
-              {{ states('sensor.daves_samsung_galaxy_geocoded_location') }} 
+            {% if person in ['not_home'] %}
+              {{ state_attr('sensor.dave_location','city') }}
             {% else %}
-              {{ states('person.david_forrester') }}
+              {% if person in ['livingroom'] %}
+              Living Room
+              {% elif person in ['kitchen'] %}
+              Kitchen
+              {% elif person in ['office'] %}
+              Office
+              {% elif person in ['jamiesroom'] %}
+              Jamie's Room
+              {% elif person in ['seansroom'] %}
+              Sean's Room
+              {% elif person in ['spareroom'] %}
+              Guest Bedroom
+              {%- elif person in ['mainbedroom'] and (now().hour | int >= 22 or now().hour | int < 7 ) %}
+              In bed
+              {% elif person in ['mainbedroom'] %}
+              Master Bedroom
+              {% else %}
+              Undetermined
+              {% endif %}
             {%- endif %}
           {%- endif %}
- 
-      - name: "Gem"
-        unique_id: gem_location
-        state: >-
-          {% set person = states('person.gem_forrester') %}
-          {%- if person in ['abbotsford','abbotsford_house'] %}
-            Abbotsford House
-          {% elif person in ['Asda'] %}
-            Asda
-          {% elif person in ['dave_s_mum_and_dad'] %}
-            Daves Mum and Dad
-          {% elif person in ['dawn','john','dawn_john'] %}
-            The Winpennys
-          {% elif person in ['dentist'] %}
-            Penicuik Dentist
-          {% elif person in ['doctors','surgery','doctors_surgery'] %}
-            St Ronans Health Centre
-          {% elif person in ['galashiels','playpark','galashiels_playpark'] %} 
-            Galashiels Playpark
-          {% elif person in ['gem_s_mum_and_dad'] %}
-            Moxo and Poxo
-          {% elif person in ['gem_work'] %}
-            Gems Work
-          {% elif person in ['harestanes'] %}
-            Harestanes Adventure Park
-          {% elif person in ['tesco'] %} 
-            Tesco
-          {% elif person in ['karen'] %}
-            Karens Place
-          {% elif person in ['swimming'] %}
-            Galashiels Swimming Pool
+      attributes:
+        address: >
+          {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location','name')}} {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location','thoroughfare')}}
+        city: >
+          {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location', 'locality')}}
+        region: >
+          {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location', 'sub_administrative_area')}}
+        postcode: >
+          {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location', 'postal_code')}}
+        country: >
+          {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location', 'administrative_area')}}
+        source: >
+          {% if states('sensor.dave_room') in ['not_home','NA'] %}
+          person
           {% else %}
-            {% if person in ['not_home','away'] %}
-              {{ states('sensor.sm_s901b_geocoded_location') }} 
+          room_presence
+          {% endif %}
+        general: >
+          {% if states('sensor.dave_room') not in ['not_home','NA'] %}
+          home
+          {% else %}
+          {{ states('person.david_forrester') }}
+          {% endif %}
+
+    - name: gem_location
+      unique_id: gem_location
+      state: >-
+        {% if states('sensor.gem_room') in ['not_home','NA'] %}
+        {% set person = states('person.gem_forrester') %}
+        {% else %}
+        {% set person = states('sensor.gem_room') %}
+        {% endif %}
+          {%- if person in ['Asda','Tesco'] %}
+                  Supermarket
+          {% elif person in ['B&Q Galashiels'] %}
+                  B&Q
+          {% elif person in ['BGH','Dentist','Doctors Surgery'] %}
+                  Medical Appointment
+          {% elif person in ["Dave's mum and dad",'Dawn & John',"Gem's mum and dad",'Karen'] %}
+                  Visiting Family
+          {% elif person in ['Clovenfords PS'] %}
+                  School
+          {% elif person in ['Gala Vet'] %}
+                  Vet Appointment
+          {% elif person in ['Peebles Playpark','Galashiels Playpark','Harestanes'] %}
+                  Playpark
+          {% elif person in ['Swimming'] %}
+                  Swimming
+          {% elif person in ['McDonalds'] %}
+                  Fast Food
+          {% elif person in ['Hairdresser'] %}
+                  Hairdresser
+          {% elif person in ['Gem Work'] %}
+                  At work
+          {% else %}
+            {% if person in ['not_home'] %}
+              {{ state_attr('sensor.gem_location','city') }}
             {% else %}
-              {{ states('person.gem_forrester') }}
+              {% if person in ['livingroom'] %}
+              Living Room
+              {% elif person in ['kitchen'] %}
+              Kitchen
+              {% elif person in ['office'] %}
+              Office
+              {% elif person in ['jamiesroom'] %}
+              Jamie's Room
+              {% elif person in ['seansroom'] %}
+              Sean's Room
+              {% elif person in ['spareroom'] %}
+              Guest Bedroom
+              {%- elif person in ['mainbedroom'] and (now().hour | int >= 22 or now().hour | int < 7 ) %}
+              In bed
+              {% elif person in ['mainbedroom'] %}
+              Master Bedroom
+              {% else %}
+              Undetermined
+              {% endif %}
             {%- endif %}
           {%- endif %}
+      attributes:
+        address: >
+          {{ state_attr('sensor.sm_s901b_geocoded_location','name')}} {{ state_attr('sensor.daves_samsung_galaxy_geocoded_location','thoroughfare')}}
+        city: >
+          {{ state_attr('sensor.sm_s901b_geocoded_location', 'locality')}}
+        region: >
+          {{ state_attr('sensor.sm_s901b_geocoded_location', 'sub_administrative_area')}}
+        postcode: >
+          {{ state_attr('sensor.sm_s901b_geocoded_location', 'postal_code')}}
+        country: >
+          {{ state_attr('sensor.sm_s901b_geocoded_location', 'administrative_area')}}
+        source: >
+          {% if states('sensor.gem_room') in ['not_home','NA'] %}
+          person
+          {% else %}
+          room_presence
+          {% endif %}
+        general: >
+          {% if states('sensor.gem_room') not in ['not_home','NA'] %}
+          home
+          {% else %}
+          {{ states('person.gem_forrester') }}
+          {% endif %}
 
-automation:
+    - name: gem_distance
+      unique_id: gem_distance 
+      state: >-
+        {{ state_attr('sensor.gems_phone_espresence','distance')}}
 
-##############################
-#        Automations         #
-##############################
+    - name: dave_phone_distance
+      unique_id: dave_phone_distance 
+      state: >-
+        {{ state_attr('sensor.daves_phone_espresence','distance')}}
 
-##############################
-#        Family Arrived      #
-##############################
+    - name: daves_keys_distance
+      unique_id: daves_keys_distance 
+      state: >-
+        {{ state_attr('sensor.daves_keys','distance')}}
 
-    - id: family_has_arrived
-      alias: Family Has Arrived
-      description: ""
-      mode: single
-      initial_state: true
-      trigger:
-        - platform: state
-          entity_id:
-            - binary_sensor.family_home
-          from: "off"
-          to: "on"
-          id: Auto
-        - platform: state
-          entity_id:
-            - input_boolean.family_is_home
-          from: "off"
-          to: "on"
-          id: Manual
-      condition:
-        - condition: state
-          entity_id: input_boolean.family_is_home
-          state: "off"
-      action:
-        - service: input_boolean.turn_on
-          data: {}
-          target:
-            entity_id: input_boolean.family_is_home
-      
-##############################
-#        Family Left         #
-##############################
+    - name: max_distance
+      unique_id: max_distance 
+      state: >-
+        {{ state_attr('sensor.max','distance')}}
 
-  - id: family_has_left
-    alias: "Family has left"
-    description: ""
-    mode: single
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id:
-          - binary_sensor.family_home
-        from: "on"
-        to: "off"
-        id: Auto
-      - platform: state
-        entity_id:
-          - input_boolean.family_is_home
-        from: "on"
-        to: "off"
-        id: Manual
-    condition: []
-    action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id:
-                  - Auto
-            sequence:
-              - service: input_boolean.turn_off
-                data: {}
-                target:
-                 entity_id: input_boolean.family_is_home
+    - name: huxley_distance
+      unique_id: huxley_distance 
+      state: >-
+        {{ state_attr('sensor.huxley','distance')}}
 
-###########################
-#         Travel          #
-###########################
+### ESPresence sensors  ######
+sensor:
+  - platform: mqtt_room
+    device_id: "iBeacon:ca4a4904-6b45-43cb-b423-84e83fe0e8c0-100-1"
+    name: 'Daves Phone ESPresence'
+    state_topic: 'espresense/devices/iBeacon:ca4a4904-6b45-43cb-b423-84e83fe0e8c0-100-1'
+    timeout: 10
+    away_timeout: 120
 
+  - platform: mqtt_room
+    device_id: "iBeacon:d551de33-0f97-445c-b5f0-084dee5cfd3f-100-1"
+    name: 'Gems Phone ESPresence'
+    state_topic: 'espresense/devices/iBeacon:d551de33-0f97-445c-b5f0-084dee5cfd3f-100-1'
+    timeout: 10
+    away_timeout: 120
 
-    
-####################################
-#          Welcome Home            #
-####################################
+  - platform: mqtt_room 
+    device_id: "tile:fbb32130a48a"
+    name: 'Daves Keys'
+    state_topic: 'espresense/devices/tile:fbb32130a48a'
+    timeout: 10
+    away_timeout: 120
 
-  - id: welcome_home
-    alias: Welcome Home
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id:
-          - person.david_forrester
-          - person.gem_forrester
-        from: "not_home"
-        to: "home"
-    action:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.welcome_home
-                state: "on"
-            sequence:
-              - wait_for_trigger:
-                  - platform: state
-                    entity_id: binary_sensor.front_door_sense_contact
-                    from: "off"
-                    to: "on"
-              - delay:
-                  hours: 0
-                  minutes: 0
-                  seconds: 10
-                  milliseconds: 0
-              - service: script.turn_on
-                entity_id: script.welcome_briefing
-        default:
-          - service: group.set
-            data:
-              object_id: "arriving"
-              add_entities: >-
-                {{ trigger.to_state.entity_id }}
-          - wait_for_trigger:
-              - platform: state
-                entity_id: binary_sensor.front_door
-                from: "off"
-                to: "on"
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 10
-              milliseconds: 0
-          - service: script.status_annc
-            data:
-              who: "{{ states('sensor.room_presence') }}"
-              call_interuption: 1
-              speech_message: >
-                {% set person = expand('group.arriving')|map(attribute='name')|join(' and ') %}
-                {% set peoplecount = expand('group.arriving') | count %}
-                {% if peoplecount == 1 %}
-                  {% set is_are = ' is ' %}
-                  {% set has_have = ' has ' %}
-                {% else %}
-                  {% set is_are = ' are ' %}
-                  {% set has_have = ' have ' %}
-                {% endif %}
-                {%- macro greeting_sentence(person, is_are, has_have) -%}
-                  {{ [
-                  person ~ has_have + " arrived.",
-                  "My sensors are picking up the presence of additional humans. " ~ person ~ has_have + " been identified as home.",
-                  "Guess who is in the hub?" ~ person ~ is_are,
-                  "I am sensing a disturbance in the force. "  ~ person +" must be back!",
-                  person ~ is_are + "now in the house.",
-                  person  ~ is_are + " now here.  Welcome Home.",
-                  person  ~ is_are + " now here.",
-                  "Just a quick announcement. " ~ person ~ has_have + "  arrived!",
-                  person ~ has_have + " finally made it home."
-                  ] | random }}
-                {%- endmacro -%}
-                {{greeting_sentence(person, is_are, has_have)}}
-          - delay: 00:02:00
-          - service: group.set
-            data:
-              object_id: "arriving"
-              entities: []
+  - platform: mqtt_room 
+    device_id: "tile:d26e3fe15d98"
+    name: 'Max'
+    state_topic: 'espresense/devices/tile:d26e3fe15d98'
+    timeout: 10
+    away_timeout: 120
 
-  - id: guests_have_arrived
-    alias: Guests have arrived
-    trigger:
-      - platform: state
-        entity_id:
-          - person.kaitlyn
-          - person.ronald
-          - person.mari
-          - person.rheena
-          - person.danielle
-          - person.daniel
-          - person.brian
-          - person.rathnam
-          - person.nico
-        from: "not_home"
-        to: "home"
-    action:
-      # - service: script.standby
-      - service: script.family_is_home
-      - service: script.visitors_here
-    initial_state: true
+  - platform: mqtt_room 
+    device_id: "tile:f0171e3fc16b"
+    name: 'Huxley'
+    state_topic: 'espresense/devices/tile:f0171e3fc16b'
+    timeout: 10
+    away_timeout: 120
 
-  - id: guests_have_left
-    alias: Guests have left
-    trigger:
-      - entity_id: group.friends
-        from: home
-        to: not_home
-        platform: state
-    action:
-      - service: script.visitors_gone
-      - condition: not
-        conditions:
-          - condition: state
-            entity_id: group.family
-            state: home
-      - service: script.family_is_away
-        data: {}
-    initial_state: true
-
+#################
+#    Scripts    # 
+################# 
 script:
-  family_is_home:
-    sequence:
-      - condition: state
-        entity_id: group.family
-        state: "home"
-      - service: script.standby
 
-  family_is_away:
-    sequence:
-      - condition: state
-        entity_id: group.family
-        state: "not_home"
-      # - service: script.appliances_off
-      - service: scene.turn_on
-        entity_id: scene.all_off
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.sentry_mode
-      - service: input_boolean.turn_off
-        entity_id: input_boolean.motion_lights_master
-      # - service: scene.turn_on
-      #   entity_id: scene.all_fans_off
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.welcome_home
+  
+
