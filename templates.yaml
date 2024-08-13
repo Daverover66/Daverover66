@@ -9,6 +9,9 @@
 #   @modified       :   17/05/2024                         #
 ############################################################
 
+###########################
+#     Binary Sensors      #
+###########################
 
 - binary_sensor:
   - name: "Daves Samsung Galaxy Home"
@@ -16,43 +19,36 @@
     state: >
       {{ states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ"}}
 
-- binary_sensor:
   - name: "Gems Samsung Galaxy Home"
     unique_id: gems_samsung_galaxy_home
     state: >
       {{ states('sensor.sm_s901b_wifi_connection') == "ForresterQ5G" or states('sensor.sm_s901b_wifi_connection') == "ForresterQ" }}
 
-- binary_sensor:
   - name: "Seans Samsung Tablet Home"
     unique_id: seans_samsung_galaxy_home
     state: >
       {{ states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ"}}
 
-- binary_sensor:
   - name: "Jamies Samsung Tablet Home"
     unique_id: jamies_samsung_galaxy_home
     state: >
       {{ states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ5G" or states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ"}}
 
-- binary_sensor: 
   - name: "Dave Home"
     unique_id: dave_home 
     state: >-
       {{ is_state('person.david_forrester', 'Home') or is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
 
-- binary_sensor: 
   - name: "Gem Home"
     unique_id: gem_home 
     state: >- 
       {{ is_state('person.gem_forrester', 'Home') or is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
       
-- binary_sensor: 
   - name: "Family Home"
     unique_id: family_home 
     state: >- 
       {{ is_state('binary_sensor.gem_home','on') or is_state('binary_sensor.dave_home','on')}}
 
-- binary_sensor:
   - name: "Fridge Too Warm"
     unique_id: fridge_too_warm_sensor
     state: >
@@ -65,7 +61,10 @@
       {{ states('sensor.freezer_thermometer_temperature') | int(0) > 1 }}
     device_class: problem
 
-        
+####################
+#     Sensors      #
+####################
+
 - sensor:
   ##### Low Battery List ######
   - name: "Low Battery Devices"
@@ -96,52 +95,25 @@
         {{ 'unavailable' }}
       {% endif %}    
 
-- sensor:
   ##### day of week #####
   - name: "Day of Week"
     unique_id: day_of_week
     state: >
       {{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A') }}
 
-- sensor:
   #### day of the year #####
   - name: "Day of Year"
     unique_id: day_of_year 
     state: >
       {{ now().strftime('%j')|int(9999) }}
 
-
-- sensor:
-  #### Lights On Counter ######
-  - name: "Lights On Count"
-    unique_id: lights_on_count
-    state: >
-      {{ states.light
-          | rejectattr('attributes.friendly_name','eq','Valkyrie Backlight')
-          | rejectattr('attributes.friendly_name','eq','Upstairs Landing Lights')
-          | rejectattr('attributes.friendly_name','eq','Kitchen Light 1')
-          | rejectattr('attributes.friendly_name','eq','Kitchen Light 2')
-          | rejectattr('attributes.friendly_name','eq','Kitchen Light 3')
-          | rejectattr('attributes.friendly_name','eq','Kitchen Light 4')
-          | rejectattr('attributes.friendly_name','eq','Kitchen Light 5')
-          | rejectattr('attributes.friendly_name','eq','Living Room Light 1')
-          | rejectattr('attributes.friendly_name','eq','Living Room Light 2')
-          | rejectattr('attributes.friendly_name','eq','Living Room Light 3')
-          | rejectattr('attributes.friendly_name','eq','Living Room Light 4')
-          | rejectattr('attributes.friendly_name','eq','Living Room Light 5')
-          | rejectattr('attributes.entity_id','defined')
-          | selectattr('state', 'eq', 'on')
-          | list | count }}
-
-
-- sensor:
   ### Garage Dehumidifier Water Tray Status ###
   - name: "Garage Dehumidifier Water Tray Status"
     unique_id: garage_dehumidifier_water_tray_status
     state: >
       {{ state_attr('humidifier.garage_dehumidifier_2' , 'unknown_11') }}
 
-- sensor:
+
   ### Garage Dehumidifier Water Tray Full ###
   - name: "Garage Dehumidifier Water Tray Full"
     unique_id: garage_dehumidifier_water_tray_full
@@ -155,7 +127,7 @@
       {{ states('sensor.garage_dehumidifier_water_tray_status') == "0" 
         or states('sensor.garage_dehumidifier_water_tray_status') == "2" }}
 
-- sensor:
+
   ### Last Alexa Called ###
   - name: "Last Alexa Called"
     unique_id: last_alexa_called
@@ -183,9 +155,6 @@
       | first is defined}}
       
 
-      
-
-- sensor:
   ### Room Presence for Alexa ###
   - name: "Room Presence For Alexa"
     unique_id: room_presence_for_alexa
@@ -208,6 +177,35 @@
       {% else %}
         Living Room
       {% endif %}
+
+  ### another location based sensor ###
+  - name: "Dave is in da hoose"
+    unique_id: dave_is_in_da_hoose
+    state: |-
+      {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
+      {% if dave_location == "on" %}
+        home
+      {% else %}
+      not_home
+      {% endif %}
+
+  ### yet another location based sensor ###
+  - name: "Gem is in da hoose"
+    unique_id: gem_is_in_da_hoose
+    state: |-
+      {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
+      {% if gem_location == "on" %}
+        home
+      {% else %}
+      not_home
+      {% endif %}
+
+  #### Number of HACS updates available ######
+  - name: "HACS Updates Available"
+    unique_id: hacs_updates_available 
+    icon: mdi:package 
+    state: >
+      {{ states.update | rejectattr('entity_id', 'in',  ['']) | selectattr('state', 'eq', 'on') | list | count }} 
 
 
 # - sensor:
@@ -232,6 +230,9 @@
 #       {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
 #         {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}
 
+#############################
+#   Trigger based sensors   #
+#############################
 
   ### Trigger based sensor to store calendar events ###
 - trigger:
@@ -245,42 +246,6 @@
         calendar_response: "{{ trigger.event.data.calendar_response }}"
       icon: mdi:calendar
 
-
-- sensor:
-  ### another location based sensor ###
-  - name: "Dave is in da hoose"
-    unique_id: dave_is_in_da_hoose
-    state: |-
-      {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
-      {% if dave_location == "on" %}
-        home
-      {% else %}
-      not_home
-      {% endif %}
-
-- sensor:
-  ### yet another location based sensor ###
-  - name: "Gem is in da hoose"
-    unique_id: gem_is_in_da_hoose
-    state: |-
-      {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
-      {% if gem_location == "on" %}
-        home
-      {% else %}
-      not_home
-      {% endif %}
-
-- sensor:
-  #### Number of HACS updates available ######
-  - name: "HACS Updates Available"
-    unique_id: hacs_updates_available 
-    icon: mdi:package 
-    state: >
-      {{ states.update | rejectattr('entity_id', 'in',  ['']) | selectattr('state', 'eq', 'on') | list | count }} 
-
-########################################
-#      Action Template Sensors         #
-########################################
 
 #########################################
 #     Gets total rainfall for the day   # 
