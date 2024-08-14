@@ -9,206 +9,34 @@
 #   @modified       :   13/08/2024                         #
 ############################################################
 
-###########################
-#     Binary Sensors      #
-###########################
+###############################
+#       Binary Sensors        # 
+###############################
 
 - binary_sensor:
-  - name: "Daves Samsung Galaxy Home"
-    unique_id: daves_samsung_galaxy_home
+  - name: "Smart Button Downstairs 1 Single Press"
+    unique_id: smart_button_downstairs_1_single_press
+    delay_off:
+      seconds: 30
     state: >
-      {{ states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.daves_samsung_galaxy_wifi_connection') == "ForresterQ"}}
+      {{ is_state('sensor.smart_button_downstairs_1_action','single')}}
 
-  - name: "Gems Samsung Galaxy Home"
-    unique_id: gems_samsung_galaxy_home
-    state: >
-      {{ states('sensor.sm_s901b_wifi_connection') == "ForresterQ5G" or states('sensor.sm_s901b_wifi_connection') == "ForresterQ" }}
+########################
+#       Sensors        # 
+########################
 
-  - name: "Seans Samsung Tablet Home"
-    unique_id: seans_samsung_galaxy_home
-    state: >
-      {{ states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ5G" or states('sensor.sean_s_samsung_galaxy_wifi_connection') == "ForresterQ"}}
-
-  - name: "Jamies Samsung Tablet Home"
-    unique_id: jamies_samsung_galaxy_home
-    state: >
-      {{ states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ5G" or states('sensor.jamie_s_samsung_tablet_wifi_connection') == "ForresterQ"}}
-
-  - name: "Dave Home"
-    unique_id: dave_home 
-    state: >-
-      {{ is_state('person.david_forrester', 'Home') or is_state('device_tracker.daves_samsung_galaxy', 'home') or is_state('binary_sensor.daves_samsung_galaxy_home','on')}}
-
-  - name: "Gem Home"
-    unique_id: gem_home 
-    state: >- 
-      {{ is_state('person.gem_forrester', 'Home') or is_state('device_tracker.sm_s901b', 'home') or is_state('binary_sensor.gems_samsung_galaxy_home','on')  }} 
-      
-  - name: "Family Home"
-    unique_id: family_home 
-    state: >- 
-      {{ is_state('binary_sensor.gem_home','on') or is_state('binary_sensor.dave_home','on')}}
-
-  - name: "Fridge Too Warm"
-    unique_id: fridge_too_warm_sensor
-    state: >
-      {{ states('sensor.fridge_thermometer_temperature')  | int(0) > 10 }}
-    device_class: problem
-
-  - name: "Freezer Too Warm"
-    unique_id: freezer_too_warm_sensor
-    state: >
-      {{ states('sensor.freezer_thermometer_temperature') | int(0) > 1 }}
-    device_class: problem
-
-####################
-#     Sensors      #
-####################
 
 - sensor:
-  ##### Low Battery List ######
-  - name: "Low Battery Devices"
-    unique_id: low_battery_devices_list
-    icon: mdi:battery-low
+  #### Lights On Counter ######
+  - name: "Lights On Count"
+    unique_id: lights_on_count
     state: >
-      {% set threshold = states('input_number.battery_threshold') | int%}
-      {%- set ns = namespace(sensors=[]) -%}
-      {%- for state in states.sensor
-        | selectattr('attributes.device_class','defined')
-        | selectattr('attributes.state_class','defined')
-        | selectattr('attributes.device_class','==','battery')
-        | selectattr('attributes.state_class','==','measurement')
-        | selectattr('state','is_number') -%}
-        {%- if state.state | int <= threshold -%}
-          {% set ns.sensors = ns.sensors + [dict(name = state.name | replace(' battery', '') | replace(' Battery', ''), state = state.state | int)]%}
-        {%- endif -%}
-      {%- endfor -%}
-      {%- set batt = ns.sensors | sort(attribute = 'state') %}
-      {%- set ns = namespace(batt = '')-%}
-      {%- for state in batt -%}
-          {% set ns.batt = ns.batt + (state.name ~ ' (' ~ state.state ~'%)' ~ "\n")%}
-      {%- endfor -%}
+      {{ states.light 
+            | selectattr('entity_id','in',label_entities('Light Group')) 
+            | selectattr('state','eq','on')
+            | list 
+            | count }}
 
-      {% if ns.batt | count > 0 %}
-        {{ ns.batt | truncate(255, true, '...') }}
-      {% else %}
-        {{ 'unavailable' }}
-      {% endif %}    
-
-  ##### day of week #####
-  - name: "Day of Week"
-    unique_id: day_of_week
-    state: >
-      {{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A') }}
-
-  #### day of the year #####
-  - name: "Day of Year"
-    unique_id: day_of_year 
-    state: >
-      {{ now().strftime('%j')|int(9999) }}
-
-  ### Garage Dehumidifier Water Tray Status ###
-  - name: "Garage Dehumidifier Water Tray Status"
-    unique_id: garage_dehumidifier_water_tray_status
-    state: >
-      {{ state_attr('humidifier.garage_dehumidifier_2' , 'unknown_11') }}
-
-
-  ### Garage Dehumidifier Water Tray Full ###
-  - name: "Garage Dehumidifier Water Tray Full"
-    unique_id: garage_dehumidifier_water_tray_full
-    state: >
-      {% if states('sensor.garage_dehumidifier_water_tray_status') == "2" %}
-        {{"full"}}
-      {% else %}
-        {{"not_full"}}
-      {% endif %}
-    availability: >
-      {{ states('sensor.garage_dehumidifier_water_tray_status') == "0" 
-        or states('sensor.garage_dehumidifier_water_tray_status') == "2" }}
-
-
-  ### Last Alexa Called ###
-  - name: "Last Alexa Called"
-    unique_id: last_alexa_called
-    state: |-
-      {% set last_called = (expand(integration_entities('alexa_media') | select('search', 'media_player'))
-      | selectattr('attributes.last_called', 'eq', True) | map(attribute='entity_id') | first )%}
-      {% if last_called == "media_player.dave_s_2nd_echo_pop" %}
-      Living Room
-      {% elif last_called == "media_player.dave_s_echo_pop" %}
-      Dining Room
-      {% elif last_called == "media_player.guest_bedroom_echo_dot" %}
-      Guest Bedroom
-      {% elif last_called == "media_player.kitchen_echo_show" %}
-      Kitchen
-      {% elif last_called == "media_player.living_room_dot" %}
-      Jamie's Room
-      {% elif last_called == "media_player.main_bedroom_dot" %}
-      Main Bedroom
-      {% elif last_called == "media_player.seans_room_dot" %}
-      Sean's Room
-      {% endif %}
-    availability: |-
-      {{ states.media_player | rejectattr('object_id','match', '(sky_q|toshiba)')
-      | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id')
-      | first is defined}}
-      
-
-  ### Room Presence for Alexa ###
-  - name: "Room Presence For Alexa"
-    unique_id: room_presence_for_alexa
-    state: |-
-      {% set room_presence = (expand('group.room_with_alexa_presence') | selectattr('state','eq','on') | map(attribute='name')) | list %}
-      {% if "living_room" in room_presence %}
-        Living Room
-      {% elif "kitchen" in room_presence %}
-        Kitchen
-      {% elif "dining_room" in room_presence %}
-        Dining Room
-      {% elif "main_bedroom" in room_presence %}
-        Main Bedroom
-      {% elif "guest_bedroom" in room_presence %}
-        Guest Bedroom
-      {% elif "Jamie" in room_presence %}
-        Jamies Room
-      {% elif "Sean" in room_presence %}
-        Seans Room
-      {% else %}
-        Living Room
-      {% endif %}
-
-  ### another location based sensor ###
-  - name: "Dave is in da hoose"
-    unique_id: dave_is_in_da_hoose
-    state: |-
-      {% set dave_location = states('binary_sensor.daves_samsung_galaxy_home')%}
-      {% if dave_location == "on" %}
-        home
-      {% else %}
-      not_home
-      {% endif %}
-
-  ### yet another location based sensor ###
-  - name: "Gem is in da hoose"
-    unique_id: gem_is_in_da_hoose
-    state: |-
-      {% set gem_location = states('binary_sensor.gems_samsung_galaxy_home')%}
-      {% if gem_location == "on" %}
-        home
-      {% else %}
-      not_home
-      {% endif %}
-
-  #### Number of HACS updates available ######
-  - name: "HACS Updates Available"
-    unique_id: hacs_updates_available 
-    icon: mdi:package 
-    state: >
-      {{ states.update | rejectattr('entity_id', 'in',  ['']) | selectattr('state', 'eq', 'on') | list | count }} 
-
-
-# - sensor:
 #   ### determine overnight low temperature for daily briefing ###
 #   - name: "Overnight Low Temp"
 #     unique_id: overnight_temp_low
@@ -219,7 +47,6 @@
 #       {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
 #         {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | min }}
 
-# - sensor:
 #   ### determine overnight high temperature for daily briefing ###
 #   - name: "Overnight High Temp"
 #     unique_id: overnight_temp_high
@@ -230,232 +57,66 @@
 #       {% set end = end.strftime("%Y-%m-%dT%H:%M:%S+00:00") %}
 #         {{ state_attr('weather.openweathermap', 'forecast') | selectattr('datetime', '>=', start) | selectattr('datetime','<=', end) | map(attribute='temperature') | list | max }}
 
-#############################
-#   Trigger based sensors   #
-#############################
-
-  ### Trigger based sensor to store calendar events ###
-- trigger:
-  - platform: event
-    event_type: calendar_poll
-  sensor:
-    - name: "Calendar Events"
-      unique_id: calendar_events
-      state: "{{ trigger.event.data.calendar_response.events | count() }}"
-      attributes:
-        calendar_response: "{{ trigger.event.data.calendar_response }}"
-      icon: mdi:calendar
-
-
-#########################################
-#     Gets total rainfall for the day   # 
-#########################################
-
-- trigger:
-  - platform: time_pattern
-    hours: /1
-  action: 
-    - service: weather.get_forecasts 
-      target: 
-        entity_id: weather.openweathermap
-      data: 
-        type: hourly
-      response_variable: my_forecast
-  sensor:
-    - name: Weather Total Expected Rainfall 24 Hours
-      unique_id: weather_total_expected_rainfall_24_hrs
-      icon: mdi:weather-pouring
-      unit_of_measurement: mm
-      state: >
-        {% set ns = namespace() %}
-        {% set ns.totalrainfall = 0 %}
-        {% for daypart in range(0,7) %}
-          {% set rainfall = my_forecast["weather.openweathermap"].forecast[daypart].precipitation %}
-          {% set rainfall_probability = my_forecast["weather.openweathermap"].forecast[daypart].precipitation_probability / 100 %}
-          {% if rainfall_probability > 0 %}
-            {% set rainfall = rainfall * rainfall_probability %}
-          {% endif %}
-          {% set ns.totalrainfall = ns.totalrainfall + rainfall %}
-        {% endfor %}
-        {{ ns.totalrainfall | float(0) | round(2) }}
-
-- trigger:
-    - platform: time_pattern
-      hours: "/1"
-      minutes: 0
-  sensor:
-    - unique_id: z2m_last_seen_entities
-      name: "Z2M Last Seen Entities"
-      state: >
-        {% set lapsed_hours = 36 %}
-        {% set ns = namespace(count=0) %}
-        {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$')  %}
-          {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
-            {% set ns.count = ns.count + 1 %}
-          {% endif %}
-        {% endfor %}
-        {{ ns.count }}     
-      attributes:
-        devices: >
-          {% set lapsed_hours = 36 %}
-          {% set result = namespace(sensors=[]) %}
-          {% for state in states.sensor | selectattr('entity_id', 'search', '.*_last_seen$') %}
-            {% if states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id),0)) > ((lapsed_hours | int) * 60 * 60)) %}
-              {% set result.sensors = result.sensors + [state.name | regex_replace(find='_last_seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
-            {% endif %}
-          {% endfor %}
-          {{ result.sensors }}
-        
-#########################################
-#   Gets min and max temp for the day   # 
-#########################################
-
-# - trigger:
-#     - platform: state
-#       entity_id: weather.openweathermap
-#     - platform: homeassistant
-#       event: start
-#     - platform: event
-#       event_type: event_template_reloaded
-#   action:
-#     - service: weather.get_forecasts
-#       data:
-#         type: daily
-#       target:
-#         entity_id: weather.openweathermap
-#       response_variable: daily
-#   sensor:
-#     - name: Forecast Daily
-#       unique_id: weather_forecast_daily
-#       state: "{{ states('weather.openweathermap') }}"
-#       attributes:
-#         forecast: "{{ daily['weather.openweathermap'].forecast }}"
-
-- trigger:
-    - platform: state
-      entity_id: weather.openweathermap
-    - platform: homeassistant
-      event: start
-    - platform: event
-      event_type: event_template_reloaded
-  action:
-    - service: weather.get_forecasts
-      data:
-        type: hourly
-      target:
-        entity_id: weather.openweathermap
-      response_variable: hourly
-  sensor:
-    - name: Forecast Hourly
-      unique_id: weather_forecast_hourly
-      state: "{{ states('weather.openweathermap') }}"
-      attributes:
-        forecast: "{{ hourly['weather.openweathermap'].forecast }}"
-    
-- sensor:
-    - name: "High temperature today"
-      unique_id: high_temperature_today
-      unit_of_measurement: "°C" 
-      device_class: temperature
-      state: "{{ (state_attr('sensor.forecast_hourly', 'forecast')|selectattr('datetime', 'lt', (now().replace(hour=23,minute=59)).isoformat()))| map(attribute='temperature') | list | max }}"
-
-- sensor:
-    - name: "Low temperature today"
-      unique_id: low_temperature_today
-      unit_of_measurement: "°C" 
-      device_class: temperature
-      state: "{{ (state_attr('sensor.forecast_hourly', 'forecast')|selectattr('datetime', 'lt', (now().replace(hour=23,minute=59)).isoformat()))| map(attribute='temperature') | list | min }}"
-
 ###################################
 #       Echo Volume Levels        #
 ###################################
 
-- sensor:
+
   ### Kitchen Echo Volume History ###
   - name: "Kitchen Echo Volume"
     unique_id: kitchen_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.kitchen_echo_show','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Living Room Echo Volume History ###
   - name: "Living Room Echo Volume"
     unique_id: living_room_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.dave_s_2nd_echo_pop','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Dining Room Echo Volume History ###
   - name: "Dining Room Echo Volume"
     unique_id: dining_room_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.dave_s_echo_pop','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Office Echo Volume History ###
   - name: "Office Echo Volume"
     unique_id: office_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.dave_s_2nd_echo_pop_2','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Main Bedroom Echo Volume History ###
   - name: "Main Bedroom Echo Volume"
     unique_id: main_bedroom_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.main_bedroom_dot','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Guest Bedroom Echo Volume History ###
   - name: "Guest Bedroom Echo Volume"
     unique_id: guest_bedroom_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.guest_bedroom_echo_dot','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Seans Room Echo Volume History ###
   - name: "Seans Room Echo Volume"
     unique_id: seans_room_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.seans_room_dot','volume_level') | float(0) }}"
 
-- sensor:
+
   ### Jamies Room Echo Volume History ###
   - name: "Jamies Room Echo Volume"
     unique_id: jamies_room_echo_volume
     icon: mdi:volume-equal
     state:  "{{ state_attr('media_player.living_room_dot','volume_level') | float(0) }}"
 
-- sensor:
-  ### Critical Battery Count ####
-  - name: "Critical Battery Count" 
-    unique_id: critical_battery_count
-    state: >
-      {{ expand('group.critical_batteries') 
-      | rejectattr('state', 'eq', '100')
-      | rejectattr('state', 'in', ['unavailable','unknown'])
-      | selectattr('state', 'lt', '20') | list | count }}
-
-- sensor:
-  ### Rechargeable Battery Count ####
-  - name: "Rechargeable Battery Count" 
-    unique_id: rechargeable_battery_count
-    state: >
-      {{ expand('group.rechargeable_batteries') 
-      | rejectattr('state', 'eq', '100')
-      | rejectattr('state', 'in', ['unavailable','unknown'])
-      | selectattr('state', 'lt', '20') | list | count }}
-
-- sensor:
-  ### SRV Critical Battery Count ###
-  - name: "SRV Critical Battery Count"
-    unique_id: srv_critical_battery_count
-    state: >
-      {{ expand('group.srv_critical_batteries') 
-      | rejectattr('state', 'in', ['unavailable','unknown'])
-      | selectattr('state', 'eq', 'on') | list | count }} 
-
-- sensor:
   - name: "Garage Door State"
     unique_id: garage_door_state 
     state: >- 
@@ -471,7 +132,7 @@
         mdi:garage-variant 
       {% endif %}
 
-- sensor:
+
   - name: "Hallway Motion"
     unique_id: hallway_motion  
     state: >- 
@@ -487,7 +148,7 @@
         mdi:motion-sensor-off 
       {% endif %}
 
-- sensor:
+
   - name: "Utility Room Motion"
     unique_id: utility_room_motion  
     state: >- 
@@ -503,7 +164,7 @@
         mdi:motion-sensor-off 
       {% endif %}
 
-- sensor:
+
   - name: "Upstairs Landing Motion"
     unique_id: upstairs_landing_motion 
     state: >- 
@@ -523,7 +184,6 @@
 #   Days to Birthdays   #
 #########################
 
-- sensor:
   - name: "Days Until Gemma's Birthday"
     unique_id: days_until_gemmas_birthday
     unit_of_measurement: Days
@@ -535,7 +195,7 @@
         {{ ((as_timestamp(now().replace(month=9, day=24)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
         
-- sensor:
+
   - name: "Days Until Dave's Birthday"
     unique_id: days_until_daves_birthday
     unit_of_measurement: Days
@@ -547,7 +207,7 @@
         {{ ((as_timestamp(now().replace(month=9, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Jamie's Birthday"
     unique_id: days_until_jamies_birthday
     unit_of_measurement: Days
@@ -559,7 +219,7 @@
         {{ ((as_timestamp(now().replace(month=1, day=7)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Sean's Birthday"
     unique_id: days_until_seans_birthday
     unit_of_measurement: Days
@@ -571,7 +231,7 @@
         {{ ((as_timestamp(now().replace(month=3, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Gregor's Birthday"
     unique_id: days_until_gregors_birthday
     unit_of_measurement: Days
@@ -583,7 +243,7 @@
         {{ ((as_timestamp(now().replace(month=3, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Blair's Birthday"
     unique_id: days_until_blairs_birthday
     unit_of_measurement: Days
@@ -595,7 +255,7 @@
         {{ ((as_timestamp(now().replace(month=11, day=9)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Grandad's Birthday"
     unique_id: days_until_grandads_birthday
     unit_of_measurement: Days
@@ -607,7 +267,7 @@
         {{ ((as_timestamp(now().replace(month=5, day=13)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Grandma's Birthday"
     unique_id: days_until_grandmas_birthday
     unit_of_measurement: Days
@@ -619,7 +279,7 @@
         {{ ((as_timestamp(now().replace(month=1, day=15)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Dada's Birthday"
     unique_id: days_until_dadas_birthday
     unit_of_measurement: Days
@@ -631,7 +291,7 @@
         {{ ((as_timestamp(now().replace(month=9, day=11)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
 
-- sensor:
+
   - name: "Days Until Nannie's Birthday"
     unique_id: days_until_nannies_birthday
     unit_of_measurement: Days
@@ -642,455 +302,6 @@
       {% else %}
         {{ ((as_timestamp(now().replace(month=7, day=22)) - as_timestamp(now()) | int) / 86400) | round(0) }}
       {% endif %}
-
-- sensor:
-  - name: "Days Until Christmas"
-    unique_id: days_until_christmas
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=12, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=12, day=25))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=12, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until Halloween"
-    unique_id: days_until_halloween 
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=10, day=31)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=10, day=31))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=10, day=31)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until St Andrews Day"
-    unique_id: days_until_standrews_day  
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=11, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=11, day=30))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=11, day=30)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until Burns"
-    unique_id: days_until_burns 
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=1, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=1, day=25))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=1, day=25)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until St Davids Day"
-    unique_id: days_until_stdavids_day  
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=3, day=1)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=1))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=3, day=1)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until St Georges Day"
-    unique_id: days_until_stgeorges_day 
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=4, day=23)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=4, day=23))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=4, day=23)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-- sensor:
-  - name: "Days Until St Patricks Day"
-    unique_id: days_until_st_patricks_day 
-    unit_of_measurement: Days
-    state: >
-      {% set daystogo = ((as_timestamp(now().replace(month=3, day=17)) - as_timestamp(now()) | int) / 86400) | round(0) %}
-      {% if daystogo < 0 %}
-        {{ 366 - ((as_timestamp(now()) | int - as_timestamp(now().replace(month=3, day=17))) / 86400) | round(0)}}
-      {% else %}
-        {{ ((as_timestamp(now().replace(month=3, day=17)) - as_timestamp(now()) | int) / 86400) | round(0) }}
-      {% endif %}
-
-
-
-- sensor:
-  - name: "Estimated Earliest Evening MODBUS Disconnect Times"
-    unique_id: estimated_earliest_evening_modbus_disconnect_times
-    icon: mdi:clock-start
-    state: >
-      {% set t1 = states('input_datetime.morning_modbus_disconnect_time') %}
-      {% set t2 = '13:54:00' %}
-      {% set time_pm_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
-        {{ time_pm_earliest }}
-      
-- sensor:
-  - name: "Estimated Latest Evening MODBUS Disconnect Times"
-    unique_id: estimated_latest_evening_modbus_disconnect_times
-    icon: mdi:clock-end 
-    state: >
-      {% set t1 = states('input_datetime.morning_modbus_disconnect_time') %}
-      {% set t2 = '14:08:00' %}
-      {% set time_pm_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
-        {{ time_pm_latest }}
-
-- sensor:
-  - name: "Estimated Earliest Morning MODBUS Disconnect Times"
-    unique_id: estimated_earliest_morning_modbus_disconnect_times
-    icon: mdi:clock-start
-    state: >
-      {% set t1 = states('input_datetime.evening_modbus_disconnect_time')  %}
-      {% set t2 = '09:56:00' %}
-      {% set time_am_earliest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
-        {{ time_am_earliest }}
-      
-- sensor:
-  - name: "Estimated Latest Morning MODBUS Disconnect Times"
-    unique_id: estimated_latest_morning_modbus_disconnect_times
-    icon: mdi:clock-end 
-    state: >
-      {% set t1 = states('input_datetime.evening_modbus_disconnect_time')  %}
-      {% set t2 = '10:10:00' %}
-      {% set time_am_latest = (as_timestamp(strptime(t1, '%H:%M:%S')) + as_timestamp(strptime(t2, '%H:%M:%S')))|timestamp_custom ('%H:%M') %}
-        {{ time_am_latest }} 
-
-- sensor:
-  - name: "Current Energy Rate"
-    unique_id: current_energy_rate 
-    icon: mdi:transmission-tower-import 
-    state: >
-      {% set energy = expand('group.energy_cost_toggles') | selectattr('state','eq','on') | sort(attribute='last_changed') | last %}
-      {% if energy.name == "Plunge Pricing" %}
-        input_boolean.plunge_pricing 
-      {% elif energy.name == "Cheap Energy" %}
-        input_boolean.cheap_energy 
-      {% elif energy.name == "Medium Cost Energy" %}
-        input_boolean.medium_cost_energy 
-      {% elif energy.name == "Expensive Energy" %}
-        input_boolean.expensive_energy 
-      {% else %}
-        input_boolean.most_expensive_energy 
-      {% endif %}
-
-- sensor:
-  - name: "Previous Energy Rate"
-    unique_id: previous_energy_rate 
-    icon: mdi:transmission-tower-import 
-    state: >
-      {% set energy = expand('group.energy_cost_toggles') | selectattr('state','eq','on') | sort(attribute='last_changed') | first %}
-      {% if energy.name == "Plunge Pricing" %}
-        input_boolean.plunge_pricing 
-      {% elif energy.name == "Cheap Energy" %}
-        input_boolean.cheap_energy 
-      {% elif energy.name == "Medium Cost Energy" %}
-        input_boolean.medium_cost_energy 
-      {% elif energy.name == "Expensive Energy" %}
-        input_boolean.expensive_energy 
-      {% else %}
-        input_boolean.most_expensive_energy 
-      {% endif %}
-
-
-- sensor:
-  - name: "School Tomorrow"
-    unique_id: school_tomorrow
-    state: >
-      {% set next_event=as_timestamp(state_attr('calendar.school_day','start_time')) | timestamp_custom("%Y-%m-%d",true) %}
-      {% set tomorrow=(now().date() + timedelta(days=1)) | string %}
-      {{ next_event == tomorrow }} 
-
-- sensor:
-  - name: "Ground Floor Lights On"
-    unique_id: ground_floor_lights_on 
-    state: >
-      {%- set search_state = 'on' %}
-      {%- set search_areas = ['Kitchen', 'Dining Room', 'Downstairs', 'Living Room', 'Hallway', 'Cloakroom', 'Utility Room' ] %}
-      {%- set ns = namespace(lights=[]) %}
-      {%- for light in states.light | selectattr('state','eq', search_state) %}
-        {%- for area in search_areas %}
-          {% if area_name(light.entity_id) == area and "Gnd Floor" not in state_attr(light.entity_id, "friendly_name") %}
-            {%- set ns.lights = ns.lights + [ light.entity_id ] %}
-          {% endif%}
-          {%- endfor %}
-      {%- endfor %}
-      {{ ns.lights| list | length }}
-
-- sensor:
-  - name: "First Floor Lights On"
-    unique_id: first_floor_lights_on 
-    state: >
-      {%- set search_state = 'on' %}
-      {%- set search_areas = ['Master Bedroom', 'Upstairs', 'Guest Bedroom', 'Office', 'Main Bathroom', 'En-suite Bathroom', 'jamie_s_room', 'Seans Room', 'Kids Bathroom' ] %}
-      {%- set ns = namespace(lights=[]) %}
-      {%- for light in states.light | selectattr('state','eq', search_state) %}
-        {%- for area in search_areas %}
-          {% if area_name(light.entity_id) == area and "1st Floor" not in state_attr(light.entity_id, "friendly_name") %}
-            {%- set ns.lights = ns.lights + [ light.entity_id ] %}
-          {% endif%}
-          {%- endfor %}
-      {%- endfor %}
-      {{ ns.lights| list | length }}
-
-- sensor:
-  - name: "First Floor Switches On"
-    unique_id: first_floor_switches_on 
-    state: >
-      {%- set search_state = 'on' %}
-      {%- set search_areas = ['Kitchen', 'Dining Room', 'Downstairs', 'Living Room', 'Hallway', 'Cloakroom', 'Utility Room' ] %}
-      {%- set ns = namespace(switch=[]) %}
-      {%- for switch in states.switch | selectattr('state','eq', search_state) %}
-        {%- for area in search_areas %}
-          {% if area_name(switch.entity_id) == area and "1st Floor" not in state_attr(switch.entity_id, "friendly_name") %}
-            {%- set ns.switch = ns.switch + [ switch.entity_id ] %}
-          {% endif%}
-          {%- endfor %}
-      {%- endfor %}
-      {{ ns.switch| list | length }}
-
-- sensor:
-  - name: "Ground Floor Switches On"
-    unique_id: ground_floor_switches_on 
-    state: >
-      {%- set search_state = 'on' %}
-      {%- set search_areas = ['Master Bedroom', 'Upstairs', 'Guest Bedroom', 'Office', 'Main Bathroom', 'En-suite Bathroom', 'jamie_s_room', 'Seans Room', 'Kids Bathroom' ] %}
-      {%- set ns = namespace(switch=[]) %}
-      {%- for switch in states.switch | selectattr('state','eq', search_state) %}
-        {%- for area in search_areas %}
-          {% if area_name(switch.entity_id) == area and "1st Floor" not in state_attr(switch.entity_id, "friendly_name") %}
-            {%- set ns.switch = ns.switch + [ switch.entity_id ] %}
-          {% endif%}
-          {%- endfor %}
-      {%- endfor %}
-      {{ ns.switch| list | length }}
-
-- sensor:
-  - name: "Home Assistant Last Restart"
-    unique_id: ha_last_restart 
-    state: >
-      {{ relative_time(states.sensor.uptime.last_changed) }}
-
-- sensor:
-  - name: "Zigbee2MQTT Offline Devices"
-    unique_id: zigbee2mqtt_offline_devices
-    state: >
-      {% set result = namespace(sensors=[]) %}
-      {%- for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
-        {%- if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
-          {%- set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
-        {%- endif %}
-      {%- endfor -%}
-        {{ result.sensors | join(', ') }}
-
-- sensor:
-  - name: "Zigbee2MQTT Offline Devices Count"
-    unique_id: zigbee2mqtt_offline_devices_count 
-    state: >
-      {% set result = namespace(sensors=[]) %}
-      {% for state in states.sensor | rejectattr('attributes.device_class', 'undefined') | selectattr('attributes.device_class', '==', 'timestamp') %}
-        {% if 'last_seen' in state.entity_id and (states(state.entity_id) == 'unavailable' or ((as_timestamp(now()) - as_timestamp(states(state.entity_id))) > ((24 | int) * 60 * 60))) %}
-          {% set result.sensors = result.sensors + [state.name | regex_replace(find=' last seen', replace='') ~ ' (' ~ relative_time(strptime(states(state.entity_id), '%Y-%m-%dT%H:%M:%S%z', 'unavailable')) ~ ')'] %}
-        {% endif %}
-      {% endfor %}
-        {{ result.sensors | list | count }}
-
-- sensor:
-  - name: "Car Battery Hours To Full"
-    unique_id: car_battery_hours_to_full 
-    icon: mdi:battery-clock 
-    state: >
-      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
-      {% set energy_remaining_kwh = (57.4 -(57.4 * battery_state)/100) %}
-      {% set hrs_to_full =  (energy_remaining_kwh / 7.2) | round(2) %}
-      {% set t1 = ('%02d:%02d' | format((hrs_to_full | int),((hrs_to_full*60) % 60) | round(0))) %} 
-      {% set t2 = strptime(t1,'%H:%M') %}
-        {{ t2.hour}} hours {{ t2.minute}} minutes
-    availability: >
-      {{ hrs_to_full | is_number }}
-
-- sensor:
-  - name: "Set Octopus Time For Rolec"
-    unique_id: set_octopus_time_for_rolec
-    icon: mdi:battery-clock 
-    state: >
-      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
-      {% set energy_remaining_kwh = (57.4 -(57.4 * battery_state)/100) %}
-      {% set hrs_to_full =  (energy_remaining_kwh / 7) | round(2) %}
-        "{{ hrs_to_full | round + 1}}"
-
-- sensor:
-  - name: "Cost To Charge To Full 15p" 
-    unique_id: cost_to_charge_to_full_fifteen 
-    icon: mdi:currency-gbp 
-    state: >
-      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
-      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
-        {{ (energy_used_kwh|float(0) * 0.15) | round(2) }}
-
-- sensor:
-  - name: "Cost To Charge To Full 10p" 
-    unique_id: cost_to_charge_to_full_ten  
-    icon: mdi:currency-gbp 
-    state: >
-      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
-      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
-        {{ (energy_used_kwh|float(0) * 0.10) | round(2) }}
-
-- sensor:
-  - name: "Cost To Charge To Full 5p" 
-    unique_id: cost_to_charge_to_full_five  
-    icon: mdi:currency-gbp 
-    state: >
-      {% set battery_state = states('input_number.car_battery_charge_level')|float(0) %}
-      {% set energy_used_kwh = (57.4-(57.4 * battery_state)/100)|round(2) %}
-        {{ (energy_used_kwh|float(0) * 0.05) | round(2) }}
-
-############################
-#     Clocks Changing      #
-############################
-- trigger:
-    - platform: time
-      at: "00:00:00"
-    - platform: homeassistant
-      event: start
-    - platform: event
-      event_type: call_service
-      event_data:
-        domain: template
-        service: reload
-  sensor:
-    - unique_id: dst_next
-      name: "Daylight Savings: Next"
-      device_class: timestamp
-      state: >
-        {%- macro hms(t) %}
-        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
-        {%- set h, m, s = dststr.split(':') | map('int') %}
-        {{- h * 60 * 60 + m * 60 + s }}   
-        {%- endmacro %}
-        
-        {%- macro is_dst(t) %}
-        {{- hms(t) | int != 0 }}
-        {%- endmacro %}
-        
-        {%- macro finddst(t, kwarg, rng) %}
-        {%- set ns = namespace(previous=is_dst(t), found=none) %}
-        {%- for i in range(rng) %}
-          {%- set ts = t + timedelta(**{kwarg:i}) %}
-          {%- if ns.previous != is_dst(ts) and ns.found is none %}
-            {%- set ns.found = i %}
-          {%- endif %}
-        {%- endfor %}
-        {{- ns.found }}
-        {%- endmacro %}
-        
-        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
-        {%- set d = finddst(t, 'days', 366) | int - 1 %}
-        {%- set h = finddst(t + timedelta(days=d), 'hours', 25) | int - 1 %}
-        {%- set m = finddst(t + timedelta(days=d, hours=h), 'minutes', 61) | int %}
-        {{ (t + timedelta(days=d, hours=h, minutes=m)) }}
-
-    - unique_id: dst_phrase
-      name: "Daylight Savings: Phrase"
-      state: >
-        {%- macro hms(t) %}
-        {%- set dststr = t.dst() | string if t.dst() is not none else "00:00:00" %}
-        {%- set h, m, s = dststr.split(':') | map('int') %}
-        {{- h * 60 * 60 + m * 60 + s }}   
-        {%- endmacro %}
-
-        {%- macro phrase(seconds, name, divisor, mod=None) %}
-          {%- set value = ((seconds | abs // divisor) % (mod if mod else divisor)) | int %}
-          {%- set end = 's' if value > 1 else '' %}
-          {{- '{} {}{}'.format(value, name, end) if value > 0 else '' }}
-        {%- endmacro %}
-
-        {%- macro total(seconds) %}
-        {%- set values = [ 
-          phrase(seconds, 'hour', 60*60, 60*60*24),
-          phrase(seconds, 'minute', 60, 60),
-          ] | select('!=','') | list %}
-        {{- values[:-1] | join(', ') ~ ' and ' ~ values[-1] if values | length > 1 else values | first | default}}
-        {%- endmacro %}
-
-        {%- macro finddelta(t, kwarg, rng) %}
-        {%- set ns = namespace(previous=hms(t), found=none) %}
-        {%- for i in range(rng) %}
-          {%- set ts = t + timedelta(**{kwarg:i}) %}
-          {%- if ns.previous != hms(ts) and ns.found is none %}
-            {%- set before = hms(ts - timedelta(days=1)) | int %}
-            {%- set after = hms(ts) | int %}
-            {%- set ns.found =  after - before %}
-          {%- endif %}
-        {%- endfor %}
-        {{ ns.found }}
-        {%- endmacro %}
-        
-        {%- set t = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
-        {%- set delta = finddelta(t, 'days', 365) | int %}
-        {% if delta > 0 %}
-          lose {{ total(delta | abs) }}
-        {% else %}
-          gain {{ total(delta | abs) }}
-        {% endif %}
-
-- sensor:
-    - unique_id: dst_days
-      name: "Daylight Savings: Days Until"
-      unit_of_measurement: days
-      state: >
-        {% set next = states('sensor.daylight_savings_next') | as_datetime %}
-        {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
-        {{ (next - today).days if next is not none else 0 }}
-      availability: >
-        {{ states('sensor.daylight_savings_next') not in ['unknown', 'unavailable'] }}
-
-- sensor:
-    - unique_id: dave_room
-      name: dave_room
-      state: >
-        {% set weight_values = {
-            'sensor.daves_phone_espresence': 0.8,
-            'sensor.daves_keys': 1.0
-          } %}
-          {% set ns = namespace(presence=[]) %}
-          {% for entity_id, weight in weight_values.items() %}
-            {% set key = states(entity_id) %}
-            {% set td = dict.from_keys(ns.presence) %}
-            {% set new_weight = weight if key not in td.keys() else td[key] + weight %}
-            {% set ns.presence = td.items() | rejectattr('0', 'eq', key) | list + [(key, new_weight)] %}
-          {% endfor %}
-          {% if ns.presence | length > 0 %}
-            {{ (ns.presence | sort(attribute='1', reverse=True) | first) | first }}
-          {% else %}
-            unknown
-          {% endif %}
-
-# - sensor:
-#     - name: dave_room
-#       unique_id: dave_room
-#       state: >
-#         {% if states('sensor.daves_keys') != 'not_home' %}
-#           {{ states('sensor.daves_keys') }}
-#         {% elif states('sensor.daves_phone_espresence') != 'not_home' %}
-#           {{ states('sensor.daves_phone_espresence') }}
-#         {% else %}
-#           NA
-#         {% endif %}
 
 ########################################
 #      Action Template Sensors         #
@@ -1302,6 +513,15 @@
       attributes:
         calendar_response: "{{ trigger.event.data.calendar_response }}"
       icon: mdi:calendar
+
+
+
+
+
+                                                                    
+                                                                    
+
+
 
 
 
