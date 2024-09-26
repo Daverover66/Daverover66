@@ -1,0 +1,91 @@
+alias: Get Wrap Up
+sequence:
+  - variables:
+      wrap_up: |
+        {{ ['That about wraps it up for today. Have a good one.',   
+          'Well there you have it.  Ive expended terajoules of energy and gigabytes of processing power putting this report together for you.  Did you hear a word of it?  Oh well, there is always tomorrow.', 
+          'Thats all for today. Shall we do it again tomorrow? Same time, same place?',
+          'That concludes todays report. Tune in at the same time tomorrow for another thrilling report.',   
+          'Thats all folks. Perhaps you could give me something more meaningful to do before we do this all over again tomorrow? ',   
+          'Thats all for now. Have a good day.'] | random }}
+      one_more_thing: >
+        {{ ["and one more thing, I seek not to know the answer, but simply to
+        understand the question.",
+            "and one more thing, You fail a hundred percent of the time you dont try.",
+            "and one more thing, there is no try. There is do,or do not.",
+            "and one more thing, The only difference between who you are and who you want to be, is what you do now.",
+            "and one more thing, A wise person changes their mind. A fool never does.",
+            "and one more thing, Life is short. Smile while you still have teeth.",
+            "and one more thing, Change is inevitable.  Growth is optional.",
+            "and one more thing, Dont worry. Be happy.",
+            "and one more thing, A journey of a thousand miles begins with a single step. So off you go",
+            "and one more thing, All of our dreams can come true if we have the courage to pursue them.",
+            "and one more thing, Good things come to those who wait, but it can be better to just go out and get them.",
+            "and one more thing, If you do what you have always done, you will get what you have always got.",
+            "and one more thing, Success is the sum of small efforts, repeated day after day after day.",
+            "and one more thing, Only put off until tomorrow what you are willing to die having left undone.",
+            "and one more thing, People who are crazy enough to think they can change the world, are usually the ones who do.",
+            "and one more thing, Just when the caterpillar thought the world was ending, it turned into a butterfly.",
+            "and one more thing, Opportunities dont just happen, you have to create them.",
+            "and one more thing, Start by doing whats necessary; then do whats possible; and suddenly you are doing the impossible.",
+            "and one more thing, Some people dream of great accomplishments, while others stay awake and get on with doing them.",
+            "and one more thing, The distance between insanity and genius is measured only by success.",
+            "and one more thing, It doesnt matter how slowly you go, as long as you dont stop.",
+            "and one more thing, Trust the process and enjoy the journey",
+            "and one more thing, There are far better things ahead of us, than there are behind us.",
+            "and one more thing, Sometimes we are tested, not to show our weaknesses, but to discover our strengths.",
+            "and one more thing, Do something today that your future self will thank you for.",
+            "and one more thing, Life is ten percent what happens to you, and ninety percent of how you react to it.",
+            "and one more thing, The most common way people give up their power, is by thinking they dont have any.",
+            "and one more thing, Life is not a rehearsal.  You only get one shot. So always try to Live your best life.",
+            "and one more thing, When nothing goes right, go left. And when nothing is left, your goosed",
+            "and one more thing, The best time to plant a tree was twenty years ago. The second best time is now.",
+            "and one more thing, Eighty percent of success is showing up. The other 20 is sheer good fortune.",
+            "and one more thing, Dont stop when you are tired. Stop when you are finished.",
+            "and one more thing, Its okay to make mistakes, but dont ever give up.",
+            "and one more thing, Dont let the fear of losing, be greater than the excitement of winning.",
+            "and one more thing, The way to get started, is to quit talking and start doing.",
+            "and one more thing, When you feel like giving up, remember why you started.",
+            "and one more thing, The harder you work, the more luck people will think you have.",
+            "and one more thing, The harder you work for something, the better you will feel when you achieve it.",
+            "and one more thing, Your time is limited, so dont waste it living someone elses life.",
+            "and one more thing, Winning is not everything, but it does feel pretty good.",
+            "and one more thing, Either you run the day, or the day runs you.",
+            "and one more thing, Whether you think you can or you think you cant, you will be right.",
+            "and one more thing, The two most important days in your life are the day you are born and the day you find out why.",
+            "and one more thing, Never ruin a good today, by thinking about a bad yesterday.",
+            "and one more thing, The best revenge is massive success.",
+            "and one more thing, People often say that motivation does not last. Well, neither does bathing. That is why we recommend doing it every day.",
+            "and one more thing, The only person you are destined to become, is the person you decide to be.",
+            "and one more thing, Certain things catch your eye, but chase only those that capture the heart.",
+            "and one more thing, Believe you can and you are halfway there.",
+            "and one more thing, Good things take time.",
+            "and one more thing, Feel the fear and do it anyway.",
+            "and one more thing, There really is no place like home.",
+            "and one more thing, Life can be tough, but so can you.",
+            "and one more thing, Life is not measured by the number of breaths we take, but by the moments that take our breath away.",
+            "and one more thing, Be nice to others, and nice things will happen to you.",
+            "and one more thing, Everyone has a plan, until they get punched in the face.  Be ready to duck, change direction, and adapt to the situation.",
+            "and one more thing, It is nice to be important, but more important to be nice.",
+            "and one more thing, Life is too short to waste time hating anyone.",
+            "and one more thing, Be yourself, everyone else is already taken.",
+            "and one more thing, Be alert! Your country needs lerts!",
+            "and one more thing, What we fear doing most is usually what we need to do most.",
+            ] |random}}
+  - data:
+      message: |
+        {{wrap_up}}
+    response_variable: cleaned_wrap_up
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{one_more_thing}}
+    response_variable: cleaned_one_more_thing
+    action: script.cleanup_text
+  - variables:
+      briefing: |
+        {"wrap_up":"{{cleaned_wrap_up.text}}",
+         "one_more_thing":"{{cleaned_one_more_thing.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
