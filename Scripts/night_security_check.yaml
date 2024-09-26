@@ -1,0 +1,18 @@
+alias: Night Security Check
+sequence:
+  - condition: state
+    entity_id: binary_sensor.all_secure_night
+    state: "off"
+  - choose:
+      - conditions: []
+        sequence:
+          - data:
+              where: living_room
+              call_goodnight_secure: 1
+            action: script.status_annc
+    default:
+      - data:
+          where: living_room
+          call_goodnight_not_secure: 1
+        action: script.status_annc
+description: ""
