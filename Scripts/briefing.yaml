@@ -1,0 +1,24 @@
+alias: Briefing
+sequence:
+  - data:
+      where: "{{ where }}"
+      message: >-
+        {% if now().strftime('%H')|int < 12%}
+         Good morning.
+        {% elif now().strftime('%H')|int >= 12 and now().strftime('%H')|int < 17
+        %}
+          Good afternoon.
+        {% else %}
+          Good evening.
+        {% endif %} {% if states('sensor.gem_room') == where and
+        states('sensor.dave_room') == where  %}
+          everyone.
+        {% elif states('sensor.gem_room') == where  %}
+          Ma'am.
+        {% elif states('sensor.dave_room') == where  %}
+          Sir.
+        {% else %}
+            
+        {% endif %} {{ message }}
+    action: script.jarvis_speech_engine
+description: ""
