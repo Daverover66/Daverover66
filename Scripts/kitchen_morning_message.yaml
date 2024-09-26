@@ -1,0 +1,104 @@
+alias: Kitchen Morning Message
+sequence:
+  - response_variable: room_services
+    data:
+      type: briefing
+    action: script.get_room_audio
+  - response_variable: greeting
+    data: {}
+    action: script.get_tts_greeting
+  - response_variable: briefing_data
+    data: {}
+    action: script.get_briefing_data
+  - response_variable: dave_briefing
+    data: {}
+    action: script.get_dave_briefing
+  - response_variable: weather_info
+    data: {}
+    action: script.get_weather_info
+  - action: script.get_energy_info
+    data: {}
+    response_variable: energy_info
+  - action: script.get_wrap_up
+    data: {}
+    response_variable: wrap_up
+  - variables:
+      message: |
+        {{ greeting.general }}
+
+        {{ briefing_data.current_time_full }}
+
+        {{ briefing_data.family_birthday }}
+
+        {{ briefing_data.bin_day }}
+
+        {{ dave_briefing.event}}
+
+        {{ briefing_data.annual_event}}
+
+        {{ weather_info.sun_status }}
+
+        {{ briefing_data.moon_phase }}    
+
+        {{ weather_info.current_warnings }}
+
+        {{ weather_info.current_warnings_detail }}
+
+        {{ weather_info.current_conditions_detail }}
+
+        {{ weather_info.clothing_forecast }}
+
+        {{ briefing_data.calendar }}
+
+        {{ dave_briefing.critical_battery_info }}
+
+        {{ dave_briefing.srv_critical_battery_info }}
+
+        {{ dave_briefing.rechargeable_battery_info }}
+
+        {{ dave_briefing.zigbee_device_info }}
+
+        {{ energy_info.solar_forecast }}
+
+        {{ energy_info.battery_charge_info }}
+
+        {{ energy_info.battery_grid_topup_needed }}
+
+        {{ energy_info.car_battery_info }}
+
+        {{ briefing_data.holiday_info }}
+
+        {{ wrap_up.wrap_up }}
+
+        {{ wrap_up.one_more_thing }}
+  - action: script.battery_notification
+    data: {}
+  - action: script.srv_battery_notification
+    data: {}
+  - action: script.rechargeable_battery_notification
+    data: {}
+  - data:
+      message: |
+        {{ message }}
+    response_variable: cleaned_briefing
+    action: script.cleanup_text
+  - data:
+      where: kitchen
+      message: |
+        {{ cleaned_briefing.text }}
+      msg_summary: Gave the Kitchen briefing.
+      type: priority
+    action: script.jarvis_speech_engine
+  - data: {}
+    target:
+      entity_id: input_boolean.morning_briefing_playing
+    action: input_boolean.toggle
+  - delay:
+      minutes: 3
+  - data: {}
+    target:
+      entity_id: input_boolean.morning_briefing_playing
+    action: input_boolean.toggle
+  - entity_id: input_boolean.morning_briefing_played
+    action: input_boolean.turn_on
+description: ""
