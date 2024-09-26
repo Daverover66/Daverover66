@@ -1,0 +1,235 @@
+alias: Get Dave Briefing
+sequence:
+  - variables:
+      morning_snark: |
+        {{ [
+          'Congratulations on surviving the night.',
+          'Good to see you made it to another day.',
+          'Well done for making it through another night.',
+          'Well.  Here we are again.'
+        ] | random }}
+      device_status: >
+        {% set level = states('sensor.daves_samsung_galaxy_battery_level') %} {%
+        set charging = states('sensor.daves_samsung_galaxy_battery_state') %} {%
+        set level2 = states('sensor.sm_t736b_battery_level') %} {% set charging2
+        = states('sensor.sm_t736b_battery_state') %} {% if
+        has_value('sensor.daves_samsung_galaxy_battery_level') %}
+          {{ [
+            'Your phone battery is currently at ' ~ level ~ ' percent.',
+            'You have ' ~ level ~ ' percent remaining on your phone battery.',
+            'Your phone is reporting ' ~ level ~ ' percent remaining on internal power.',
+            'Your phone battery appears to have ' ~ level ~ ' percent remaining.',
+            'The power level of your device is currently' ~ level ~ ' percent.'
+          ] | random }}
+          {% if level | int <=20 and charging == 'Not Charging' %}
+            {{ [
+            'I suggest you connect it to a power source.',
+            'You may want to charge it.',
+            'Charging the battery appears to be best way to avoid loss of service.',
+            'If you would like to continue using it I think charging it would be the next step.',
+            'May I remind you that your phone is not powered by an infinity stone, nor an ark reactor .',
+            'May I remind you that your phone needs power to work.'
+            ] | random }}
+          {% elif level | int <=10 and charging == 'Not Charging' %}
+            {{ [
+            'I must insist you connect it to a power source if you want to stay in communication with your family.',
+            'At that level your phone will fail in less than hour or so.',
+            'I will be unable to track you if the phone loses power.',
+            'May I remind you that your phone has almost exhausted its power reserves.'
+            ] | random }}
+          {% elif level | int <=3 and charging == 'Not Charging' %}
+            {{ [
+            'Your phones power level is critical.',
+            'Failure due to power loss is imminent.',
+            'If you would like to remain in communication I suggest dropping what you are doing and finding a power source.',
+            'Drop what you are doing and find a power source for your phone.'
+            ] | random }}
+          {% endif %}
+        {% else %}
+          {{ [
+            'Your phone is unresponsive.',
+            'It appears your phone has lost power.',
+            'Your phone is no longer reporting its power level.',
+            'I suspect your phone has had a power failure.',
+            'Your mobile device is no longer responding.'
+            ] | random }}
+            I suggest you locate it. 
+        {% endif %} {{ [ 'And.', 'Also.', ] | random }} {% if
+        has_value('sensor.sm_t736b_battery_level') %}
+          {{ [
+            'Your tablet battery is currently at ' ~ level2 ~ ' percent.',
+            'You have ' ~ level2 ~ ' percent remaining on your tablet battery.',
+            'Your tablet is reporting ' ~ level2 ~ ' percent remaining on internal power.',
+            'Your tablet appears to have ' ~ level2 ~ ' percent of power remaining.',
+            'The power level of your tablet is ' ~ level2 ~ ' percent.'
+          ] | random }}
+          {% if level2 | int <=20 and charging2 == 'Not Charging' %}
+            {{ [
+            'If you are planning on coding today.',
+            'I insist that you find a suitable power source to charge it.',
+            'I suggest charging it.',
+            'If you plan on continuing to use it today I would consider putting it on a charger.',
+            'May I remind you that the device needs power to work.'
+            ] | random }}
+          {% endif %}
+        {% else %}
+          {{ [
+            'Your tablet is unresponsive.',
+            'It appears your tablet has suffered a power outage.',
+            'I suggest you locate your tablet. I believe it has run out of power.',
+            'Your tablet is no longer responsive. I suspect onboard power reserves are depleted.',
+            'I am unable to communicate with your tablet.'
+            ] | random }}
+            I suggest you locate it. 
+        {% endif %}
+      critical_battery_count: |
+        {{ states('sensor.critical_battery_count') }}
+      critical_battery_info: |
+        {% if critical_battery_count | int > 0 %}
+          {{ [
+            'My latest smart device sensor sweep has detected that',
+            'Smart device sensors have detected that',
+            'My smart device crystal ball has revealed that',
+            ] | random }}
+          {% if critical_battery_count | int > 1 %}
+            {{ [
+              'There are ' ~ critical_battery_count ~ ' critical batteries that need your attention.',
+              critical_battery_count ~ ' critical devices are close to losing power.',
+              critical_battery_count ~ ' batteries in various pieces of smart home tech are close to 0.',
+              critical_battery_count ~ ' devices are nearing power failure.'
+              ] | random }}
+          {% else %}
+            {{ [
+              'There is ' ~ critical_battery_count ~ ' critical battery that needs your attention.',
+              critical_battery_count ~ ' critical device is close to losing power.',
+              critical_battery_count ~ ' battery in smart home tech is close to 0.',
+              critical_battery_count ~ ' device is nearing power failure.'
+              ] | random }}
+          {% endif %}
+            I sent a list to your phone. 
+        {% else %}
+        {% endif %} 
+      srv_critical_battery_count: |
+        {{ states('sensor.srv_critical_battery_count') }}
+      srv_critical_battery_info: |
+        {% if srv_critical_battery_count | int > 0 %}
+          {{ [
+            'One more thing.',
+            'And in case you were not aware.',
+            ] | random }}
+          {% if srv_critical_battery_count | int > 1 %}
+            {{ [
+              'There are ' ~ srv_critical_battery_count ~ ' radiator thermostats that need your attention.',
+              srv_critical_battery_count ~ ' radiator thermostats are close to loss of power.',
+              'I did a quick sweep and found ' ~ srv_critical_battery_count ~ ' radiator thermostats that are close to 0% battery power.',
+              'I suggest you make time to change some batteries. Because ' ~ srv_critical_battery_count ~ ' radiator thermostats are nearing power failure.'
+              ] | random }}
+          {% else %}
+            {{ [
+              'There is ' ~ srv_critical_battery_count ~ ' radiator thermostat that needs your attention.',
+              srv_critical_battery_count ~ ' radiator thermostat is close to loss of power.',
+              'I did a quick sweep and found ' ~ srv_critical_battery_count ~ ' battery in a radiator thermostat that is close to 0% battery power.',
+              'I suggest you make time to change some batteries. Because ' ~ srv_critical_battery_count ~ ' radiator thermostat is nearing power failure.'
+              ] | random }}
+          {% endif %}
+            I sent a list to your phone. 
+        {% else %}
+        {% endif %} 
+      rechargeable_battery_count: |
+        {{ states('sensor.rechargeable_battery_count') }}
+      rechargeable_battery_info: |
+        {% if rechargeable_battery_count | int > 0 %}
+          {{ [
+            'Finally.',
+            'And just in case you thought you were done.',
+            ] | random }}
+          {% if rechargeable_battery_count | int > 1 %}
+            {{ [
+              'There are ' ~ rechargeable_battery_count ~ ' mobile device batteries that need your attention.',
+              rechargeable_battery_count ~ ' mobile device batteries are close to loss of power.',
+              'I did a quick sweep and found ' ~ rechargeable_battery_count ~ ' mobile devices that are close to 0% battery power.',
+              'I suggest you make time to charge some batteries. Because ' ~ rechargeable_battery_count ~ ' mobile devices are nearing power failure.'
+              ] | random }}
+          {% else %}
+            {{ [
+              'There is ' ~ rechargeable_battery_count ~ ' mobile device battery that needs your attention.',
+              rechargeable_battery_count ~ ' mobile device is close to loss of power.',
+              'I did a quick sweep and found ' ~ rechargeable_battery_count ~ ' battery in a mobile device that is close to 0% power.',
+              'I suggest you make time to charge some batteries. Because ' ~ rechargeable_battery_count ~ ' mobile device is nearing power failure.'
+              ] | random }}
+          {% endif %}
+            I sent a list to your phone. 
+        {% else %}
+        {% endif %} 
+      zigbee_device_count: |
+        {{states('sensor.zigbee2mqtt_offline_devices_count')}}
+      zigbee_device_info: |
+        {% if zigbee_device_count == 1 %}
+            {% set is_are = ' is ' %}
+            {% set device_devices = ' device ' %}
+          {%- else -%}
+            {% set is_are = ' are ' %}
+            {% set device_devices = ' devices ' %}
+          {% endif %}
+            A scan of the zigbee network shows that
+          {% if  zigbee_device_count|int < 1 %}
+            the network is functioning at full capacity, with all devices reporting availability.
+          {% else %}
+            {{ 'there' ~ is_are ~ zigbee_device_count ~ device_devices + 'offline. Check your notifications for details.' }}
+          {% endif %}
+      event: |
+        {% set day_of_week = states('sensor.day_of_week') %}
+        {% set event = state_attr('calendar.forrester_events','message') %}
+        {% set time = state_attr('calendar.forrester_events','start_time') %}
+        {% if day_of_week == 'Friday' and event == 'Skype mum' %}
+          It is {{ event }} day and you are scheduled to {{ event }} this afternoon at 
+          {{ as_timestamp(time)|timestamp_custom ('%-I:%M%p') }}.
+        {% elif now().day  == 1  and event == 'Mini UPS Discharge' %}
+          Remember to turn off mains power to all three mini UPS to run the batteries down.  Then, perhaps more
+          importantly, remember to turn mains power to them back on.
+        {% endif %}
+  - data:
+      message: |
+        {{device_status}}
+    response_variable: cleaned_device_status
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{critical_battery_info}}
+    response_variable: cleaned_critical_battery_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{srv_critical_battery_info}}
+    response_variable: cleaned_srv_critical_battery_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{rechargeable_battery_info }}
+    response_variable: cleaned_rechargeable_battery_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{zigbee_device_info }}
+    response_variable: cleaned_zigbee_device_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{event}}
+    response_variable: cleaned_event
+    action: script.cleanup_text
+  - variables:
+      briefing: |
+        {"morning_snark":"{{morning_snark}}",
+         "device_status":"{{cleaned_device_status.text}}",
+         "critical_battery_count":"{{critical_battery_count}}",
+         "critical_battery_info":"{{cleaned_critical_battery_info.text}}",
+         "srv_battery_count":"{{srv_battery_count}}",
+         "srv_critical_battery_info":"{{cleaned_srv_critical_battery_info.text}}",
+         "rechargeable_battery_count":"{{rechargeable_battery_count}}",
+         "rechargeable_battery_info":"{{cleaned_rechargeable_battery_info.text}}",
+         "zigbee_device_info":"{{zigbee_device_info.text}}",
+         "event":"{{cleaned_event.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
