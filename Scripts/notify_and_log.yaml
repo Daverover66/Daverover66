@@ -1,0 +1,15 @@
+alias: Notify and Log
+sequence:
+  - if:
+      - condition: template
+        value_template: "{{is_state('input_boolean.debug_flag', 'on')}}"
+    then:
+      - data:
+          title: "{{ title }}"
+          message: "{{ message }}"
+        action: script.text_notify_dave
+      - data:
+          message: "{{ message }}"
+          level: warning
+        action: system_log.write
+mode: single
