@@ -1,0 +1,133 @@
+alias: Get Briefing Data
+sequence:
+  - data:
+      message: |
+        {{ states('sensor.bin_day') }}
+    response_variable: cleaned_bin_day
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.annual_event') }}
+    response_variable: cleaned_annual_event
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.moon_phase_2') }}
+    response_variable: cleaned_moon_phase
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.family_birthday') }}
+    response_variable: cleaned_family_birthday
+    action: script.cleanup_text
+  - variables:
+      calendar: |
+        {% set e_list = state_attr('sensor.calendar_events',
+           'calendar_response')['calendar.forrester_events']['events'] |
+           sort(attribute= 'start') | list %}
+         {% if e_list|count > 0 %}
+             You have {{ e_list | count }}
+           {% if (e_list | count) >1 or (e_list | count) <1 %} 
+             events in your calendar today. 
+           {% elif (e_list | count) ==1 %} 
+             event in your calendar today. 
+           {% endif %}
+
+           {%- for e in e_list %}
+             {{ ['. Then you have ','. Next is ', '. Followed by ']|random if not loop.first else ['First up is ', 'First is ']|random}}
+             {{- e.summary }}, starting at {{ (as_timestamp(e.start|as_datetime)) | timestamp_custom ('%H:%M')}}, {{-[' for ', ' and lasting for ', ' which lasts ']|random}}{{- ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round }} 
+             {%- if  ((e.end|as_datetime - e.start|as_datetime).total_seconds()/3600)|round >1 -%}
+               hours.
+             {%- else -%}
+               hour.
+             {% endif %}
+           {%- endfor %}
+         {% endif %}
+      dow: |
+        {{ as_timestamp(now()) | timestamp_custom('%A') }}
+      current_time: |
+        It is {{ now().strftime("%I:%M %p") }}.
+      current_time_full: >
+        Today is {{ states('sensor.day_of_week')}} the {{ now().day | ordinal }}
+        of {{ as_timestamp(now()) |timestamp_custom ('%B')}} {{ now().year }}.
+      bin_day: |
+        {{ cleaned_bin_day.text }}
+      annual_event: |
+        {{ cleaned_annual_event.text}}
+      family_birthday: |
+        {{ cleaned_family_birthday.text }}
+      birthday_today: >
+        Attention everyone!  I am delighted to inform you that it is
+        {{state_attr('calendar.birthdays','message') }} today.   {% if
+        state_attr('calendar.birthdays','message') == "Gem's Birthday" %}   
+        Please join me in wishing her a very Happy Birthday. {% else %} Please
+        join me in wishing him a very Happy Birthday.  {% endif %}
+      moon_phase: |
+        {{ cleaned_moon_phase.text}}
+      holiday_info: >
+        {% set day_of_week = states('sensor.day_of_week') %} {% set
+        school_holiday = states('calendar.school_holidays') %} {% set
+        gem_holiday = states('calendar.gem_holidays') %} {% set schools_out =
+        states('calendar.schools_out') %} {% set work_day =
+        states('binary_sensor.workday_sensor')%} {% if work_day == 'on' %}
+          {% if school_holiday == 'off' and gem_holiday == 'off' %}
+            {{ ['There are no holidays today.',
+                'Work and school for everyone today. Yippee!'] | random }}
+          {% elif school_holiday == 'on' and gem_holiday == 'off' %}        
+            {{ ['Its a school holiday today and mummy is working.',
+                'No school today, but mummy cannot play.',
+                'schools out, but I am afraid that mummy is not, sorry.'] | random }}
+          {% elif school_holiday == 'off' and gem_holiday == 'on' %}   
+            {{ ['Its a school day today but mummy is off.',
+                'School today, but mummy can play.',
+                'Schools in, but mummy is not, yaay!.'] | random }}
+          {% else %}  
+            {{ ['Its a school holiday today and Mummy is off too.',
+                'No school today and mummy too can play. Hooray!',
+                'schools out and mummy is in da hoose.'] | random }}
+          {% endif %}
+        {% else %}
+          {% if work_day == 'off' and (day_of_week == 'Saturday' or day_of_week == 'Sunday') %}
+            {{ ['Its the weekend, so come on mummy, get the big breakfast on.',
+                'The working week is done.  Time for all those weekend jobs.',
+                'Hooray! Its the weekend. So make the most of it.'] | random }}
+          {% elif work_day == 'off' %}  
+            {% if school_holiday == 'off' %}
+              School for the boys, but mummy is off.
+            {% else %}
+              {{ ['Its a holiday, so come on mummy, get the big breakfast on',
+                  'No work today. Time for all those holiday jobs',
+                  'Hooray! Its a holiday. So make the most of it '] | random }}
+            {% endif %}       
+          {% endif %}
+        {% endif %}
+  - data:
+      message: |
+        {{ calendar }}
+    response_variable: cleaned_calevents
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ holiday_info }}
+    response_variable: cleaned_holiday_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ birthday_today }}
+    response_variable: cleaned_birthday_today
+    action: script.cleanup_text
+  - variables:
+      briefing: |
+        {"calendar":"{{cleaned_calevents.text}}",
+         "dow":"{{dow}}",
+         "current_time":"{{current_time}}",
+         "current_time_full":"{{current_time_full}}",
+         "bin_day":"{{bin_day}}",
+         "annual_event":"{{annual_event}}",
+         "family_birthday":"{{family_birthday}}",
+         "birthday_today":"{{cleaned_birthday_today.text}}",
+         "moon_phase":"{{moon_phase}}",
+         "holiday_info":"{{cleaned_holiday_info.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
