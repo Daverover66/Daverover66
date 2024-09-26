@@ -1,28 +1,26 @@
-alias: Marauders Map Opens
-sequence:
-  - data:
-      room: living_room
-      type: priority
-      message: |
-        {{ [
-            "What are you doing wandering the corridors at night?, ",
-            "Out for a little walk in the moonlight, are we?, ",
-            "I am pretty sure you won't find Peter Pettigrew.",
-            "Training for the ballet, Potter? ",
-            "A wise man once said, Happiness can be found, even in the darkest of times, if one only remembers to turn on the light.",
-            "Nothing like a night time stroll to give you ideas. ",
-            "You ought to be careful. People will think you’re… up to something. "
-            ] | random }}
-        {{ [
-            "Oh well.",
-            "Guess we might as well get to it then. ",
-            "Right. ",
-            "So that is what I did. "
-            ] | random }}
-        {{ [
-            "I have disabled the light timer.",
-            "I have configured the office for light. ",
-            "The lights are now on indefinately. "
-            ] | random }}
-    action: script.jarvis_speech_engine
-description: ""
+data:
+  room: kitchen
+  type: priority
+  message: |
+    {{ [
+        "What are you doing wandering the corridors at night?, ",
+        "Out for a little walk in the moonlight, are we?, ",
+        "I am pretty sure you won't find Peter Pettigrew.",
+        "Training for the ballet Potter? ",
+        "A wise man once said, Happiness can be found, even in the darkest of times, if one only remembers to turn on the light.",
+        "Nothing like a night time stroll to give you ideas. ",
+        "You ought to be careful. People will think you’re… up to something. "
+        ] | random }}
+    {{ [
+        "Oh well.",
+        "Guess we might as well get to it then. ",
+        "Right. ",
+        "So that is what I did. "
+        ] | random }}
+    {{ [
+        "I have disabled the light timer.",
+        "I have configured the office for light. ",
+        "The lights are now on indefinitely. "
+        ] | random }}
+action: script.jarvis_speech_engine
+
