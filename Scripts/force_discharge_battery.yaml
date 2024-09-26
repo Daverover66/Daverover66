@@ -1,0 +1,26 @@
+alias: Force Discharge Battery
+sequence:
+  - data:
+      value: >-
+        {{ states('input_number.storage_command_timeout_for_discharge_to_grid')
+        | float(0) }}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: "Set Storage Command Timeout to Input Helper value "
+    action: number.set_value
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: select.solaredge_i1_storage_command_mode
+    type: select_option
+    option: Discharge to Maximize Export
+    alias: Set Storage Command Mode to Discharge to Maximize Export
+  - data:
+      value: >-
+        {{ states('input_number.storage_command_timeout_default_period') |
+        float(0) }}
+    target:
+      entity_id: number.solaredge_i1_storage_command_timeout
+    alias: Set Storage Command Timeout to Default via helper
+    action: number.set_value
+mode: single
+icon: mdi:battery-minus
