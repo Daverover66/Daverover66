@@ -1,0 +1,65 @@
+alias: Get Gem Briefing
+sequence:
+  - variables:
+      morning_snark: |
+        {{ [
+          'Congratulations on surviving the night.',
+          'I see you made it you made it to another day.'
+        ] | random }}
+      device_status: >
+        {% set level = states('sensor.sm_s901b_battery_level') %}  {% set
+        charging = states('sensor.sm_s901b_battery_state') %} {% if
+        has_value('sensor.sm_s901b_battery_level') %}
+          {{ [
+            'Your phone battery is currently at ' ~ level ~ ' percent.',
+            'You have ' ~ level ~ ' percent remaining on your phone battery.',
+            'Your phone is reporting ' ~ level ~ ' percent is left on its internal battery.',
+            'Your phone appears to have ' ~ level ~ ' percent battery charge remaining.',
+            'The battery level of your phone is ' ~ level ~ ' percent.'
+          ] | random }}
+          {% if level | int <=20 and charging == 'Not Charging' %}
+            {{ [
+            'I suggest you connect it to a power source.',
+            'You may want to charge it.',
+            'Charging the battery appears to be best way to avoid loss of service.',
+            'If you would like to continue using it I think charging it would be the next step.',
+            'May I remind you that your phone is not powered by an infinity stone, nor an ark reactor .',
+            'May I remind you that your phone needs power to work.'
+            ] | random }}
+          {% elif level | int <=10 and charging == 'Not Charging' %}
+            {{ [
+            'I must insist you connect it to a power source if you want to stay in communication with your family.',
+            'At that level your phone will fail in less than hour or so.',
+            'I will be unable to track you if the phone loses power.',
+            'May I remind you that your phone has almost exhausted its power reserves.'
+            ] | random }}
+          {% elif level | int <=3 and charging == 'Not Charging' %}
+            {{ [
+            'Your phones power level is critical.',
+            'Failure due to power loss is imminent.',
+            'If you would like to remain in communication I suggest dropping what you are doing and finding a power source.',
+            'Drop what you are doing and find a power source for your phone.'
+            ] | random }}
+          {% endif %}
+        {% else %}
+          {{ [
+            'Your phone is unresponsive.',
+            'It appears your phone has lost power.',
+            'Your phone is no longer reporting its power level.',
+            'I suspect your phone has had a power failure.',
+            'Your mobile device is no longer responding.'
+            ] | random }}
+            I suggest you locate it. 
+        {% endif %} 
+  - data:
+      message: |
+        {{device_status}}
+    response_variable: cleaned_device_status
+    action: script.cleanup_text
+  - variables:
+      briefing: >
+        {"morning_snark":"{{morning_snark}}",
+        "device_status":"{{cleaned_device_status.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
