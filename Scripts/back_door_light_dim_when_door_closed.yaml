@@ -1,0 +1,34 @@
+alias: Back Door Light Dim When Door Closed
+sequence:
+  - data:
+      value: 255
+    target:
+      entity_id: input_number.back_door_light_level
+    action: input_number.set_value
+  - repeat:
+      while:
+        - condition: template
+          value_template: "{{ states(\"input_number.back_door_light_level\") | int > 0 }}"
+      sequence:
+        - data:
+            level: "{{ states(\"input_number.back_door_light_level\") }}"
+          action: script.back_door_light_with_level
+        - target:
+            entity_id: input_number.back_door_light_level
+          data: {}
+          action: input_number.decrement
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 30
+            milliseconds: 0
+  - data: {}
+    target:
+      entity_id: light.back_door_light
+    action: light.turn_off
+  - data:
+      value: 255
+    target:
+      entity_id: input_number.back_door_light_level
+    action: input_number.set_value
+mode: restart
