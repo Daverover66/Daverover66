@@ -1,0 +1,48 @@
+alias: Get Weather Info
+sequence:
+  - data:
+      message: |
+        {{ states('sensor.clothing_forecast_detail') }}
+    response_variable: cleaned_cforecast
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.sun_status') }}
+    response_variable: cleaned_sun_status
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.current_conditions_detail') }}
+    response_variable: cleaned_current_conditions_detailed
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ states('sensor.current_weather_warnings') }}
+    response_variable: cleaned_warnings_detailed
+    action: script.cleanup_text
+  - variables:
+      clothing_forecast: |
+        {{ cleaned_cforecast.text }}
+      current_warnings: |
+        {% set warning_count = states('sensor.weather_alerts_borders')|int %}
+        {% if warning_count == 1 %}
+          {% set is_are = ' is ' %}
+          {% set warning_warnings = ' warning ' %}
+        {%- else -%}
+          {% set is_are = ' are ' %}
+          {% set warning_warnings = ' warnings ' %}
+        {% endif %}
+        {% if warning_count | int > 0 %}
+          {{ 'There' ~ is_are ~ warning_count +' weather' ~ warning_warnings + 'affecting the Scottish Borders.'}}
+        {% else %}
+                  
+        {% endif %}      
+      weather: >
+        {"sun_status":"{{cleaned_sun_status.text}}",
+        "current_warnings":"{{current_warnings}}",
+        "current_warnings_detail":"{{cleaned_warnings_detailed.text}}",
+        "current_conditions_detail":"{{cleaned_current_conditions_detailed.text}}",
+        "clothing_forecast":"{{clothing_forecast}}"}
+  - stop: Alright. Im done.
+    response_variable: weather
+description: ""
