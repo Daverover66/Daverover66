@@ -1,0 +1,6 @@
+alias: "Hot Water: Turn On"
+sequence:
+  - data: {}
+    action: water_heater.turn_on
+mode: single
+icon: mdi:water-boiler
