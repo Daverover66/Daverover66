@@ -1,0 +1,31 @@
+alias: Battery pre-peak top down
+sequence:
+  - metadata: {}
+    data: {}
+    target:
+      entity_id: script.grid_charge_battery
+    action: script.turn_off
+  - device_id: 952193e87f675ba7f7e32eda5500c572
+    domain: select
+    entity_id: 0bdfb19491b49722c2a94351b9a673aa
+    type: select_option
+    option: Maximize Self Consumption
+  - metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.home_battery_grid_charging
+    action: input_boolean.turn_off
+  - metadata: {}
+    data: {}
+    target:
+      entity_id: timer.home_battery_3_hour_charge_period
+    action: timer.cancel
+  - metadata: {}
+    data:
+      where: "{{states('sensor.room_audio')}}"
+      message: >-
+        Attention in the house.  The home battery has completed a half hour pree
+        peak topup and its charge level is now a more healthy {{
+        states('sensor.battery_state_of_charge') }}%.
+    action: script.speech_engine
+mode: single
