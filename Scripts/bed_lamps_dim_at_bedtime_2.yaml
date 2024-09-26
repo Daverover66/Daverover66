@@ -1,0 +1,43 @@
+alias: Bed lamps dim at Bedtime
+    sequence:
+    - service: input_number.set_value
+      data:
+        value: 75
+      target:
+        entity_id: input_number.main_bedroom_sleep
+    - service: light.turn_on
+      target:
+        entity_id: light.bed_lamps_3
+      data:
+        rgb_color:
+          - 255
+          - 50
+          - 10
+        brightness: 75
+    - repeat:
+        while:
+        - condition: template
+          value_template: '{{ states("input_number.main_bedroom_sleep") | int > 0 }}'
+        sequence:
+        - service: script.main_bedroom_bed_lights_night_dim
+          data:
+            level: '{{ states("input_number.main_bedroom_sleep") }}'
+        - service: input_number.decrement
+          target:
+            entity_id: input_number.main_bedroom_sleep
+          data: {}
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.bed_lamps_3
+    - service: input_number.set_value
+      data:
+        value: 75
+      target:
+        entity_id: input_number.main_bedroom_sleep
+    mode: single
