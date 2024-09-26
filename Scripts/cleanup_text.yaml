@@ -1,0 +1,16 @@
+alias: Cleanup Text
+sequence:
+  - variables:
+      cleaned: >
+        {%- macro getReport() -%}
+            {{ message }}
+        {%- endmacro -%} {%- macro cleanup(data) -%}
+          {%- for item in data.split("\n")  if item | trim != "" -%}
+            {{ item | trim }} {% endfor -%}
+        {%- endmacro -%} {%- macro mother_of_all_macros() -%}
+          {{ getReport() }}
+        {%- endmacro -%}  {"text":"{{- cleanup(mother_of_all_macros()) | string
+        -}}"}
+  - stop: ok, Im done.
+    response_variable: cleaned
+description: ""
