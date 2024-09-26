@@ -1,0 +1,19 @@
+alias: Dave's phone location
+sequence:
+  - data: {}
+    action: alexa_media.update_last_called
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - data:
+      where: "{{ states('sensor.room_audio')}}"
+      message: |
+        {% if states('sensor.daves_phone_espresence')  == 'not_home' %} 
+          I am unble to determine the exact location of Daves phone at this time. 
+        {% else %}
+          Daves phone is in the "{{ states('sensor.daves_phone_espresence')}}"
+        {% endif %}
+    action: script.speech_engine
+description: ""
