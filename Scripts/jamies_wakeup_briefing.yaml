@@ -1,0 +1,74 @@
+alias: Jamies Wakeup Briefing
+sequence:
+  - response_variable: greetings
+    action: script.get_tts_greetings
+  - response_variable: school_info
+    action: script.get_school_info
+  - response_variable: weather_info
+    action: script.get_weather_info
+    data: {}
+  - response_variable: briefing_data
+    action: script.get_briefing_data
+    data: {}
+  - variables:
+      message: |
+        {{ greetings.general }} Skylar.
+        {{ briefing_data.current_time }}
+        {% if is_state('sensor.birthday_skylar', '0') %}
+          Even birthday boys have to get dressed. So get to it. 
+        {% else %} 
+          {{ [ 'It is time to get up.',
+            'It is time to get the day started.',
+            'Rise and Shine.',
+            'The Sun is up. or will be soon.',
+            'Wake up, Wake up. Time to get a move on.'
+          ] | random }} 
+          {{ [ 'And get dressed. ',
+            'But put some real clothes on before you leave your room. ',
+            'Everyone should change their underwear at least once a day. And then put on Pants.',
+            'Lets go. Come on. You may ask if you need to wear pants. The answer is Yes.',
+            'Where are your pants? Seriously. Its a serious question. Wait. Where are my pants?',
+            'If you have not gotten dressed it is that time. You know. To put on Pants.'
+          ] | random }} 
+        {% endif %}
+
+        {{[
+          'Speaking of pants.',
+          'Speaking of clothing.',
+          'Listen, did you know you should wear clothes based on the forecast? Now you do.',
+          'Did you know. ',
+          'Listen. Did you know, ' 
+          'I took the liberty of checking the forecast.' 
+        ] | random}}
+        {{ weather_info.clothing_forecast }}
+        {{[
+          'Do not forget to put on your deodorant.',
+          'And if you do not want to stink later. I suggest deodorant.',
+          'Also. remember the deodorant. Your friends, and especially your parents, will thank you.'
+        ] | random }}
+        {{ school_info.school_today}}
+        {{ weather_info.current_conditions_detail }}
+        {{[
+          'Do not forget to grab some breakfast.',
+          'I hope you have a good day.',
+          'Be sure to grab some food.',
+          'Looks like an exciting day out there.' 
+        ] | random }}
+  - data:
+      message: |
+        {{ message }}
+    response_variable: cleaned_briefing
+    action: script.cleanup_text
+  - delay: "00:00:07"
+  - data:
+      who: skylars_bedroom
+      type: priority
+      message: |
+        {{ cleaned_briefing.text }}
+      msg_summary: Gave the Skylars morning briefing.
+    action: script.speech_engine
+  - data:
+      who: jeff
+      message: I just gave Skylars morning briefing.
+    action: script.text_notify
+description: ""
