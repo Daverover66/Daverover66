@@ -1,0 +1,46 @@
+alias: Get Sean Briefing
+sequence:
+  - variables:
+      day_type: |
+        {% if is_state('calendar.schools_out','on')%}
+              Schools out today.  No time to lie in if you want to have a fun day out. 
+        {% elif is_state('calendar.school_holidays','on')%}
+            {{ ['Its a school holiday today so no need to get up early',
+                'No school today.  So why not have a lie in',
+                'Today is a school holiday.  So chill and have a duvet day'] | random }}
+        {% elif is_state('binary_sensor.workday_sensor','off') %}
+            {{ ['Its the weekend so no school today',
+                'Guess what? Its the weekend.  Why not have a lie in.',
+                'Its the weekend. So you can either chill in bed,or get up and watch tv'] | random }}
+        {% elif is_state('binary_sensor.schoolday','on') %}
+            {{ ['Its a school day today so you need to get up now',
+                'School today.  So as warm and cosy as your bed is, might I suggest you get up now',
+                'Today is a school day.  So no time to chill.  Time to get up and go downstairs'] | random }}        
+        {% elif is_state('binary_sensor.fridayschool','on') %}
+            {{ ['Its a Friday school day today. So you need to get up now. But its a half day and you have Schools Out this afternoon.',
+                'School today.  So as warm and cozee as your bed is. Might I suggest you get up now. On the plus side. It is Friday. So Schools Out this afternoon.',
+                'Today is a school day.  So no time to chill.  Time to get up and go downstairs. You might also like to know that its Friday and you have Schools Out this afternoon.'] | random }}
+        {% endif %} {% if is_state('sensor.days_until_sean_s_birthday', '0') %}
+           Its also your birthday. So happy birthday Sean. 
+        {% endif %}
+  - data:
+      message: |
+        {{day_type}}
+    response_variable: cleaned_day_type
+    action: script.cleanup_text
+  - action: script.get_tts_greeting
+    metadata: {}
+    data: {}
+    response_variable: greeting
+  - action: script.get_weather_info
+    data: {}
+    response_variable: weather_info
+  - variables:
+      briefing: |
+        {"day_type":"{{cleaned_day_type.text}}",
+         "greeting":"{{greeting.general}}",
+         "current_conditions":"{{weather_info.current_conditions_detail}}",
+         "clothing_forecast":"{{weather_info.clothing_forecast}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
