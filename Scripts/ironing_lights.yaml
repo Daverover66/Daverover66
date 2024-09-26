@@ -1,0 +1,36 @@
+alias: Ironing Lights
+sequence:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ state_attr('light.spare_room_lights','brightness') == 255 }}
+        sequence:
+          - target:
+              entity_id: input_boolean.guest_bedroom_allow_lights_off
+            data: {}
+            action: input_boolean.toggle
+          - target:
+              entity_id: switch.adaptive_lighting_spare_room_ceiling_lights
+            data: {}
+            action: switch.toggle
+          - target:
+              entity_id: light.spare_room_lights
+            data: {}
+            action: light.turn_off
+    default:
+      - target:
+          entity_id: input_boolean.guest_bedroom_allow_lights_off
+        data: {}
+        action: input_boolean.toggle
+      - target:
+          entity_id: switch.adaptive_lighting_spare_room_ceiling_lights
+        data: {}
+        action: switch.toggle
+      - target:
+          entity_id: light.spare_room_lights
+        data:
+          brightness_pct: 100
+          kelvin: 6500
+        action: light.turn_on
+description: Spare Room Lights to Full Brightness
