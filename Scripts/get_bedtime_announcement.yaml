@@ -1,0 +1,107 @@
+alias: Get Bedtime Announcement
+sequence:
+  - variables:
+      time_for_bed: |
+        {{ [
+            'ahem! Its time for bed both. ',
+            'Its time for bed both. ',
+            'Its that time again both of you. ',
+            'Its time for bed. Yes, that means you too.',
+            'Its time for bed. Yup, this is what I am reduced to now. ',
+            'Its time for bed you guys. I do like this job, but perhaps you could give me something more meaningful to do tomorrow. ',
+            'Its time for bed you guys. or just stay up forever. What do I care? '
+            ] | random }}
+      goodnight: |
+        {{ [ 
+            'Goodnight you two.  Dont forget the dishwasher', 
+            'Goodnight both. Make sure you check the doors', 'Sleep well both. I will see you in the morning',
+            'Goodnight you two. I will monitor the house while you sleep.', 
+            'Goodnight both. Sleep tight.', 
+            'Goodnight both. Pleasant dreams.', 
+            'Have a good night both. Dont let the bedbugs bite'
+            ] | random }} 
+      goodnight_secure: >
+        {% set window_count = expand('binary_sensor.all_secure_night') |
+
+        selectattr('state','eq','on') | list | count %} 
+
+
+        {% set windows = expand('binary_sensor.all_secure_night') |
+
+        selectattr('state','eq','on') | map(attribute='name') | list |join(' and
+        ')
+
+        %}
+
+
+        {%- if window_count == 0 %} 
+
+        {{ [ 
+            'Goodnight you two. The house is secure. So sleep well and I will see you in the morning.',
+            'Goodnight both. The ground floor is secure. So get a good nights sleep', 
+            'Sleep well both. Safe in the knowledge that the house is secure.', 
+            'Goodnight you two. Barn door protocol has been initiated, but I will continue to monitor the house while you sleep.', 
+            'Goodnight both. Sleep tight. The house is shut down tight.', 
+            'Goodnight both. Pleasant dreams. The house is locked down for the night.',
+            'Have a good night both. Dont let the bedbugs bite. My bug zapper is on standby and the house is locked down.' 
+            ] | random }}
+        {% endif %}
+      goodnight_not_secure: >
+        {% set window_count = expand('binary_sensor.all_secure_night') |
+        selectattr('state','eq','on') | list | count %} 
+
+        {% set windows = expand('binary_sensor.all_secure_night') |
+        selectattr('state','eq','on') | map(attribute='name') | list |join(' and
+        ') %}
+
+        {%- if window_count == 1 %} 
+
+        {% set is_are = ' is ' %} 
+
+        {% set has_have = ' has ' %} 
+
+        {%- else -%}
+
+        {% set is_are = ' are ' %}
+
+        {% set has_have = ' have ' %}
+
+        {%- endif -%}
+
+        {% if window_count > 0 %}
+
+        {{ 'Hold on a minute you two. The house is not yet secure. The ' ~
+        windows ~ is_are + 'open.' }} {% endif %}
+  - action: script.cleanup_text
+    metadata: {}
+    data:
+      message: |
+        {{ time_for_bed }}
+    response_variable: cleaned_time_for_bed
+  - action: script.cleanup_text
+    metadata: {}
+    data:
+      message: |
+        {{ goodnight }}
+    response_variable: cleaned_goodnight
+  - action: script.cleanup_text
+    metadata: {}
+    data:
+      message: |
+        {{ goodnight_secure }}
+    response_variable: cleaned_goodnight_secure
+  - action: script.cleanup_text
+    metadata: {}
+    data:
+      message: |
+        {{ goodnight_not_secure }}
+    response_variable: cleaned_goodnight_not_secure
+  - variables:
+      briefing: |
+        {"time_for_bed":"{{cleaned_time_for_bed.text}}",
+         "goodnight":"{{cleaned_goodnight.text}}",
+         "goodnight_secure":"{{cleaned_goodnight_secure.text}}",
+         "goodnight_not_secure":"{{cleaned_goodnight_not_secure.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
