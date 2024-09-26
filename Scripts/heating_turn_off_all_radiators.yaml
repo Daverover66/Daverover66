@@ -1,0 +1,17 @@
+alias: "Heating: Turn OFF all radiators"
+sequence:
+  - data: {}
+    target:
+      entity_id:
+        - climate.cloakroom
+        - climate.dining_room
+        - climate.downstairs
+        - climate.en_suite_bathroom
+        - climate.guest_bedroom
+        - climate.kids_bathroom
+        - climate.master_bedroom
+        - climate.office
+        - climate.upstairs
+    action: climate.turn_off
+mode: single
+icon: mdi:radiator-off
