@@ -1,0 +1,6 @@
+alias: "Hot Water: Turn Off"
+sequence:
+  - data: {}
+    action: water_heater.turn_off
+mode: single
+icon: mdi:water-boiler-off
