@@ -1,0 +1,120 @@
+alias: Holiday House
+sequence:
+  - if:
+      - condition: state
+        entity_id: binary_sensor.morning
+        state: "on"
+    then:
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_main
+        action: media_player.turn_on
+      - data: {}
+        target:
+          entity_id: switch.living_room_tv
+        action: switch.turn_on
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_main
+        action: media_player.turn_off
+      - data: {}
+        target:
+          entity_id: switch.living_room_tv
+        action: switch.turn_off
+    alias: Turn on Living Room TV in the morning
+  - alias: Turn on kitchen TV at luncthime
+    if:
+      - condition: state
+        entity_id: binary_sensor.lunchtime
+        state: "on"
+    then:
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_kitchen_mini_2
+        action: media_player.turn_on
+      - data: {}
+        target:
+          entity_id: switch.ingrid
+        action: switch.turn_on
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
+      - data: {}
+        target:
+          entity_id: switch.ingrid
+        action: switch.turn_off
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_kitchen_mini_2
+        action: media_player.turn_off
+  - if:
+      - condition: state
+        entity_id: binary_sensor.dinner_time
+        state: "on"
+    then:
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_kitchen_mini_2
+        action: media_player.turn_on
+      - data: {}
+        target:
+          entity_id: switch.ingrid
+        action: switch.turn_on
+      - delay:
+          hours: 0
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
+      - data: {}
+        target:
+          entity_id: switch.ingrid
+        action: switch.turn_off
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_kitchen_mini_2
+        action: media_player.turn_off
+    alias: Turn on kitchen TV at dinner time
+  - if:
+      - condition: state
+        entity_id: binary_sensor.evening
+        state: "on"
+    then:
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_main
+        action: media_player.turn_on
+      - data: {}
+        target:
+          entity_id: switch.living_room_tv
+        action: switch.turn_on
+      - delay:
+          hours: 1
+          minutes: 30
+          seconds: 0
+          milliseconds: 0
+      - data: {}
+        target:
+          entity_id: media_player.sky_q_main
+        action: media_player.turn_off
+      - data: {}
+        target:
+          entity_id: switch.living_room_tv
+        action: switch.turn_off
+    alias: Turn on Living Room TV at night
+  - if:
+      - condition: time
+        after: "22:00:00"
+    then:
+      - data: {}
+        action: script.stair_lights_fade_at_bedtime
+      - data: {}
+        action: script.bed_lamps_dim_at_bedtime
+    alias: Start lights dimming
+mode: single
