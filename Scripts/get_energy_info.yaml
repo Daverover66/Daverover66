@@ -1,0 +1,111 @@
+alias: Get Energy Info
+sequence:
+  - data:
+      message: |
+        {{states('sensor.solcast_pv_forecast_forecast_today')|int|round(2)}}
+    response_variable: cleaned_solar_forecast
+    action: script.cleanup_text
+  - variables:
+      solar_forecast: |
+        The solar forecast for today is {{cleaned_solar_forecast.text}}kWh.
+      battery_charge_info: >
+        {% set charge_level = states('sensor.battery_state_of_charge')%} {% set
+        time = states('sensor.solar_battery_time_to_charge_solar')%} {% if
+        is_state('binary_sensor.home_battery_charged_overnight','on') %}
+          The home battery was topped up with {{states('sensor.solar_grid_to_battery_daily')|round(1)}}kWh of cheap energy from the grid last night and is sitting at {{ charge_level }}%.
+        {% else %}
+          The home battery is sitting at {{ charge_level }}%.
+        {% endif %} {% if time == "Charging" and
+        is_state('input_boolean.charge_rate_limited','on') %} 
+           It is currently charging from solar at a reduced rate of {{ states('number.solaredge_i1_storage_charge_limit')[0] }} kW 
+         {{ ['and there is a good chance it will be topped up with glorious sunshine today and wont be needed.',
+             'and I expect terawatts of energy transfer into it for use later today.',
+             'and I expect it to be full of clean energy ready for use later today.'] | random }} 
+        {% elif time == "Charging" and
+        is_state('input_boolean.charge_rate_limited','off') %} 
+          It is currently charging from solar at full charge rate
+         {{ ['and will fill up quite quickly with what little sunshine we see today.',
+             'and megawatts of energy should transfer quickly into battery.',
+             'and I expect it to be full of clean energy ready for use later today.'] | random }} 
+        {% else %} 
+          It is estimated to last until {{ states('sensor.solar_battery_empty_time') }} at the current rate of consumption.      
+        {% endif %}
+      battery_grid_topup_needed: >
+        {% if is_state('sensor.solar_battery_daytime_topup_needed','true') or
+        states('sensor.battery_state_of_charge') | float(0) < 10 %}   
+         The battery may need a top up from the grid later. Leave it to me, and I will pick
+         the best time 
+         {{ ['to avoid paying extortionate peak prices.',
+             'to minimise the impact on your bank balance.',
+             'to prevent it running out in the middle of peak rate.'] | random }}
+        {% endif %}
+      car_battery_info: >
+        {% set topup = states('sensor.rolec_energy_consumption_weekly') |
+        float(0)  %} {% set level =
+        states('input_number.car_battery_charge_level') | float(0) %} 
+          Last time I checked, the battery in the car was at {{ level|round(0) }}%. 
+        {% if level == 100 %}
+          So it doesn't need a topup charge and should be good for 
+          {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+          180 miles.
+          {% else %}
+          200 miles.
+          {% endif %}
+        {% else %}
+          {% if topup > 5 %}
+            Sensors indicate that it has been topped up this week with {{ topup | round(1) }}kWh of lovely cheap energy.
+            So it should be good for around
+            {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+            {{ ((level/100)* 57.4 * 3) | round()}} miles.
+            {% else %}
+            {{ ((level/100)* 57.4 * 3.5) | round()}} miles.
+            {% endif %}   
+          If you need to do a longer journey, it will need to be charged today.
+          {% else %}
+          It appears that it has not been topped up this week, but it is probably good for around  
+            {% if states('sensor.outdoor_temperature_mean_last_24_hours')|float(0) < 10 %}
+            {{ ((level/100)* 57.4 * 3) | round()}} miles.
+            {% else %}
+            {{ ((level/100)* 57.4 * 3.5) | round()}} miles.
+            {% endif %}
+          If you need to do a longer journey, it will need to be charged today.
+          {% endif %}
+        {% endif %} {% if level != 100 %}
+          {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','on') %}
+          I am currently expending terawatts of processing power trying to determine when the best time will be. Once my computations are complete, 
+          I will let you know. Then you can tell whats her face that the car is plugged in, and leave the rest to me.
+          {% elif state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time') is none %}
+          I am currently expending terawatts of processing power trying to determine when the best time will be. Once my computations are complete, 
+          I will let you know. Then you can tell whats her face that the car is plugged in, and leave the rest to me.
+          {% else %}
+          Just make sure it is plugged in before my computed best time of
+          {{as_timestamp(state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time'))|timestamp_custom ('%I:%M %p') }}, 
+          tell whats her face that the car is plugged in, and leave the rest to me.  
+          {% endif %}
+          If you want to charge it outside of my computed best time,
+          {{ ['you know what to do.','on your own head be it.',' you had better get your credit card out.'] | random }}
+        {% endif %}
+  - data:
+      message: |
+        {{battery_charge_info}}
+    response_variable: cleaned_battery_charge_info
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{battery_grid_topup_needed}}
+    response_variable: cleaned_battery_grid_topup_needed
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{car_battery_info}}
+    response_variable: cleaned_car_battery_info
+    action: script.cleanup_text
+  - variables:
+      briefing: |
+        {"solar_forecast":"{{solar_forecast}}",
+         "battery_charge_info":"{{cleaned_battery_charge_info.text}}",
+         "battery_grid_topup_needed":"{{cleaned_battery_grid_topup_needed.text}}",
+         "car_battery_info":"{{cleaned_car_battery_info.text}}"}
+  - stop: Alright. Im done.
+    response_variable: briefing
+description: ""
