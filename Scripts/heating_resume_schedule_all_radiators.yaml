@@ -1,0 +1,18 @@
+alias: "Heating: RESUME schedule all radiators"
+sequence:
+  - data:
+      hvac_mode: auto
+    target:
+      entity_id:
+        - climate.cloakroom
+        - climate.dining_room
+        - climate.downstairs
+        - climate.en_suite_bathroom
+        - climate.guest_bedroom
+        - climate.kids_bathroom
+        - climate.master_bedroom
+        - climate.office
+        - climate.upstairs
+    action: climate.set_hvac_mode
+mode: single
+icon: mdi:calendar-refresh
