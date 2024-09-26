@@ -1,0 +1,42 @@
+alias: Battery Notification
+sequence:
+  - response_variable: dave_briefing
+    action: script.get_dave_briefing
+    data: {}
+  - condition: template
+    value_template: |
+      {{ dave_briefing.critical_battery_count | int > 0 }}
+  - variables:
+      message: |
+        {% set batts = expand('group.critical_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | selectattr('state', 'lt', '30') | list %}
+        {% for bat in batts %}
+          {{ bat.name }} is at {{ bat.state }}%
+        {% endfor %}
+  - data:
+      message: |
+        {{ message }}
+    response_variable: cleaned_message
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ cleaned_message.text }}
+      title: Battery List
+    action: script.text_notify_dave
+  - data:
+      notification_id: battery_notification
+    action: persistent_notification.dismiss
+  - data:
+      notification_id: battery_notification
+      message: "{{ message }}"
+      title: Battery List - To Change
+    action: persistent_notification.create
+  - target:
+      entity_id: todo.smart_home_jobs
+    data:
+      item: Replace Batteries
+      due_date: "{{states('sensor.date')}}"
+      description: Replace these batteries.
+    action: todo.add_item
+description: ""
