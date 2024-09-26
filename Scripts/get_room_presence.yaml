@@ -1,0 +1,39 @@
+alias: Get Room Presence
+sequence:
+  - variables:
+      occupied_rooms: >
+        {% set rooms = ['living_room'] %} {% if
+        is_state('input_boolean.audible_notifications', 'on') %}
+          {% if expand('group.rooms') 
+          | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+          {% set rooms = expand('group.rooms') 
+          | selectattr('state', 'eq', 'on') 
+          | sort(attribute='last_changed', reverse=True)
+          | map(attribute='name') | list %}
+          {%- endif -%}
+        {% else -%}
+          {%- if expand('group.rooms')
+          | rejectattr('name', 'search', 'bedroom') 
+          | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+          {%- set rooms = expand('group.rooms') 
+          | rejectattr('name', 'search', 'bedroom') 
+          | selectattr('state', 'eq', 'on') 
+          | sort(attribute='last_changed', reverse=True) 
+          | map(attribute='name')| list %}
+          {%- endif -%}
+        {% endif %} {{ rooms | replace('_occupied','') }}
+      occupied_rooms_cnt: |
+        {% if is_state('input_boolean.audible_notifications', 'on') %}
+          {{ expand('group.rooms') 
+            | selectattr('state', 'eq', 'on') | list | count }}
+        {% else %}
+          {{ expand('group.rooms') 
+            | rejectattr('name', 'search', 'bedroom') 
+            | selectattr('state', 'eq', 'on') | list | count }}
+        {% endif %}
+      room_presence: >-
+        {"occupied_rooms":"{{occupied_rooms}}",
+        "occupied_rooms_cnt":"{{occupied_rooms_cnt}}"}
+  - stop: ok, Im done.
+    response_variable: room_presence
+description: ""
