@@ -1,0 +1,43 @@
+alias: Rechargeable Battery Notification
+sequence:
+  - response_variable: dave_briefing
+    action: script.get_dave_briefing
+    data: {}
+  - condition: template
+    value_template: |
+      {{ dave_briefing.rechargeable_battery_count | int > 0 }}
+  - variables:
+      message: |
+        {% set batts = expand('group.rechargeable_batteries') 
+          | rejectattr('state', 'eq', '100')
+          | rejectattr('state', 'in', ['unavailable','unknown'])
+          | selectattr('state', 'lt', '20') | list %}
+        {% for bat in batts %}
+          {{ bat.name }} is at {{ bat.state }}%. 
+        {% endfor %}
+  - data:
+      message: |
+        {{ message }}
+    response_variable: cleaned_message
+    action: script.cleanup_text
+  - data:
+      message: |
+        {{ cleaned_message.text }}
+      title: Rechargeable Battery List
+    action: script.text_notify_dave
+  - data:
+      notification_id: rechargeable_battery_notification
+    action: persistent_notification.dismiss
+  - data:
+      notification_id: rechargeable_battery_notification
+      message: "{{ message }}"
+      title: Rechargeable Battery List - To Charge
+    action: persistent_notification.create
+  - target:
+      entity_id: todo.smart_home_jobs
+    data:
+      item: Recharge Batteries
+      due_date: "{{states('sensor.date')}}"
+      description: Recharge these srv batteries.
+    action: todo.add_item
+description: ""
