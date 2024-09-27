@@ -1,0 +1,10 @@
+alias: Restart Home Assistant
+sequence:
+  - data: {}
+    target:
+      entity_id: input_boolean.audible_notifications
+    action: input_boolean.turn_off
+  - data: {}
+    action: homeassistant.restart
+mode: single
+icon: mdi:home-assistant
