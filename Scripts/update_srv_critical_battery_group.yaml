@@ -1,0 +1,14 @@
+alias: Update SRV Critical Battery Group
+sequence:
+  - data:
+      object_id: srv_critical_batteries
+      entities: []
+    action: group.set
+  - data:
+      object_id: srv_critical_batteries
+      add_entities: |-
+        {{ states.binary_sensor | 
+          selectattr('entity_id', 'in', area_entities('SRV Critical Battery')) |
+          map(attribute='entity_id') | list  | join(',') }} 
+    action: group.set
+mode: single
