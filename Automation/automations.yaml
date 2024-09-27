@@ -37,6 +37,9 @@
   action:
   - choose:
     - conditions:
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
       - condition: or
         conditions:
         - condition: trigger
@@ -49,24 +52,21 @@
           message: The heating controller is offline
           title: HEATING
         alias: Send a notification based on an input text helper
-      - service: notify.alexa_media_kitchen_echo_show
+      - service: script.speech_engine
         data:
+          where: '{{ states(''sensor.room_audio'')}}'
           message: The heating controller is offline
-          title: HEATING
-          data:
-            type: announce
-            method: all
     - conditions:
       - condition: trigger
         id: Tado Bridge Disconnected
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
       sequence:
-      - service: notify.alexa_media_kitchen_echo_show
+      - service: script.speech_engine
         data:
+          where: '{{ states(''sensor.room_audio'')}}'
           message: The tado bridge is offline
-          title: HEATING
-          data:
-            type: announce
-            method: all
   mode: single
 - id: '1675186464541'
   alias: Greenhouse Heating Toggle
@@ -104,9 +104,9 @@
           entity_id: switch.heater_greenhouse_s1
   mode: single
 - id: '1677073569551'
-  alias: Solar Hot Water Toggle
+  alias: Hot Water, solar and gas
   description: Turn on the immersion heater when the battery is full and solar export
-    is more than 1kW
+    is high. Check later in the day and, if needed, heat water with gas.
   trigger:
   - platform: numeric_state
     entity_id:
@@ -134,8 +134,8 @@
   - platform: numeric_state
     entity_id:
     - sensor.hot_water_energy_consumption_daily
-    above: 4
-    id: 4kWh Energy Used
+    above: 6
+    id: 6kWh Energy Used
   - platform: time
     at: '16:00:00'
     id: Deactivate
@@ -149,6 +149,9 @@
   - platform: time
     at: '17:30:00'
     id: Time On
+  - platform: time
+    at: '21:00:00'
+    id: Last Check
   condition: []
   action:
   - choose:
@@ -223,7 +226,7 @@
         id:
         - Deactivate
         - Timer Done
-        - 4kWh Energy Used
+        - 6kWh Energy Used
       sequence:
       - service: input_boolean.turn_off
         target:
@@ -246,10 +249,27 @@
       - condition: trigger
         id:
         - Time On
-      - alias: Solar Hot Water Consumption below 4kWh
-        condition: numeric_state
+      - condition: numeric_state
         entity_id: sensor.hot_water_energy_consumption_daily
-        below: 1.5
+        below: 6
+      sequence:
+      - service: tado.set_water_heater_timer
+        target:
+          entity_id: water_heater.hot_water
+        data:
+          time_period: 00:30:00
+    - conditions:
+      - condition: trigger
+        id:
+        - Last Check
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.hot_water_energy_consumption_daily
+          below: 6
+        - condition: numeric_state
+          entity_id: sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption_kwh
+          below: 6
       sequence:
       - service: tado.set_water_heater_timer
         target:
@@ -315,13 +335,10 @@
           message: There is a problem with the Home Battery
           title: HOME BATTERY
         alias: Send a notification based on an input text helper
-      - service: notify.alexa_media_kitchen_echo_show
+      - service: script.speech_engine
         data:
+          where: '{{ states(''sensor.room_audio'')}}'
           message: There is a problem with the home battery
-          title: HOME BATTERY
-          data:
-            type: announce
-            method: all
   mode: single
 - id: '1677242524542'
   alias: Granny Charger Toggle
@@ -588,6 +605,18 @@
     zone: zone.doctors_surgery
     event: leave
     id: Left the Doctors
+  - platform: state
+    entity_id:
+    - person.david_forrester
+    - person.gem_forrester
+    from: home
+    id: Start Monitor
+  - platform: state
+    entity_id:
+    - person.david_forrester
+    - person.gem_forrester
+    id: Stop Monitor
+    to: home
   condition: []
   action:
   - choose:
@@ -600,9 +629,6 @@
           message: Gem has got to work
           title: GEM AT WORK
       - if:
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
@@ -617,9 +643,6 @@
     - conditions:
       - condition: trigger
         id: Gem almost home
-      - condition: state
-        entity_id: binary_sensor.quiet_time
-        state: 'off'
       - condition: state
         entity_id: input_boolean.audible_notifications
         state: 'on'
@@ -641,14 +664,10 @@
         data:
           message: Gem has left work
           title: GEM LEFT WORK
-        alias: Send a notification based on an input text helper
       - if:
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
         then:
         - service: script.speech_engine
           data:
@@ -664,9 +683,6 @@
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
         then:
         - service: script.speech_engine
           data:
@@ -676,15 +692,11 @@
         data:
           message: 'Dave is at his mum and dad''s '
           title: DAVE IS IN DUNDEE
-        alias: Send a notification based on an input text helper
     - conditions:
       - condition: trigger
         id: Dave almost home
       sequence:
       - if:
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
@@ -698,13 +710,10 @@
               the area. Logic circuits have determined that Daddy will be home soon.',\n
               \   'Information. Sensors have reported movement at a range of 1 mile
               from the property. Logic circuits surmise that Daddy will be home soon.']|random\n}}\n"
-        alias: If quiet time is off and audible notifications is on, announce on Alexa
-          everywhere group.
       - service: script.text_notify_gem
         data:
           message: Dave is almost home
           title: DAVE 5 MINS AWAY
-        alias: Notify Gem's phone
     - conditions:
       - condition: trigger
         id: 'Dave left his mum and dad''s '
@@ -713,9 +722,6 @@
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
         then:
         - service: script.speech_engine
           data:
@@ -726,7 +732,6 @@
         data:
           message: Dave has left Dundee
           title: DAVE LEFT
-        alias: Notify Gem's phone
     - conditions:
       - condition: trigger
         id: At the Doctors
@@ -742,9 +747,6 @@
             title: GEM AT DOCTORS
         - if:
           - condition: state
-            entity_id: binary_sensor.quiet_time
-            state: 'off'
-          - condition: state
             entity_id: input_boolean.audible_notifications
             state: 'on'
           then:
@@ -758,9 +760,6 @@
             message: Dave is at the doctors
             title: DAVE AT DOCTORS
         - if:
-          - condition: state
-            entity_id: binary_sensor.quiet_time
-            state: 'off'
           - condition: state
             entity_id: input_boolean.audible_notifications
             state: 'on'
@@ -784,9 +783,6 @@
             title: GEM LEFT DOCTORS
         - if:
           - condition: state
-            entity_id: binary_sensor.quiet_time
-            state: 'off'
-          - condition: state
             entity_id: input_boolean.audible_notifications
             state: 'on'
           then:
@@ -801,9 +797,6 @@
             title: DAVE LEFT DOCTORS
         - if:
           - condition: state
-            entity_id: binary_sensor.quiet_time
-            state: 'off'
-          - condition: state
             entity_id: input_boolean.audible_notifications
             state: 'on'
           then:
@@ -811,6 +804,42 @@
             data:
               where: '{{ states(''sensor.room_audio'') }}'
               message: '{{ "Pardon me mummy. daddy has left the doctors" }}'
+    - conditions:
+      - condition: trigger
+        id:
+        - Start Monitor
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{"Gem" in trigger.to_state.attributes.friendly_name }}'
+        then:
+        - service: input_boolean.toggle
+          target:
+            entity_id: input_boolean.gem_travel_monitor
+          data: {}
+        else:
+        - service: input_boolean.toggle
+          target:
+            entity_id: input_boolean.dave_travel_monitor
+          data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - Stop Monitor
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{"Gem" in trigger.to_state.attributes.friendly_name }}'
+        then:
+        - service: input_boolean.toggle
+          target:
+            entity_id: input_boolean.gem_travel_monitor
+          data: {}
+        else:
+        - service: input_boolean.toggle
+          target:
+            entity_id: input_boolean.dave_travel_monitor
+          data: {}
   mode: single
 - id: '1680183645675'
   alias: Battery Settings Confirm
@@ -1125,10 +1154,8 @@
             }}\n"
           title: GARAGE DEHUMIDIFIER
         alias: Send a notification based on an input text helper
-      - if:
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
+      - alias: Broadcast message outside quiet time
+        if:
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
@@ -1149,7 +1176,6 @@
               The garage rust prevention device has stalled. Unless you want your
               cars to disintegrate into a heap of iron oxide, might I suggest you
               take immediate action.'     \n    ]|random }}"
-        alias: Broadcast message outside quiet time
       - service: light.turn_on
         data:
           rgb_color:
@@ -1176,10 +1202,8 @@
         data: {}
         target:
           entity_id: input_boolean.garage_dehumidifier_full
-      - if:
-        - condition: state
-          entity_id: binary_sensor.quiet_time
-          state: 'off'
+      - alias: Broadcast message outside quiet time
+        if:
         - condition: state
           entity_id: input_boolean.audible_notifications
           state: 'on'
@@ -1198,7 +1222,6 @@
               \     '<prosody pitch=\"low\">The garage rust prevention device has
               recommenced operation. You have saved your cars from disintegrating
               into a heap of iron oxide.</prosody>'     \n    ]|random }}"
-        alias: Broadcast message outside quiet time
       - if:
         - condition: template
           value_template: '{{is_state(''sensor.current_energy_rate'',''input_boolean.plunge_pricing'')}}'
@@ -1358,6 +1381,27 @@
     - sensor.shellyem_244cab4194b1_channel_2_power
     below: 20
     id: Charge Complete
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - platform: state
+    entity_id:
+    - binary_sensor.morning
+    to: 'on'
+    id: Reset Timer
+  - platform: state
+    entity_id:
+    - input_boolean.car_plugged_in
+    from: 'off'
+    to: 'on'
+    id: Session start
+  - platform: state
+    entity_id:
+    - input_boolean.car_plugged_in
+    from: 'on'
+    to: 'off'
+    id: Session end
   condition: []
   action:
   - choose:
@@ -1367,15 +1411,12 @@
         - Activate Charge Session
       sequence:
       - condition: state
-        entity_id: input_boolean.rolec_battery_master
-        state: 'off'
-      - condition: state
-        entity_id: script.car_plugged_in
+        entity_id: input_boolean.car_plugged_in
         state: 'on'
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.rolec_battery_master
+        action: input_boolean.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -1387,49 +1428,49 @@
         entity_id: input_boolean.car_plugged_in
         state: 'on'
       sequence:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.shelly1_c45bbe7867c7
+        action: switch.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 30
           milliseconds: 0
-      - service: number.set_value
-        data:
+      - data:
           value: '{{ states(''input_number.desired_battery_output_limit_for_overnight_ev_charging'')
             | float(0) }}'
         target:
           entity_id: number.solaredge_i1_storage_discharge_limit
-      - service: timer.start
-        data: {}
+        action: number.set_value
+      - data: {}
         target:
           entity_id: timer.rolec_4_hour_charge_period
+        action: timer.start
     - conditions:
       - condition: trigger
         id:
         - 'Off'
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.shelly1_c45bbe7867c7
+        action: switch.turn_off
       - delay:
           hours: 0
           minutes: 0
           seconds: 30
           milliseconds: 0
-      - service: number.set_value
-        data:
+      - data:
           value: '{{ states(''input_number.default_battery_output_limit'') | float(0)
             }}'
         target:
           entity_id: number.solaredge_i1_storage_discharge_limit
-      - service: timer.pause
-        data: {}
+        action: number.set_value
+      - data: {}
         target:
           entity_id: timer.rolec_4_hour_charge_period
+        action: timer.pause
     - conditions:
       - condition: trigger
         id: Rolec Available
@@ -1446,27 +1487,26 @@
         entity_id: input_boolean.car_plugged_in
         state: 'on'
       sequence:
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.shelly1_c45bbe7867c7
-      - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-        data:
+        action: switch.turn_on
+      - data:
           message: The Rolec was turned on because it became available during a charge
             period.
           title: ROLEC ON
-        alias: Send a notification based on an input text helper
+        action: script.text_notify_dave
       - delay:
           hours: 0
           minutes: 0
           seconds: 30
           milliseconds: 0
-      - service: number.set_value
-        data:
+      - data:
           value: '{{ states(''input_number.desired_battery_output_limit_for_overnight_ev_charging'')
             | float(0) }}'
         target:
           entity_id: number.solaredge_i1_storage_discharge_limit
+        action: number.set_value
     - conditions:
       - condition: trigger
         id: Rolec Available
@@ -1477,37 +1517,38 @@
         entity_id: switch.shelly1_c45bbe7867c7
         state: 'on'
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.shelly1_c45bbe7867c7
-      - service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
-        data:
+        action: switch.turn_off
+      - data:
           message: The Rolec was turned off because it was on outside of a charge
             period.
           title: ROLEC OFF
-        alias: Send a notification based on an input text helper
+        action: script.text_notify_dave
     - conditions:
       - condition: trigger
         id:
         - Stop Charge
         - Charge Complete
       sequence:
-      - service: switch.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: switch.shelly1_c45bbe7867c7
+        action: switch.turn_off
       - delay:
           hours: 0
           minutes: 0
           seconds: 30
           milliseconds: 0
-      - service: number.set_value
-        data:
+      - data:
           value: '{{ states(''input_number.default_battery_output_limit'') | float(0)
             }}'
         target:
           entity_id: number.solaredge_i1_storage_discharge_limit
+        action: number.set_value
+      - action: script.car_plugged_in
+        data: {}
     - conditions:
       - condition: trigger
         id:
@@ -1522,16 +1563,123 @@
         entity_id: timer.rolec_4_hour_charge_period
         state: active
       - condition: state
-        entity_id: script.car_plugged_in
+        entity_id: input_boolean.car_plugged_in
         state: 'on'
       sequence:
-      - service: number.set_value
-        data:
+      - data:
           value: '{{ states(''input_number.desired_battery_output_limit_for_overnight_ev_charging'')
             | float(0) }}'
         target:
           entity_id: number.solaredge_i1_storage_discharge_limit
-  mode: single
+        action: number.set_value
+    - conditions:
+      - condition: trigger
+        id:
+        - Reset Timer
+      sequence:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - switch.shelly1_c45bbe7867c7
+          from: 'on'
+          to: 'off'
+          for:
+            hours: 0
+            minutes: 1
+            seconds: 0
+        timeout:
+          hours: 1
+          minutes: 0
+          seconds: 0
+          milliseconds: 0
+      - target:
+          entity_id: timer.rolec_4_hour_charge_period
+        data: {}
+        action: timer.cancel
+    - conditions:
+      - condition: trigger
+        id:
+        - Session start
+      sequence:
+      - action: mqtt.publish
+        data:
+          retain: true
+          payload: '{{states(''sensor.rolec_energy_consumption_monthly'')|float(0)|round(1)}}'
+          topic: rolec/energy/start
+      - action: mqtt.publish
+        data:
+          retain: true
+          payload: '{{states(''input_number.car_battery_charge_level'')|float(0)}}'
+          topic: car/battery/start
+    - conditions:
+      - condition: trigger
+        id:
+        - Session end
+      sequence:
+      - action: mqtt.publish
+        data:
+          retain: true
+          topic: rolec/energy/end
+          payload: '{{states(''sensor.rolec_energy_consumption_monthly'')|float(0)|round(1)}}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+      - action: mqtt.publish
+        data:
+          retain: true
+          topic: rolec/energy/used
+          payload: '{{ (states(''sensor.rolec_energy_end_session'')|float(0) - states(''sensor.rolec_energy_start_session'')|float(0))|round(1)}}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+      - action: mqtt.publish
+        data:
+          retain: true
+          topic: car/battery/end
+          payload: '{% set energy = states(''sensor.rolec_energy_used'')|float(0)
+            %}
+
+            {% set oldbatt = states(''sensor.battery_level_start_session'')|float(0)%}
+
+            {% set newbatt = oldbatt +  ((energy / 58)*100)|int %}
+
+            {{ newbatt }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+      - action: mqtt.publish
+        data:
+          retain: true
+          topic: car/battery/added
+          payload: '{% set energy = states(''sensor.rolec_energy_used'')|float(0)
+            %}
+
+            {% set oldbatt = states(''sensor.battery_level_start_session'')|float(0)%}
+
+            {% set newbatt = oldbatt +  ((energy / 58)*100)|int %}
+
+            {{ newbatt - oldbatt }}'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+      - target:
+          entity_id:
+          - input_number.car_battery_charge_level
+        data:
+          value: '{{states(''sensor.battery_level_end_session'')|float(0)}}'
+        action: input_number.set_value
+  mode: parallel
+  max: 10
+  trace:
+    stored_traces: 20
 - id: '1686230178966'
   alias: Water Leak Detection and Alarm
   description: ''
@@ -1563,9 +1711,6 @@
       - condition: state
         entity_id: input_boolean.audible_notifications
         state: 'on'
-      - condition: state
-        entity_id: binary_sensor.quiet_time
-        state: 'off'
       sequence:
       - service: script.speech_engine
         data:
@@ -1607,6 +1752,9 @@
       - condition: state
         entity_id: sun.sun
         state: above_horizon
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
       sequence:
       - service: media_player.volume_set
         data:
@@ -1657,6 +1805,9 @@
     - conditions:
       - condition: trigger
         id: Cooling Down
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
       sequence:
       - service: media_player.volume_set
         data:
@@ -1793,17 +1944,22 @@
       - condition: template
         value_template: '{{"Back" in trigger.to_state.attributes.friendly_name }}'
         alias: Filter Back Door
-      - condition: sun
-        before: sunrise
-        after: sunset
+      - condition: or
+        conditions:
+        - condition: sun
+          before: sunrise
+          after: sunset
+        - condition: numeric_state
+          entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+          below: input_number.low_light_threshold
       - condition: state
         entity_id: light.back_door_zone_light
         state: 'off'
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: light.back_door_zone_light
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -1833,22 +1989,22 @@
             entity_id: media_player.kitchen_echo_show
             state: paused
         then:
-        - service: script.alexa_voice
-          data:
+        - data:
             where: kitchen
             message: '<audio src=''https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3''/>
 
               '
+          action: script.alexa_voice
       - if:
         - condition: sun
           after: sunset
           before: sunrise
         then:
-        - service: light.turn_on
-          target:
+        - target:
             entity_id: light.back_door_light
           data:
             brightness_step: 255
+          action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -1878,19 +2034,19 @@
             entity_id: media_player.kitchen_echo_show
             state: paused
         then:
-        - service: script.alexa_voice
-          data:
+        - data:
             where: kitchen
             message: '<audio src=''https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/8TpwC3xH-tos-turboliftdoor.mp3''/>
 
               '
+          action: script.alexa_voice
       - if:
         - condition: state
           entity_id: light.back_door_light
           state: 'on'
         then:
-        - service: script.back_door_light_dim_when_door_closed
-          data: {}
+        - data: {}
+          action: script.back_door_light_dim_when_door_closed
     - conditions:
       - condition: trigger
         id: Door Still Open
@@ -1903,8 +2059,7 @@
           entity_id: input_boolean.guest_mode
           state: 'off'
       sequence:
-      - service: script.speech_engine
-        data:
+      - data:
           where: '{{ states(''sensor.room_audio'') }}'
           message: "Attention in the house.  The {{ trigger.to_state.attributes.friendly_name
             }} {{ [\n  ' is standing open.',\n  ' is open.',\n  ' does not close on
@@ -1917,6 +2072,7 @@
             like a good time to try again.',\n    'And the automatic door closer appears
             to be broken. So, you know what to do. Time to get physical.',\n    'I
             would close it for you. But I lack legs. And Arms.'\n] | random }}\n"
+        action: script.speech_engine
   mode: restart
 - id: '1691393321806'
   alias: Night Lights and Reset
@@ -1946,6 +2102,14 @@
     from: 'off'
     to: 'on'
     id: Camera LED Off
+  - platform: sun
+    event: sunset
+    offset: 0
+    id: Sunset
+  - platform: sun
+    event: sunrise
+    offset: 0
+    id: Sunrise
   condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -1963,30 +2127,30 @@
           entity_id: light.corner_lamp_2
           state: 'on'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.corner_lamp_2
+          action: light.turn_off
       - if:
         - condition: state
           entity_id: light.standard_lamp
           state: 'on'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.standard_lamp
+          action: light.turn_off
         alias: If standard lamp is on, turn it off
       - if:
         - condition: state
           entity_id: switch.under_shelf_lights_local
           state: 'on'
         then:
-        - service: switch.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: switch.under_shelf_lights_local
+          action: switch.turn_off
         alias: If undershelf lights are on, turn them off
       - if:
         - condition: state
@@ -1996,10 +2160,10 @@
           entity_id: binary_sensor.back_door_sensor_contact
           state: 'off'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.back_door_light
+          action: light.turn_off
         alias: If back door light is on, turn it off
       - alias: 'If landing lights are on, turn them off '
         if:
@@ -2007,17 +2171,17 @@
           entity_id: light.landing_lights_2
           state: 'on'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.landing_lights_2
-      - service: input_boolean.turn_off
-        data: {}
+          action: light.turn_off
+      - data: {}
         target:
           entity_id:
           - input_boolean.guest_bedroom_bedside_lamps_active
           - input_boolean.main_bedroom_bedside_lamps_active
+        action: input_boolean.turn_off
       - if:
         - condition: state
           entity_id: light.guest_bedroom_bedside_lamp_left
@@ -2026,32 +2190,32 @@
           entity_id: input_boolean.room_occupied_guest_bedroom
           state: 'on'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id:
             - light.guest_bedroom_bedside_lamp_left
             - light.guest_bedroom_bedside_lamp_right
+          action: light.turn_off
         alias: If guest bedroom bedside lamps are on, turn them off
       - if:
         - condition: state
           state: 'on'
           entity_id: light.sonoff_1001f6d950
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.sonoff_1001f6d950
+          action: light.turn_off
         alias: If Daddy's bedside lamp is on, turn it off
       - if:
         - condition: state
           state: 'on'
           entity_id: light.sonoff_1001f6d982
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.sonoff_1001f6d982
+          action: light.turn_off
         alias: If Mummy's bedside lamp is on, turn it off
       - if:
         - condition: state
@@ -2061,15 +2225,15 @@
           entity_id: binary_sensor.back_door_sensor_contact
           state: 'off'
         then:
-        - service: light.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: light.back_door_zone_light
+          action: light.turn_off
         alias: If back door zone light is on, turn it off
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.kitchen_lights_2
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
@@ -2086,27 +2250,30 @@
           minutes: 13
           seconds: 0
           milliseconds: 0
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.morning_briefing_played
-          - input_boolean.kids_bedtime_announcement_played
+          - input_boolean.seans_bedtime_announcement_played
+          - input_boolean.jamies_bedtime_announcement_played
           - input_boolean.school_morning_announcement_played
           - input_boolean.school_pick_up_announcement_played
           - input_boolean.schools_out_morning_announcements_played
+          - input_boolean.office_welcome_played
+          - input_boolean.guest_bedroom_night_lights_active
+        action: input_boolean.turn_off
       - delay:
           hours: 1
           minutes: 0
           seconds: 0
           milliseconds: 0
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.main_bedroom_bedside_lamps_active
           - input_boolean.guest_bedroom_bedside_lamps_active
           - input_boolean.guest_bedroom_allow_lights_off
+        action: input_boolean.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -2125,34 +2292,37 @@
           minutes: 13
           seconds: 0
           milliseconds: 0
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
           - input_boolean.main_bedroom_bedside_lamps_active
           - input_boolean.guest_bedroom_bedside_lamps_active
           - input_boolean.guest_bedroom_allow_lights_off
-      - service: input_boolean.turn_off
-        data: {}
+          - input_boolean.office_welcome_played
+        action: input_boolean.turn_on
+      - data: {}
         target:
           entity_id:
           - input_boolean.morning_briefing_played
-          - input_boolean.kids_bedtime_announcement_played
+          - input_boolean.seans_bedtime_announcement_played
+          - input_boolean.jamies_bedtime_announcement_played
           - input_boolean.school_morning_announcement_played
           - input_boolean.school_pick_up_announcement_played
+          - input_boolean.guest_bedroom_night_lights_active
+        action: input_boolean.turn_off
     - conditions:
       - condition: trigger
         id:
         - Camera LED Off
       sequence:
-      - service: switch.toggle
-        target:
+      - target:
           entity_id:
           - switch.landing_camera_indicator_led
           - switch.jamie_s_room_camera_indicator_led
           - switch.sean_s_room_camera_indicator_led
           - switch.guest_bedroom_camera_indicator_led
         data: {}
+        action: switch.toggle
     - conditions:
       - condition: trigger
         id:
@@ -2163,28 +2333,57 @@
           entity_id: input_boolean.bst
           state: 'on'
         then:
-        - service: switch.toggle
-          target:
+        - target:
             entity_id:
             - switch.landing_camera_indicator_led
             - switch.jamie_s_room_camera_indicator_led
             - switch.sean_s_room_camera_indicator_led
             - switch.guest_bedroom_camera_indicator_led
           data: {}
+          action: switch.toggle
         else:
         - delay:
             hours: 1
             minutes: 0
             seconds: 0
             milliseconds: 0
-        - service: switch.toggle
-          target:
+        - target:
             entity_id:
             - switch.landing_camera_indicator_led
             - switch.jamie_s_room_camera_indicator_led
             - switch.sean_s_room_camera_indicator_led
             - switch.guest_bedroom_camera_indicator_led
           data: {}
+          action: switch.toggle
+    - conditions:
+      - condition: trigger
+        id:
+        - Sunset
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.hallway_light_switch_2_left
+        action: switch.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Sunrise
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.hallway_light_switch_2_left
+        action: switch.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Turn On
+      sequence:
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.seans_morning_briefing
+        data_template:
+          time: "{% if is_state('binary_sensor.schoolday','on') %}\n  07:30\n{% else
+            %}\n  08:00\n{% endif %}\n"
   mode: parallel
   max: 10
 - id: '1692351497233'
@@ -2278,6 +2477,7 @@
     from: 'off'
     to: 'on'
     id: Presence
+    alias: When someone goes into the cloakroom.
   - platform: state
     entity_id:
     - binary_sensor.cloakroom_presence_occupancy
@@ -2288,13 +2488,27 @@
       minutes: 0
       seconds: 0
     id: Absence
+    alias: When someone leaves the cloakroom.
   - platform: event
     event_type: timer.finished
     event_data:
       entity_id: timer.cloakroom_light
     id: Timer Done
-    alias: Cloakroom Light off with Timer
+    alias: When cloakroom timer runs down.
     enabled: true
+  - platform: state
+    entity_id:
+    - light.cloakroom_switch_left
+    from: 'off'
+    to: 'on'
+    id: Switch on
+    alias: When light is turned on manually.
+  - platform: numeric_state
+    entity_id:
+    - sensor.cloakroom_presence_illuminance_lux
+    below: 20
+    id: Low Light
+    alias: When light level is low.
   condition: []
   action:
   - choose:
@@ -2306,19 +2520,53 @@
         conditions:
         - condition: numeric_state
           entity_id: sensor.cloakroom_presence_illuminance_lux
-          below: input_number.daytime_light_needed
+          below: 20
         - condition: sun
           before: sunrise
           after: sunset
+      - condition: state
+        entity_id: binary_sensor.quiet_time_boys
+        state: 'off'
       sequence:
-      - service: light.turn_on
-        data: {}
+      - action: switch.turn_on
         target:
-          entity_id: light.cloakroom_light_2
-      - service: timer.start
+          entity_id:
+          - switch.cloakroom_switch_left
+          - switch.cloakroom_switch_right
         data: {}
+        alias: Turn on light and extractor.
+      - data: {}
         target:
           entity_id: timer.cloakroom_light
+        action: timer.start
+      alias: When someone enters cloakroom outside of quite time.
+    - conditions:
+      - condition: trigger
+        id:
+        - Presence
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.cloakroom_presence_illuminance_lux
+          below: 20
+        - condition: sun
+          before: sunrise
+          after: sunset
+      - condition: state
+        entity_id: binary_sensor.quiet_time_boys
+        state: 'on'
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.cloakroom_switch_left
+        data: {}
+        alias: Turn on light only.
+      - data: {}
+        target:
+          entity_id: timer.cloakroom_light
+        action: timer.start
+      alias: When someone enters cloakroom during quite time.
     - conditions:
       - condition: trigger
         id:
@@ -2327,34 +2575,94 @@
         entity_id: timer.cloakroom_light
         state: idle
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
-          entity_id: light.cloakroom_light_2
+          entity_id:
+          - switch.cloakroom_switch_left
+        action: switch.turn_off
+        alias: Turn off the light.
+      - condition: state
+        entity_id: switch.cloakroom_switch_right
+        state: 'on'
+        alias: Check if the extractor is on.
+      - data: {}
+        target:
+          entity_id:
+          - switch.cloakroom_switch_right
+        action: switch.turn_off
+        alias: Turn off the extractor.
+      alias: When someone leaves the cloakroom.
     - conditions:
       - condition: trigger
         id:
-        - Manual Switch On
+        - Switch on
+      - condition: state
+        entity_id: binary_sensor.quiet_time_boys
+        state: 'off'
       sequence:
-      - service: timer.start
-        data: {}
+      - data: {}
         target:
           entity_id: timer.cloakroom_light
+        action: timer.start
+      - target:
+          entity_id: switch.cloakroom_switch_right
+        data: {}
+        action: switch.turn_on
+        alias: Turn on extractor.
+      alias: Light switch manually turned on.
     - conditions:
       - condition: trigger
         id:
         - Timer Done
-      - condition: state
-        entity_id: light.cloakroom_light_2
-        state: 'on'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.cloakroom_switch_left
+          state: 'on'
+        - condition: state
+          entity_id: switch.cloakroom_switch_right
+          state: 'on'
+        alias: If light or extractor is on.
       - condition: state
         entity_id: binary_sensor.cloakroom_presence_occupancy
         state: 'off'
       sequence:
-      - service: light.turn_off
-        data: {}
+      - alias: Check which switches are on.
+        if:
+        - condition: state
+          entity_id:
+          - switch.cloakroom_switch_left
+          - switch.cloakroom_switch_right
+          state: 'on'
+          alias: Both switches on.
+        then:
+        - action: switch.turn_off
+          target:
+            entity_id:
+            - switch.cloakroom_switch_left
+            - switch.cloakroom_switch_right
+          data: {}
+          alias: Turn both switches off.
+        else:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.cloakroom_switch_right
+          data: {}
+          alias: Turn off extractor.
+      alias: When cloakroom timer runs down.
+    - conditions:
+      - condition: trigger
+        id:
+        - Low Light
+      - condition: state
+        entity_id: binary_sensor.cloakroom_occupied
+        state: 'on'
+      sequence:
+      - action: switch.turn_on
         target:
-          entity_id: light.cloakroom_light_2
+          entity_id: switch.cloakroom_switch_left
+        data: {}
+        alias: Turn on the light.
   mode: restart
 - id: '1692367263581'
   alias: Upstairs Landing Lights with Presence
@@ -2476,6 +2784,10 @@
         data: {}
         target:
           entity_id: input_boolean.family_is_home
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.welcome_home
+        data: {}
   mode: single
 - id: '1692778631650'
   alias: Run Holiday Lights
@@ -2569,18 +2881,17 @@
   alias: Time To Put Heating On
   description: ''
   trigger:
-  - platform: numeric_state
+  - platform: sun
+    event: sunset
+    offset: 0
+  condition:
+  - condition: numeric_state
     entity_id: sensor.indoor_temperature_mean_last_24_hours
     below: 18
-    id: Low Temp
-  condition:
-  - condition: time
-    after: 08:00:00
-    before: '22:00:00'
   action:
-  - service: notify.mobile_app_daves_samsung_galaxy
-    data:
+  - data:
       message: Time to turn on the Heating?
+    action: script.text_notify_parents
   mode: restart
 - id: '1695732722060'
   alias: Main Bathroom Lights with Presence
@@ -2616,8 +2927,20 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 0
     id: Dim Lights
+  - platform: state
+    entity_id:
+    - switch.main_bathroom_switch_light
+    from: 'off'
+    id: Switch On
+    to: 'on'
+  - platform: state
+    entity_id:
+    - switch.main_bathroom_switch_light
+    from: 'on'
+    id: Switch Off
+    to: 'off'
   condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -2635,16 +2958,16 @@
         entity_id: sensor.main_bathroom_presence_illuminance_lux
         below: input_number.low_light_threshold
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           color_temp: 200
           brightness: 64
         target:
           entity_id: light.main_bathroom_light
-      - service: timer.start
-        target:
+        action: light.turn_on
+      - target:
           entity_id: timer.bathroom_light
         data: {}
+        action: timer.start
     - conditions:
       - condition: trigger
         id:
@@ -2653,8 +2976,7 @@
         entity_id: binary_sensor.overnight
         state: 'on'
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           rgb_color:
           - 255
           - 248
@@ -2662,10 +2984,11 @@
           brightness: 26
         target:
           entity_id: light.main_bathroom_light
-      - service: timer.start
-        target:
+        action: light.turn_on
+      - target:
           entity_id: timer.bathroom_light
         data: {}
+        action: timer.start
     - conditions:
       - condition: trigger
         id:
@@ -2676,11 +2999,14 @@
       - condition: state
         entity_id: timer.bathroom_light
         state: idle
+      - condition: state
+        entity_id: input_boolean.allow_main_bathroom_lights_max
+        state: 'off'
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.main_bathroom_light
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
@@ -2691,21 +3017,23 @@
       - condition: state
         entity_id: light.main_bathroom_light
         state: 'on'
+      - condition: state
+        entity_id: input_boolean.allow_main_bathroom_lights_max
+        state: 'off'
       sequence:
-      - service: light.turn_off
-        target:
+      - target:
           entity_id: light.main_bathroom_light
         data: {}
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
         - Dim Lights
       - condition: state
-        entity_id: input_boolean.room_occupied_main_bathroom
+        entity_id: input_boolean.allow_main_bathroom_lights_max
         state: 'off'
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           rgb_color:
           - 255
           - 248
@@ -2713,15 +3041,42 @@
           brightness: 26
         target:
           entity_id: light.main_bathroom_light
-      - service: light.turn_off
-        data: {}
-        target:
-          entity_id: light.main_bathroom_light
+        action: light.turn_on
       - delay:
           hours: 0
           minutes: 0
-          seconds: 2
+          seconds: 10
           milliseconds: 0
+      - condition: state
+        entity_id: binary_sensor.main_bathroom_occupied
+        state: 'off'
+      - data: {}
+        target:
+          entity_id: light.main_bathroom_light
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Switch On
+      sequence:
+      - data:
+          color_temp: 200
+          brightness: 64
+        target:
+          entity_id: light.main_bathroom_light
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Switch Off
+      - condition: state
+        entity_id: light.main_bathroom_light
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: light.main_bathroom_light
+        action: light.turn_off
   mode: single
 - id: '1695736939384'
   alias: Kids Bathroom Lights with presence
@@ -2744,8 +3099,22 @@
       seconds: 0
     id: Light Off
   - platform: time
-    at: '19:59:55'
-    id: Dim On
+    at: '20:00:10'
+    id: Dim on
+  - platform: state
+    entity_id:
+    - switch.jamie_bathroom_switch_left
+    - switch.sean_bathroom_switch_right
+    from: 'off'
+    to: 'on'
+    id: Lights to Max
+  - platform: state
+    entity_id:
+    - switch.jamie_bathroom_switch_left
+    - switch.sean_bathroom_switch_right
+    from: 'on'
+    to: 'off'
+    id: Lights to Presence
   condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -2760,18 +3129,18 @@
         entity_id: input_boolean.allow_kids_bathroom_lights_max
         state: 'off'
       - condition: time
-        after: 08:00:00
+        after: 07:00:00
         before: '20:00:00'
       - condition: numeric_state
         entity_id: sensor.jack_and_jill_presence_illuminance_lux
         below: input_number.low_light_threshold
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           color_temp: 200
           brightness: 64
         target:
           entity_id: light.kids_bathroom_light
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -2781,13 +3150,12 @@
         state: 'off'
       - condition: time
         after: '20:00:00'
-        before: 08:00:00
+        before: 07:00:00
       - condition: numeric_state
         entity_id: sensor.jack_and_jill_presence_illuminance_lux
         below: input_number.low_light_threshold
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           rgb_color:
           - 255
           - 248
@@ -2795,6 +3163,7 @@
           brightness: 26
         target:
           entity_id: light.kids_bathroom_light
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -2802,38 +3171,20 @@
       - condition: state
         entity_id: light.kids_bathroom_light
         state: 'on'
+      - condition: state
+        entity_id: input_boolean.allow_kids_bathroom_lights_max
+        state: 'off'
       sequence:
-      - if:
-        - condition: time
-          weekday:
-          - sun
-          after: '17:30:00'
-          before: '19:00:00'
-        then:
-        - delay:
-            hours: 0
-            minutes: 30
-            seconds: 0
-            milliseconds: 0
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id: light.kids_bathroom_light
-        else:
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id: light.kids_bathroom_light
+      - target:
+          entity_id: light.kids_bathroom_light
+        data: {}
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
         - Dim on
-      - condition: state
-        entity_id: input_boolean.room_occupied_jack_jill
-        state: 'off'
       sequence:
-      - service: light.turn_on
-        data:
+      - data:
           rgb_color:
           - 255
           - 248
@@ -2841,15 +3192,47 @@
           brightness: 26
         target:
           entity_id: light.kids_bathroom_light
+        action: light.turn_on
       - delay:
           hours: 0
           minutes: 0
-          seconds: 2
+          seconds: 10
           milliseconds: 0
-      - service: light.turn_off
-        target:
+      - condition: state
+        entity_id: binary_sensor.kids_bathroom_occupied
+        state: 'off'
+      - target:
           entity_id: light.kids_bathroom_light
         data: {}
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Lights to Max
+      sequence:
+      - target:
+          entity_id: input_boolean.allow_kids_bathroom_lights_max
+        data: {}
+        action: input_boolean.turn_on
+      - target:
+          entity_id: light.kids_bathroom_light
+        data:
+          brightness: 255
+          color_temp: 154
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Lights to Presence
+      sequence:
+      - target:
+          entity_id: input_boolean.allow_kids_bathroom_lights_max
+        data: {}
+        action: input_boolean.turn_off
+      - target:
+          entity_id: light.kids_bathroom_light
+        data: {}
+        action: light.turn_off
   mode: restart
 - id: '1696531313017'
   alias: Automations That Run When HA Starts or When Groups Reload
@@ -2970,12 +3353,20 @@
       - binary_sensor.dining_room_window_right_contact
       input_mode_winter: input_boolean.winter_mode
       input_mode_holiday: input_boolean.holiday_mode
-      input_presence_sensor: binary_sensor.dining_room_presence_sensor_occupancy
+      input_presence_sensor: binary_sensor.dining_room_occupied
       input_force_max_temperature: input_boolean.boost_heating
       input_scheduler_holiday: schedule.holiday_heating_schedule
       input_change_comfort_temperature_on_physical_change: false
       input_presence_reaction_off_time: 5
       input_presence_reaction_on_time: 1
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_options:
+      - presence
+      input_away_offset: 2
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_temperature_sensor: sensor.dining_room_thermometer_temperature
+      input_calibration_options:
+      - generic_calibration
 - id: '1701004289466'
   alias: Office Heating
   description: ''
@@ -2998,13 +3389,20 @@
       - binary_sensor.office_window_sensor_contact
       input_mode_winter: input_boolean.winter_mode
       input_mode_holiday: input_boolean.holiday_mode
-      input_presence_sensor: binary_sensor.office_presence_sensor_occupancy
+      input_presence_sensor: binary_sensor.office_occupied
       input_presence_reaction_on_time: 1
       input_temperature_sensor: sensor.office_temperature_and_humidity_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_scheduler_holiday: schedule.holiday_heating_schedule
       input_change_comfort_temperature_on_physical_change: false
       input_presence_reaction_off_time: 10
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701178419984'
   alias: Hallway Lights with Presence
   description: ''
@@ -3375,7 +3773,14 @@
       input_temperature_sensor: sensor.seans_room_temperature_and_humidity_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_scheduler_regular: schedule.boys_heating_schedule
-      input_presence_sensor: binary_sensor.sean_s_room_camera_cell_motion_detection
+      input_presence_sensor: binary_sensor.seans_room_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701436796947'
   alias: Jamie's Room Heating
   description: ''
@@ -3403,7 +3808,14 @@
       input_temperature_sensor: sensor.jamies_room_thermometer_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_scheduler_regular: schedule.boys_heating_schedule
-      input_presence_sensor: binary_sensor.jamie_s_room_camera_cell_motion_detection
+      input_presence_sensor: binary_sensor.jamies_room_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701538084707'
   alias: Intermittent Grid Charge Battery.
   description: ''
@@ -3567,9 +3979,14 @@
       - condition: trigger
         id:
         - Topup
-      - condition: state
-        entity_id: sensor.solar_battery_daytime_topup_needed
-        state: 'true'
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: sensor.solar_battery_daytime_topup_needed
+          state: 'true'
+        - condition: numeric_state
+          entity_id: sensor.battery_state_of_charge
+          below: 50
       sequence:
       - service: script.battery_pre_peak_top_up
         metadata: {}
@@ -3607,23 +4024,34 @@
       input_windows:
       - binary_sensor.front_door_sense_contact
       - binary_sensor.back_door_sensor_contact
-      - binary_sensor.side_door_sensor_contact
-      - binary_sensor.living_room_window_left_contact
-      - binary_sensor.living_room_window_right_contact
-      - binary_sensor.kitchen_window_left_contact
-      - binary_sensor.kitchen_window_right_contact
       - binary_sensor.hallway_window_contact
       input_windows_reaction_time: 30
       input_mode_winter: input_boolean.winter_mode
       input_scheduler_holiday: schedule.holiday_heating_schedule
       input_mode_holiday: input_boolean.holiday_mode
-      input_presence_sensor: binary_sensor.living_room_fp2_presence_sensor_1
-      input_temperature_sensor: sensor.living_room_thermometer_temperature
+      input_presence_sensor: binary_sensor.hallway_occupied
+      input_temperature_sensor: sensor.downstairs_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_reset_comfort_temperature: false
       input_presence_reaction_on_time: 2
       input_service_call_delay: 3
       input_presence_reaction_off_time: 2
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
+      input_temperature_minimum_static: 10
+      input_people_entering_home_duration:
+        hours: 0
+        minutes: 0
+        seconds: 0
+      input_people_leaving_home_duration:
+        hours: 0
+        minutes: 0
+        seconds: 0
 - id: '1701698657512'
   alias: Kids Bathroom Heating
   description: ''
@@ -3645,10 +4073,17 @@
       input_mode_winter: input_boolean.winter_mode
       input_scheduler_holiday: schedule.holiday_heating_schedule
       input_mode_holiday: input_boolean.holiday_mode
-      input_presence_sensor: binary_sensor.jack_and_jill_presence_occupancy
+      input_presence_sensor: binary_sensor.kids_bathroom_occupied
       input_presence_reaction_on_time: 1
       input_temperature_sensor: sensor.kids_bathroom_temperature_and_humidity_temperature
       input_force_max_temperature: input_boolean.boost_heating
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701699152456'
   alias: Main Bedroom Heating
   description: ''
@@ -3679,6 +4114,14 @@
       input_temperature_sensor: sensor.h5075_5177_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_service_call_delay: 5
+      input_presence_sensor: binary_sensor.master_bedroom_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701699367461'
   alias: En Suite Bathroom Heating
   description: ''
@@ -3705,6 +4148,14 @@
       input_mode_holiday: input_boolean.holiday_mode
       input_temperature_sensor: sensor.en_suite_temperature_and_humidity_temperature
       input_force_max_temperature: input_boolean.boost_heating
+      input_presence_sensor: binary_sensor.en_suite_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701699596810'
   alias: Cloakroom Heating
   description: ''
@@ -3729,7 +4180,7 @@
       input_mode_winter: input_boolean.winter_mode
       input_scheduler_holiday: schedule.holiday_heating_schedule
       input_mode_holiday: input_boolean.holiday_mode
-      input_presence_sensor: binary_sensor.cloakroom_presence_occupancy
+      input_presence_sensor: binary_sensor.cloakroom_occupied
       input_presence_reaction_off_time: 1
       input_presence_reaction_on_time: 1
       input_force_max_temperature: input_boolean.boost_heating
@@ -3743,8 +4194,15 @@
         minutes: 1
         seconds: 0
       input_scheduler_selector: input_select.heating_schedules
-      input_schedulers:
-      - schedule.general_heating_schedule
+      input_schedulers: []
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_temperature_sensor: sensor.cloakroom_temperature
+      input_calibration_options:
+      - generic_calibration
 - id: '1701699918831'
   alias: Upstairs Heating
   description: ''
@@ -3769,6 +4227,14 @@
       input_temperature_sensor: sensor.tado_smart_thermostat_su2860260864_current_temperature
       input_force_max_temperature: input_boolean.boost_heating
       input_service_call_delay: 4
+      input_presence_sensor: binary_sensor.landing_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1701700218158'
   alias: Guest Bedroom Heating
   description: ''
@@ -3798,6 +4264,14 @@
       input_presence_reaction_on_time: 2
       input_temperature_sensor: sensor.guest_bedroom_temperature_and_humidity_temperature
       input_force_max_temperature: input_boolean.boost_heating
+      input_presence_sensor: binary_sensor.guest_bedroom_occupied
+      input_scheduler_presence: schedule.general_heating_schedule
+      input_away_offset: 2
+      input_away_options:
+      - presence
+      input_proximity: 4ceb8d4d4c0bfd33a044373150933207
+      input_calibration_options:
+      - generic_calibration
 - id: '1703965572879'
   alias: Adaptive Lighting Active Toggle
   description: ''
@@ -3835,17 +4309,17 @@
       - service: switch.turn_{{al_active}}
         data: {}
         entity_id:
-        - switch.adaptive_lighting_kitchen_lights
         - switch.adaptive_lighting_back_door_zone
-        - switch.adaptive_lighting_upstairs_landing
         - switch.adaptive_lighting_bedside_lamps
         - switch.adaptive_lighting_corner_lamp
-        - switch.adaptive_lighting_hallway_lighting
-        - switch.adaptive_lighting_utility_light
         - switch.adaptive_lighting_hallway_lamp
-        - switch.adaptive_lighting_spare_room_lamps
+        - switch.adaptive_lighting_hallway_lighting
+        - switch.adaptive_lighting_kitchen_lights
         - switch.adaptive_lighting_spare_room_ceiling_lights
+        - switch.adaptive_lighting_spare_room_lamps
         - switch.adaptive_lighting_spare_room_lamp_right
+        - switch.adaptive_lighting_upstairs_landing
+        - switch.adaptive_lighting_utility_light
     - conditions:
       - condition: trigger
         id:
@@ -3857,17 +4331,17 @@
             }}'
       - service: switch.turn_{{ sleep_mode }}
         entity_id:
-        - switch.adaptive_lighting_sleep_mode_kitchen_lights
-        - switch.adaptive_lighting_sleep_mode_upstairs_landing
         - switch.adaptive_lighting_sleep_mode_back_door_zone
         - switch.adaptive_lighting_sleep_mode_bedside_lamps
         - switch.adaptive_lighting_sleep_mode_corner_lamp
-        - switch.adaptive_lighting_sleep_mode_hallway_lighting
         - switch.adaptive_lighting_sleep_mode_hallway_lamp
-        - switch.adaptive_lighting_sleep_mode_utility_light
-        - switch.adaptive_lighting_sleep_mode_spare_room_lamps
+        - switch.adaptive_lighting_sleep_mode_hallway_lighting
+        - switch.adaptive_lighting_sleep_mode_kitchen_lights
         - switch.adaptive_lighting_sleep_mode_spare_room_ceiling_lights
+        - switch.adaptive_lighting_sleep_mode_spare_room_lamps
         - switch.adaptive_lighting_sleep_mode_spare_room_lamp_right
+        - switch.adaptive_lighting_sleep_mode_upstairs_landing
+        - switch.adaptive_lighting_sleep_mode_utility_light
     - conditions:
       - condition: trigger
         id:
@@ -3907,7 +4381,7 @@
       falling_humidity: -2
       time_out: 60
       include_max_humidity: maximum_humidity_enabled
-      include_manual_fan_switch: disable_manual_fan_switch
+      include_manual_fan_switch: enable_manual_fan_switch_auto_off
       month_winter_mode:
       - '12'
       - '1'
@@ -3926,6 +4400,12 @@
       winter_falling_humidity: -3
       max_humidity: 90
       winter_max_humidity: 90
+      include_manual_trigger: disable_manual_trigger
+      manual_trigger: []
+      manual_trigger_winter_time_delay: 20
+      manual_trigger_default_time_delay: 5
+      manual_fan_switch:
+      - switch.en_suite_switch_right
 - id: '1705650358527'
   alias: Living Room Presence
   description: ''
@@ -5162,9 +5642,6 @@
     - condition: time
       after: 07:30:00
       before: 09:00:00
-    - condition: time
-      after: '19:00:00'
-      before: '21:00:00'
   action:
   - service: media_player.play_media
     metadata: {}
@@ -5185,6 +5662,9 @@
     state: 'on'
   - condition: state
     entity_id: calendar.schools_out
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.audible_notifications
     state: 'on'
   action:
   - service: script.status_annc
@@ -5341,7 +5821,9 @@
     - person.gem_forrester
     to:
     for:
-      minutes: 1
+      hours: 0
+      minutes: 0
+      seconds: 30
   condition:
   - condition: template
     value_template: '{{ trigger.to_state.state != trigger.from_state.state }}'
@@ -5497,6 +5979,10 @@
     entity_id:
     - sensor.car_battery_hours_to_full
     id: Rolec
+  - platform: state
+    entity_id:
+    - input_number.pre_peak_topup_length
+    id: TU Length
   condition: []
   action:
   - choose:
@@ -5506,26 +5992,26 @@
         - Home Battery
         - Set
       sequence:
-      - service: octopus_energy.update_target_config
-        target:
+      - target:
           entity_id: binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
         data:
           target_hours: '"{{ states(''input_number.home_battery_charge_length'')}}"
 
             '
+        action: octopus_energy.update_target_config
     - conditions:
       - condition: trigger
         id:
         - EV
         - Set
       sequence:
-      - service: octopus_energy.update_target_config
-        target:
+      - target:
           entity_id: binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
         data:
           target_hours: '"{{ states(''input_number.ev_charge_length_hrs'')}}"
 
             '
+        action: octopus_energy.update_target_config
     - conditions:
       - condition: trigger
         id:
@@ -5536,13 +6022,25 @@
           minutes: 1
           seconds: 0
           milliseconds: 0
-      - service: octopus_energy.update_target_config
-        target:
+      - target:
           entity_id: binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
         data:
           target_hours: '{{ states(''sensor.set_octopus_time_for_rolec'')}}
 
             '
+        action: octopus_energy.update_target_config
+    - conditions:
+      - condition: trigger
+        id:
+        - TU Length
+      sequence:
+      - target:
+          entity_id: binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+        data:
+          target_hours: '"{{ states(''input_number.pre_peak_topup_length'')}}"
+
+            '
+        action: octopus_energy.update_target_config
   mode: single
 - id: '1713619542387'
   alias: HACS Updates Notify
@@ -5651,9 +6149,6 @@
   - condition: state
     entity_id: input_boolean.allow_battery_grid_discharge
     state: 'on'
-  - condition: numeric_state
-    entity_id: sensor.solaredge_b1_state_of_energy
-    above: 90
   action:
   - service: number.set_value
     metadata: {}
@@ -5715,17 +6210,39 @@
   - condition: or
     conditions:
     - condition: state
-      entity_id: binary_sensor.front_doorbell_camera_person
+      entity_id: binary_sensor.front_door_motion_detected
       state: 'on'
     - condition: state
-      entity_id: binary_sensor.front_doorbell_camera_motion
+      entity_id: binary_sensor.front_door_person_detected
       state: 'on'
   action:
-  - service: script.text_notify_parents
-    data:
+  - data:
       message: You have post!
       title: POST!
-  mode: single
+    action: script.text_notify_parents
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: 'on'
+  - data:
+      where: '{{ states(''sensor.room_audio'')}}'
+      message: You have got post.
+    action: script.speech_engine
+  - action: input_boolean.toggle
+    target:
+      entity_id: input_boolean.post
+    data: {}
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.family_home
+      to: 'off'
+      from: 'on'
+  - action: input_boolean.toggle
+    target:
+      entity_id: input_boolean.post
+    data: {}
+  mode: parallel
+  max: 10
 - id: '1716477352889'
   alias: Solcast update
   description: ''
@@ -6322,17 +6839,74 @@
     to: 'on'
   condition: []
   action:
-  - service: update.skip
-    target:
-      entity_id:
-      - update.hallway_camera_update
-      - update.landing_camera_update
-      - update.loft_camera_update
-      - update.garage_camera_update
-      - update.guest_bedroom_camera_update
-      - update.sean_s_room_camera_update
-      - update.jamie_s_room_camera_update
-    data: {}
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{"Garage" in trigger.to_state.attributes.friendly_name }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.garage_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Hallway" in trigger.to_state.attributes.friendly_name
+          }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.hallway_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Landing" in trigger.to_state.attributes.friendly_name
+          }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.landing_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Guest" in trigger.to_state.attributes.friendly_name }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.guest_bedroom_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Loft" in trigger.to_state.attributes.friendly_name }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.loft_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Sean''s" in trigger.to_state.attributes.friendly_name
+          }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.sean_s_room_camera_update
+        data: {}
+        action: update.skip
+    - conditions:
+      - condition: template
+        value_template: '{{"Jamie''s" in trigger.to_state.attributes.friendly_name
+          }}'
+      sequence:
+      - target:
+          entity_id:
+          - update.jamie_s_room_camera_update
+        data: {}
+        action: update.skip
   mode: single
 - id: '1722256809723'
   alias: Front Door Visitor
@@ -6382,20 +6956,20 @@
         id:
         - Visitor
       sequence:
-      - service: input_boolean.toggle
-        target:
+      - target:
           entity_id: input_boolean.front_doorbell_active
         data: {}
-      - service: number.set_value
-        target:
+        action: input_boolean.toggle
+      - target:
           entity_id: number.front_doorbell_camera_auto_quick_reply_time
         data:
-          value: '40'
-      - service: select.select_option
-        target:
+          value: '30'
+        action: number.set_value
+      - target:
           entity_id: select.front_doorbell_camera_auto_quick_reply_message
         data:
           option: Hi, please leave the package at the door. We will get it later.
+        action: select.select_option
     - conditions:
       - condition: trigger
         id:
@@ -6404,15 +6978,15 @@
         entity_id: input_boolean.front_doorbell_active
         state: 'on'
       sequence:
-      - service: input_boolean.toggle
-        target:
+      - target:
           entity_id: input_boolean.front_doorbell_active
         data: {}
-      - service: select.select_option
-        target:
+        action: input_boolean.toggle
+      - target:
           entity_id: select.front_doorbell_camera_auto_quick_reply_message
         data:
           option: 'off'
+        action: select.select_option
     - conditions:
       - condition: trigger
         id:
@@ -6424,21 +6998,21 @@
         entity_id: calendar.gem_holidays
         state: 'off'
       sequence:
-      - service: select.select_option
-        target:
+      - target:
           entity_id: select.front_doorbell_camera_auto_quick_reply_message
         data:
           option: Hi, please leave the package at the door. We will get it later.
+        action: select.select_option
     - conditions:
       - condition: trigger
         id:
         - Dave Home
       sequence:
-      - service: select.select_option
-        target:
+      - target:
           entity_id: select.front_doorbell_camera_auto_quick_reply_message
         data:
           option: 'off'
+        action: select.select_option
   mode: single
 - id: '1722761587373'
   alias: Guest Bedroom Lights with presence
@@ -6486,6 +7060,12 @@
       hours: 0
       minutes: 0
       seconds: 30
+  - platform: state
+    entity_id:
+    - switch.spare_room_light_switch
+    from:
+    to:
+    id: Ironing
   condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -6498,6 +7078,9 @@
       - condition: state
         entity_id: binary_sensor.lights_out
         state: 'off'
+      - condition: state
+        entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+        state: 'on'
       - condition: or
         conditions:
         - condition: sun
@@ -6506,16 +7089,12 @@
         - condition: numeric_state
           entity_id: sensor.guest_bedroom_motion_illuminance_lux
           below: input_number.low_light_threshold
-      - condition: state
-        entity_id: input_boolean.guest_bedroom_bedside_lamps_active
-        state: 'on'
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
-          - light.guest_bedroom_bedside_lamp_left
           - light.spare_room_lights
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id: Light off
@@ -6523,52 +7102,38 @@
         entity_id: input_boolean.guest_bedroom_allow_lights_off
         state: 'on'
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
-          - light.guest_bedroom_bedside_lamp_left
           - light.spare_room_lights
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
         - Low Light
-      - condition: and
-        conditions:
-        - condition: state
-          entity_id: light.guest_bedroom_bedside_lamp_left
-          state: 'off'
-        - condition: state
-          entity_id: light.guest_bedroom_bedside_lamp_right
-          state: 'off'
-        - condition: state
-          entity_id: input_boolean.guest_bedroom_bedside_lamps_active
-          state: 'on'
       - condition: state
-        entity_id: binary_sensor.guest_bedroom_motion_occupancy
         state: 'on'
+        entity_id: binary_sensor.guest_bedroom_occupied
       - condition: state
         entity_id: binary_sensor.lights_out
         state: 'off'
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
-          entity_id:
-          - light.guest_bedroom_bedside_lamp_left
-          - light.guest_bedroom_bedside_lamp_right
+          entity_id: light.spare_room_lights
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
         - Good Light
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.guest_bedroom_bedside_lamp_left
           - light.guest_bedroom_bedside_lamp_right
           - light.spare_room_lights
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
@@ -6591,11 +7156,11 @@
           entity_id: sensor.guest_bedroom_motion_illuminance_lux
           below: input_number.low_light_threshold
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.guest_bedroom_bedside_lamp_right
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -6607,11 +7172,11 @@
         entity_id: input_boolean.guest_bedroom_allow_lights_off
         state: 'on'
       sequence:
-      - service: light.turn_off
-        target:
+      - target:
           entity_id:
           - light.guest_bedroom_bedside_lamp_right
         data: {}
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
@@ -6634,11 +7199,11 @@
           entity_id: sensor.guest_bedroom_motion_illuminance_lux
           below: input_number.low_light_threshold
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id:
           - light.guest_bedroom_bedside_lamp_left
+        action: light.turn_on
     - conditions:
       - condition: trigger
         id:
@@ -6650,12 +7215,18 @@
         entity_id: input_boolean.guest_bedroom_allow_lights_off
         state: 'on'
       sequence:
-      - service: light.turn_off
-        target:
+      - target:
           entity_id:
           - light.guest_bedroom_bedside_lamp_left
         data: {}
         enabled: true
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id: Ironing
+      sequence:
+      - data: {}
+        action: script.ironing_lights
   mode: restart
   initial_state: true
 - id: '1722761890652'
@@ -6667,11 +7238,6 @@
     - sensor.smart_button_upstairs_1_action
     id: Casper & Sky toggle
     to: single
-  - platform: state
-    entity_id:
-    - sensor.smart_button_upstairs_1_action
-    id: Ironing
-    to: double
   - platform: state
     entity_id: sensor.smart_button_upstairs_1_action
     to: release
@@ -6690,12 +7256,6 @@
         id: Night Lights
       sequence:
       - service: script.spare_room_night_light
-        data: {}
-    - conditions:
-      - condition: trigger
-        id: Ironing
-      sequence:
-      - service: script.ironing_lights
         data: {}
   mode: single
   initial_state: true
@@ -7188,6 +7748,16 @@
     - sensor.gem_location
     from: Kitchen
     id: Not in Kitchen
+  - platform: state
+    entity_id:
+    - switch.adaptive_lighting_sleep_mode_kitchen_lights
+    from: 'off'
+    to: 'on'
+    id: Dim lights
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
   condition:
   - condition: state
     entity_id: input_boolean.holiday_mode
@@ -7299,6 +7869,27 @@
         data: {}
         target:
           entity_id: light.kitchen_lights_2
+    - conditions:
+      - condition: trigger
+        id:
+        - Dim lights
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.kitchen_lights_2
+        data: {}
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 10
+          milliseconds: 0
+      - condition: state
+        entity_id: binary_sensor.kitchen_occupied
+        state: 'off'
+      - service: light.turn_off
+        target:
+          entity_id: light.kitchen_lights_2
+        data: {}
   mode: parallel
   trace:
     stored_traces: 20
@@ -7415,5 +8006,2236 @@
       sequence:
       - service: script.spare_room_tv_toggle
         data: {}
+  mode: single
+  initial_state: true
+- id: '1723739090197'
+  alias: Audible Notifications
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.audible_notification_on
+    id: 'on'
+  - platform: time
+    at: input_datetime.audible_notification_off
+    id: 'off'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      - condition: state
+        entity_id: binary_sensor.family_home
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.audible_notifications
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.audible_notifications
+    default: []
+  mode: single
+- id: '1723792173268'
+  alias: Boys Bedtime Announcements
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.school_night_jamie
+    id: School Bedtime Jamie
+  - platform: time
+    at: input_datetime.school_night_sean
+    id: School Bedtime Sean
+  - platform: time
+    at: input_datetime.non_school_night
+    id: Non School Bedtime
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - School Bedtime Sean
+      - condition: state
+        entity_id: sensor.school_tomorrow
+        state: 'True'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.seans_bedtime_announcement_played
+        state: 'off'
+      sequence:
+      - service: script.status_annc
+        data:
+          where: living_room
+          call_jetsons_chime: 1
+          call_time_is: 1
+          call_sean_time_for_bed: 1
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.seans_bedtime_announcement_played
+    - conditions:
+      - condition: trigger
+        id:
+        - School Bedtime Jamie
+      - condition: state
+        entity_id: sensor.school_tomorrow
+        state: 'True'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.jamies_bedtime_announcement_played
+        state: 'off'
+      sequence:
+      - service: script.status_annc
+        data:
+          where: living_room
+          call_jetsons_chime: 1
+          call_time_is: 1
+          call_jamie_time_for_bed: 1
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.jamies_bedtime_announcement_played
+    - conditions:
+      - condition: trigger
+        id: Non School Bedtime
+      - condition: state
+        entity_id: sensor.school_tomorrow
+        state: 'False'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.seans_bedtime_announcement_played
+          state: 'off'
+        - condition: state
+          entity_id: input_boolean.jamies_bedtime_announcement_played
+          state: 'off'
+      sequence:
+      - service: script.status_annc
+        data:
+          where: living_room
+          call_jetsons_chime: 1
+          call_time_is: 1
+          call_boys_time_for_bed: 1
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id:
+          - input_boolean.seans_bedtime_announcement_played
+          - input_boolean.jamies_bedtime_announcement_played
+  mode: single
+  initial_state: true
+- id: '1723812751523'
+  alias: Play Seans Morning Briefing
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.seans_morning_briefing
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.schoolday
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.fridayschool
+      state: 'on'
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.seans_morning_briefing_played
+    state: 'off'
+  action:
+  - service: script.seans_morning_briefing
+    data: {}
+  - service: script.jamies_morning_briefing
+    data: {}
+  mode: single
+  initial_state: true
+- id: '1723828046713'
+  alias: Schools Out Pick Up Jamie
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.school_pick_up_time_friday
+  condition:
+  - condition: state
+    entity_id: binary_sensor.fridayschool
+    state: 'on'
+  - condition: state
+    entity_id: calendar.school_holidays
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: 'on'
+  action:
+  - service: script.status_annc
+    data:
+      where: '{{ states(''sensor.room_audio'') }}'
+      call_jetsons_chime: 1
+      call_time_is: 1
+      call_school_pick_up: 1
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.school_pick_up_announcement_played
+  mode: single
+  initial_state: true
+- id: '1724174138849'
+  alias: Office Echo
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.office_hours
+    from: 'off'
+    to: 'on'
+    id: Office in use
+  - platform: state
+    entity_id:
+    - binary_sensor.office_hours
+    from: 'on'
+    to: 'off'
+    id: Office not in use
+  - platform: state
+    entity_id:
+    - binary_sensor.gem_home
+    from: 'on'
+    to: 'off'
+    id: Gem out of office
+  - platform: state
+    entity_id:
+    - binary_sensor.gem_home
+    from: 'off'
+    to: 'on'
+    id: Gem in office
+  - platform: state
+    entity_id:
+    - binary_sensor.office_presence_sensor_occupancy
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: Welcome
+  - platform: time
+    at: 08:05:00
+    id: Time
+  condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: 'off'
+  - condition: state
+    entity_id: calendar.gem_holidays
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Office in use
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: calendar.gem_holidays
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.gem_home
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.office_echo_local
+        action: switch.turn_off
+    - conditions:
+      - condition: trigger
+        id: Office not in use
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: calendar.gem_holidays
+        state: 'off'
+      - condition: state
+        entity_id: switch.office_echo_local
+        state: 'off'
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.office_echo_local
+        action: switch.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Gem out of office
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: switch.office_echo_local
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.office_hours
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: switch.office_echo_local
+        action: switch.turn_on
+      - data: {}
+        target:
+          entity_id: input_boolean.gem_gone_out_to_office
+        action: input_boolean.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Gem in office
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: switch.office_echo_local
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: input_boolean.gem_gone_out_to_office
+        action: input_boolean.turn_off
+      - if:
+        - condition: state
+          entity_id: binary_sensor.office_hours
+          state: 'on'
+        then:
+        - data: {}
+          target:
+            entity_id: switch.office_echo_local
+          action: switch.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Welcome
+      - condition: time
+        after: 07:50:00
+        before: 08:13:00
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.office_welcome_played
+        state: 'off'
+      sequence:
+      - data:
+          where: office
+        action: script.office_welcome_message
+      - target:
+          entity_id: input_boolean.office_welcome_played
+        data: {}
+        action: input_boolean.toggle
+    - conditions:
+      - condition: trigger
+        id:
+        - Time
+      - condition: state
+        entity_id: binary_sensor.workday_sensor
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.office_welcome_played
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.office_occupied
+        state: 'on'
+      sequence:
+      - data:
+          where: office
+        action: script.office_welcome_message
+      - target:
+          entity_id: input_boolean.office_welcome_played
+        data: {}
+        action: input_boolean.toggle
+  mode: restart
+  initial_state: true
+- id: '1724234781744'
+  alias: Kitchen Lights Needed
+  description: Overrides kitchen lights with presence
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.kitchen_light_switch_right
+    id: Light needed
+    from:
+  condition:
+  - condition: state
+    entity_id: binary_sensor.kitchen_occupied
+    state: 'on'
+  action:
+  - target:
+      entity_id: automation.kitchen_lights_with_presence_2
+    data:
+      stop_actions: true
+    action: automation.turn_off
+  - target:
+      entity_id: light.kitchen_lights_2
+    data:
+      kelvin: 6500
+      brightness_pct: 100
+    action: light.turn_on
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.kitchen_occupied
+      from: 'on'
+      to: 'off'
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+    timeout:
+      hours: 1
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    continue_on_timeout: false
+  - target:
+      entity_id: automation.kitchen_lights_with_presence_2
+    data: {}
+    action: automation.turn_on
+  - target:
+      entity_id: light.kitchen_lights_2
+    data: {}
+    action: light.turn_off
+  mode: restart
+- id: '1724439685310'
+  alias: Back Door Zone Light Needed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.kitchen_light_switch_left
+    from:
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.back_door_zone_light
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.back_door_zone_light
+        data: {}
+    default:
+    - service: light.turn_off
+      target:
+        entity_id: light.back_door_zone_light
+      data: {}
+  mode: single
+- id: '1724439929676'
+  alias: Hallway Lights Needed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.hallway_light_switch_1
+    - switch.hallway_light_switch_2_right
+    from:
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.hallway_lights
+        state: 'off'
+      sequence:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.hallway_lights
+    default:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.hallway_lights
+  mode: single
+- id: '1724440175555'
+  alias: Back Door Light Needed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.back_door_light_switch
+    from:
+    to:
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: light.back_door_light
+        state: 'off'
+      sequence:
+      - data: {}
+        target:
+          entity_id: light.back_door_light
+        action: light.turn_on
+    default:
+    - data: {}
+      target:
+        entity_id: light.back_door_light
+      action: light.turn_off
+    - action: script.back_door_light_dim_when_door_closed
+      metadata: {}
+      data: {}
+  mode: single
+- id: '1724922616567'
+  alias: Notification Volume Normal
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.quiet_time_boys
+    to: 'off'
+  condition: []
+  action:
+  - service: media_player.volume_set
+    data:
+      entity_id:
+      - media_player.kitchen_echo_show
+      - media_player.dave_s_2nd_echo_pop
+      - media_player.dave_s_echo_pop
+      - media_player.main_bedroom_dot
+      - media_player.guest_bedroom_echo_dot
+      - media_player.living_room_dot
+      - media_player.seans_room_dot
+      volume_level: '{{ states(''input_number.alexa_volume_level_announcements'')
+        | float(0) }}'
+  mode: single
+  initial_state: true
+- id: '1725176117496'
+  alias: En Suite Lights with presence
+  description: Lights on and off with presence and timer
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.en_suite_presence_occupancy
+    from: 'off'
+    to: 'on'
+    id: Presence
+  - platform: state
+    entity_id:
+    - binary_sensor.en_suite_presence_occupancy
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: Absence
+  - alias: Light off with Timer
+    platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.en_suite_light
+    id: Timer Done
+    enabled: true
+  - platform: state
+    entity_id:
+    - switch.en_suite_switch_left
+    id: Switch toggle
+    from:
+    to:
+  condition:
+  - condition: state
+    entity_id: binary_sensor.lights_out
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Presence
+      - condition: or
+        conditions:
+        - condition: numeric_state
+          entity_id: sensor.en_suite_presence_illuminance_lux
+          below: input_number.daytime_light_needed
+        - condition: sun
+          before: sunrise
+          after: sunset
+      sequence:
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.en_suite_switch_left
+      - service: timer.start
+        data: {}
+        target:
+          entity_id: timer.en_suite_light
+    - conditions:
+      - condition: trigger
+        id:
+        - Absence
+      - condition: state
+        state: idle
+        entity_id: timer.en_suite_light
+      - condition: state
+        entity_id: input_boolean.allow_en_suite_lights_off
+        state: 'on'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.en_suite_switch_left
+    - conditions:
+      - condition: trigger
+        id:
+        - Switch toggle
+      sequence:
+      - service: switch.toggle
+        target:
+          entity_id: switch.en_suite_switch_left
+        data: {}
+      - service: input_boolean.toggle
+        target:
+          entity_id: input_boolean.allow_en_suite_lights_off
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - Timer Done
+      - condition: state
+        state: 'on'
+        entity_id: switch.en_suite_switch_left
+      - condition: state
+        entity_id: binary_sensor.en_suite_occupied
+        state: 'off'
+      sequence:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.en_suite_switch_left
+  mode: restart
+- id: '1725548519733'
+  alias: Living Room Lights with presence
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: light.living_room_lights
+    from: 'off'
+    to: 'on'
+    id: Ceiling Light On
+  - platform: state
+    entity_id: light.living_room_lights
+    from: 'on'
+    to: 'off'
+    id: Ceiling Light Off
+  - platform: state
+    entity_id:
+    - binary_sensor.living_room_fp2_presence_sensor_1
+    from: 'off'
+    to: 'on'
+    id: Light On With Presence
+  - platform: state
+    entity_id:
+    - binary_sensor.living_room_fp2_presence_sensor_1
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Light Off With No Presence
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    for:
+      seconds: 20
+    id: Low Light
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    for:
+      seconds: 20
+    id: Good Light
+  condition:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: 'off'
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Ceiling Light On
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+          - light.dreamview_g1_pro_2
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Ceiling Light Off
+      - condition: numeric_state
+        entity_id: sensor.living_room_fp2_light_sensor_light_level
+        below: input_number.low_light_threshold
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+        action: light.turn_on
+      - if:
+        - condition: state
+          entity_id: switch.living_room_tv
+          state: 'on'
+        then:
+        - data: {}
+          target:
+            entity_id: light.dreamview_g1_pro_2
+          action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Light On With Presence
+        alias: Light on with presence
+      - condition: numeric_state
+        entity_id: sensor.living_room_fp2_light_sensor_light_level
+        below: input_number.low_light_threshold
+      - condition: state
+        entity_id: light.living_room_lights
+        state: 'off'
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+        action: light.turn_on
+      - condition: state
+        entity_id: light.hallway_lights
+        state: 'off'
+      - data: {}
+        target:
+          entity_id:
+          - light.standard_lamp
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Light Off With No Presence
+        alias: Light off with no presence
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+        action: light.turn_off
+      - condition: state
+        entity_id: light.standard_lamp
+        state: 'on'
+      - data: {}
+        target:
+          entity_id:
+          - light.standard_lamp
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Low Light
+        alias: Light on when Low Light and Presence
+      - condition: state
+        entity_id: binary_sensor.living_room_fp2_presence_sensor_1
+        state: 'on'
+      - condition: state
+        entity_id: light.living_room_lights
+        state: 'off'
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+        action: light.turn_on
+      - condition: state
+        entity_id: light.hallway_lights
+        state: 'off'
+      - data: {}
+        target:
+          entity_id:
+          - light.standard_lamp
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Good Light
+        alias: Light off with Good Light
+      sequence:
+      - data: {}
+        target:
+          entity_id:
+          - light.corner_lamp_2
+        action: light.turn_off
+      - condition: state
+        entity_id: light.standard_lamp
+        state: 'on'
+      - data: {}
+        target:
+          entity_id:
+          - light.standard_lamp
+        action: light.turn_off
+  mode: restart
+  initial_state: true
+- id: '1725648134079'
+  alias: Home Battery Overnight Charge type test
+  description: ''
+  trigger:
+  - platform: time
+    at: '21:00:00'
+    id: Set
+  - platform: time
+    at: 07:00:00
+    id: Reset
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Set
+      sequence:
+      - action: script.text_notify_dave
+        data:
+          message: '{{states(''sensor.solar_battery_charge_overnight_logic'')}}'
+    - conditions:
+      - condition: trigger
+        id:
+        - Reset
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.home_battery_charge_length
+        data:
+          value: 2.5
+  mode: single
+- id: '1725982003472'
+  alias: Play Morning Briefing
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: 'off'
+    to: 'on'
+    id: presence
+  - platform: time
+    at: input_datetime.morning_report
+    id: time
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: presence
+      - condition: state
+        entity_id: input_boolean.morning_briefing_played
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - condition: time
+        after: input_datetime.morning_report_earliest_time
+        before: input_datetime.morning_report_latest_time
+      sequence:
+      - action: script.kitchen_morning_message
+        data: {}
+    - conditions:
+      - condition: trigger
+        id: time
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: calendar.school_holidays
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.workday_sensor
+          state: 'off'
+      - condition: state
+        entity_id: input_boolean.morning_briefing_played
+        state: 'off'
+      sequence:
+      - action: script.kitchen_morning_message
+        data: {}
+  mode: single
+  initial_state: true
+- id: '1726137208476'
+  alias: Welcome Home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.dave_home
+    - binary_sensor.gem_home
+    to: 'on'
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.welcome_home
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.morning_briefing_playing
+        state: 'off'
+      sequence:
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.front_door_sense_contact
+          - binary_sensor.back_door_sensor_contact
+          to: 'off'
+          from: 'on'
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 0
+        timeout:
+          hours: 0
+          minutes: 1
+          seconds: 0
+          milliseconds: 0
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+      - data: {}
+        action: script.welcome_briefing
+    default:
+    - data:
+        object_id: arriving
+        add_entities: '{{ trigger.to_state.entity_id }}'
+      action: group.set
+    - wait_for_trigger:
+      - platform: state
+        entity_id:
+        - binary_sensor.front_door_sense_contact
+        - binary_sensor.back_door_sensor_contact
+        from: 'on'
+        to: 'off'
+      timeout:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 20
+        milliseconds: 0
+    - data:
+        where: kitchen
+        message: "{{ [\n  'Pardon me. ',\n  '<prosody pitch=\"high\">Excuse me.</prosody>
+          ',\n  '<prosody pitch=\"high\">I do not mean to interrupt. </prosody>but.',\n
+          \ '<prosody pitch=\"high\">I hate to interrupt. </prosody>but.',\n  'I beg
+          your pardon. ',\n  '<prosody pitch=\"high\">I do not mean to intrude, </prosody>but.
+          ',\n  'I am sorry to interrupt, but. ',\n  'Just a quick heads up. ',\n
+          \ '<prosody pitch=\"high\">Information. </prosody>',\n  'Pardon me for intruding
+          on your relaxation once more.',\n  'Excuse me for once again breaking the
+          silence.'\n  ] | random }}\n{% set person = expand('group.arriving')|map(attribute='name')|join('
+          and ') %} {% set peoplecount = expand('group.arriving') | count %} {% if
+          peoplecount == 1 %}\n  {% set is_are = ' is ' %}\n  {% set has_have = '
+          has ' %}\n{% else %}\n  {% set is_are = ' are ' %}\n  {% set has_have =
+          ' have ' %}\n{% endif %} {%- macro greeting_sentence(person, is_are, has_have)
+          -%}\n  {{ [\n  person ~ has_have + \" arrived.\",\n  \"My sensors are picking
+          up the presence of additional humans. \" ~ person ~ has_have + \" been identified
+          as home.\",\n  \"Guess who is in the house?\" ~ person ~ is_are,\n  \"I
+          am sensing a disturbance in the force. \"  ~ person +\" must be back!\",\n
+          \ person ~ is_are + \"now in the house.\",\n  person  ~ is_are + \" now
+          here.  Welcome Home.\",\n  person  ~ is_are + \" now here.\",\n  \"Just
+          a quick announcement. \" ~ person ~ has_have + \"  arrived!\",\n  person
+          ~ has_have + \" finally made it home.\"\n  ] | random }}\n{%- endmacro -%}
+          {{greeting_sentence(person, is_are, has_have)}}\n"
+      action: script.speech_engine
+    - delay: 00:02:00
+    - data:
+        object_id: arriving
+        entities: []
+      action: group.set
+  mode: restart
+- id: '1726138536829'
+  alias: Time for Bed Parents
+  description: ''
+  trigger:
+  - platform: time
+    at: '22:10:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: 'on'
+  action:
+  - action: script.parents_bedtime_announcement
+    data:
+      where: living_room
+  mode: single
+- id: '1726253825482'
+  alias: Count Front Door Motion While Out
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: binary_sensor.front_door_motion_detected
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.family_home
+    state: 'off'
+  action:
+  - target:
+      entity_id: counter.front_door_motion_detected
+    action: counter.increment
+  mode: single
+- id: '1726319289620'
+  alias: Main Bathroom Extractor Fan
+  description: With blueprint
+  use_blueprint:
+    path: Blackshome/bathroom-humidity-exhaust-fan.yaml
+    input:
+      trigger: sensor.main_bathroom_humidity_change
+      fan_switch:
+        entity_id: switch.shellyplus1_441793a36e14_switch_0
+      bathroom_humidity_sensor: sensor.main_bathroom_temperature_and_humidity_humidity
+      rising_humidity: 5
+      falling_humidity: -2
+      time_out: 60
+      include_max_humidity: maximum_humidity_enabled
+      include_manual_fan_switch: enable_manual_fan_switch_auto_off
+      month_winter_mode:
+      - '12'
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      winter_time_delay: 5
+      winter_time_out: 60
+      winter_include_max_humidity: maximum_humidity_enabled
+      bypass_auto_off_delay: 60
+      by_pass: binary_sensor.main_bathroom_window
+      include_bypass: bypass_enabled
+      time_delay: 5
+      include_winter_mode: winter_mode_enabled
+      winter_rising_humidity: 2
+      winter_falling_humidity: -3
+      max_humidity: 90
+      winter_max_humidity: 90
+      include_manual_trigger: disable_manual_trigger
+      manual_trigger: []
+      manual_trigger_winter_time_delay: 20
+      manual_trigger_default_time_delay: 5
+      manual_fan_switch:
+      - switch.main_bathroom_switch_fan
+- id: '1726405705772'
+  alias: 'Schedule: Hourly'
+  description: ''
+  trigger:
+  - platform: time_pattern
+    seconds: '00'
+    minutes: '00'
+  condition: []
+  action:
+  - data:
+      overwrite: true
+      url: https://sdo.gsfc.nasa.gov/assets/img/latest/mpeg/latest_1024_0193.mp4
+    action: downloader.download_file
+  - data:
+      overwrite: true
+      url: https://sdo.gsfc.nasa.gov/assets/img/latest/mpeg/latest_1024_0335.mp4
+    action: downloader.download_file
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - target:
+      entity_id: counter.sun_335_downloads
+    data: {}
+    action: counter.increment
+  mode: single
+- id: '1726748258357'
+  alias: Update Weather Records
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.gw2000a_max_daily_gust
+    id: new_gust
+  - platform: state
+    entity_id: sensor.gw2000a_wind_speed
+    id: new_wind_speed
+  - platform: time
+    at: '23:55:00'
+    id: daily
+  - platform: time
+    at: 00:01:00
+    id: save_stats
+  - platform: time
+    at: 00:03:00
+    id: record_reset
+  - platform: time
+    at: 00:00:00
+    id: record_reset
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: new_gust
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ (states(''sensor.gw2000a_max_daily_gust'') | float)
+            > (states(''sensor.ath_wind_gust'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athwind
+            payload: '{{ states(''sensor.gw2000a_max_daily_gust'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Gust
+            message: 'Just recorded a new ALL TIME HIGH WIND GUST: {{ states(''sensor.gw2000a_max_daily_gust'')
+              }} mph'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+    - conditions:
+      - condition: trigger
+        id: save_stats
+      sequence:
+      - if:
+        - condition: numeric_state
+          entity_id: sensor.chill_time_yesterday
+          above: 0
+        then:
+        - data:
+            topic: house/weather/chillhours
+            payload: '{% set total = (states(''sensor.chill_time_yesterday'') | float
+              | round(1)) + (states(''sensor.chill_hours'') | float) | round(1) %}
+              {{ total|int }}
+
+              '
+            retain: true
+          action: mqtt.publish
+      - if:
+        - condition: numeric_state
+          entity_id: sensor.freeze_time_yesterday
+          above: 0
+        then:
+        - data:
+            topic: house/weather/freezehours
+            payload: '{% set total = (states(''sensor.freeze_time_yesterday'') | float
+              | round(1)) + (states(''sensor.freeze_hours'') | float) | round(1) %}
+              {{ total }}
+
+              '
+            retain: true
+          action: mqtt.publish
+    - conditions:
+      - condition: trigger
+        id: record_reset
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ now().day == 1 }}'
+        then:
+        - data:
+            topic: house/weather/monthlymaxtemp
+            payload: '{{ states(''sensor.gw2000a_outdoor_temperature'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            topic: house/weather/monthlylowtemp
+            payload: '{{ states(''sensor.gw2000a_outdoor_temperature'') }}'
+            retain: true
+          action: mqtt.publish
+      - if:
+        - condition: time
+          weekday:
+          - sun
+        then:
+        - data:
+            topic: house/weather/weekly_rainfall
+            payload: '{{ states(''sensor.rainfall_last_week_2'') }}'
+          action: mqtt.publish
+      - if:
+        - condition: template
+          value_template: '{{ now().day == 28 }}'
+        - condition: template
+          value_template: '{{ now().month == 4 }}'
+        then:
+        - data:
+            topic: house/weather/chillhours
+            payload: '0'
+            retain: true
+          action: mqtt.publish
+        - data:
+            topic: house/weather/freezehours
+            payload: '0'
+            retain: true
+          action: mqtt.publish
+    - conditions:
+      - condition: trigger
+        id: new_wind_speed
+      sequence:
+      - data:
+          topic: house/weather/new_wind_speed
+          payload: "{% if has_value('sensor.gw2000a_wind_speed') %}\n  {{ states('sensor.gw2000a_wind_speed')
+            | int }}\n{% else %}\n  0\n{% endif %}\n"
+          retain: true
+        action: mqtt.publish
+    - conditions:
+      - condition: trigger
+        id: daily
+      sequence:
+      - data:
+          topic: house/weather/yesterday_rainfall_mm
+          payload: '{{ state_attr(''sensor.daily_rainfall_ut'',''last_period'') |
+            float }}'
+          retain: true
+        action: mqtt.publish
+      - alias: Record daily max temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_temp'') | float) > (states(''sensor.max_temp'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxtemp
+            payload: '{{ states(''sensor.daily_max_temp'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_temp'') | float) > (states(''sensor.ath_max_temp'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxtemp
+            payload: '{{ states(''sensor.daily_max_temp'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High Temp
+            message: 'Just recorded a new ALL TIME HIGH TEMP: {{ states(''sensor.daily_max_temp'')
+              }} degrees.'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily low temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_low_temp'') | float) < (states(''sensor.low_temp'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/lowtemp
+            payload: '{{ states(''sensor.daily_low_temp'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATL temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_low_temp'') | float) < (states(''sensor.ath_low_temp'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/athlowtemp
+            payload: '{{ states(''sensor.daily_low_temp'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Low Temp
+            message: 'Just recorded a new ALL TIME LOW TEMP: {{ states(''sensor.daily_low_temp'')
+              }} degrees.'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record ATH Daily Rain
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_rainfall_ut'') | float) > (states(''sensor.ath_24h_rain'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/athdailyrain
+            payload: '{{ states(''sensor.daily_rainfall_ut'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New Wettest Day
+            message: 'Just recorded a new ALL TIME HIGH DAILY RAINFALL: {{ states(''sensor.ath_24h_rain'')
+              }} mm.'
+          action: script.text_notify_parents
+      - alias: Record daily max wind speed
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_wind_speed'') | float) >
+            (states(''sensor.max_wind_gust'') | float) }}'
+        then:
+        - data:
+            topic: house/weather/maxwind
+            payload: '{{ states(''sensor.daily_max_wind_speed'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record number of days with rain and total rainfall
+        if:
+        - condition: numeric_state
+          entity_id: sensor.daily_rainfall_ut
+          above: 0
+        then:
+        - data:
+            topic: house/weather/daysrain
+            payload: '{% set total = states(''sensor.days_with_rain'') | int + 1 %}
+              {{ total }}
+
+              '
+            retain: true
+          action: mqtt.publish
+        - data:
+            topic: house/weather/totalrainfall
+            payload: '{% set total = (states(''sensor.daily_rainfall_ut'') | float)
+              + (states(''sensor.gw2000a_daily_rain_rate'') | float) | round(1) %}
+              {{ total }}
+
+              '
+            retain: true
+          action: mqtt.publish
+        else:
+        - if:
+          - condition: state
+            entity_id: sensor.daily_rainfall_ut
+            state: '0'
+          then:
+          - data:
+              topic: house/weather/daysnorain
+              payload: '{% set total = states(''sensor.days_without_rain'') | int
+                + 1 %} {{ total }}
+
+                '
+              retain: true
+            action: mqtt.publish
+      - if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_pressure'') | float) > (states(''sensor.max_pressure'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxpress
+            payload: '{{ states(''sensor.daily_max_pressure'') }}'
+            retain: true
+          action: mqtt.publish
+        alias: Record daily high pressure
+      - if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_pressure'') | float) > (states(''sensor.ath_max_press'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxpress
+            payload: '{{ states(''sensor.daily_max_pressure'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High Pressure
+            message: 'Just recorded a new ALL TIME HIGH BAROMETRIC PRESSURE: {{ states(''sensor.daily_max_pressure'')
+              }} millibars.'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+        alias: Record ATH Pressure
+      - if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_low_pressure'') | float) < (states(''sensor.min_pressure'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/minpress
+            payload: '{{ states(''sensor.daily_low_pressure'') }}'
+            retain: true
+          action: mqtt.publish
+        alias: Record daily low pressure
+      - alias: Record ATL pressure
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_low_pressure'') | float) < (states(''sensor.ath_min_pressure'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/athminpress
+            payload: '{{ states(''sensor.daily_low_pressure'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Low Pressure
+            message: 'Just recorded a new ALL TIME LOW BAROMETRIC PRESSURE: {{ states(''sensor.daily_low_pressure'')
+              }} millibars.'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily max humidity
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_humidity'') | float) > (states(''sensor.max_humidity'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxhum
+            payload: '{{ states(''sensor.daily_max_humidity'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH humidity
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_humidity'') | float) > (states(''sensor.ath_max_humidity'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxhum
+            payload: '{{ states(''sensor.daily_max_humidity'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High Humidity Level
+            message: 'Just recorded a new ALL TIME HIGH HUMDITIY LEVEL: {{ states(''sensor.daily_max_humidity'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily low humidity
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_humidity'') | float) < (states(''sensor.min_humidity'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/minhum
+            payload: '{{ states(''sensor.daily_min_humidity'') }}'
+            retain: true
+          action: mqtt.publish
+      - if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_humidity'') | float) < (states(''sensor.ath_min_humidity'')
+            | float) }}'
+        then:
+        - data:
+            topic: house/weather/athminhum
+            payload: '{{ states(''sensor.daily_min_humidity'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Low Humidity Level
+            message: 'Just recorded a new ALL TIME LOW HUMIDITY LEVEL: {{ states(''sensor.daily_min_humidity'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+        alias: Record ATL humidity
+      - alias: Record daily max solar radiation
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_solar_radiation'') | float)
+            > (states(''sensor.max_solar_radiation'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxsolrad
+            payload: '{{ states(''sensor.daily_max_solar_radiation'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH solar radiation
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_solar_radiation'') | float)
+            > (states(''sensor.ath_max_solar_radiation'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxsolrad
+            payload: '{{ states(''sensor.daily_max_solar_radiation'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High Solar Radiation Level
+            message: 'Just recorded a new ALL TIME HIGH SOLAR RADIATION LEVEL: {{
+              states(''sensor.daily_max_solar_radiation'') }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily max lux level
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_solar_lux'') | float) > (states(''sensor.max_solar_lux'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxsollux
+            payload: '{{ states(''sensor.daily_max_solar_lux'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH lux level
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_solar_lux'') | float) > (states(''sensor.ath_max_solar_lux'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxsollux
+            payload: '{{ states(''sensor.daily_max_solar_lux'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High Solar Lux Level
+            message: 'Just recorded a new ALL TIME HIGH SOLAR LUX LEVEL: {{ states(''sensor.daily_max_solar_lux'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily max uv index
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_uv_index'') | float) > (states(''sensor.max_uv_index'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxuv
+            payload: '{{ states(''sensor.daily_max_uv_index'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH uv index
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_uv_index'') | float) > (states(''sensor.ath_max_uv_index'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxuv
+            payload: '{{ states(''sensor.daily_max_uv_index'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH High UV Index
+            message: 'Just recorded a new ALL TIME HIGH UV LEVEL: {{ states(''sensor.daily_max_uv_index'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily max soil temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_soil_temp'') | float) > (states(''sensor.max_soil_temperature'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxsoiltemp
+            payload: '{{ states(''sensor.daily_max_soil_temp'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH soil temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_soil_temp'') | float) > (states(''sensor.ath_max_soil_temperature'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxsoiltemp
+            payload: '{{ states(''sensor.daily_max_soil_temp'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Soil Temp
+            message: 'Just recorded a new ALL TIME HIGH SOIL TEMPERATURE: {{ states(''sensor.daily_max_soil_temp'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily min soil temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_soil_temp'') | float) < (states(''sensor.min_soil_temperature'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/minsoiltemp
+            payload: '{{ states(''sensor.daily_min_soil_temp'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATL soil temp
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_soil_temp'') | float) < (states(''sensor.ath_min_soil_temperature'')
+            | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athminsoiltemp
+            payload: '{{ states(''sensor.daily_min_soil_temp'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATL Soil Temp
+            message: 'Just recorded a new ALL TIME LOW SOIL TEMPERATURE: {{ states(''sensor.daily_min_soil_temp'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily max soil moisture
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_soil_moisture'') | float)
+            > (states(''sensor.max_soil_moisture'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/maxsoilmoist
+            payload: '{{ states(''sensor.daily_max_soil_moisture'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATH soil moisture
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_max_soil_moisture'') | float)
+            > (states(''sensor.ath_max_soil_moisture'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athmaxsoilmoist
+            payload: '{{ states(''sensor.daily_max_soil_moisture'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATH Soil Moisture
+            message: 'Just recorded a new ALL TIME HIGH SOIL MOISTURE: {{ states(''sensor.daily_max_soil_moisture'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+      - alias: Record daily min soil moisture
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_soil_moisture'') | float)
+            < (states(''sensor.min_soil_moisture'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/minsoilmoist
+            payload: '{{ states(''sensor.daily_min_soil_moisture'') }}'
+            retain: true
+          action: mqtt.publish
+      - alias: Record ATL soil moisture
+        if:
+        - condition: template
+          value_template: '{{ (states(''sensor.daily_min_soil_moisture'') | float)
+            < (states(''sensor.ath_min_soil_moisture'') | float)  }}'
+        then:
+        - data:
+            topic: house/weather/athminsoilmoist
+            payload: '{{ states(''sensor.daily_min_soil_moisture'') }}'
+            retain: true
+          action: mqtt.publish
+        - data:
+            title: New ATL Soil Moisture
+            message: 'Just recorded a new ALL TIME LOW SOIL MOISTURE: {{ states(''sensor.daily_min_soil_moisture'')
+              }}%'
+          action: script.text_notify_parents
+        - delay: 00:00:30
+  mode: queued
+- id: '1726934953551'
+  alias: Kids Bathroom Fan Control
+  description: With blueprint
+  use_blueprint:
+    path: Blackshome/bathroom-humidity-exhaust-fan.yaml
+    input:
+      trigger: sensor.jack_and_jill_humidity_change
+      fan_switch:
+        entity_id: switch.jamie_bathroom_switch_right
+      bathroom_humidity_sensor: sensor.kids_bathroom_temperature_and_humidity_humidity
+      rising_humidity: 5
+      falling_humidity: -2
+      time_out: 60
+      include_max_humidity: maximum_humidity_enabled
+      include_manual_fan_switch: enable_manual_fan_switch_auto_off
+      month_winter_mode:
+      - '12'
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      winter_time_delay: 5
+      winter_time_out: 60
+      winter_include_max_humidity: maximum_humidity_enabled
+      bypass_auto_off_delay: 60
+      by_pass: group.en_suite_window
+      include_bypass: bypass_disabled
+      time_delay: 5
+      include_winter_mode: winter_mode_enabled
+      winter_rising_humidity: 2
+      winter_falling_humidity: -3
+      max_humidity: 90
+      winter_max_humidity: 90
+      include_manual_trigger: disable_manual_trigger
+      manual_trigger: []
+      manual_trigger_winter_time_delay: 20
+      manual_trigger_default_time_delay: 5
+      manual_fan_switch:
+      - switch.sean_bathroom_switch_left
+- id: '1727262696473'
+  alias: New AHC Blueprint Version Available
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ahc_latest_version
+    from:
+  condition: []
+  action:
+  - action: script.text_notify_dave
+    metadata: {}
+    data:
+      title: AHC VERSION
+      message: There is a new version of the AHC Blueprint
+  mode: single
+- id: '1727273028449'
+  alias: Frost Warning
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.outdside_thermal_comfort_frost_risk
+    to: probable
+    id: Probable
+  - platform: state
+    entity_id:
+    - sensor.outdside_thermal_comfort_frost_risk
+    to: high
+    id: 'High Probability '
+  - platform: state
+    entity_id:
+    - sensor.outdside_thermal_comfort_frost_risk
+    to: unlikely
+    id: Unlikely
+  - platform: state
+    entity_id:
+    - sensor.outdside_thermal_comfort_frost_risk
+    to: no_risk
+    id: No Risk
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Probable
+      sequence:
+      - action: script.text_notify_parents
+        metadata: {}
+        data:
+          title: FROST RISK - PROBABLE
+          message: There may be a frost tonight.
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - action: script.jarvis_speech_engine
+        data:
+          where: dave
+          message: Sorry to interrupt, but it will probably be frosty tonight.
+    - conditions:
+      - condition: trigger
+        id:
+        - 'High Probability '
+      sequence:
+      - action: script.text_notify_parents
+        metadata: {}
+        data:
+          title: FROST RISK - HIGHLY PROIBABLY
+          message: There will most likely be a frost tonight.
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: 'on'
+      - action: script.jarvis_speech_engine
+        data:
+          where: dave
+          message: Sorry to interrupt, but there is a good chance it will be frosty
+            tonight.
+    - conditions: []
+      sequence: []
+  mode: single
+- id: '1727364410131'
+  alias: All Govee Lighting
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    id: Low Light
+    for:
+      seconds: 20
+  - platform: numeric_state
+    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    id: Good Light
+    for:
+      seconds: 20
+  - platform: state
+    entity_id:
+    - binary_sensor.morning
+    from: 'off'
+    to: 'on'
+    id: Morning
+  - platform: state
+    entity_id:
+    - sun.sun
+    from: below_horizon
+    to: above_horizon
+    id: sunrise
+  - platform: state
+    entity_id:
+    - binary_sensor.afternoon
+    from: 'off'
+    to: 'on'
+    id: Afternoon
+  - platform: state
+    entity_id:
+    - binary_sensor.evening
+    from: 'off'
+    to: 'on'
+    id: Evening
+  - platform: state
+    entity_id:
+    - sun.sun
+    from: above_horizon
+    to: below_horizon
+    id: sunset
+  - platform: state
+    entity_id:
+    - binary_sensor.overnight
+    from: 'off'
+    to: 'on'
+    id: Overnight
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  - platform: state
+    entity_id:
+    - switch.living_room_tv
+    from: 'off'
+    to: 'on'
+    id: TV on
+  - platform: state
+    entity_id:
+    - switch.living_room_tv
+    from: 'on'
+    to: 'off'
+    id: TV off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Low Light
+      - condition: state
+        entity_id: switch.living_room_tv
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: light.dreamview_g1_pro_2
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id: Good Light
+      - condition: state
+        entity_id: switch.living_room_tv
+        state: 'on'
+      sequence:
+      - data: {}
+        target:
+          entity_id: light.dreamview_g1_pro_2
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - Morning
+      sequence:
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 1
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 1
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Morning
+        action: light.turn_on
+      - condition: state
+        entity_id: input_boolean.wakeup_lights
+        state: 'off'
+      - delay:
+          hours: 0
+          minutes: 23
+          seconds: 0
+          milliseconds: 0
+      - condition: state
+        entity_id: input_boolean.wakeup_lights
+        state: 'off'
+      - target:
+          entity_id: light.bed_lamps_3
+        data:
+          brightness_pct: 5
+          effect: Morning
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Afternoon
+      sequence:
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 1
+          effect: Rustling Leaves
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 1
+          effect: Rustling Leaves
+        action: light.turn_on
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Afternoon
+        action: light.turn_on
+      - target:
+          entity_id: light.bed_lamps_3
+        data:
+          brightness_pct: 5
+          effect: Afternoon
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Afternoon
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Evening
+      sequence:
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 1
+          effect: Candlelight
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 1
+          effect: Candlelight
+        action: light.turn_on
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Dating
+        action: light.turn_on
+      - target:
+          entity_id: light.bed_lamps_3
+        data:
+          brightness_pct: 5
+          effect: Dating
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Gobi Desert
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - Overnight
+      sequence:
+      - target:
+          entity_id:
+          - light.glide_lights_right_2
+          - light.govee_glide_left_2
+          - light.xmas_string_lights_3_2
+        data: {}
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - sunrise
+      - condition: state
+        entity_id: binary_sensor.morning
+        state: 'on'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: input_boolean.wakeup_lights
+          state: 'off'
+        then:
+        - target:
+            entity_id: light.bed_lamps_3
+          data:
+            brightness_pct: 5
+            effect: Sunrise
+          action: light.turn_on
+        alias: Turn on bed lamps if wakeup lights off
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Sunrise
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 5
+          effect: Sunrise
+        action: light.turn_on
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 5
+          effect: Sunrise
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Sunrise
+        action: light.turn_on
+      - delay:
+          minutes: 30
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 1
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 1
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.bed_lamps_3
+        data:
+          brightness_pct: 5
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Morning
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - TV on
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: binary_sensor.day
+          state: 'off'
+        - condition: numeric_state
+          entity_id: sensor.living_room_fp2_light_sensor_light_level
+          below: input_number.low_light_threshold
+      sequence:
+      - target:
+          entity_id: light.dreamview_g1_pro_2
+        data: {}
+        action: light.turn_on
+    - conditions:
+      - condition: trigger
+        id:
+        - TV off
+      - condition: state
+        entity_id: light.dreamview_g1_pro_2
+        state: 'on'
+      sequence:
+      - target:
+          entity_id: light.dreamview_g1_pro_2
+        data: {}
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - sunset
+      sequence:
+      - if:
+        - condition: state
+          entity_id: binary_sensor.overnight
+          state: 'off'
+        then:
+        - target:
+            entity_id: light.bed_lamps_3
+          data:
+            brightness_pct: 5
+            effect: Warm
+          action: light.turn_on
+      - target:
+          entity_id: light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Warm
+        action: light.turn_on
+      - target:
+          entity_id: light.govee_glide_left_2
+        data:
+          brightness_pct: 5
+          effect: Sunset Glow
+        action: light.turn_on
+      - target:
+          entity_id: light.glide_lights_right_2
+        data:
+          brightness_pct: 5
+          effect: Sunset Glow
+        action: light.turn_on
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Warm
+        action: light.turn_on
+      - delay:
+          minutes: 30
+      - if:
+        - condition: state
+          entity_id: binary_sensor.afternoon
+          state: 'on'
+        then:
+        - target:
+            entity_id: light.glide_lights_right_2
+          data:
+            brightness_pct: 1
+            effect: Rustling Leaves
+          action: light.turn_on
+        - target:
+            entity_id: light.govee_glide_left_2
+          data:
+            brightness_pct: 1
+            effect: Rustling Leaves
+          action: light.turn_on
+        - target:
+            entity_id: light.stair_lights_2
+          data:
+            brightness_pct: 5
+            effect: Afternoon
+          action: light.turn_on
+        - target:
+            entity_id: light.xmas_string_lights_3_2
+          data:
+            brightness_pct: 50
+            effect: Afternoon
+          action: light.turn_on
+        - target:
+            entity_id: light.bed_lamps_3
+          data:
+            brightness_pct: 5
+            effect: Afternoon
+          action: light.turn_on
+        else:
+        - target:
+            entity_id: light.glide_lights_right_2
+          data:
+            brightness_pct: 1
+            effect: Candlelight
+          action: light.turn_on
+        - target:
+            entity_id: light.govee_glide_left_2
+          data:
+            brightness_pct: 1
+            effect: Candlelight
+          action: light.turn_on
+        - target:
+            entity_id: light.stair_lights_2
+          data:
+            brightness_pct: 5
+            effect: Dating
+          action: light.turn_on
+        - target:
+            entity_id: light.xmas_string_lights_3_2
+          data:
+            brightness_pct: 50
+            effect: Gobi Desert
+          action: light.turn_on
+        - if:
+          - condition: state
+            entity_id: binary_sensor.overnight
+            state: 'off'
+          then:
+          - target:
+              entity_id: light.bed_lamps_3
+            data:
+              brightness_pct: 5
+              effect: Dating
+            action: light.turn_on
+  mode: parallel
+  initial_state: true
+- id: '1727367350595'
+  alias: Birthday Announcements
+  description: ''
+  trigger:
+  - platform: calendar
+    event: start
+    offset: '7:45:0'
+    entity_id: calendar.birthdays
+  condition:
+  - condition: template
+    value_template: '{{ is_state(''input_boolean.audible_notifications'',''on'') }}'
+  action:
+  - action: script.birthday_announcement
+    data:
+      where: kitchen
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 15
+      milliseconds: 0
+  - data:
+      entity_id: media_player.dave_s_2nd_echo_pop
+      media_content_id: Awesome Birthday Song in everywhere group
+      media_content_type: AMAZON_MUSIC
+    action: media_player.play_media
   mode: single
   initial_state: true
