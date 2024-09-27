@@ -1,0 +1,6 @@
+alias: Solcast Nov Feb Dampening
+sequence:
+  - action: solcast_solar.set_dampening
+    data:
+      damp_factor: 1,1,1,1,1,1,1,0.5,0.5,0.5,0.8,0.8,0.8,0.8,0.7,0.7,0.7,0.7,0.7,1,1,1,1,1
+description: ""
