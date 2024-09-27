@@ -1,0 +1,39 @@
+alias: Spare Room Night Light
+sequence:
+  - target:
+      entity_id:
+        - input_boolean.guest_bedroom_allow_lights_off
+        - input_boolean.guest_bedroom_bedside_lamps_active
+    data: {}
+    action: input_boolean.turn_off
+  - target:
+      entity_id: light.spare_room_lights
+    data: {}
+    action: light.turn_off
+  - target:
+      entity_id:
+        - light.guest_bedroom_bedside_lamp_right
+    data: {}
+    action: light.turn_off
+  - target:
+      entity_id:
+        - light.guest_bedroom_bedside_lamp_left
+    data:
+      rgb_color:
+        - 255
+        - 0
+        - 0
+      brightness_pct: 1
+    action: light.turn_on
+  - data: {}
+    target:
+      entity_id: input_boolean.guest_bedroom_night_lights_active
+    action: input_boolean.turn_on
+  - condition: state
+    entity_id: switch.adaptive_lighting_sleep_mode_spare_room_lamps
+    state: "off"
+  - target:
+      entity_id: switch.adaptive_lighting_sleep_mode_spare_room_lamps
+    data: {}
+    action: switch.turn_on
+description: ""
