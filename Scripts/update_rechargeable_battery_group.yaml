@@ -1,0 +1,14 @@
+alias: Update Rechargeable Battery Group
+sequence:
+  - data:
+      object_id: rechargeable_batteries
+      entities: []
+    action: group.set
+  - data:
+      object_id: rechargeable_batteries
+      add_entities: |-
+        {{ states.sensor | 
+          selectattr('entity_id', 'in', area_entities('Rechargeable Battery')) |
+          map(attribute='entity_id') | list  | join(',') }} 
+    action: group.set
+mode: single
