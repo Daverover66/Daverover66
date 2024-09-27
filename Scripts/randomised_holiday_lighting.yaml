@@ -1,0 +1,24 @@
+alias: Randomised Holiday Lighting
+sequence:
+  - repeat:
+      until:
+        - condition: state
+          entity_id: sun.sun
+          state: above_horizon
+      sequence:
+        - data:
+            message: Holiday Lights Running
+          action: notify.mobile_app_daves_samsung_galaxy
+        - data:
+            entity_id: >
+              {{ expand('group.holiday_lights') | map(attribute='entity_id') |
+              list | random }}
+          action: homeassistant.toggle
+        - delay:
+            minutes: "{{ range(1,3) | random | int }}"
+        - data: {}
+          target:
+            entity_id: group.holiday_lights
+          action: homeassistant.turn_off
+mode: single
+icon: mdi:lightbulb-multiple
