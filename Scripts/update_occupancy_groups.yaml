@@ -1,0 +1,228 @@
+alias: Update Occupancy Groups
+sequence:
+  - data:
+      object_id: living_room_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: living_room_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('living room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: kitchen_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: kitchen_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('kitchen')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running|door)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: dining_room_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: dining_room_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('dining room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: utility_room_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: utility_room_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('utility room')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: cloakroom_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: cloakroom_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('cloakroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: hallway_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: hallway_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('hallway')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: master_bedroom_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: master_bedroom_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('master bedroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: guest_bedroom_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: guest_bedroom_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('guest bedroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|running)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: seans_room_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: seans_room_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities("sean's room")) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: jamies_room_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: jamies_room_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities("jamie's room")) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: office_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: office_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('office')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: en_suite_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: en_suite_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('en-suite bathroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: garage_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: garage_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('garage')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: cloakroom_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: cloakroom_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('cloakroom')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: loft_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: loft_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('loft')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion|door)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+  - data:
+      object_id: landing_occupancy
+      entities: []
+    action: group.set
+  - data:
+      object_id: landing_occupancy
+      add_entities: |-
+        {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('landing')) 
+            | rejectattr('attributes.device_class', 'undefined') 
+            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | map(attribute='entity_id')
+            | list | join(' , ')}}
+    action: group.set
+mode: single
+description: ""
