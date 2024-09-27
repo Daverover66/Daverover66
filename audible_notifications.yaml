@@ -1,0 +1,36 @@
+alias: Audible Notifications
+description: ""
+trigger:
+  - platform: time
+    at: input_datetime.audible_notification_on
+    id: "on"
+  - platform: time
+    at: input_datetime.audible_notification_off
+    id: "off"
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: "on"
+          - condition: state
+            entity_id: binary_sensor.family_home
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: input_boolean.audible_notifications
+            action: input_boolean.turn_on
+      - conditions:
+          - condition: trigger
+            id: "off"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: input_boolean.audible_notifications
+            action: input_boolean.turn_off
+    default: []
+mode: single
