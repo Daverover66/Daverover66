@@ -57,7 +57,7 @@ input_datetime:
     has_time: true
 
 ############################
-# input_number (https://www.home-assistant.io/integrations/input_number/)
+# input_datetime (https://www.home-assistant.io/integrations/input_number/)
 # 
 # This cranks up the volume to extra spooky
 input_number:
@@ -93,28 +93,10 @@ automation:
     - platform: time
       at: input_datetime.halloween_show
     action:
-    - service: input_boolean.turn_on
+    - action: input_boolean.turn_on
       entity_id: input_boolean.this_is_halloween  
-    - service: switch.turn_on
-      entity_id: switch.living_room_light
-    - delay: '00:00:20'
-    - service: scene.turn_on
-      data: {}
-      target:
-        entity_id: scene.halloween_living_room_light
-    - delay: '00:01:00'
-    - service: light.turn_off
-      entity_id: light.living_room_lights
-    - service: light.turn_on
-      entity_id: light.living_room_lights
-      data:
-        brightness: 255
-        color_temp: 160
-    - service: switch.turn_off
-      entity_id: switch.living_room_light
     - delay: '02:00:00'
-    
-    - service: input_boolean.turn_off
+    - action: input_boolean.turn_off
       entity_id: input_boolean.this_is_halloween
 
 
@@ -143,15 +125,15 @@ automation:
           id: start
         sequence:
         #  crank up the volume to extra spooky #
-        - service: script.audio_volume_extra_spooky
+        - action: script.audio_volume_extra_spooky
           data: {}
-        - service: script.alexa_voice
+        - action: script.alexa_voice
           data:
             where: kitchen
             message: >-
               <audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/PkavOCzx-config-media-haunted-sounds-this-is-halloween.mp3'/>
         - delay: '00:03:20'
-        - service: script.turn_on
+        - action: script.turn_on
           target:
             entity_id: script.haunted_house
       # Stop the show
@@ -160,10 +142,10 @@ automation:
           id: stop
         sequence:
         # And finally we turn off the haunted house script so no more sounds play. 
-        - service: script.turn_off
+        - action: script.turn_off
           target:
             entity_id: script.haunted_house
-        - service: scene.turn_on
+        - action: scene.turn_on
           target:
             entity_id: scene.before_haunting
       default: []
@@ -178,7 +160,7 @@ script:
 
   audio_volume_extra_spooky:
     sequence:
-    - service: media_player.volume_set
+    - action: media_player.volume_set
       data:
         volume_level: >
           {{ states('input_number.alexa_volume_level_extra_spooky') | float(0) }}
@@ -204,7 +186,7 @@ script:
 
   audio_volume_normal:
     sequence:
-    - service: media_player.volume_set
+    - action: media_player.volume_set
       data:
         volume_level: >
           {{ states('input_number.alexa_volume_level_announcements') | float(0) }}
@@ -235,7 +217,7 @@ script:
             state: 'on'
         sequence:
         # Take a snap shot of current state
-        - service: scene.create
+        - action: scene.create
           data:
             scene_id: before_haunting
             snapshot_entities:
@@ -261,7 +243,7 @@ script:
               - light.guest_bedroom_bedside_lamp_right
               - light.landing_lights_2
         # Change a random Random Light
-        - service: light.toggle
+        - action: light.toggle
           data:
             entity_id: >
               {{ ['light.kids_bathroom_light','light.main_bathroom_light','light.living_room_light','light.cloakroom_light_2',
@@ -271,15 +253,15 @@ script:
                   'light.utility_room_light'
                   ] | random }}
         # Start playing a random selection from our spooky music.
-        - service: script.spooky_music
+        - action: script.spooky_music
         # Then another delay. This one is a random delay between 2 and 5 minutes. A delay of at least 2 minutes ensures the previous effect is done before the next one.
         - delay: '00:0{{ range(2,5) | random | int }}:00'
         # After the delay, change the state of the lights back to what they were 
-        - service: scene.turn_on
+        - action: scene.turn_on
           target:
             entity_id: scene.before_haunting
         # play more random haunted sounds. This time though, if we have haunted sounds on we play one from there, if not, back to spooky music. 
-        - service: >
+        - action: >
             {% if is_state('input_boolean.haunted_sounds', 'on') %}
               script.haunted_sounds
             {% else %}
@@ -287,7 +269,7 @@ script:
             {% endif %}
         # Then delay again, and when that is done start over.
         - delay: '00:0{{ range(2,5) | random | int }}:00'
-    - service: script.audio_volume_normal
+    - action: script.audio_volume_normal
       data: {}
         
   #  Update this script with your AWS S3 Spooky Music
@@ -297,7 +279,7 @@ script:
     - condition: state
       entity_id: input_boolean.spooky_music
       state: 'on'
-    - service: script.alexa_voice # This script is in the notify.yaml in the packages folder. 
+    - action: script.alexa_voice # This script is in the notify.yaml in the packages folder. 
       data:
         where: >
           {{ ['media_player.kitchen_echo_show',
@@ -326,7 +308,7 @@ script:
     - condition: state
       entity_id: input_boolean.haunted_sounds
       state: 'on'
-    - service: script.alexa_voice # This script is in the notify.yaml package
+    - action: script.alexa_voice # This script is in the notify.yaml package
       data:
         where: >
           {{ ['media_player.kitchen_echo_show',
@@ -350,7 +332,7 @@ script:
               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/2ihPxTGT-monstercry.mp3'/>",
               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/8mQXx37a-evil-laugh-in-hall.mp3'/>",
               "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/HXk4A6Dx-evil-witch-laughing.mp3'/>",
-              "<audio src='ttps://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/jeiDxSi7-womanscream1.mp3'/>"
+              "<audio src='https://davesaudiobucket.s3.eu-west-2.amazonaws.com/Audio/Spooky/jeiDxSi7-womanscream1.mp3'/>"
               ] | random -}}
 # sensor:
 #   # Halloween Countdown Sensor using Wolfram Alpha. See the note at the top for a link to how to set it up.
