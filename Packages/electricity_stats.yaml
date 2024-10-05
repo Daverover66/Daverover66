@@ -256,11 +256,12 @@ template:
           {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
           {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
           {%- set state = secs_to_empty - timetogosecs %}
+          {% if state < 0 %}
+          {% set state = 1800 %}
+          {% endif %}
           {% set month = now().month %}
           {% set batt = states('sensor.battery_state_of_charge')|float(-1) %}
-          {% if (is_state('binary_sensor.lunchtime','on') or is_state('binary_sensor.afternoon','on')) and (month in [9,10,11,12,1,2,3,4] and batt < 50) %}
-            true
-          {% elif state < 1800 %}
+              {% if ((is_state('binary_sensor.lunchtime','on') or is_state('binary_sensor.afternoon','on')) and (month in [9,10,11,12,1,2,3,4] and batt < 50)) or (state < 1800) %}
             true
           {% else -%}
             false
