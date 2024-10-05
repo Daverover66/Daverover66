@@ -251,7 +251,7 @@ script:
               {{ ['light.kids_bathroom_light','light.main_bathroom_light','light.living_room_lights','light.cloakroom_switch_left',
                   'light.back_door_light','light.guest_bedroom_bedside_lamp_left',
                   'light.corner_lamp','light.standard_lamp','light.guest_bedroom_bedside_lamp_right',
-                  'light.landing_lights_2','light.kitchen_lights_2','light.back_door_zone_light','light.hallway_lights,
+                  'light.landing_lights_2','light.kitchen_lights_2','light.back_door_zone_light','light.hallway_lights',
                   'light.utility_room_light','switch.office_light_switch'
                   ] | random }}
         # Start playing a random selection from our spooky music.
