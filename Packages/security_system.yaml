@@ -42,36 +42,6 @@ input_boolean:
     name: Dog Mode
     icon: mdi:dog-side
 
-#######################
-#        Group        #
-#######################
-
-group: 
-  external_doors:
-  name: External Doors
-  icon: mdi:door-closed-lock
-  entities:
-    - binary_sensor.back_door_sensor_contact 
-    - binary_sensor.side_door_sensor_contact 
-    - binary_sensor.front_door_sense_contact 
-
-  garage_doors:
-  name: Garage Doors
-  icon: mdi:garage-variant-lock
-  entities:
-    - binary_sensor.garage_door_left_contact 
-    - binary_sensor.garage_door_right_contact 
-
-######################
-#   reinstate once Reolink doorbell camera installed
-######################
-
-# sensor:
-#   - platform: authenticated
-#   - platform: mqtt
-#     name: front_door_motion_away_count
-#     state_topic: "house/front_door_motion/away_count"
-
 automation:
   #############################################
   # When sentry mode is enabled / security armed by any method, check the doors and notify everyone.
