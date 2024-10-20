@@ -5,7 +5,7 @@
 #   @description    :   Everything related to security functions.
 #
 #   @modified by    :   David Forrester
-#   @date           :   16/01/2024
+#   @date           :   20/10/2024
 ###############################################################################
 
 #######################
@@ -16,20 +16,6 @@
 #      Toggle         #
 #######################
 input_boolean:
-  # Main security switch. If this is on, the security is armed.
-  sentry_mode:
-    name: Sentry Mode
-    icon: mdi:security
-  # Holiday mode is automagically set when we are 2 hours from the house, and turns off when we return.
-  # This is used to modify some of the normal automations.
-  holiday_mode:
-    name: Holiday Mode
-    icon: mdi:airplane-takeoff
-  # Guest mode is use to modify automations when we have guests.
-  # In some cases this prevents security from being set to prevent security alarm going off
-  guest_mode:
-    name: Guest Mode
-    icon: mdi:account-multiple
   # This switch powers the security alarm and gives an easy way to kill the alarm.
   # When it is on, the alarm is going off
   security_alarm:
@@ -49,12 +35,8 @@ input_boolean:
   lockdown_issue:
     name: Lockdown Issue
     icon: mdi:lock-reset
-  # This switch is turned on if there is a security breach. Turning on this switch starts the countdown to the alarm.
-  security_issue:
-    name: Security Issue
-    icon: mdi:alert-circle-outline
   # Dog Mode is triggered when Home Assistant believes someone is about to open the back door to let
-  # to let the dog out in the midddle of the night.
+  # the dog out in the midddle of the night.
   # https://slacker-labs.com/2020/04/14/where-we-are-going-we-need-dog-mode/
   dog_mode:
     name: Dog Mode
