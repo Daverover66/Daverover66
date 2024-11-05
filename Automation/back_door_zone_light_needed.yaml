@@ -1,0 +1,31 @@
+alias: Back Door Zone Light Needed
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - switch.kitchen_light_switch_left
+    from: "off"
+    to: "on"
+    trigger: state
+  - entity_id:
+      - switch.kitchen_light_switch_left
+    from: "on"
+    to: "off"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: light.back_door_zone_light
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.back_door_zone_light
+            data: {}
+    default:
+      - action: light.turn_off
+        target:
+          entity_id: light.back_door_zone_light
+        data: {}
