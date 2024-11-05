@@ -1,0 +1,133 @@
+alias: Bathrooms Presence
+description: ""
+mode: parallel
+triggers:
+  - entity_id:
+      - binary_sensor.cloakroom_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Cloak Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.cloakroom_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Cloak Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.jack_and_jill_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Boys Bathroom Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.jack_and_jill_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Boys Bathroom Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bathroom_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Main Bathroom Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bathroom_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Main Bathroom Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Cloak Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: cloakroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_cloakroom
+      - conditions:
+          - condition: trigger
+            id:
+              - Cloak Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_cloakroom
+      - conditions:
+          - condition: trigger
+            id:
+              - Main Bathroom Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: main_bathroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_main_bathroom
+      - conditions:
+          - condition: trigger
+            id:
+              - Main Bathroom Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_main_bathroom
+      - conditions:
+          - condition: trigger
+            id:
+              - Boys Bathroom Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: boys_bathroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_jack_jill
+      - conditions:
+          - condition: trigger
+            id:
+              - Boys Bathroom Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_jack_jill
