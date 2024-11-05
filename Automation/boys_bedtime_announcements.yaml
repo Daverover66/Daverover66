@@ -1,0 +1,110 @@
+alias: Boys Bedtime Announcements
+description: ""
+mode: single
+initial_state: true
+triggers:
+  - at: input_datetime.school_night_jamie
+    id: School Bedtime Jamie
+    trigger: time
+  - at: input_datetime.school_night_sean
+    id: School Bedtime Sean
+    trigger: time
+  - at: input_datetime.non_school_night
+    id: Non School Bedtime
+    trigger: time
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - School Bedtime Sean
+          - condition: state
+            entity_id: sensor.school_tomorrow
+            state: "True"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.seans_bedtime_announcement_played
+            state: "off"
+        sequence:
+          - action: script.status_annc
+            data:
+              where: living_room
+              call_jetsons_chime: 1
+              call_time_is: 1
+              call_sean_time_for_bed: 1
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.seans_bedtime_announcement_played
+          - action: cover.close_cover
+            target:
+              entity_id:
+                - cover.seans_room_blind
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - School Bedtime Jamie
+          - condition: state
+            entity_id: sensor.school_tomorrow
+            state: "True"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.jamies_bedtime_announcement_played
+            state: "off"
+        sequence:
+          - action: script.status_annc
+            data:
+              where: living_room
+              call_jetsons_chime: 1
+              call_time_is: 1
+              call_jamie_time_for_bed: 1
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.jamies_bedtime_announcement_played
+          - action: cover.close_cover
+            target:
+              entity_id: cover.jamies_room_blind
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Non School Bedtime
+          - condition: state
+            entity_id: sensor.school_tomorrow
+            state: "False"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: input_boolean.seans_bedtime_announcement_played
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.jamies_bedtime_announcement_played
+                state: "off"
+        sequence:
+          - action: script.status_annc
+            data:
+              where: living_room
+              call_jetsons_chime: 1
+              call_time_is: 1
+              call_boys_time_for_bed: 1
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.seans_bedtime_announcement_played
+                - input_boolean.jamies_bedtime_announcement_played
+          - action: cover.close_cover
+            target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            data: {}
