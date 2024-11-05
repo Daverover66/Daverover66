@@ -1,0 +1,104 @@
+alias: Battery Settings Confirm
+description: checks to see if battery settings are correct and sets an input boolean toggle
+mode: parallel
+max: 10
+triggers:
+  - entity_id:
+      - select.solaredge_i1_storage_default_mode
+    from: Maximize Self Consumption
+    id: Storage Default Mode Wrong
+    trigger: state
+  - entity_id:
+      - select.solaredge_i1_storage_default_mode
+    id: Storage Default Mode Correct
+    to: Maximize Self Consumption
+    trigger: state
+  - entity_id:
+      - select.solaredge_i1_storage_command_mode
+    from: Maximize Self Consumption
+    id: Storage Cmd Mode Wrong
+    trigger: state
+  - entity_id:
+      - select.solaredge_i1_storage_command_mode
+    id: Storage Cmd Mode Correct
+    to: Maximize Self Consumption
+    trigger: state
+  - entity_id:
+      - select.solaredge_i1_storage_control_mode
+    from: Remote Control
+    id: Storage Control Mode Wrong
+    trigger: state
+  - entity_id:
+      - select.solaredge_i1_storage_control_mode
+    id: Storage Control Mode Correct
+    to: Remote Control
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "on"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Default Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_default_mode_correct
+            state: "off"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_default_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "on"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Cmd Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_cmd_mode_correct
+            state: "off"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_cmd_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Wrong
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "on"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
+      - conditions:
+          - condition: trigger
+            id: Storage Control Mode Correct
+          - condition: state
+            entity_id: input_boolean.desired_storage_control_mode_correct
+            state: "off"
+        sequence:
+          - action: input_boolean.toggle
+            data: {}
+            target:
+              entity_id: input_boolean.desired_storage_control_mode_correct
