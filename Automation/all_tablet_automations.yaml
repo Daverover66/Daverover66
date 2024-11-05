@@ -1,0 +1,100 @@
+alias: All Tablet Automations
+description: ""
+triggers:
+  - entity_id: sensor.sm_t736b_battery_state
+    to: full
+    id: Daves tablet charged
+    trigger: state
+  - entity_id: sensor.sm_t736b_battery_state
+    to: charging
+    id: Daves tablet charging
+    trigger: state
+  - entity_id: sensor.jamie_s_samsung_tablet_network_type
+    id: Jamie Network Type
+    trigger: state
+  - entity_id: sensor.jamie_s_samsung_tablet_battery_level
+    below: 10
+    id: Jamie Low Battery
+    trigger: numeric_state
+  - entity_id: sensor.jamie_s_samsung_tablet_battery_level
+    above: 99
+    id: Jamie Fully Charged
+    trigger: numeric_state
+  - entity_id: sensor.sean_s_samsung_galaxy_network_type
+    id: Sean Network Type
+    trigger: state
+  - entity_id: sensor.sean_s_samsung_galaxy_battery_level
+    below: 10
+    id: Sean Low Battery
+    trigger: numeric_state
+  - entity_id: sensor.sean_s_samsung_galaxy_battery_level
+    above: 99
+    id: Sean Fully Charged
+    trigger: numeric_state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Daves tablet charged
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: TABLET CHARGED
+              message: Your tablet is charged.
+      - conditions:
+          - condition: trigger
+            id: Jamie Network Type
+          - condition: state
+            entity_id: person.jamie
+            state: home
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: JAMIE TABLET
+              message: Jamie's tablet has changed network.
+      - conditions:
+          - condition: trigger
+            id: Jamie Low Battery
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: JAMIE TABLET
+              message: Jamie's tablet needs charged.
+      - conditions:
+          - condition: trigger
+            id: Jamie Fully Charged
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: JAMIE TABLET
+              message: Jamie's tablet is charged.
+      - conditions:
+          - condition: trigger
+            id: Sean Network Type
+          - condition: state
+            entity_id: person.sean
+            state: home
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: SEAN TABLET
+              message: Sean's tablet has changed network.
+      - conditions:
+          - condition: trigger
+            id: Sean Low Battery
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: SEAN TABLET
+              message: Sean's tablet needs charged.
+      - conditions:
+          - condition: trigger
+            id: Sean Fully Charged
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: SEAN TABLET
+              message: Sean's tablet is charged.
+mode: single
+initial_state: true
