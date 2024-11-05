@@ -1,8 +1,8 @@
 alias: "Charge Battery from Clipped Solar "
 description: Charges battery from clipped DC power when solar production estimate is high.
-trigger:
-  - platform: state
-    entity_id:
+mode: single
+triggers:
+  - entity_id:
       - input_boolean.home_battery_grid_charging
       - >-
         binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
@@ -10,27 +10,14 @@ trigger:
     from: "on"
     id: Grid Charge Finished
     alias: When battery finishes grid charge.
-  - alias: When excess DC Power Available.
-    platform: numeric_state
-    entity_id:
-      - sensor.inverter_1_production
-    above: 4100
-    id: Excess DC Available
-  - platform: numeric_state
-    entity_id:
-      - sensor.inverter_1_production
-    below: 4050
-    id: Excess DC not Available
-  - platform: numeric_state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sensor.solaredge_b1_state_of_energy
     above: 99.5
     id: Charge Complete
-  - platform: time
-    at: input_datetime.end_charge_from_clipped_solar
-    id: Midday
-condition: []
-action:
+    trigger: numeric_state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
@@ -42,140 +29,34 @@ action:
               is_state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','next_duration_in_hours',0)}}
           - condition: numeric_state
             entity_id: sensor.solcast_pv_forecast_forecast_today
-            above: 30
-          - condition: numeric_state
-            entity_id: sensor.solaredge_b1_state_of_energy
-            below: 99
+            above: 40
         sequence:
-          - service: input_boolean.turn_on
-            target:
-              entity_id: input_boolean.allow_charge_from_excess_dc
+          - action: input_boolean.turn_on
             data: {}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - service: number.set_value
             target:
-              entity_id: number.solaredge_i1_storage_command_timeout
-            data:
-              value: "21600"
-          - service: select.select_option
+              entity_id: input_boolean.charge_rate_limited
+          - action: number.set_value
             target:
-              entity_id: select.solaredge_i1_storage_command_mode
+              entity_id:
+                - number.solaredge_i1_storage_charge_limit
             data:
-              option: Discharge to Minimize Import
-      - conditions:
-          - condition: trigger
-            id:
-              - Excess DC Available
-          - condition: state
-            entity_id: input_boolean.allow_charge_from_excess_dc
-            state: "on"
-          - condition: numeric_state
-            entity_id: sensor.solaredge_b1_state_of_energy
-            below: 99.5
-          - condition: sun
-            before: sunset
-            after: sunrise
-        sequence:
-          - service: number.set_value
-            metadata: {}
-            data:
-              value: "21600"
-            target:
-              entity_id: number.solaredge_i1_storage_command_timeout
-          - service: select.select_option
-            metadata: {}
-            data:
-              option: Charge from Clipped Solar Power
-            target:
-              entity_id: select.solaredge_i1_storage_command_mode
-      - conditions:
-          - condition: trigger
-            id:
-              - Excess DC not Available
-          - condition: state
-            entity_id: input_boolean.allow_charge_from_excess_dc
-            state: "on"
-          - condition: sun
-            before: sunset
-            after: sunrise
-          - condition: numeric_state
-            entity_id: sensor.solaredge_b1_state_of_energy
-            below: 99.5
-        sequence:
-          - service: number.set_value
-            metadata: {}
-            data:
-              value: "21600"
-            target:
-              entity_id: number.solaredge_i1_storage_command_timeout
-          - service: select.select_option
-            metadata: {}
-            data:
-              option: Discharge to Minimize Import
-            target:
-              entity_id: select.solaredge_i1_storage_command_mode
+              value: "{{states('input_number.storage_charge_limit')|float(0)}}"
       - conditions:
           - condition: trigger
             id:
               - Charge Complete
           - condition: state
-            entity_id: input_boolean.allow_charge_from_excess_dc
+            entity_id: input_boolean.charge_rate_limited
             state: "on"
         sequence:
-          - service: input_boolean.turn_off
+          - action: input_boolean.turn_off
             target:
-              entity_id: input_boolean.allow_charge_from_excess_dc
+              entity_id:
+                - input_boolean.charge_rate_limited
             data: {}
-          - service: number.set_value
+          - action: number.set_value
             metadata: {}
             data:
-              value: >-
-                {{
-                states('input_number.storage_command_timeout_default_period')|float(0)
-                }}
+              value: "7000"
             target:
-              entity_id: number.solaredge_i1_storage_command_timeout
-          - service: select.select_option
-            target:
-              entity_id: select.solaredge_i1_storage_command_mode
-            data:
-              option: Maximize Self Consumption
-      - conditions:
-          - condition: trigger
-            id:
-              - Midday
-          - condition: numeric_state
-            entity_id: sensor.solaredge_b1_state_of_energy
-            below: 99.5
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: select.solaredge_i1_storage_command_mode
-                state: Charge from Clipped Solar Power
-              - condition: state
-                entity_id: select.solaredge_i1_storage_command_mode
-                state: Discharge to Minimize Import
-        sequence:
-          - service: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.allow_charge_from_excess_dc
-            data: {}
-          - service: number.set_value
-            metadata: {}
-            data:
-              value: >-
-                {{ states('input_number.storage_command_timeout_default_period')
-                | float(0) }}
-            target:
-              entity_id: number.solaredge_i1_storage_command_timeout
-          - service: select.select_option
-            metadata: {}
-            data:
-              option: Maximize Self Consumption
-            target:
-              entity_id: select.solaredge_i1_storage_command_mode
-mode: single
+              entity_id: number.solaredge_i1_storage_charge_limit
