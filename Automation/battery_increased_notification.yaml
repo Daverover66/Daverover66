@@ -1,0 +1,15 @@
+alias: Battery Increased Notification
+description: Battery Increased Notification
+mode: queued
+triggers:
+  - event_type: battery_notes_battery_increased
+    trigger: event
+conditions: []
+actions:
+  - action: persistent_notification.create
+    data:
+      title: |
+        {{ trigger.event.data.device_name }} Battery Increased
+      message: >
+        The device has increased its battery level.  Consequently, I have marked
+        it as replaced.  If this is not the case, you know what to do.
