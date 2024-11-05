@@ -5,30 +5,35 @@
 #   @description    :   Controls when automations are      #
 #                       enabled                            #
 #                                                          #
-#   @version        :   1.0                                #
+#   @version        :   1.1                                #
 #   @modified       :                                      #
 ############################################################ 
 
 alias: Adaptive Lighting Active Toggle
 description: ""
-trigger:
-  - platform: state
-    entity_id:
+mode: restart
+triggers:
+  - entity_id:
       - input_boolean.adaptive_lighting_active
     id: AL Active
-  - platform: homeassistant
-    event: start
+    trigger: state
+  - event: start
     id: HA start
-  - platform: state
-    entity_id:
+    trigger: homeassistant
+  - entity_id:
       - input_boolean.adaptive_lighting_sleep_mode_active
     id: Sleep Mode Active
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - binary_sensor.quiet_time_boys
-    id: Sleep Mode Toggle
-condition: []
-action:
+    id: Sleep Mode Toggle Winter
+    trigger: state
+  - entity_id:
+      - binary_sensor.overnight
+    id: Sleep Mode Toggle Summer
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
@@ -38,18 +43,20 @@ action:
         sequence:
           - variables:
               al_active: "{{ states('input_boolean.adaptive_lighting_active') }}"
-          - service: switch.turn_{{al_active}}
+          - action: switch.turn_{{al_active}}
             data: {}
             entity_id:
-              - switch.adaptive_lighting_kitchen_lights
               - switch.adaptive_lighting_back_door_zone
-              - switch.adaptive_lighting_upstairs_landing
               - switch.adaptive_lighting_bedside_lamps
               - switch.adaptive_lighting_corner_lamp
-              - switch.adaptive_lighting_hallway_lighting
-              - switch.adaptive_lighting_utility_light
               - switch.adaptive_lighting_hallway_lamp
+              - switch.adaptive_lighting_hallway_lighting
+              - switch.adaptive_lighting_kitchen_lights
+              - switch.adaptive_lighting_spare_room_ceiling_lights
               - switch.adaptive_lighting_spare_room_lamps
+              - switch.adaptive_lighting_spare_room_lamp_right
+              - switch.adaptive_lighting_upstairs_landing
+              - switch.adaptive_lighting_utility_light
       - conditions:
           - condition: trigger
             id:
@@ -60,24 +67,41 @@ action:
               sleep_mode: >-
                 {{ states('input_boolean.adaptive_lighting_sleep_mode_active')
                 }}
-          - service: switch.turn_{{ sleep_mode }}
+          - action: switch.turn_{{ sleep_mode }}
             entity_id:
-              - switch.adaptive_lighting_sleep_mode_kitchen_lights
-              - switch.adaptive_lighting_sleep_mode_upstairs_landing
               - switch.adaptive_lighting_sleep_mode_back_door_zone
               - switch.adaptive_lighting_sleep_mode_bedside_lamps
               - switch.adaptive_lighting_sleep_mode_corner_lamp
-              - switch.adaptive_lighting_sleep_mode_hallway_lighting
               - switch.adaptive_lighting_sleep_mode_hallway_lamp
-              - switch.adaptive_lighting_sleep_mode_utility_light
+              - switch.adaptive_lighting_sleep_mode_hallway_lighting
+              - switch.adaptive_lighting_sleep_mode_kitchen_lights
+              - switch.adaptive_lighting_sleep_mode_spare_room_ceiling_lights
               - switch.adaptive_lighting_sleep_mode_spare_room_lamps
+              - switch.adaptive_lighting_sleep_mode_spare_room_lamp_right
+              - switch.adaptive_lighting_sleep_mode_upstairs_landing
+              - switch.adaptive_lighting_sleep_mode_utility_light
       - conditions:
           - condition: trigger
             id:
-              - Sleep Mode Toggle
+              - Sleep Mode Toggle Winter
+          - condition: state
+            entity_id: input_boolean.bst
+            state: "off"
         sequence:
-          - service: input_boolean.toggle
+          - action: input_boolean.toggle
             target:
               entity_id: input_boolean.adaptive_lighting_sleep_mode_active
             data: {}
-mode: restart
+      - conditions:
+          - condition: trigger
+            id:
+              - Sleep Mode Toggle Summer
+          - condition: state
+            entity_id: input_boolean.bst
+            state: "on"
+        sequence:
+          - action: input_boolean.toggle
+            target:
+              entity_id: input_boolean.adaptive_lighting_sleep_mode_active
+            data: {}
+
