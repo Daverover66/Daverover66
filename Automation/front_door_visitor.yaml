@@ -1,0 +1,180 @@
+alias: Front Door Visitor
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.front_doorbell_camera_visitor
+    to: "on"
+    from: "off"
+    id: Visitor
+    trigger: state
+  - entity_id:
+      - binary_sensor.front_door_sense_contact
+    from: "off"
+    to: "on"
+    id: Door Open
+    trigger: state
+  - entity_id:
+      - binary_sensor.dave_home
+    from: "on"
+    to: "off"
+    id: Dave Out
+    trigger: state
+  - entity_id:
+      - binary_sensor.dave_home
+    from: "off"
+    to: "on"
+    id: Dave Home
+    trigger: state
+  - entity_id:
+      - binary_sensor.family_home
+    from: "on"
+    to: "off"
+    id: Family Out
+    trigger: state
+  - entity_id:
+      - binary_sensor.family_home
+    from: "off"
+    to: "on"
+    id: Family Home
+    trigger: state
+  - trigger: state
+    entity_id:
+      - binary_sensor.front_doorbell_camera_motion
+    id: Motion Detected
+    from: "off"
+    to: "on"
+  - trigger: time
+    at:
+      - "08:30:00"
+      - "15:10:00"
+    id: Time off
+    alias: When school run starts
+  - trigger: time
+    at:
+      - "08:55:00"
+      - "15:25:00"
+    id: Time on
+    alias: When school run ends
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Visitor
+        sequence:
+          - action: camera.snapshot
+            target:
+              entity_id: camera.front_doorbell_camera_snapshots_clear
+            data:
+              filename: /config/www/doorbell/snapshot_doorbell.jpg
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: notify.mobile_app_daves_samsung_galaxy
+            data:
+              title: DOORBELL!
+              message: Someone is at the front door!
+              data:
+                image: /local/doorbell/snapshot_doorbell.jpg
+                clickAction: /lovelace/camera
+                ttl: 0
+                priority: high
+          - action: notify.mobile_app_sm_s901b
+            data:
+              title: DOORBELL!
+              message: Someone is at the front door!
+              data:
+                image: /local/doorbell/snapshot_doorbell.jpg
+                clickAction: /lovelace/camera
+                ttl: 0
+                priority: high
+          - target:
+              entity_id: input_boolean.front_doorbell_active
+            data: {}
+            action: input_boolean.toggle
+          - target:
+              entity_id: number.front_doorbell_camera_auto_quick_reply_time
+            data:
+              value: "30"
+            action: number.set_value
+          - target:
+              entity_id: select.front_doorbell_camera_auto_quick_reply_message
+            data:
+              option: Hi, please leave the package at the door. We will get it later.
+            action: select.select_option
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Open
+          - condition: state
+            entity_id: input_boolean.front_doorbell_active
+            state: "on"
+        sequence:
+          - target:
+              entity_id: input_boolean.front_doorbell_active
+            data: {}
+            action: input_boolean.toggle
+          - target:
+              entity_id: select.front_doorbell_camera_auto_quick_reply_message
+            data:
+              option: "off"
+            action: select.select_option
+      - conditions:
+          - condition: trigger
+            id:
+              - Dave Out
+          - condition: state
+            entity_id: binary_sensor.workday_sensor
+            state: "on"
+          - condition: state
+            entity_id: calendar.gem_holidays
+            state: "off"
+        sequence:
+          - target:
+              entity_id: select.front_doorbell_camera_auto_quick_reply_message
+            data:
+              option: Hi, please leave the package at the door. We will get it later.
+            action: select.select_option
+      - conditions:
+          - condition: trigger
+            id:
+              - Dave Home
+        sequence:
+          - target:
+              entity_id: select.front_doorbell_camera_auto_quick_reply_message
+            data:
+              option: "off"
+            action: select.select_option
+      - conditions:
+          - condition: trigger
+            id:
+              - Motion Detected
+          - condition: state
+            entity_id: input_boolean.doorbell_motion_no_trigger
+            state: "off"
+        sequence:
+          - action: script.doorbell_camera_snapshot_ai_notify
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Time off
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.doorbell_motion_no_trigger
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Time on
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.doorbell_motion_no_trigger
+            data: {}
+mode: parallel
+max: 10
