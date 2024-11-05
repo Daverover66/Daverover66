@@ -1,0 +1,72 @@
+alias: Dining Room Presence
+description: ""
+mode: restart
+triggers:
+  - entity_id:
+      - binary_sensor.dining_room_presence_sensor_occupancy
+    from: "off"
+    to: "on"
+    id: Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.dining_room_presence_sensor_occupancy
+    from: "on"
+    to: "off"
+    id: Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - group.dining_room_occupancy
+    from: "off"
+    to: "on"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Presence
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: dining_room
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_dining_room
+      - conditions:
+          - condition: trigger
+            id: Absence
+        sequence:
+          - if:
+              - condition: time
+                after: "13:00:00"
+                before: "16:00:00"
+                weekday:
+                  - sun
+            then:
+              - delay:
+                  hours: 0
+                  minutes: 10
+                  seconds: 0
+                  milliseconds: 0
+              - condition: state
+                entity_id: binary_sensor.dining_room_presence_sensor_occupancy
+                state: "off"
+              - action: input_boolean.turn_off
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: input_boolean.room_occupied_dining_room
+            else:
+              - action: input_boolean.turn_off
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: input_boolean.room_occupied_dining_room
