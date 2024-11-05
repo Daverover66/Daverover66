@@ -1,0 +1,16 @@
+alias: Count Front Door Motion While Out
+description: ""
+mode: single
+triggers:
+  - entity_id: binary_sensor.front_door_motion_detected
+    to: "on"
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: binary_sensor.family_home
+    state: "off"
+actions:
+  - target:
+      entity_id: counter.front_door_motion_detected
+    action: counter.increment
+    data: {}
