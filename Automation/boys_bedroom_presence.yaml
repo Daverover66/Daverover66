@@ -1,0 +1,105 @@
+alias: Boys Bedroom Presence
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - binary_sensor.jamie_room_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Jamie Presence
+    trigger: state
+  - entity_id:
+      - media_player.living_room_dot
+    attribute: last_called
+    to: "true"
+    id: Jamie Alexa
+    trigger: state
+  - entity_id:
+      - binary_sensor.jamie_room_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Jamie Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.sean_room_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Sean Presence
+    trigger: state
+  - entity_id:
+      - media_player.seans_room_dot
+    attribute: last_called
+    to: "true"
+    id: Sean Alexa
+    trigger: state
+  - entity_id:
+      - binary_sensor.sean_room_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Sean Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Jamie Presence
+              - Jamie Alexa
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: jamies_room
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_jamie_s_room
+      - conditions:
+          - condition: trigger
+            id:
+              - Sean Presence
+              - Sean Alexa
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: seans_room
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_sean_s_room
+      - conditions:
+          - condition: trigger
+            id:
+              - Jamie Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_jamie_s_room
+      - conditions:
+          - condition: trigger
+            id:
+              - Sean Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_sean_s_room
