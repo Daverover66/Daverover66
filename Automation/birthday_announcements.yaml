@@ -1,0 +1,26 @@
+alias: Birthday Announcements
+description: ""
+mode: single
+initial_state: true
+triggers:
+  - event: start
+    offset: "7:45:0"
+    entity_id: calendar.birthdays
+    trigger: calendar
+conditions:
+  - condition: template
+    value_template: "{{ is_state('input_boolean.audible_notifications','on') }}"
+actions:
+  - action: script.birthday_announcement
+    data:
+      where: kitchen
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 15
+      milliseconds: 0
+  - data:
+      entity_id: media_player.dave_s_2nd_echo_pop
+      media_content_id: Awesome Birthday Song in everywhere group
+      media_content_type: AMAZON_MUSIC
+    action: media_player.play_media
