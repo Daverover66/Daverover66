@@ -5,21 +5,22 @@
 #   @description    :                                      #
 #                                                          #
 #                                                          #
-#   @version        :   1.02                               #
+#   @version        :   1.03                               #
 #   @modified       :                                      #
 ############################################################
 
 alias: Cloakroom Lights on with Presence
 description: Lights on and off with presence and timer
-trigger:
-  - platform: state
-    entity_id:
+mode: restart
+triggers:
+  - entity_id:
       - binary_sensor.cloakroom_presence_occupancy
     from: "off"
     to: "on"
-    id: Light On
-  - platform: state
-    entity_id:
+    id: Presence
+    alias: When someone goes into the cloakroom.
+    trigger: state
+  - entity_id:
       - binary_sensor.cloakroom_presence_occupancy
     from: "on"
     to: "off"
@@ -27,141 +28,179 @@ trigger:
       hours: 0
       minutes: 0
       seconds: 0
-    id: Light Off
-  - platform: device
-    type: turned_on
-    device_id: 621f8db4e2d03a6d1cb101ec3be46e7a
-    entity_id: switch.cloakroom_light
-    domain: switch
-    id: Light turned on
-  - platform: event
-    event_type: timer.finished
+    id: Absence
+    alias: When someone leaves the cloakroom.
+    trigger: state
+  - event_type: timer.finished
     event_data:
       entity_id: timer.cloakroom_light
-    id: Cloakroom Light off
-    alias: Cloakroom Light off with Timer
-  - platform: numeric_state
-    entity_id:
-      - sensor.main_bedroom_fp2_light_sensor_light_level
-    below: input_number.low_light_threshold
+    id: Timer Done
+    alias: When cloakroom timer runs down.
+    enabled: true
+    trigger: event
+  - entity_id:
+      - light.cloakroom_switch_left
+    from: "off"
+    to: "on"
+    id: Switch on
+    alias: When light is turned on manually.
+    trigger: state
+  - entity_id:
+      - sensor.cloakroom_presence_illuminance_lux
+    below: 20
     id: Low Light
-  - platform: numeric_state
-    entity_id:
-      - sensor.main_bedroom_fp2_light_sensor_light_level
-    id: Good Light
-    above: input_number.upper_light_threshold_level
-condition: []
-action:
+    alias: When light level is low.
+    trigger: numeric_state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
             id:
-              - Light turned on
-            alias: Start timer when light turns on
+              - Presence
+          - condition: state
+            entity_id: binary_sensor.quiet_time_boys
+            state: "off"
         sequence:
-          - service: timer.start
+          - alias: Turn on extractor.
+            action: switch.turn_on
+            target:
+              entity_id:
+                - switch.cloakroom_switch_right
             data: {}
+          - data: {}
             target:
               entity_id: timer.cloakroom_light
-      - conditions:
-          - condition: trigger
-            id:
-              - Cloakroom Light off
-            alias: Turn light off when timer runs down
-          - condition: state
-            entity_id: light.cloakroom_light_2
-            state: "on"
-        sequence:
-          - service: light.turn_off
-            data: {}
+            action: timer.start
+          - condition: or
+            conditions:
+              - condition: sun
+                before: sunrise
+                after: sunset
+              - condition: numeric_state
+                entity_id: sensor.cloakroom_presence_illuminance_lux
+                below: 20
+          - alias: Turn on light.
+            action: switch.turn_on
             target:
-              entity_id: light.cloakroom_light_2
+              entity_id:
+                - switch.cloakroom_switch_left
+            data: {}
+        alias: When someone enters cloakroom outside of quite time.
       - conditions:
           - condition: trigger
             id:
-              - Light On
-            alias: Turn on light with presence
+              - Presence
+          - condition: state
+            entity_id: binary_sensor.quiet_time_boys
+            state: "on"
           - condition: or
             conditions:
               - condition: numeric_state
-                entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
-                below: input_number.daytime_light_needed
+                entity_id: sensor.cloakroom_presence_illuminance_lux
+                below: 20
               - condition: sun
                 before: sunrise
                 after: sunset
         sequence:
-          - service: light.turn_on
-            data: {}
+          - action: switch.turn_on
             target:
-              entity_id: light.cloakroom_light_2
+              entity_id:
+                - switch.cloakroom_switch_left
+            data: {}
+            alias: Turn on light only.
+          - data: {}
+            target:
+              entity_id: timer.cloakroom_light
+            action: timer.start
+        alias: When someone enters cloakroom during quite time.
       - conditions:
           - condition: trigger
             id:
-              - Light Off
+              - Absence
+          - condition: state
+            entity_id: timer.cloakroom_light
+            state: idle
         sequence:
-          - service: light.turn_off
-            data: {}
+          - data: {}
             target:
-              entity_id: light.cloakroom_light_2
+              entity_id:
+                - switch.cloakroom_switch_left
+            action: switch.turn_off
+            alias: Turn off the light.
+          - condition: state
+            entity_id: switch.cloakroom_switch_right
+            state: "on"
+            alias: Check if the extractor is on.
+          - data: {}
+            target:
+              entity_id:
+                - switch.cloakroom_switch_right
+            action: switch.turn_off
+            alias: Turn off the extractor.
+        alias: When someone leaves the cloakroom.
+      - conditions:
+          - condition: trigger
+            id:
+              - Switch on
+          - condition: state
+            entity_id: binary_sensor.quiet_time_boys
+            state: "off"
+        sequence:
+          - data: {}
+            target:
+              entity_id: timer.cloakroom_light
+            action: timer.start
+          - target:
+              entity_id: switch.cloakroom_switch_right
+            data: {}
+            action: switch.turn_on
+            alias: Turn on extractor.
+        alias: Light switch manually turned on.
+      - conditions:
+          - condition: trigger
+            id:
+              - Timer Done
+          - condition: state
+            entity_id: binary_sensor.cloakroom_presence_occupancy
+            state: "off"
+        sequence:
+          - if:
+              - condition: state
+                entity_id: binary_sensor.quiet_time_boys
+                state: "off"
+            then:
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.cloakroom_switch_right
+                data: {}
+              - if:
+                  - condition: state
+                    entity_id: switch.cloakroom_switch_left
+                    state: "on"
+                then:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: switch.cloakroom_switch_left
+                    data: {}
+            else:
+              - action: switch.turn_off
+                target:
+                  entity_id: switch.cloakroom_switch_left
+                data: {}
+        alias: When cloakroom timer runs down.
       - conditions:
           - condition: trigger
             id:
               - Low Light
           - condition: state
-            entity_id: light.cloakroom_light_2
-            state: "off"
-          - condition: state
-            entity_id: input_boolean.room_occupied_cloakroom
+            entity_id: binary_sensor.cloakroom_occupied
             state: "on"
         sequence:
-          - service: light.turn_on
-            data: {}
+          - action: switch.turn_on
             target:
-              entity_id: light.cloakroom_light_2
-      - conditions:
-          - condition: trigger
-            id:
-              - Good Light
-          - condition: state
-            entity_id: light.cloakroom_light_2
-            state: "on"
-          - condition: state
-            entity_id: input_boolean.room_occupied_cloakroom
-            state: "on"
-        sequence:
-          - service: light.turn_off
+              entity_id: switch.cloakroom_switch_left
             data: {}
-            target:
-              entity_id: light.cloakroom_light_2
-      - conditions:
-          - condition: trigger
-            id:
-              - Light On
-          - condition: state
-            entity_id: light.cloakroom_light_2
-            state: "on"
-          - condition: state
-            entity_id: timer.cloakroom_light
-            state: active
-        sequence:
-          - service: timer.pause
-            target:
-              entity_id: timer.cloakroom_light
-            data: {}
-      - conditions:
-          - condition: trigger
-            id:
-              - Light Off
-          - condition: state
-            entity_id: light.cloakroom_light_2
-            state: "on"
-          - condition: state
-            entity_id: timer.cloakroom_light
-            state: paused
-        sequence:
-          - service: timer.start
-            target:
-              entity_id: timer.cloakroom_light
-            data: {}
-mode: restart
+            alias: Turn on the light.
+
 
