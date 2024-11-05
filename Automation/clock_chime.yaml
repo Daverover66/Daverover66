@@ -1,0 +1,88 @@
+alias: Clock Chime
+description: ""
+mode: restart
+triggers:
+  - minutes: 0
+    id: "0"
+    trigger: time_pattern
+  - minutes: 15
+    id: "15"
+    trigger: time_pattern
+  - minutes: 30
+    id: "30"
+    trigger: time_pattern
+  - minutes: 45
+    id: "45"
+    trigger: time_pattern
+conditions:
+  - condition: time
+    after: input_datetime.clock_chime_on_time
+    before: input_datetime.clock_chime_off_time
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.clock_chime
+    state: "on"
+  - condition: or
+    conditions:
+      - condition: state
+        state: "on"
+        entity_id: binary_sensor.family_home
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: "on"
+actions:
+  - choose:
+      - conditions:
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: "15"
+              - condition: trigger
+                id: "45"
+        sequence:
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.clock_chime_quarter_toll
+                state: "off"
+              - condition: state
+                entity_id: input_select.clock_chime_sound
+                state: Cuckoo Clock
+          - stop: Quarter Toll Disabled
+      - conditions:
+          - condition: trigger
+            id: "30"
+        sequence:
+          - condition: state
+            entity_id: input_boolean.clock_chime_half_toll
+            state: "off"
+          - stop: Half Toll Disabled
+    default: []
+  - wait_template: "{{ not is_state(\"media_player.dave_s_2nd_echo_pop\", \"playing\") }}"
+    continue_on_timeout: false
+    timeout: "00:02:00"
+  - action: script.alexa_voice
+    data:
+      where: living room
+      message: >
+        {% if states("input_select.clock_chime_sound") == "Cuckoo Clock" %}
+          {% if trigger.id == "30" %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/cuckoo-clock/cuckoo-clock-01.mp3'/>
+          {% else %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/cuckoo-clock/cuckoo-clock-{{now().strftime("%I")}}.mp3'/>
+          {% endif %}
+        {% elif states("input_select.clock_chime_sound") == "Grandfather Clock"
+        %}
+          {% if trigger.id == "15" %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/toll-1quarter.mp3'/>
+          {% elif trigger.id == "30" %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/toll-2quarter.mp3'/>
+          {% elif trigger.id == "45" %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/toll-3quarter.mp3'/>
+          {% else %}
+            <audio src='https://heder-homeassistant.s3.amazonaws.com/gf-clock/{{now().strftime("%I")}}-hour.mp3'/>
+          {% endif %}
+        {% endif %}
+      msg_summary: clock chime
