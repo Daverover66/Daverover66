@@ -1,0 +1,46 @@
+alias: Battery Low Notification
+description: Battery Low Notification with auto dismiss
+mode: queued
+triggers:
+  - event_type: battery_notes_battery_threshold
+    event_data:
+      battery_low: true
+    id: low
+    alias: Battery went low
+    trigger: event
+  - event_type: battery_notes_battery_threshold
+    event_data:
+      battery_low: false
+    id: high
+    alias: Battery went high
+    trigger: event
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - low
+        sequence:
+          - action: persistent_notification.create
+            data:
+              title: |
+                {{ trigger.event.data.device_name }} Battery Low
+              notification_id: >-
+                {{ trigger.event.data.device_id }}-{{
+                trigger.event.data.source_entity_id }}
+              message: >
+                The device has a battery level of {{
+                trigger.event.data.battery_level }}% {{ '\n' -}} You need {{
+                trigger.event.data.battery_quantity }}× {{
+                trigger.event.data.battery_type }}
+      - conditions:
+          - condition: trigger
+            id:
+              - high
+        sequence:
+          - action: persistent_notification.dismiss
+            data:
+              notification_id: >-
+                {{ trigger.event.data.device_id }}-{{
+                trigger.event.data.source_entity_id }}
