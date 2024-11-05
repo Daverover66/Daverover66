@@ -1,15 +1,39 @@
-alias: Automations That Run When HA Starts
+alias: Automations That Run When HA Starts or When Groups Reload
 description: ""
-trigger:
-  - platform: homeassistant
-    event: start
-condition: []
-action:
-  - service: script.update_critical_battery_group_2
-    data: {}
-  - service: script.update_rechargeable_battery_group
-    data: {}
-  - service: script.update_srv_critical_battery_group
-    data: {}
 mode: single
+triggers:
+  - event: start
+    id: HA Start
+    trigger: homeassistant
+  - entity_id:
+      - group.kitchen_occupancy
+    to: unknown
+    id: Group Reset
+    trigger: state
+conditions: []
+actions:
+  - action: script.update_critical_battery_group_2
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: script.update_rechargeable_battery_group
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: script.update_srv_critical_battery_group
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - action: script.update_occupancy_groups
+    data: {}
+
 
