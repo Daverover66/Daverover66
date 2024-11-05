@@ -1,50 +1,51 @@
 alias: All Govee Lighting
 description: ""
-trigger:
-  - platform: numeric_state
-    entity_id: sensor.living_room_fp2_light_sensor_light_level
+mode: parallel
+initial_state: true
+triggers:
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
     below: input_number.low_light_threshold
     id: Low Light
     for:
       seconds: 20
-  - platform: numeric_state
-    entity_id: sensor.living_room_fp2_light_sensor_light_level
+    trigger: numeric_state
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
     above: input_number.upper_light_threshold_level
     id: Good Light
     for:
       seconds: 20
-  - platform: state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
       - binary_sensor.morning
     from: "off"
     to: "on"
     id: Morning
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sun.sun
     from: below_horizon
     to: above_horizon
     id: sunrise
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - binary_sensor.afternoon
     from: "off"
     to: "on"
     id: Afternoon
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - binary_sensor.evening
     from: "off"
     to: "on"
     id: Evening
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sun.sun
     from: above_horizon
     to: below_horizon
     id: sunset
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - binary_sensor.overnight
     from: "off"
     to: "on"
@@ -53,20 +54,21 @@ trigger:
       hours: 1
       minutes: 0
       seconds: 0
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - switch.living_room_tv
     from: "off"
     to: "on"
     id: TV on
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - switch.living_room_tv
     from: "on"
     to: "off"
     id: TV off
-condition: []
-action:
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
@@ -436,5 +438,3 @@ action:
                       brightness_pct: 5
                       effect: Dating
                     action: light.turn_on
-mode: parallel
-initial_state: true
