@@ -17,7 +17,7 @@ trigger:
     variables:
       tariff: Off Peak
   - platform: time
-    at: "04:30:00"
+    at: "05:30:00"
     variables:
       tariff: Peak
 action:
