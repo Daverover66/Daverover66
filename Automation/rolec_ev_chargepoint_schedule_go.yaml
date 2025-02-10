@@ -1,0 +1,306 @@
+alias: Rolec EV Chargepoint Go Schedule
+description: Single Slot for Go
+triggers:
+  - at: "20:59:00"
+    id: Activate Charge Session
+    trigger: time
+    alias: Activate Charge Session at 9pm
+  - alias: Start Charge
+    id: start
+    trigger: time
+    at: "00:30:00"
+  - id: stop
+    trigger: time
+    at: "05:30:00"
+    alias: Stop Charge
+  - entity_id:
+      - switch.shelly1_c45bbe7867c7
+    from: unavailable
+    id: Shelly Reconnected
+    trigger: state
+    alias: If the Shelly reconnects to the network
+  - alias: When inverter resets
+    entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    trigger: state
+  - entity_id:
+      - input_boolean.car_plugged_in
+    from: "off"
+    to: "on"
+    id: Session start
+    trigger: state
+  - entity_id:
+      - input_boolean.car_plugged_in
+    from: "on"
+    to: "off"
+    id: Session end
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate Charge Session
+        sequence:
+          - condition: state
+            entity_id: input_boolean.car_plugged_in
+            state: "on"
+          - data: {}
+            target:
+              entity_id: input_boolean.rolec_battery_master
+            action: input_boolean.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - start
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.car_plugged_in
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+            action: switch.turn_on
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            action: number.set_value
+      - conditions:
+          - condition: trigger
+            id:
+              - stop
+        sequence:
+          - data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+            action: switch.turn_off
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - data:
+              value: >-
+                {{ states('input_number.default_battery_output_limit') |
+                float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            action: number.set_value
+          - action: script.car_plugged_in
+            data: {}
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.rolec_battery_master
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Shelly Reconnected
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.car_plugged_in
+            state: "on"
+          - condition: time
+            after: "00:30:00"
+            before: "05:30:00"
+        sequence:
+          - data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+            action: switch.turn_on
+          - data:
+              message: >-
+                The Rolec was turned on because it became available during a
+                charge period.
+              title: ROLEC ON
+            action: script.text_notify_dave
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            action: number.set_value
+        alias: If Shelly reconnects and the car is charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Shelly Reconnected
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "off"
+        sequence:
+          - data: {}
+            target:
+              entity_id: switch.shelly1_c45bbe7867c7
+            action: switch.turn_off
+          - data:
+              message: >-
+                The Rolec was turned off because it was on outside of a charge
+                period.
+              title: ROLEC OFF
+            action: script.text_notify_dave
+        alias: If Shelly reconnects and the car is not charging
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: time
+            after: "00:30:00"
+            before: "05:30:00"
+          - condition: state
+            entity_id: switch.shelly1_c45bbe7867c7
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.car_plugged_in
+            state: "on"
+          - condition: numeric_state
+            entity_id: number.solaredge_i1_storage_discharge_limit
+            above: 100
+        sequence:
+          - data:
+              value: >-
+                {{
+                states('input_number.desired_battery_output_limit_for_overnight_ev_charging')
+                | float(0) }}
+            target:
+              entity_id: number.solaredge_i1_storage_discharge_limit
+            action: number.set_value
+        alias: >-
+          If the inverter resets and the car is charging turn down the home
+          battery
+      - conditions:
+          - condition: trigger
+            id:
+              - Session start
+        sequence:
+          - action: mqtt.publish
+            data:
+              retain: true
+              payload: >-
+                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
+              topic: rolec/energy/start
+          - action: mqtt.publish
+            data:
+              retain: true
+              payload: "{{states('input_number.car_battery_charge_level')|float(0)}}"
+              topic: car/battery/start
+      - conditions:
+          - condition: trigger
+            id:
+              - Session end
+        sequence:
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: rolec/energy/end
+              payload: >-
+                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: rolec/energy/used
+              payload: >-
+                {{ (states('sensor.rolec_energy_end_session')|float(0) -
+                states('sensor.rolec_energy_start_session')|float(0))|round(1)}}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: car/battery/end
+              payload: >-
+                {% set energy = states('sensor.rolec_energy_used')|float(0) %}
+
+                {% set oldbatt =
+                states('sensor.battery_level_start_session')|float(0)%}
+
+                {% set newbatt = oldbatt +  ((energy / 63)*100)|int %}
+
+                {{ newbatt }}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: car/battery/added
+              payload: >-
+                {% set energy = states('sensor.rolec_energy_used')|float(0) %}
+
+                {% set oldbatt =
+                states('sensor.battery_level_start_session')|float(0)%}
+
+                {% set newbatt = oldbatt +  ((energy / 58)*100)|int %}
+
+                {{ newbatt - oldbatt }}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - target:
+              entity_id:
+                - input_number.car_battery_charge_level
+            data:
+              value: "{{states('sensor.battery_level_end_session')|float(0)}}"
+            action: input_number.set_value
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - target:
+              entity_id:
+                - input_number.ev_charge_length_hrs
+            data:
+              value: 1
+            action: input_number.set_value
+mode: parallel
+max: 10
+trace:
+  stored_traces: 20
