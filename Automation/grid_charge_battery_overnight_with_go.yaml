@@ -1,0 +1,82 @@
+alias: Grid Charge Battery Overnight with Go
+description: ""
+triggers:
+  - id: Activate Grid Charge
+    at: "21:00:00"
+    trigger: time
+  - id: Start Grid Charge
+    trigger: time
+    at: "03:00:00"
+  - id: Stop Grid Charge
+    trigger: time
+    at: "05:30:00"
+  - entity_id:
+      - switch.solaredge_i1_advanced_power_control
+    from: unavailable
+    to: "on"
+    id: Inverter Reset
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate Grid Charge
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id:
+                - input_boolean.grid_charge_home_battery
+              device_id: []
+              area_id: []
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Start Grid Charge
+          - condition: state
+            entity_id: input_boolean.grid_charge_home_battery
+            state: "on"
+        sequence:
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.home_battery_grid_charging
+          - action: script.grid_charge_battery
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop Grid Charge
+        sequence:
+          - action: script.turn_off
+            data: {}
+            target:
+              entity_id: script.grid_charge_battery
+          - action: select.select_option
+            target:
+              entity_id: select.solaredge_i1_storage_command_mode
+            data:
+              option: Maximize Self Consumption
+          - action: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.home_battery_grid_charging
+                - input_boolean.grid_charge_home_battery
+      - conditions:
+          - condition: trigger
+            id:
+              - Inverter Reset
+          - condition: state
+            entity_id: input_boolean.grid_charge_home_battery
+            state: "on"
+          - condition: time
+            after: "00:30:00"
+            before: "05:30:00"
+        sequence:
+          - action: script.grid_charge_battery
+            data: {}
+mode: parallel
+max: 10
