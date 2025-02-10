@@ -617,3 +617,1156 @@ cards:
     content: |
       &nbsp;
 
+
+#############################################################
+
+type: vertical-stack
+cards:
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>today's financials</h1>
+  - type: custom:layout-card
+    layout_type: custom:grid-layout
+    cards:
+      - type: gauge
+        card_mod:
+          class: middle-blank
+        entity: >-
+          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost
+        segments:
+          - from: -14
+            to: -13.5
+            color: "#04d916"
+          - from: -13.5
+            to: -13
+            color: "#16db18"
+          - from: -13
+            to: -12.5
+            color: "#29e11b"
+          - from: -12.5
+            to: -12
+            color: "#3ce71d"
+          - from: -12
+            to: -11.5
+            color: "#50ed20"
+          - from: -11.5
+            to: -11
+            color: "#63f324"
+          - from: -11
+            to: -10.5
+            color: "#76f927"
+          - from: -10.5
+            to: -10
+            color: "#89ff2a"
+          - from: -10
+            to: -9.5
+            color: "#9cff2c"
+          - from: -9.5
+            to: -9
+            color: "#aff92f"
+          - from: -9
+            to: -8.5
+            color: "#c3ff31"
+          - from: -8.5
+            to: -8
+            color: "#d6ff34"
+          - from: -8
+            to: -7.5
+            color: "#e9ff36"
+          - from: -7.5
+            to: -7
+            color: "#fcff39"
+          - from: -7
+            to: -6.5
+            color: "#fdff3c"
+          - from: -6.5
+            to: -6
+            color: "#ffff3e"
+          - from: -6
+            to: -5.5
+            color: "#fffa4d"
+          - from: -5.5
+            to: -5
+            color: "#fff55c"
+          - from: -5
+            to: -4.5
+            color: "#fff06b"
+          - from: -4.5
+            to: -4
+            color: "#ffeb7a"
+          - from: -4
+            to: -3.5
+            color: "#ffe689"
+          - from: -3.5
+            to: -3
+            color: "#ffe198"
+          - from: -3
+            to: -2.5
+            color: "#ffdc7b"
+          - from: -2.5
+            to: -2
+            color: "#ffd85e"
+          - from: -2
+            to: -1.5
+            color: "#ffd441"
+          - from: -1.5
+            to: -1
+            color: "#ffd024"
+          - from: -1
+            to: -0.5
+            color: "#ffcc07"
+          - from: -0.5
+            to: 0
+            color: "#ffbf07"
+          - from: 0
+            to: 0.5
+            color: "#ffb207"
+          - from: 0.5
+            to: 1
+            color: "#ffa507"
+          - from: 1
+            to: 1.5
+            color: "#ff9807"
+          - from: 1.5
+            to: 2
+            color: "#ff8b06"
+          - from: 2
+            to: 2.5
+            color: "#ff7e06"
+          - from: 2.5
+            to: 3
+            color: "#ff7106"
+          - from: 3
+            to: 3.5
+            color: "#ff6405"
+          - from: 3.5
+            to: 4
+            color: "#ff5705"
+          - from: 4
+            to: 4.5
+            color: "#ff4a05"
+          - from: 4.5
+            to: 5
+            color: "#ff3d04"
+          - from: 5
+            to: 5.5
+            color: "#ff3004"
+          - from: 5.5
+            to: 6
+            color: "#ff2304"
+          - from: 6
+            to: 7.5
+            color: "#ff1604"
+          - from: 7.5
+            to: 8
+            color: "#ff0904"
+          - from: 8
+            to: 8.5
+            color: "#ff0b0a"
+          - from: 8.5
+            to: 9
+            color: "#ff0d10"
+          - from: 9
+            to: 9.5
+            color: "#ff0f17"
+          - from: 9.5
+            to: 10
+            color: "#ff0f0f"
+        needle: true
+        min: -14
+        max: 10
+        name: Import Cost
+      - type: gauge
+        card_mod:
+          class: middle-blank
+        entity: sensor.electricity_bill_today
+        segments:
+          - from: -14
+            to: -13.5
+            color: "#04d916"
+          - from: -13.5
+            to: -13
+            color: "#16db18"
+          - from: -13
+            to: -12.5
+            color: "#29e11b"
+          - from: -12.5
+            to: -12
+            color: "#3ce71d"
+          - from: -12
+            to: -11.5
+            color: "#50ed20"
+          - from: -11.5
+            to: -11
+            color: "#63f324"
+          - from: -11
+            to: -10.5
+            color: "#76f927"
+          - from: -10.5
+            to: -10
+            color: "#89ff2a"
+          - from: -10
+            to: -9.5
+            color: "#9cff2c"
+          - from: -9.5
+            to: -9
+            color: "#aff92f"
+          - from: -9
+            to: -8.5
+            color: "#c3ff31"
+          - from: -8.5
+            to: -8
+            color: "#d6ff34"
+          - from: -8
+            to: -7.5
+            color: "#e9ff36"
+          - from: -7.5
+            to: -7
+            color: "#fcff39"
+          - from: -7
+            to: -6.5
+            color: "#fdff3c"
+          - from: -6.5
+            to: -6
+            color: "#ffff3e"
+          - from: -6
+            to: -5.5
+            color: "#fffa4d"
+          - from: -5.5
+            to: -5
+            color: "#fff55c"
+          - from: -5
+            to: -4.5
+            color: "#fff06b"
+          - from: -4.5
+            to: -4
+            color: "#ffeb7a"
+          - from: -4
+            to: -3.5
+            color: "#ffe689"
+          - from: -3.5
+            to: -3
+            color: "#ffe198"
+          - from: -3
+            to: -2.5
+            color: "#ffdc7b"
+          - from: -2.5
+            to: -2
+            color: "#ffd85e"
+          - from: -2
+            to: -1.5
+            color: "#ffd441"
+          - from: -1.5
+            to: -1
+            color: "#ffd024"
+          - from: -1
+            to: -0.5
+            color: "#ffcc07"
+          - from: -0.5
+            to: 0
+            color: "#ffbf07"
+          - from: 0
+            to: 0.5
+            color: "#ffb207"
+          - from: 0.5
+            to: 1
+            color: "#ffa507"
+          - from: 1
+            to: 1.5
+            color: "#ff9807"
+          - from: 1.5
+            to: 2
+            color: "#ff8b06"
+          - from: 2
+            to: 2.5
+            color: "#ff7e06"
+          - from: 2.5
+            to: 3
+            color: "#ff7106"
+          - from: 3
+            to: 3.5
+            color: "#ff6405"
+          - from: 3.5
+            to: 4
+            color: "#ff5705"
+          - from: 4
+            to: 4.5
+            color: "#ff4a05"
+          - from: 4.5
+            to: 5
+            color: "#ff3d04"
+          - from: 5
+            to: 5.5
+            color: "#ff3004"
+          - from: 5.5
+            to: 6
+            color: "#ff2304"
+          - from: 6
+            to: 7.5
+            color: "#ff1604"
+          - from: 7.5
+            to: 8
+            color: "#ff0904"
+          - from: 8
+            to: 8.5
+            color: "#ff0b0a"
+          - from: 8.5
+            to: 9
+            color: "#ff0d10"
+          - from: 9
+            to: 9.5
+            color: "#ff0f17"
+          - from: 9.5
+            to: 10
+            color: "#ff0f0f"
+        needle: true
+        min: -14
+        max: 10
+        name: Net Cost
+      - type: gauge
+        card_mod:
+          class: middle-blank
+        entity: sensor.solar_accounting_outgoing_fixed_compensation
+        name: Export Value
+        min: -14
+        max: 10
+        needle: true
+        segments:
+          - from: -14
+            to: -13.5
+            color: "#04d916"
+          - from: -13.5
+            to: -13
+            color: "#16db18"
+          - from: -13
+            to: -12.5
+            color: "#29e11b"
+          - from: -12.5
+            to: -12
+            color: "#3ce71d"
+          - from: -12
+            to: -11.5
+            color: "#50ed20"
+          - from: -11.5
+            to: -11
+            color: "#63f324"
+          - from: -11
+            to: -10.5
+            color: "#76f927"
+          - from: -10.5
+            to: -10
+            color: "#89ff2a"
+          - from: -10
+            to: -9.5
+            color: "#9cff2c"
+          - from: -9.5
+            to: -9
+            color: "#aff92f"
+          - from: -9
+            to: -8.5
+            color: "#c3ff31"
+          - from: -8.5
+            to: -8
+            color: "#d6ff34"
+          - from: -8
+            to: -7.5
+            color: "#e9ff36"
+          - from: -7.5
+            to: -7
+            color: "#fcff39"
+          - from: -7
+            to: -6.5
+            color: "#fdff3c"
+          - from: -6.5
+            to: -6
+            color: "#ffff3e"
+          - from: -6
+            to: -5.5
+            color: "#fffa4d"
+          - from: -5.5
+            to: -5
+            color: "#fff55c"
+          - from: -5
+            to: -4.5
+            color: "#fff06b"
+          - from: -4.5
+            to: -4
+            color: "#ffeb7a"
+          - from: -4
+            to: -3.5
+            color: "#ffe689"
+          - from: -3.5
+            to: -3
+            color: "#ffe198"
+          - from: -3
+            to: -2.5
+            color: "#ffdc7b"
+          - from: -2.5
+            to: -2
+            color: "#ffd85e"
+          - from: -2
+            to: -1.5
+            color: "#ffd441"
+          - from: -1.5
+            to: -1
+            color: "#ffd024"
+          - from: -1
+            to: -0.5
+            color: "#ffcc07"
+          - from: -0.5
+            to: 0
+            color: "#ffbf07"
+          - from: 0
+            to: 0.5
+            color: "#ffb207"
+          - from: 0.5
+            to: 1
+            color: "#ffa507"
+          - from: 1
+            to: 1.5
+            color: "#ff9807"
+          - from: 1.5
+            to: 2
+            color: "#ff8b06"
+          - from: 2
+            to: 2.5
+            color: "#ff7e06"
+          - from: 2.5
+            to: 3
+            color: "#ff7106"
+          - from: 3
+            to: 3.5
+            color: "#ff6405"
+          - from: 3.5
+            to: 4
+            color: "#ff5705"
+          - from: 4
+            to: 4.5
+            color: "#ff4a05"
+          - from: 4.5
+            to: 5
+            color: "#ff3d04"
+          - from: 5
+            to: 5.5
+            color: "#ff3004"
+          - from: 5.5
+            to: 6
+            color: "#ff2304"
+          - from: 6
+            to: 7.5
+            color: "#ff1604"
+          - from: 7.5
+            to: 8
+            color: "#ff0904"
+          - from: 8
+            to: 8.5
+            color: "#ff0b0a"
+          - from: 8.5
+            to: 9
+            color: "#ff0d10"
+          - from: 9
+            to: 9.5
+            color: "#ff0f17"
+          - from: 9.5
+            to: 10
+            color: "#ff0f0f"
+      - type: gauge
+        card_mod:
+          class: middle-blank
+        entity: >-
+          sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_cost
+        needle: true
+        segments:
+          - from: 0
+            to: 0.25
+            color: "#04d916"
+          - from: 0.25
+            to: 0.5
+            color: "#16db18"
+          - from: 0.5
+            to: 0.75
+            color: "#29e11b"
+          - from: 0.75
+            to: 1
+            color: "#3ce71d"
+          - from: 1
+            to: 1.25
+            color: "#50ed20"
+          - from: 1.25
+            to: 1.5
+            color: "#63f324"
+          - from: 1.5
+            to: 1.75
+            color: "#76f927"
+          - from: 1.75
+            to: 2
+            color: "#89ff2a"
+          - from: 2
+            to: 2.25
+            color: "#9cff2c"
+          - from: 2.25
+            to: 2.5
+            color: "#aff92f"
+          - from: 2.5
+            to: 2.75
+            color: "#c3ff31"
+          - from: 2.75
+            to: 3
+            color: "#d6ff34"
+          - from: 3
+            to: 3.25
+            color: "#e9ff36"
+          - from: 3.25
+            to: 3.5
+            color: "#fcff39"
+          - from: 3.5
+            to: 3.75
+            color: "#fdff3c"
+          - from: 3.75
+            to: 4
+            color: "#ffff3e"
+          - from: 4
+            to: 4.25
+            color: "#fffa4d"
+          - from: 4.25
+            to: 4.5
+            color: "#fff55c"
+          - from: 4.5
+            to: 4.75
+            color: "#fff06b"
+          - from: 4.75
+            to: 5
+            color: "#ffeb7a"
+          - from: 5
+            to: 5.25
+            color: "#ffe689"
+          - from: 5.25
+            to: 5.5
+            color: "#ffe198"
+          - from: 5.5
+            to: 5.75
+            color: "#ffdc7b"
+          - from: 5.75
+            to: 6
+            color: "#ffd85e"
+          - from: 6
+            to: 6.25
+            color: "#ffd441"
+          - from: 6.25
+            to: 6.5
+            color: "#ffd024"
+          - from: 6.5
+            to: 6.75
+            color: "#ffcc07"
+          - from: 6.75
+            to: 7
+            color: "#ffbf07"
+          - from: 7
+            to: 7.25
+            color: "#ffb207"
+          - from: 7.25
+            to: 7.5
+            color: "#ffa507"
+          - from: 7.5
+            to: 7.75
+            color: "#ff9807"
+          - from: 7.75
+            to: 8
+            color: "#ff8b06"
+          - from: 8
+            to: 8.25
+            color: "#ff7e06"
+          - from: 8.25
+            to: 8.5
+            color: "#ff7106"
+          - from: 8.5
+            to: 8.75
+            color: "#ff6405"
+          - from: 8.75
+            to: 9
+            color: "#ff5705"
+          - from: 9
+            to: 9.25
+            color: "#ff4a05"
+          - from: 9.25
+            to: 9.5
+            color: "#ff3d04"
+          - from: 9.5
+            to: 9.75
+            color: "#ff3004"
+          - from: 9.75
+            to: 10
+            color: "#ff2304"
+          - from: 10
+            to: 10.25
+            color: "#ff1604"
+          - from: 10.25
+            to: 10.5
+            color: "#ff0904"
+          - from: 10.5
+            to: 10.75
+            color: "#ff0b0a"
+          - from: 10.75
+            to: 11
+            color: "#ff0d10"
+          - from: 11
+            to: 11.5
+            color: "#ff0f17"
+          - from: 11.5
+            to: 12
+            color: "#ff0f0f"
+        name: Gas Bill
+        min: 0
+        max: 10
+    layout:
+      width: 300
+      max_cols: 2
+      grid-template-columns: 50% 50%
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>self consumption</h1>
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: energy-grid-neutrality-gauge
+    card_mod:
+      class: middle-contained
+  - type: energy-carbon-consumed-gauge
+    card_mod:
+      class: middle-contained
+  - type: custom:apexcharts-card
+    card_mod:
+      class: middle-contained
+    series:
+      - entity: sensor.solar_panel_to_house_daily
+        name: Direct Consumption
+        color: var(--energy-solar-color)
+      - entity: sensor.solar_battery_out_daily
+        name: Battery Usage
+        color: var(--energy-battery-out-color)
+      - entity: sensor.solar_imported_power_daily
+        name: Imported Power
+        color: var(--energy-grid-consumption-color)
+    update_interval: 1min
+    chart_type: donut
+    apex_config:
+      plotOptions:
+        pie:
+          expandOnClick: false
+          donut:
+            size: 50%
+            labels:
+              show: true
+              value:
+                fontSize: 32px
+                fontWeight: 900
+              total:
+                show: true
+                showAlways: true
+                label: Self-Consumption Rate
+                formatter: |
+                  EVAL:function(w) {
+                    let values = w.globals.seriesTotals;
+                    let total = values[0] + values[1] + values[2];
+                    let self = values[0] + values[1];
+                    return ((self / total) * 100).toFixed(0) + "%";
+                  }
+      dataLabels:
+        formatter: |
+          EVAL:function(value) {
+            return value.toFixed(0) + "%";
+          }
+      chart:
+        selection:
+          enabled: false
+      tooltip:
+        enabled: false
+      states:
+        normal:
+          filter:
+            type: none
+            value: 0
+        hover:
+          filter:
+            type: none
+            value: 0
+        active:
+          filter:
+            type: none
+            value: 0
+      legend:
+        onItemClick:
+          toggleDataSeries: false
+        onItemHover:
+          highlightDataSeries: false
+  - type: custom:apexcharts-card
+    card_mod:
+      class: middle-contained
+    series:
+      - entity: sensor.solar_panel_to_house_daily
+        name: Direct Usage
+        color: var(--energy-solar-color)
+      - entity: sensor.solar_battery_in_daily
+        name: Battery Charging
+        color: var(--energy-battery-in-color)
+      - entity: sensor.solar_exported_power_daily
+        name: Exported Power
+        color: var(--energy-grid-return-color)
+    update_interval: 1min
+    chart_type: donut
+    apex_config:
+      plotOptions:
+        pie:
+          expandOnClick: false
+          donut:
+            size: 50%
+            labels:
+              show: true
+              value:
+                fontSize: 32px
+                fontWeight: 900
+              total:
+                show: true
+                showAlways: true
+                label: Self Consumption
+                formatter: |
+                  EVAL:function(w) {
+                    let values = w.globals.seriesTotals;
+                    let total = values[0] + values[1] + values[2];
+                    let self = values[0] + values[1];
+                    return ((self / total) * 100).toFixed(0) + "%";
+                  }
+      dataLabels:
+        formatter: |
+          EVAL:function(value) {
+            return value.toFixed(0) + "%";
+          }
+      chart:
+        selection:
+          enabled: false
+      tooltip:
+        enabled: false
+      states:
+        normal:
+          filter:
+            type: none
+            value: 0
+        hover:
+          filter:
+            type: none
+            value: 0
+        active:
+          filter:
+            type: none
+            value: 0
+      legend:
+        onItemClick:
+          toggleDataSeries: false
+        onItemHover:
+          highlightDataSeries: false
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>financials</h1>
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: >-
+          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_rate
+        name: Current Import Rate
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 0.35 %}
+             red
+             {% elif states(config.entity)|float(0) > 0.20 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+      - entity: sensor.octopus_energy_electricity_21e5275054_2400000260098_next_rate
+        name: Next Import Rate
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 0.35 %}
+             red
+             {% elif states(config.entity)|float(0) > 0.20 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+      - entity: >-
+          sensor.octopus_energy_electricity_21e5275054_2400001158215_export_current_rate
+        name: Export Rate
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: gold;
+             }
+      - entity: >-
+          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_standing_charge
+        name: Standing Charge
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: gold;
+             }
+      - entity: >-
+          sensor.octopus_energy_electricity_21e5275054_2400000260098_current_accumulative_cost
+        name: Import For Today
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 3 %}
+             red
+             {% elif states(config.entity)|float(0) > 2 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+      - entity: sensor.agile_import_cost_monthly
+        name: Import This Month
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 50 %}
+             red
+             {% elif states(config.entity)|float(0) > 20 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+        icon: mdi:cash-minus
+      - entity: sensor.solar_accounting_outgoing_fixed_compensation
+        name: Export Compensation Today
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 3 %}
+             green
+             {% elif states(config.entity)|float(0) > 1 %}
+             orange
+             {% else %}
+             red
+             {% endif %};
+             }
+      - entity: sensor.export_compensation_outgoing_fixed_monthly
+        name: Export Compensation This Month
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 30 %}
+             green
+             {% elif states(config.entity)|float(0) > 20 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+        icon: mdi:cash-plus
+      - entity: sensor.electricity_bill_today
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 3 %}
+             red
+             {% elif states(config.entity)|float(0) > 2 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+        icon: mdi:equal
+      - entity: sensor.electricity_bill_this_month
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: 
+             {% if states(config.entity)|float(0) > 50 %}
+             red
+             {% elif states(config.entity)|float(0) > 30 %}
+             orange
+             {% else %}
+             green
+             {% endif %};
+             }
+        icon: mdi:equal
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>long term financials</h1>
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: sensor.total_energy_cost_daily_2
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #f08080;
+             }
+        name: Energy Bill
+        icon: mdi:equal
+      - entity: sensor.total_energy_cost_weekly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #cd5c5c;
+             }
+        name: Total Energy Bill Weekly
+        icon: mdi:equal
+      - entity: sensor.total_energy_cost_monthly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #8b0000;
+             }
+        name: Total Energy Bill Monthly
+        icon: mdi:equal
+      - entity: sensor.total_energy_cost_yearly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #ff0000;
+             }
+        name: Total Energy Bill Yearly
+        icon: mdi:equal
+      - type: custom:template-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #adff2f;
+             }
+        icon: mdi:piggy-bank
+        name: Today's Saving
+        state: |-
+          - £{{ ((states('sensor.solar_panel_to_house_daily') | float(0)) + 
+           (states('sensor.solar_battery_out_daily') | float(0)) * 0.18) | round(2)}}
+      - type: custom:template-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #7fff00;
+             }
+        icon: mdi:piggy-bank
+        name: This Week's Saving
+        state: >-
+          - £{{ ((states('sensor.solar_panel_to_house_weekly') | float(0)) +
+          (states('sensor.solar_battery_out_weekly') | float(0)) * 0.18) | 
+          round(2)}} 
+      - type: custom:template-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #32cd32;
+             }
+        icon: mdi:piggy-bank
+        name: This Month's Saving
+        state: >-
+          - £{{ ((states('sensor.solar_panel_to_house_monthly') | float(0)) +
+          (states('sensor.solar_battery_out_monthly') | float(0)) * 0.18) |
+          round(2)}}
+      - type: custom:template-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        icon: mdi:piggy-bank
+        name: This Year's Saving
+        state: >-
+          - £{{ ((states('sensor.solar_panel_to_house_yearly') | float(0)) +
+          (states('sensor.solar_battery_out_yearly') | float(0)) * 0.18) |
+          round(2)}}
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>long term statistics</h1>
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>week</h1>
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: sensor.solar_panel_production_weekly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #7fff00;
+             }
+        name: Solar Production This Week
+        icon: mdi:solar-power-variant
+      - entity: sensor.solar_battery_in_weekly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #7fff00;
+             }
+        name: Solar Battery In This Week
+        icon: mdi:battery-plus
+      - entity: sensor.solar_battery_out_weekly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #cd5c5c;
+             }
+        name: Solar Battery Out This Week
+        icon: mdi:battery-minus
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>month</h1>
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: sensor.solar_panel_production_monthly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #32cd32;
+             }
+        name: Solar Production This Month
+        icon: mdi:solar-power-variant
+      - entity: sensor.solar_battery_in_monthly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #32cd32;
+             }
+        name: Solar Battery In This Month
+        icon: mdi:battery-plus
+      - entity: sensor.solar_battery_out_monthly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #8b0000;
+             }
+        name: Solar Battery Out This Month
+        icon: mdi:battery-minus
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>year</h1>
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: sensor.solar_panel_production_yearly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        name: Solar Production This Year
+        icon: mdi:solar-power-variant
+      - entity: sensor.solar_battery_in_yearly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        name: Solar Battery In This Year
+        icon: mdi:battery-plus
+      - entity: sensor.solar_battery_out_yearly
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #ff0000;
+             }
+        name: Solar Battery Out This Year
+        icon: mdi:battery-plus
+  - type: custom:html-card
+    card_mod:
+      class: bar-right
+    content: |
+      <h1>records</h1>
+  - type: entities
+    entities:
+      - entity: sensor.ath_power_import
+        icon: mdi:transmission-tower-import
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #ff0000;
+             }
+      - entity: sensor.ath_solar_generated
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #7fff00;
+             }
+        icon: mdi:solar-panel-large
+      - entity: sensor.atl_solar_generated
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #cd5c5c;
+             }
+        icon: mdi:solar-panel
+    card_mod:
+      class: middle-contained
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+
+
