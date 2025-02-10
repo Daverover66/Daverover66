@@ -1,0 +1,619 @@
+###### Mobile Phone Energy ######
+
+type: vertical-stack
+cards:
+  - type: custom:mushroom-template-card
+    primary: engineering
+    secondary: stardate {{states('sensor.stardate')}}
+    icon: mdi:cog
+  - type: custom:mushroom-template-card
+    primary: |
+      Captains Log: Stardate {{states('sensor.stardate')}} 
+    secondary: >
+      {% set time = now().hour %} {% if (time >= 18) %} Good Evening {{ user
+      }}.  {% elif (time >=12) %} Good Afternoon {{ user }}.  {% elif (time >=
+      5) %} Good Morning {{ user }}.  {% else %} Hello {{ user }}.  {% endif %} 
+
+      Energy dashboard selected.
+
+      Terrestrial date is {{ states('sensor.day_of_week')}} {{
+      as_timestamp(now()) | timestamp_custom ('%-d %B %Y' )}}. 
+
+      Today, the warp core generated
+      {{states('sensor.solar_panel_production_daily')}} kWh
+    multiline_secondary: true
+    fill_container: true
+    icon: ""
+    card_mod:
+      class: middle-contained
+      style: |
+        ha-card {
+          --card-primary-font-size: 17px !important;
+          --card-secondary-line-height: 23px !important;
+        }
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      <h1>auxilliary power</h1>
+  - type: gauge
+    card_mod:
+      class: middle-contained
+    entity: sensor.solaredge_b1_state_of_energy
+    needle: true
+    segments:
+      - from: 0
+        to: 2
+        color: "#ff0f0f"
+      - from: 2
+        to: 4
+        color: "#ff0f17"
+      - from: 4
+        to: 6
+        color: "#ff0d10"
+      - from: 6
+        to: 8
+        color: "#ff0b0a"
+      - from: 8
+        to: 10
+        color: "#ff0904"
+      - from: 10
+        to: 12
+        color: "#ff1604"
+      - from: 12
+        to: 14
+        color: "#ff2304"
+      - from: 14
+        to: 16
+        color: "#ff3004"
+      - from: 16
+        to: 18
+        color: "#ff3d04"
+      - from: 18
+        to: 20
+        color: "#ff4a05"
+      - from: 20
+        to: 22
+        color: "#ff5705"
+      - from: 22
+        to: 24
+        color: "#ff6405"
+      - from: 24
+        to: 26
+        color: "#ff7106"
+      - from: 26
+        to: 28
+        color: "#ff7e06"
+      - from: 28
+        to: 30
+        color: "#ff8b06"
+      - from: 30
+        to: 32
+        color: "#ff9807"
+      - from: 32
+        to: 34
+        color: "#ffa507"
+      - from: 34
+        to: 36
+        color: "#ffb207"
+      - from: 36
+        to: 38
+        color: "#ffbf07"
+      - from: 38
+        to: 40
+        color: "#ffcc07"
+      - from: 40
+        to: 42
+        color: "#ffd024"
+      - from: 42
+        to: 44
+        color: "#ffd441"
+      - from: 44
+        to: 46
+        color: "#ffd85e"
+      - from: 46
+        to: 48
+        color: "#ffdc7b"
+      - from: 48
+        to: 50
+        color: "#ffe198"
+      - from: 50
+        to: 52
+        color: "#ffe689"
+      - from: 52
+        to: 54
+        color: "#ffeb7a"
+      - from: 54
+        to: 56
+        color: "#fff06b"
+      - from: 56
+        to: 58
+        color: "#fff55c"
+      - from: 58
+        to: 60
+        color: "#fffa4d"
+      - from: 60
+        to: 62
+        color: "#ffff3e"
+      - from: 62
+        to: 64
+        color: "#fdff3c"
+      - from: 64
+        to: 66
+        color: "#fcff39"
+      - from: 66
+        to: 68
+        color: "#e9ff36"
+      - from: 68
+        to: 70
+        color: "#d6ff34"
+      - from: 70
+        to: 72
+        color: "#c3ff31"
+      - from: 72
+        to: 74
+        color: "#aff92f"
+      - from: 74
+        to: 76
+        color: "#9cff2c"
+      - from: 76
+        to: 78
+        color: "#89ff2a"
+      - from: 78
+        to: 80
+        color: "#76f927"
+      - from: 80
+        to: 82
+        color: "#63f324"
+      - from: 82
+        to: 84
+        color: "#50ed20"
+      - from: 84
+        to: 86
+        color: "#3ce71d"
+      - from: 86
+        to: 88
+        color: "#29e11b"
+      - from: 88
+        to: 90
+        color: "#16db18"
+      - from: 90
+        to: 92
+        color: "#04d916"
+      - from: 92
+        to: 94
+        color: "#04d916"
+      - from: 94
+        to: 96
+        color: "#04d916"
+      - from: 96
+        to: 98
+        color: "#04d916"
+      - from: 98
+        to: 100
+        color: "#04d916"
+    name: Power Remaining
+    min: 0
+    max: 100
+  - type: entities
+    card_mod:
+      class: middle-contained
+    entities:
+      - entity: sensor.solar_battery_empty_time
+        name: Battery empty at
+        card_mod:
+          style: |
+            :host {
+              --card-mod-icon-color: orange;
+            }
+      - entity: sensor.solar_battery_daytime_topup_needed
+        name: Daytime topup needed
+        card_mod:
+          style: |
+            :host {
+              {% if is_state("sensor.solar_battery_daytime_topup_needed","true") %}
+              --card-mod-icon: mdi:check-circle-outline;
+              --card-mod-icon-color: green;
+              {% else %}
+              --card-mod-icon: mdi:checkbox-blank-circle-outline;
+              --card-mod-icon-color: crimson;
+              {% endif %}
+            }
+      - entity: sensor.solar_battery_time_to_charge_solar
+        name: Hours remaining to full
+        icon: mdi:timelapse
+        card_mod:
+          style: |
+            :host {
+              {% if is_state("sensor.solar_battery_time_to_charge_solar","Full") %}
+              --card-mod-icon: mdi:camera-timer;
+              --card-mod-icon-color: green;
+              {% elif is_state("sensor.solar_battery_time_to_charge_solar","Discharging")%}
+              --card-mod-icon: mdi:camera-timer;
+              --card-mod-icon-color: orange;
+              {% else %}
+              --card-mod-icon: mdi:camera-timer;
+              --card-mod-icon-color: lightgreen;
+              {% endif %}
+            }
+      - entity: sensor.solar_battery_time_to_charge_grid
+        name: Length of time to grid charge
+        icon: mdi:clock
+        card_mod:
+          style: |
+            :host {
+              {% if is_state("sensor.solar_battery_time_to_charge_grid","Not Needed") %}
+              --card-mod-icon: mdi:clock;
+              --card-mod-icon-color: green;
+              {% elif is_state("sensor.solar_battery_time_to_charge_solar","Discharging")%}
+              --card-mod-icon: mdi:clock;
+              --card-mod-icon-color: orange;
+              {% else %}
+              --card-mod-icon: mdi:clock;
+              --card-mod-icon-color: lightgreen;
+              {% endif %}
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      <h1>warp core intermix</h1>
+  - type: custom:power-distribution-card
+    entities:
+      - name: SE4000H
+        preset: solar
+        icon: mdi:solar-power
+        entity: sensor.inverter_1_production
+        unit_of_display: W
+        decimals: 0
+        color_threshold: "1000"
+        icon_color:
+          bigger: Lime
+          smaller: Orangered
+        arrow_color:
+          bigger: Lime
+          smaller: Orangered
+      - name: Home
+        preset: home
+        icon: mdi:home
+        entity: sensor.power_consumption
+        unit_of_display: W
+        decimals: 0
+        invert_value: false
+        invert_arrow: true
+        color_threshold: "1500"
+        icon_color:
+          bigger: Orangered
+          smaller: Lime
+        arrow_color:
+          bigger: Orangered
+          smaller: Lime
+      - name: SE3680H
+        preset: solar
+        icon: mdi:solar-power
+        entity: sensor.solaredge_i2_dc_power
+        unit_of_display: W
+        decimals: 0
+        color_threshold: "1000"
+        icon_color:
+          bigger: Lime
+          smaller: Orangered
+        arrow_color:
+          bigger: Lime
+          smaller: Orangered
+      - display_abs: true
+        name: car
+        unit_of_display: W
+        consumer: true
+        invert_arrow: true
+        icon: mdi:car-electric
+        preset: car_charger
+        entity: sensor.shellyem_244cab4194b1_channel_2_power
+        decimals: "0"
+        secondary_info_entity: input_number.car_battery_charge_level
+        secondary_info_replace_name: true
+        color_threshold: "500"
+        icon_color:
+          bigger: lime
+          smaller: orangered
+        arrow_color:
+          bigger: lime
+          smaller: orangered
+      - decimals: 2
+        display_abs: true
+        name: placeholder
+        unit_of_display: W
+        preset: placeholder
+      - display_abs: true
+        name: Water
+        unit_of_display: W
+        consumer: true
+        icon: mdi:water-boiler
+        preset: consumer
+        entity: sensor.shellyem_244cab4194b1_channel_1_power
+        decimals: "0"
+        invert_value: true
+        color_threshold: "500"
+        icon_color:
+          bigger: Lime
+          smaller: Orangered
+        arrow_color:
+          bigger: Lime
+          smaller: Orangered
+      - name: Grid
+        preset: grid
+        icon: mdi:transmission-tower
+        entity: sensor.solaredge_m1_ac_power
+        unit_of_display: W
+        decimals: 0
+        invert_value: true
+        invert_arrow: false
+        color_threshold: "1000"
+        icon_color:
+          bigger: Orangered
+          smaller: Lime
+        arrow_color:
+          bigger: Orangered
+          smaller: Lime
+      - name: Battery
+        preset: battery
+        icon: mdi:battery-high
+        entity: sensor.solaredge_b1_dc_power
+        unit_of_display: W
+        decimals: ""
+        invert_value: false
+        invert_arrow: true
+        color_threshold: "3500"
+        icon_color:
+          bigger: Orangered
+          smaller: Lime
+        arrow_color:
+          bigger: Orangered
+          smaller: Lime
+        secondary_info_entity: sensor.battery_state_of_charge
+        secondary_info_replace_name: true
+        display_abs: true
+    center:
+      type: bars
+      content:
+        - preset: custom
+          name: INV 1
+          bar_color: lime
+          bar_bg_color: palegreen
+          entity: sensor.inverter_1_efficiency_int
+        - preset: custom
+          name: INV 2
+          bar_color: Lime
+          bar_bg_color: pale green
+          entity: sensor.inverter_2_efficiency_int
+        - name: BATT
+          preset: custom
+          entity: sensor.solar_battery_efficiency_int
+          bar_color: Orangered
+          bar_bg_color: Salmon
+    animation: flash
+    card_mod:
+      class: middle-contained
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-right
+    content: |
+      <h1>eps conduit flow</h1>
+  - type: custom:tesla-style-solar-power-card
+    card_mod:
+      class: middle-open
+      style: |
+        ha-card {
+          --ha-card-background: none;
+          color: var(--primary-color);
+            }
+    threshold_in_k: 1
+    show_gap: true
+    hide_inactive_lines: 1
+    change_house_bubble_color_with_flow: 1
+    generation_icon: mdi:solar-power-variant-outline
+    house_entity: sensor.power_consumption
+    grid_entity: sensor.solaredge_m1_ac_power
+    generation_entity: sensor.power_solar_generation
+    battery_entity: sensor.solaredge_b1_dc_power
+    battery_extra_entity: sensor.battery_state_of_charge
+    grid_to_house_entity: sensor.power_grid_load
+    grid_to_battery_entity: sensor.power_grid_battery
+    generation_to_grid_entity: sensor.power_pv_grid
+    generation_to_house_entity: sensor.power_pv_load
+    generation_to_battery_entity: sensor.power_pv_battery
+    battery_to_house_entity: sensor.power_battery_load
+    generation_extra_entity: sensor.openweathermap_cloud_coverage
+    appliance1_consumption_entity: sensor.shellyem_244cab4194b1_channel_2_power
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      <h1>isolinear grid</h1>
+  - type: energy-date-selection
+    card_mod:
+      class: middle-contained
+  - type: energy-distribution
+    card_mod:
+      class: middle-contained
+  - type: energy-usage-graph
+    card_mod:
+      class: middle-contained
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+
+
+####################################
+
+type: vertical-stack
+cards:
+  - type: vertical-stack
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:html-card
+            card_mod:
+              class: bar-right
+            content: |
+              <h1>energy tariff</h1>
+          - type: custom:html-card
+            card_mod:
+              class: header-contained
+            content: |
+              <h1>electricity</h1>
+          - type: custom:apexcharts-card
+            card_mod:
+              class: middle-contained
+            experimental:
+              color_threshold: true
+            header:
+              show: true
+              show_states: true
+              colorize_states: true
+            stacked: false
+            graph_span: 18h
+            span:
+              start: day
+              offset: +6h
+            now:
+              show: true
+              label: Now
+              color: white
+            yaxis:
+              - min: -10
+                max: 100
+                decimals: 1
+            series:
+              - entity: >-
+                  event.octopus_energy_electricity_21e5275054_2400000260098_current_day_rates
+                type: column
+                name: price
+                color: gray
+                opacity: 1
+                stroke_width: 0
+                unit: p/Kw
+                show:
+                  in_header: false
+                  legend_value: false
+                  header_color_threshold: true
+                color_threshold:
+                  - value: -100
+                    color: cyan
+                  - value: 0
+                    color: lightgreen
+                  - value: 10
+                    color: darkgreen
+                  - value: 20
+                    color: orange
+                  - value: 35
+                    color: red
+                data_generator: |
+                  return entity.attributes.rates.map((entry) => {
+                  return [new Date(entry.start), entry.value_inc_vat * 100];
+                  });
+          - type: custom:html-card
+            card_mod:
+              class: footer-contained
+            content: |
+              &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      <h1>rates</h1>
+  - currentEntity: >-
+      event.octopus_energy_electricity_21e5275054_2400000260098_current_day_rates
+    pastEntity: >-
+      event.octopus_energy_electricity_21e5275054_2400000260098_previous_day_rates
+    futureEntity: event.octopus_energy_electricity_21e5275054_2400000260098_next_day_rates
+    targetTimesEntities:
+      binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours:
+        backgroundColour: green
+        prefix: 🚙
+      binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight:
+        backgroundColour: navy
+        prefix: 🏠
+      binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo:
+        backgroundColour: red
+        prefix: ⚡️
+    type: custom:octopus-energy-rates-card
+    card_mod:
+      class: middle-contained
+    cols: 2
+    title: Octopus energy agile
+    showday: true
+    showpast: false
+    cheapest: "Y"
+    unitstr: p/kWh
+    highlimit: 35
+    mediumlimit: 20
+    lowlimit: 10
+    hour12: false
+  - currentEntity: event.octopus_energy_gas_e6e03812572121_7645677109_current_day_rates
+    pastEntity: event.octopus_energy_gas_e6e03812572121_7645677109_previous_day_rates
+    futureEntity: event.octopus_energy_gas_e6e03812572121_7645677109_next_day_rates
+    type: custom:octopus-energy-rates-card
+    card_mod:
+      class: middle-contained
+    cols: 2
+    hour12: false
+    showday: true
+    showpast: false
+    title: Gas Tracker Rate
+    combinerate: "Y"
+  - type: custom:apexcharts-card
+    card_mod:
+      class: middle-contained
+    experimental:
+      color_threshold: true
+    header:
+      show: true
+      title: Green Days Forecast
+    graph_span: 7d
+    span:
+      start: hour
+    apex_config:
+      chart:
+        height: 135
+      stroke:
+        width: 4
+    series:
+      - entity: sensor.octopus_energy_a_e0d4de23_greenness_forecast_current_index
+        name: Forecast
+        show:
+          in_header: false
+          legend_value: false
+        color_threshold:
+          - value: 0
+            color: red
+          - value: 40
+            color: orange
+          - value: 80
+            color: green
+        data_generator: |
+          return entity.attributes.forecast.slice(0, 7).map((entry) => {
+          return [new Date(entry.start), entry.greenness_score];
+            });
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+
