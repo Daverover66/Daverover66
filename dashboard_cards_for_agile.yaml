@@ -1769,4 +1769,869 @@ cards:
     content: |
       &nbsp;
 
+###### Mobile Phone Operations ################
+
+type: vertical-stack
+cards:
+  - type: custom:mushroom-template-card
+    primary: operations
+    secondary: stardate {{states('sensor.stardate')}}
+    icon: mdi:controller
+  - type: custom:mushroom-template-card
+    primary: |
+      Captains Log: Stardate {{states('sensor.stardate')}} 
+    secondary: >
+      {% set time = now().hour %} {% if (time >= 18) %} Good Evening {{ user
+      }}.  {% elif (time >=12) %} Good Afternoon {{ user }}.  {% elif (time >=
+      5) %} Good Morning {{ user }}.  {% else %} Hello {{ user }}.  {% endif %} 
+
+      central control selected.
+
+      Terrestrial date is {{ states('sensor.day_of_week')}} {{
+      as_timestamp(now()) | timestamp_custom ('%-d %B %Y' )}}. 
+
+      view and set ships controls here
+    multiline_secondary: true
+    fill_container: true
+    icon: ""
+    card_mod:
+      class: middle-contained
+      style: |
+        ha-card {
+          --card-primary-font-size: 17px !important;
+          --card-secondary-line-height: 23px !important;
+        }
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+  - type: custom:html-card
+    card_mod:
+      class: bar-right
+    content: |
+      <h1>aux power settings 1</h1>
+    alignment: center
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: custom:timer-bar-card
+    card_mod:
+      class: middle-contained
+    bar_direction: ltr
+    bar_radius: 4px
+    sync_issues: ignore
+    entities:
+      - timer.home_battery_3_hour_charge_period
+    translations:
+      idle: Not Running
+    modifications:
+      - elapsed: 0%
+        bar_foreground: green
+        active_icon: mdi:timer-check
+        state_color: true
+        bar_height: 12px
+      - elapsed: 85%
+        bar_foreground: orange
+        active_icon: mdi:timer-check-outline
+        state_color: true
+        bar_height: 12px
+      - elapsed: 95%
+        bar_foreground: red
+        active_icon: mdi:timer-alert
+        state_color: true
+  - type: entities
+    card_mod:
+      class: middle-contained
+    state_color: true
+    entities:
+      - entity: input_number.home_battery_charge_length
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 20px;
+              }
+              state-badge {
+                color: #00ff00;
+              }  
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - entity: sensor.solar_battery_time_to_charge_grid
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: red
+             }
+        name: Length of time to grid charge
+        icon: mdi:clock
+      - entity: input_number.solar_production_threshold_for_grid_charging_battery
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 20px;
+              }
+              state-badge {
+                color: gold;
+              }  
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - type: custom:template-entity-row
+        name: Start Best Half Hour Slots over 3 Hour Period 10pm to 8am
+        icon: mdi:camera-timer
+        card_mod:
+          style:
+            div#wrapper: |
+              state-badge {
+                {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','on') %}
+                color: gold;
+                {% else %}
+                color: blue;
+                {% endif %}
+              }
+            hui-generic-entity-row:
+              $: |
+                .info {
+                  text-overflow: unset !important;
+                  white-space: unset !important;
+                }
+        tap_action:
+          action: more-info
+        active: >-
+          {{
+          is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight',
+          'on')}}
+        entity: >-
+          binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+        state: >-
+          {% if
+          is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight',
+          'on') %}
+            Active
+          {% else %}
+            Waiting
+          {% endif %}
+        secondary: >-
+          Starts at {% set time_start =
+          state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_3_hours','next_time')%}
+            {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}
+      - entity: input_number.pre_peak_topup_length
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 20px;
+              }
+              state-badge {
+                color: #00ff00;
+              }  
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - type: custom:template-entity-row
+        name: Best Half Hour Pre-Peak Slot
+        icon: mdi:camera-timer
+        card_mod:
+          style:
+            div#wrapper: |
+              state-badge {
+                {% if is_state('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','on') %}
+                color: gold;
+                {% else %}
+                color: blue;
+                {% endif %}
+              }
+        tap_action:
+          action: more-info
+        active: >-
+          {{
+          is_state('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo',
+          'on')}}
+        entity: binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+        state: >-
+          {% if
+          is_state('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo',
+          'on') %}
+            Active
+          {% else %}
+            Waiting
+          {% endif %}
+        secondary: >-
+          Starts at {% set time_start =
+          state_attr('binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo','next_time')%}
+            {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}
+      - entity: input_boolean.grid_charge_home_battery
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+        name: Grid Charge Battery Master
+      - entity: input_boolean.charge_rate_limited
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+        name: Charge Rate Limited
+      - entity: number.solaredge_i1_storage_charge_limit
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 40px;
+              }
+              state-badge {
+              color: #58d68d;
+              }
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+        name: Actual Charge Limit
+        icon: mdi:battery-check
+      - entity: input_boolean.allow_battery_grid_discharge
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_datetime.start_battery_discharge
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: green;
+              }  
+      - entity: input_datetime.end_battery_discharge
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: red;
+              }
+      - entity: input_number.storage_command_timeout_period_for_clipped_solar
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 40px;
+              }
+              state-badge {
+              color: green;
+              }
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - entity: input_number.storage_command_timeout_for_discharge_to_grid
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 40px;
+              }
+              state-badge {
+              color: green;
+              }
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - entity: input_number.storage_command_timeout_default_period
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 40px;
+              }
+              state-badge {
+              color: green;
+              }
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+  - type: custom:html-card
+    card_mod:
+      class: bar-right
+    content: |
+      <h1>limit storage output</h1>
+  - type: entities
+    state_color: true
+    entities:
+      - entity: input_boolean.allow_battery_output_limit
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_boolean.battery_output_limit_slot_1
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_datetime.start_battery_output_limit
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: green;
+              }  
+      - entity: input_datetime.end_battery_output_limit
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: red;
+              }
+      - entity: input_boolean.battery_output_limit_slot_2
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_datetime.start_battery_output_limit_slot_2
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: green;
+              }  
+      - entity: input_datetime.end_battery_output_limit_slot_2
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: red;
+              }
+      - entity: input_boolean.battery_output_limit_slot_3
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_datetime.start_battery_output_limit_slot_3
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: green;
+              }  
+      - entity: input_datetime.end_battery_output_limit_slot_3
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: red;
+              }
+      - entity: input_boolean.battery_output_limit_slot_4
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_datetime.start_battery_output_limit_slot_4
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: green;
+              }  
+      - entity: input_datetime.end_battery_output_limit_slot_4
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 20px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+              color: red;
+              }
+    card_mod:
+      class: middle-contained
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+
+################################
+
+type: vertical-stack
+cards:
+  - type: custom:html-card
+    card_mod:
+      class: bar-right
+    content: |
+      <h1>shuttlecraft settings</h1>
+  - type: custom:html-card
+    card_mod:
+      class: header-contained
+    content: |
+      &nbsp;
+  - type: custom:timer-bar-card
+    card_mod:
+      class: middle-contained
+    bar_direction: ltr
+    bar_radius: 4px
+    entities:
+      - timer.rolec_4_hour_charge_period
+    translations:
+      idle: Not Running
+    modifications:
+      - elapsed: 0%
+        bar_foreground: green
+        active_icon: mdi:timer-check
+        state_color: true
+        bar_height: 12px
+      - elapsed: 85%
+        bar_foreground: orange
+        active_icon: mdi:timer-check-outline
+        state_color: true
+        bar_height: 12px
+      - elapsed: 95%
+        bar_foreground: red
+        active_icon: mdi:timer-alert
+        state_color: true
+  - type: entities
+    card_mod:
+      class: middle-contained
+    state_color: true
+    entities:
+      - entity: input_boolean.car_plugged_in
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_boolean.rolec_battery_master
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_number.car_battery_charge_level
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 20px;
+              }
+              state-badge {
+                color: green;
+              }  
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - type: custom:multiple-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        entity: sensor.battery_level_end_session
+        entities:
+          - entity: sensor.battery_level_start_session
+            name: start
+            unit: "%"
+          - entity: sensor.battery_level_end_session
+            name: end
+            unit: "%"
+          - entity: sensor.car_battery_added
+            name: added
+            unit: "%"
+        name: Charge Session Battery
+        unit: ""
+        icon: mdi:battery
+        toggle: false
+        show_state: false
+        state_header: ""
+        secondary_info: null
+      - type: custom:multiple-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        entity: sensor.battery_level_end_session
+        entities:
+          - entity: sensor.rolec_energy_start_session
+            name: start
+            unit: kWh
+          - entity: sensor.rolec_energy_end_session
+            name: end
+            unit: kWh
+          - entity: sensor.rolec_energy_used
+            name: added
+            unit: kWh
+        name: Charge Session Energy
+        unit: ""
+        icon: mdi:battery
+        toggle: false
+        show_state: false
+        state_header: ""
+        secondary_info: null
+      - entity: sensor.car_battery_hours_to_full
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+      - type: custom:multiple-entity-row
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+        entity: sensor.car_battery_hours_to_full
+        entities:
+          - entity: sensor.cost_to_charge_to_full_20p
+            name: 20p/kWh
+            unit: £
+          - entity: sensor.cost_to_charge_to_full_15p
+            name: 15p/kWh
+            unit: £
+          - entity: sensor.cost_to_charge_to_full_10p
+            name: 10p/kWh
+            unit: £
+          - entity: sensor.cost_to_charge_to_full_5p
+            name: 5p/kWh
+            unit: £
+        name: Cost
+        unit: ""
+        icon: mdi:currency-gbp
+        toggle: false
+        show_state: false
+        state_header: ""
+        secondary_info: null
+      - entity: input_number.ev_charge_length_hrs
+        card_mod:
+          style:
+            hui-generic-entity-row $: |
+              .info {
+                text-overflow: unset !important;
+                white-space: unset !important;
+              }
+              :host {
+                --ha-textfield-input-width: 20px;
+              }
+              state-badge {
+                color: green;
+              }  
+            ha-textfield $: |
+              label {
+                padding-right: 10px !important;
+                padding-left: 20px !important;
+              }
+              .mdc-text-field {
+                height: 20px !important;
+                }
+              .mdc-line-ripple::after,
+              .mdc-line-ripple::before {
+               border-bottom-style: none !important;
+                 }
+      - type: custom:template-entity-row
+        name: Start Best Half Hour Slots over 5 Hour Period
+        icon: mdi:camera-timer
+        card_mod:
+          style:
+            div#wrapper: |
+              state-badge {
+                {% if is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','on') %}
+                color: gold;
+                {% else %}
+                color: blue;
+                {% endif %}
+              }
+        tap_action:
+          action: more-info
+        active: >-
+          {{
+          is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours',
+          'on')}}
+        entity: >-
+          binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+        state: >-
+          {% if
+          is_state('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours',
+          'on') %}
+            Active
+          {% else %}
+            Waiting
+          {% endif %}
+        secondary: >-
+          Starts at {% set time_start =
+          state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours','next_time')%}
+            {{ as_timestamp(time_start) | timestamp_custom ('%H:%M')}}
+  - type: custom:html-card
+    card_mod:
+      class: footer-contained
+    content: |
+      &nbsp;
+
+
 
