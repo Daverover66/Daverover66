@@ -1,0 +1,75 @@
+  alias: Home Battery Overnight Charge Type
+  description: 'Determines how long to charge the home battery overnight '
+  triggers:
+  - at: '21:05:00'
+    id: Set
+    trigger: time
+  - at: 07:00:00
+    id: Reset
+    trigger: time
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: Set
+      sequence:
+      - action: script.text_notify_dave
+        data:
+          title: HOME BATTERY CHARGE TYPE
+          message: '{{states(''sensor.solar_battery_charge_overnight_logic'')}}'
+      - action: script.jarvis_speech_engine
+        data:
+          where: dave
+          type: notification
+          message: 'For your information! The home battery will receive {{states(''sensor.solar_battery_charge_overnight_logic'')}}
+            tonight.
+
+            '
+      - if:
+        - condition: template
+          value_template: '{{ is_state(''sensor.solar_battery_charge_overnight_logic'',''a
+            full charge'')  }}'
+        then:
+        - action: input_number.set_value
+          target:
+            entity_id: input_number.home_battery_charge_length
+          data:
+            value: 3
+        else:
+        - if:
+          - condition: template
+            value_template: '{{ is_state(''sensor.solar_battery_charge_overnight_logic'',''a
+              one thirty charge'')  }}'
+          then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.home_battery_charge_length
+            data:
+              value: 1.5
+          else:
+          - if:
+            - condition: template
+              value_template: '{{ is_state(''sensor.solar_battery_charge_overnight_logic'',''a
+                one hour charge'')  }}'
+            then:
+            - action: input_number.set_value
+              target:
+                entity_id: input_number.home_battery_charge_length
+              data:
+                value: 1
+            else:
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.grid_charge_home_battery
+              data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - Reset
+      sequence:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.home_battery_charge_length
+        data:
+          value: 3
