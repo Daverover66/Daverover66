@@ -11,13 +11,12 @@
 
 alias: Get Battery Output Limit
 description: Send a notification asking if the battery output should be limited overnight
-trigger:
-  - platform: time
-    at: "22:05:00"
-condition: []
-action:
-  - alias: Send a notification based on an input text helper
-    service: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+triggers:
+  - at: "21:05:00"
+    trigger: time
+conditions: []
+actions:
+  - alias: Send a notification to my phone
     data:
       message: |
         Do you want to limit the battery output overnight?
@@ -28,16 +27,17 @@ action:
             title: "Yes"
           - action: "NO"
             title: "No"
+    action: notify.mobile_app_daves_samsung_galaxy
   - alias: Wait for a response
     wait_for_trigger:
-      - platform: event
-        event_type: mobile_app_notification_action
+      - event_type: mobile_app_notification_action
         event_data:
           action: "YES"
-      - platform: event
-        event_type: mobile_app_notification_action
+        trigger: event
+      - event_type: mobile_app_notification_action
         event_data:
           action: "NO"
+        trigger: event
     timeout:
       hours: 0
       minutes: 30
@@ -49,32 +49,46 @@ action:
           - condition: template
             value_template: "{{ not wait.trigger }}"
         sequence:
-          - service: input_number.set_value
+          - action: input_boolean.turn_on
             target:
-              entity_id: >-
-                input_number.desired_battery_output_limit_for_overnight_ev_charging
+              entity_id: input_boolean.allow_battery_output_limit
+            data: {}
+          - action: script.text_notify_dave
             data:
-              value: >-
-                {{ states('input_number.default_battery_output_limit') | float
-                }}
+              title: BATTERY WILL BE LIMITED OVERNIGHT
+              message: Please ensure you have set time slots.
+        alias: If no response received limit battery
       - conditions:
           - condition: template
             value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
         sequence:
-          - service: input_number.set_value
-            data:
-              value: 500
+          - action: input_boolean.turn_on
             target:
-              entity_id: >-
-                input_number.desired_battery_output_limit_for_overnight_ev_charging
+              entity_id: input_boolean.allow_battery_output_limit
+            data: {}
+          - action: script.text_notify_dave
+            data:
+              title: BATTERY WILL BE LIMITED OVERNIGHT
+              message: Please ensure you have set time slots.
+        alias: If response is YES limit battery
       - conditions:
           - condition: template
             value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
         sequence:
-          - service: input_number.set_value
+          - if:
+              - condition: state
+                entity_id: input_boolean.allow_battery_output_limit
+                state: "on"
+            then:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.allow_battery_output_limit
+                data: {}
+            alias: If Battery Limit Master is on turn it off
+          - action: script.text_notify_dave
             data:
-              value: 5000
-            target:
-              entity_id: >-
-                input_number.desired_battery_output_limit_for_overnight_ev_charging
+              title: BATTERY WILL NOT BE LIMITED OVERNIGHT
+              message: Please check no time slots are set.
+        alias: If response is NO don't limit battery
 mode: single
+
