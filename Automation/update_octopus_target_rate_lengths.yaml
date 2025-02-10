@@ -1,39 +1,84 @@
 alias: Update Octopus Target Rate Lengths
 description: ""
-trigger:
-  - platform: state
-    entity_id:
+mode: single
+triggers:
+  - entity_id:
       - input_number.home_battery_charge_length
     id: Home Battery
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - input_number.ev_charge_length_hrs
     id: EV
-condition: []
-action:
+    trigger: state
+  - entity_id:
+      - binary_sensor.evening
+    from: "off"
+    to: "on"
+    id: Set
+    trigger: state
+  - entity_id:
+      - sensor.car_battery_hours_to_full
+    id: Rolec
+    trigger: state
+  - entity_id:
+      - input_number.pre_peak_topup_length
+    id: TU Length
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
             id:
               - Home Battery
+              - Set
         sequence:
-          - service: octopus_energy.update_target_config
-            target:
+          - target:
               entity_id: >-
                 binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
             data:
               target_hours: |
                 "{{ states('input_number.home_battery_charge_length')}}"
+            action: octopus_energy.update_target_config
       - conditions:
           - condition: trigger
             id:
               - EV
+              - Set
         sequence:
-          - service: octopus_energy.update_target_config
-            target:
+          - target:
               entity_id: >-
                 binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
             data:
               target_hours: |
                 "{{ states('input_number.ev_charge_length_hrs')}}"
-mode: single
+            action: octopus_energy.update_target_config
+      - conditions:
+          - condition: trigger
+            id:
+              - Rolec
+        sequence:
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - target:
+              entity_id: >-
+                binary_sensor.octopus_energy_target_intermittent_best_rates_total_4_hours
+            data:
+              target_hours: |
+                {{ states('sensor.set_octopus_time_for_rolec')}}
+            action: octopus_energy.update_target_config
+      - conditions:
+          - condition: trigger
+            id:
+              - TU Length
+        sequence:
+          - target:
+              entity_id: >-
+                binary_sensor.octopus_energy_target_best_half_hour_for_pre_peak_topuo
+            data:
+              target_hours: |
+                "{{ states('input_number.pre_peak_topup_length')}}"
+            action: octopus_energy.update_target_config
