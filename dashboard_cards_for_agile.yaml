@@ -2633,5 +2633,130 @@ cards:
     content: |
       &nbsp;
 
+#############################
+
+
+  - type: custom:html-card
+    card_mod:
+      class: bar-left
+    content: |
+      <h1>octoplus</h1>
+  - type: entities
+    state_color: true
+    entities:
+      - entity: sensor.octopus_energy_a_e0d4de23_octoplus_points
+        name: Octoplus Points Total
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+      - type: custom:template-entity-row
+        state: >
+          {{
+          state_attr('event.octopus_energy_a_e0d4de23_octoplus_saving_session_events','rewarded_octopoints')
+          }}
+        name: Points Awarded Last Session
+        icon: mdi:currency-gbp
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+      - entity: automation.octoplus_join_saving_session
+        name: Join Saving Session Automagically
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: input_boolean.saving_session_enrolled
+        name: Saving Session Joined
+        card_mod:
+          style:
+            hui-generic-entity-row:
+              ha-entity-toggle:
+                $: |
+                  ha-switch {
+                  --switch-unchecked-button-color: #ec7063;
+                  --switch-unchecked-track-color: #ec7063;
+                  --switch-checked-button-color: #58d68d;
+                  --switch-checked-track-color: #58d68d;
+                  }
+      - entity: binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions
+        name: Saving Session
+      - type: custom:template-entity-row
+        state: >
+          {{
+          as_timestamp(state_attr('binary_sensor.octopus_energy_a_e0d4de23_octoplus_saving_sessions','next_joined_event_start'))|timestamp_custom
+          ('%d/%m/%y')}}
+        name: Next Saving Session on
+        icon: mdi:update
+        card_mod:
+          style: |
+            :host {
+             --paper-item-icon-color: #008000;
+             }
+      - entity: input_datetime.two_before_start_of_saving_session
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 26px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+                color: #adff2f;
+              }  
+      - entity: input_datetime.saving_session_start
+        name: Saving Session Start
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 26px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+                color: #008000;
+              }  
+      - entity: input_datetime.saving_session_end
+        name: Saving Session End
+        card_mod:
+          style:
+            ha-time-input $ ha-base-time-input $:
+              ha-textfield:
+                $: |
+                  .mdc-text-field {
+                  height: 26px !important;
+                  }
+                  .mdc-line-ripple::after,
+                  .mdc-line-ripple::before {
+                   border-bottom-style: none !important;
+                   }
+            hui-generic-entity-row $: |
+              state-badge {
+                color: #ff0000;
+              }  
+    card_mod:
+      class: middle-left
 
 
