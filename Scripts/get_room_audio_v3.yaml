@@ -1,0 +1,116 @@
+alias: Get Room Audio v3.0
+sequence:
+  - response_variable: presence
+    action: script.get_room_presence
+    data: {}
+  - variables:
+      type: >
+        {% if type in
+        ['alert','priority','briefing','morning_briefing','goodnight','weather_alert','weather_advisory','notification','gong','alarm','intercom']
+        %}
+          {{type}}
+        {% elif room in ['dave','gem'] %}
+          priority
+        {% else %}
+          normal
+        {% endif %}
+      room_priority: |
+        {% if room is defined %}
+          {% if room in ['dave','gem'] %}
+            {{ states('sensor.'~room~'_room') }}
+          {% else %}
+            {{ room }}          
+          {% endif %}
+        {% else %}
+          NA         
+        {% endif %}
+      rooms: |
+        {{ presence.occupied_rooms |
+          replace('living_room','Living Room') |
+          replace('kitchen','Kitchen') |
+          replace('hallway','Kitchen') |
+          replace('cloakroom','Kitchen') |
+          replace('garage','Kitchen') |
+          replace('loft','Master Bedroom') |
+          replace('utility','Kitchen') |
+          replace('dining_room','Dining Room') |
+          replace('guest_bedroom','Guest Bedroom') |
+          replace('spareroom','Guest Bedroom') |
+          replace('jamies_room','jamie_s_room') |
+          replace('jamiesroom','jamie_s_room') |
+          replace('seans_room','sean_s_room') |
+          replace('seansroom','sean_s_room') |
+          replace('master_bedroom','Master Bedroom') |
+          replace('mainbedroom','Master Bedroom') |
+          replace('en_suite','Master Bedroom') |
+          replace('office','Office') |
+          replace('landing','Master Bedroom') |
+          replace('main_bathroom','Guest Bedroom') |
+          replace('kids_bathroom','jamie_s_room') }}
+      room_services: |
+        {% if type in ['alarm','alert','weather-alert','weather-advisory'] %}
+          {% set jarvis_speaker = 'media_player.all_jarvis_media_player' %}
+          {% set audio_speaker = 'media_player.everywhere' %}
+          {% set room = 'all' %}
+
+        {% elif type in ['morning_briefing'] and room in ['kitchen'] %}
+          {% set audio_speaker = 'media_player.kitchen_echo_show' %}
+          {% set jarvis_speaker = 'none' %}
+
+        {% elif room_priority != 'NA' %}
+          {% set room = room_priority %}
+          
+        {% set audio_speaker_list = expand(label_entities('Amazon Speaker')) |
+            selectattr('entity_id', 'in', area_entities(room)) |
+            map(attribute='entity_id') | list %}
+
+        {% set jarvis_speaker_list = expand(label_entities('Local Speaker')) |
+            selectattr('entity_id', 'in', area_entities(room)) |
+            map(attribute='entity_id') | list %}
+
+        {% if jarvis_speaker_list | length > 0 %}
+                {% set audio_speaker = 'none' %}
+                {% set jarvis_speaker = jarvis_speaker_list[0] %}
+              {% elif audio_speaker_list | length > 0 %}
+                {% set jarvis_speaker = 'none' %}
+                {% set audio_speaker = audio_speaker_list[0] %}
+              {% else %}
+                {% set audio_speaker = 'none' %}
+                {% set jarvis_speaker = 'none' %}
+              {% endif %}
+
+        {% elif room_priority == 'NA' and rooms | length > 0 %}
+          {% set ns = namespace(area_speakers = [], audio_speakers = []) %}
+          
+          {% for room in rooms %}
+            {% set ns.audio_speakers = ns.audio_speakers + expand(label_entities('Amazon Speaker')) |
+              selectattr('entity_id', 'in', area_entities(room)) |
+              map(attribute='entity_id') | list %}
+            {% set ns.area_speakers = ns.area_speakers + expand(label_entities('Local Speaker')) |
+              selectattr('entity_id', 'in', area_entities(room)) |
+              map(attribute='entity_id') | list %}
+          {% endfor %}
+
+          {% if ns.audio_speakers | length > 0 %}
+            {% set audio_speaker = ns.audio_speakers[0] %}
+            {% set jarvis_speaker = 'none' %}
+          {% elif ns.area_speakers | length > 0 %}
+            {% set audio_speaker = 'none' %}
+            {% set jarvis_speaker = ns.area_speakers[0] %}
+          {% else %}
+            {% set audio_speaker = 'media_player.living_room' %}
+            {% set jarvis_speaker = 'none' %}
+          {% endif %}
+          
+          {% set room = rooms | join(',') %}
+
+        {% else %} 
+          {% set room = 'none' %}
+          {% set jarvis_speaker = 'none' %}
+          {% set audio_speaker = 'media_player.living_room' %}
+        {% endif %}
+        {"area":"{{room}}", "jarvis_speaker":"{{jarvis_speaker}}",
+         "audio_speaker":"{{audio_speaker}}",
+         "type":"{{type}}", "room_priority":"{{room_priority}}"}
+  - stop: ok, Im done.
+    response_variable: room_services
