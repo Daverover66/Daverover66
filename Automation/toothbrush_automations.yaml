@@ -1,0 +1,67 @@
+alias: Toothbrush Automations
+description: ""
+triggers:
+  - entity_id:
+      - sensor.smart_series_7000_236d_toothbrush_state
+      - sensor.seans_toothbrush
+    to: running
+    trigger: state
+    id: running
+  - entity_id:
+      - sensor.smart_series_7000_236d_toothbrush_state
+      - sensor.seans_toothbrush
+    to: idle
+    trigger: state
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: idle
+    enabled: false
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - running
+          - condition: time
+            after: "07:30:00"
+            before: "09:00:00"
+          - condition: state
+            entity_id: input_boolean.toothbrushing_song_playing
+            state: "off"
+        sequence:
+          - action: media_player.play_media
+            metadata: {}
+            data:
+              media_content_id: Toothbrushing Song by Duggee & The Squirrels in upstairs group
+              media_content_type: AMAZON_MUSIC
+              entity_id: media_player.jamie_s_room_dot
+          - action: input_boolean.toggle
+            target:
+              entity_id: input_boolean.toothbrushing_song_playing
+            data: {}
+          - wait_for_trigger:
+              - trigger: state
+                entity_id:
+                  - sensor.smart_series_7000_236d_toothbrush_state
+                  - sensor.seans_toothbrush
+                to: idle
+          - action: input_boolean.toggle
+            target:
+              entity_id: input_boolean.toothbrushing_song_playing
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - idle
+        sequence:
+          - action: mqtt.publish
+            data:
+              evaluate_payload: false
+              qos: 0
+              retain: false
+              topic: sean/toothbrush/time
+              payload: "{{ states('sensor.seans_toothbrush_duration') | int }}"
+mode: restart
