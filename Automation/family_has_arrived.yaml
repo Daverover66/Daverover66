@@ -1,0 +1,25 @@
+alias: Family Has Arrived
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - binary_sensor.family_home
+    from: "off"
+    to: "on"
+    id: Auto
+    trigger: state
+  - entity_id:
+      - input_boolean.family_is_home
+    from: "off"
+    to: "on"
+    id: Manual
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: input_boolean.family_is_home
+    state: "off"
+actions:
+  - action: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.family_is_home
