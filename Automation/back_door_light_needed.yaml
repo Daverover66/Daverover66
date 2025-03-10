@@ -1,6 +1,5 @@
 alias: Back Door Light Needed
 description: ""
-mode: single
 triggers:
   - entity_id:
       - switch.back_door_light_switch
@@ -29,6 +28,4 @@ actions:
         target:
           entity_id: light.back_door_light
         action: light.turn_off
-      - action: script.back_door_light_dim_when_door_closed
-        metadata: {}
-        data: {}
+mode: single
