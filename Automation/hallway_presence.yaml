@@ -1,0 +1,47 @@
+alias: Hallway Presence
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - binary_sensor.hallway_motion
+    from: "off"
+    to: "on"
+    id: Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.hallway_motion
+    from: "on"
+    to: "off"
+    id: Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: hallway
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_hallway
+      - conditions:
+          - condition: trigger
+            id: Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_hallway
