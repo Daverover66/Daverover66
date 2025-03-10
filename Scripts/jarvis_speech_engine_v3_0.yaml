@@ -1,4 +1,3 @@
-alias: Jarvis Speech Engine
 sequence:
   - response_variable: greetings
     data: {}
@@ -29,10 +28,14 @@ sequence:
           {{ greetings.dave }}
         {% elif room == 'gem' %}
           {{ greetings.gem }}
+        {% elif room == 'all' %}
+          {{ greetings.announcement }}
         {% elif type == 'weather_warning' %}
           {{ greetings.weather_warning }}
         {% elif type == 'alert' %}
           {{ greetings.alert }}
+        {% elif type == 'announcement' %}
+          {{ greetings.announcement }}
         {% else %}         
         {% endif %}
       briefing_greeting: |
@@ -46,7 +49,7 @@ sequence:
       type: |
         {{type}}
     response_variable: room_services
-    action: script.get_room_audio
+    action: script.get_room_audio_v3_0
   - data:
       message: |
         {{ briefing }} {{ greeting }} {{ message }}
@@ -104,38 +107,75 @@ sequence:
     state: "off"
   - choose:
       - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
           - condition: template
-            value_template: "{{ type | string == 'alert' }}"
+            value_template: "{{ type | string == 'alert' or type | string == 'alarm' }}"
+            alias: Alert or Alarm
         sequence:
           - data:
               entity_id: "{{ room_services.jarvis_speaker | string }}"
               volume_level: |
+                {{ states('input_number.jarvis_volume_level_high') | float }}
+            action: media_player.volume_set
+            alias: Set Jarvis volume to max
+          - data:
+              entity_id: "{{ room_services.audio_speaker | string }}"
+              volume_level: |
                 {{ states('input_number.alexa_volume_level_high') | float }}
             action: media_player.volume_set
+            alias: Set Alexa volume to max
           - data:
               message: >
                 <voice name="{{ states('input_select.echo_voice') }}">
                 <amazon:auto-breaths> <prosody rate="115%"> {{
                 cleaned_message.text }} </prosody> </amazon:auto-breaths>
                 </voice>
-              target: |
-                {{ room_services.jarvis_speaker | string }}
+              target: "{{ room_services.audio_speaker | string }}"
               data:
-                type: tts
+                type: announce
             action: notify.alexa_media
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          - data:
+              language: en-GB
+              entity_id: |
+                {{ room_services.jarvis_speaker | string }}
+              options:
+                voice: AlfieNeural
+              message: |
+                {{ cleaned_message.text }}
+            action: tts.cloud_say
           - delay:
               seconds: 20
           - data:
               entity_id: "{{ room_services.jarvis_speaker | string }} "
               volume_level: >-
+                {{ states('input_number.jarvis_volume_level_announcements') |
+                float }}
+            action: media_player.volume_set
+            alias: Set Jarvis volume to normal
+          - data:
+              entity_id: "{{ room_services.audio_speaker | string }} "
+              volume_level: >-
                 {{ states('input_number.alexa_volume_level_announcements') |
                 float }}
             action: media_player.volume_set
+            alias: Set Alexa volume to normal
       - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
           - condition: template
-            value_template: "{{ room_services.jarvis_tts | string == 'amp' }}"
+            value_template: "{{ room_services.audio_speaker | string != 'none' }}"
           - condition: template
-            value_template: "{{ room_services.jarvis_speaker | string != 'none' }}"
+            value_template: "{{ room_services.type | string != 'notification' }}"
+          - condition: template
+            value_template: "{{ room | string != 'all' }}"
         sequence:
           - data:
               message: >
@@ -143,10 +183,43 @@ sequence:
                 <amazon:auto-breaths> <prosody rate="115%"> {{
                 cleaned_message.text }} </prosody> </amazon:auto-breaths>
                 </voice>
-              target: "{{ room_services.jarvis_speaker | string }}"
+              target: "{{ room_services.audio_speaker | string }}"
               data:
                 type: tts
             action: notify.alexa_media
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: template
+            value_template: "{{ room_services.jarvis_speaker | string != 'none' }}"
+          - condition: template
+            value_template: "{{ room | string != 'all' }}"
+        sequence:
+          - data:
+              language: en-GB
+              entity_id: |
+                {{ room_services.jarvis_speaker | string }}
+              options:
+                voice: AlfieNeural
+              message: |
+                {{ cleaned_message.text }}
+            action: tts.cloud_say
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: template
+            value_template: "{{ room | string == 'all' }}"
+        sequence:
+          - data:
+              language: en-GB
+              entity_id: media_player.all_jarvis_media_player
+              options:
+                voice: AlfieNeural
+              message: |
+                {{ cleaned_message.text }}
+            action: tts.cloud_say
     default:
       - data:
           notification_id: house_notification
@@ -156,4 +229,5 @@ sequence:
           message: "{{ message }}"
           title: From Jarvis
         action: persistent_notification.create
+alias: Jarvis Speech Engine v3.0
 description: ""
