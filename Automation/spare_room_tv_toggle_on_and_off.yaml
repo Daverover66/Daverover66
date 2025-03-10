@@ -1,0 +1,38 @@
+alias: Spare Room TV Toggle On and Off
+description: ""
+triggers:
+  - entity_id:
+      - media_player.sky_q_guest_bedroom_mini
+    id: Casper & Sky toggle on
+    not_from:
+      - unknown
+      - unavailable
+      - paused
+    to: playing
+    trigger: state
+  - entity_id:
+      - media_player.sky_q_guest_bedroom_mini
+    id: Casper & Sky toggle off
+    not_from:
+      - unknown
+      - unavailable
+      - paused
+    to: "off"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Casper & Sky toggle on
+        sequence:
+          - action: script.spare_room_tv_toggle_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Casper & Sky toggle off
+        sequence:
+          - action: script.spare_room_tv_toggle_2
+            data: {}
+mode: single
+initial_state: true
