@@ -1,0 +1,188 @@
+alias: Aura Lamp
+description: ""
+triggers:
+  - event: sunset
+    id: Sunset
+    trigger: sun
+    enabled: true
+  - event: sunrise
+    id: Sunrise
+    trigger: sun
+    enabled: true
+  - trigger: state
+    entity_id:
+      - binary_sensor.morning
+    id: Morning
+    to: "on"
+    from: "off"
+  - trigger: state
+    entity_id:
+      - binary_sensor.lunchtime
+    id: Lunchtime
+    from: "off"
+    to: "on"
+  - trigger: state
+    entity_id:
+      - binary_sensor.afternoon
+    id: Afternoon
+    from: "off"
+    to: "on"
+  - trigger: state
+    entity_id:
+      - binary_sensor.dinner_time
+    id: Dinnertime
+    from: "off"
+    to: "on"
+  - trigger: state
+    entity_id:
+      - binary_sensor.evening
+    id: Evening
+    from: "off"
+    to: "on"
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Sunrise
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Sunrise
+          - delay:
+              hours: 0
+              minutes: 30
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - condition: state
+                entity_id: input_boolean.washing_machine_finished
+                state: "on"
+            then:
+              - action: light.turn_on
+                target:
+                  entity_id: light.kitchen_aura_lamp_2
+                data:
+                  rgb_color:
+                    - 255
+                    - 0
+                    - 0
+                  brightness_pct: 1
+            else:
+              - if:
+                  - condition: state
+                    entity_id: input_boolean.garage_dehumidifier_full
+                    state: "on"
+                then:
+                  - action: light.turn_on
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+                    data:
+                      rgb_color:
+                        - 133
+                        - 255
+                        - 255
+                      brightness_pct: 1
+                else:
+                  - action: light.turn_on
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+                    data:
+                      effect: Morning
+      - conditions:
+          - condition: trigger
+            id:
+              - Sunset
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Sunset
+          - delay:
+              hours: 0
+              minutes: 30
+              seconds: 0
+              milliseconds: 0
+          - if:
+              - condition: state
+                entity_id: binary_sensor.afternoon
+                state: "on"
+            then:
+              - action: light.turn_on
+                target:
+                  entity_id: light.kitchen_aura_lamp_2
+                data:
+                  effect: Forest
+            else:
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.dinner_time
+                    state: "on"
+                then:
+                  - action: light.turn_on
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+                    data:
+                      effect: Eating Dots
+                else:
+                  - action: light.turn_on
+                    target:
+                      entity_id: light.kitchen_aura_lamp_2
+                    data:
+                      effect: Firefly
+      - conditions:
+          - condition: trigger
+            id:
+              - Morning
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Morning
+      - conditions:
+          - condition: trigger
+            id:
+              - Lunchtime
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Falling Petals
+      - conditions:
+          - condition: trigger
+            id:
+              - Afternoon
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Forest
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinnertime
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Eating Dots
+      - conditions:
+          - condition: trigger
+            id:
+              - Evening
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_aura_lamp_2
+            data:
+              effect: Firefly
+mode: parallel
+initial_state: true
