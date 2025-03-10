@@ -1,0 +1,47 @@
+alias: Solcast update
+description: ""
+triggers:
+  - value_template: >-
+      {% set nr = as_datetime(state_attr('sun.sun','next_rising')) | as_local %}
+      {% set ns = as_datetime(state_attr('sun.sun','next_setting')) | as_local
+      %} {% set api_request_limit = 10 %} {% if nr > ns %}
+        {% set nr = nr - timedelta(hours = 24) %} 
+      {% endif %} {% set hours_difference = (ns - nr) %} {% set interval_hours =
+      hours_difference / api_request_limit %} {% set ns = namespace(match =
+      false) %} {% for i in range(api_request_limit) %}
+        {% set start_time = nr + (i * interval_hours) %}
+        {% if ((start_time - timedelta(seconds=30)) <= now()) and (now() <= (start_time + timedelta(seconds=30))) %}
+          {% set ns.match = true %}
+        {% endif %}
+      {% endfor %} {{ ns.match }}
+    id: API Call
+    trigger: template
+  - at: "00:01:00"
+    id: Damp
+    trigger: time
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - API Call
+          - condition: sun
+            before: sunset
+            after: sunrise
+        sequence:
+          - delay:
+              seconds: "{{ range(30, 360)|random|int }}"
+          - action: solcast_solar.update_forecasts
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Damp
+          - condition: template
+            value_template: "{{ (now().month, now().day) == (12, 1) }}"
+        sequence:
+          - action: script.solcast_dec_jan_dampening
+            data: {}
+mode: parallel
+max: 10
