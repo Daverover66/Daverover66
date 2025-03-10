@@ -1,0 +1,57 @@
+alias: Kitchen TV Toggle
+sequence:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: switch.ingrid
+            state: "off"
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: switch.ingrid
+            data: {}
+          - action: media_player.turn_on
+            target:
+              entity_id: media_player.sky_q_kitchen_mini_2
+            data: {}
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: kitchen
+              type: announcement
+              message: |
+                {{ [
+                    'media systems have been activated',
+                    'Hailing frequencies, open',
+                    'The televisual devices have been turned on',
+                    'I have turned on the gogglebox for your televisual viewing experience',
+                    'I have activated the multimedia viewing apparatus, to help while away the time?'
+                    ] | random }}
+    default:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.ingrid
+        data: {}
+      - action: media_player.turn_off
+        target:
+          entity_id: media_player.sky_q_kitchen_mini_2
+        data: {}
+      - condition: state
+        entity_id: input_boolean.audible_notifications
+        state: "on"
+      - action: script.jarvis_speech_engine_v3_0
+        data:
+          where: kitchen
+          type: announcement
+          message: |
+            {{ [
+                'media systems have been deactivated?',
+                'Hailing frequencies, closed',
+                'The televisual devices have been turned off',
+                'I believe it might be time to see what is going on in the real world',
+                'now that you have had your fill of tv, might I suggest a return to reality'
+                ] | random }}
+mode: single
+description: ""
