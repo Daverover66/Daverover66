@@ -1,17 +1,18 @@
-alias: Boys Bedtime Announcements
+alias: Boys Bedtime Announcements v2.0
 description: ""
-mode: single
-initial_state: true
 triggers:
   - at: input_datetime.school_night_jamie
     id: School Bedtime Jamie
     trigger: time
+    enabled: true
   - at: input_datetime.school_night_sean
     id: School Bedtime Sean
     trigger: time
+    enabled: true
   - at: input_datetime.non_school_night
     id: Non School Bedtime
     trigger: time
+    enabled: true
 conditions: []
 actions:
   - choose:
@@ -29,20 +30,7 @@ actions:
             entity_id: input_boolean.seans_bedtime_announcement_played
             state: "off"
         sequence:
-          - action: script.status_annc
-            data:
-              where: living_room
-              call_jetsons_chime: 1
-              call_time_is: 1
-              call_sean_time_for_bed: 1
-          - action: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id: input_boolean.seans_bedtime_announcement_played
-          - action: cover.close_cover
-            target:
-              entity_id:
-                - cover.seans_room_blind
+          - action: script.sean_bedtime_announcement
             data: {}
       - conditions:
           - condition: trigger
@@ -58,19 +46,7 @@ actions:
             entity_id: input_boolean.jamies_bedtime_announcement_played
             state: "off"
         sequence:
-          - action: script.status_annc
-            data:
-              where: living_room
-              call_jetsons_chime: 1
-              call_time_is: 1
-              call_jamie_time_for_bed: 1
-          - action: input_boolean.turn_on
-            data: {}
-            target:
-              entity_id: input_boolean.jamies_bedtime_announcement_played
-          - action: cover.close_cover
-            target:
-              entity_id: cover.jamies_room_blind
+          - action: script.jamie_bedtime_announcement
             data: {}
       - conditions:
           - condition: trigger
@@ -90,21 +66,7 @@ actions:
                 entity_id: input_boolean.jamies_bedtime_announcement_played
                 state: "off"
         sequence:
-          - action: script.status_annc
-            data:
-              where: living_room
-              call_jetsons_chime: 1
-              call_time_is: 1
-              call_boys_time_for_bed: 1
-          - action: input_boolean.turn_on
+          - action: script.boys_bedtime_announcement
             data: {}
-            target:
-              entity_id:
-                - input_boolean.seans_bedtime_announcement_played
-                - input_boolean.jamies_bedtime_announcement_played
-          - action: cover.close_cover
-            target:
-              entity_id:
-                - cover.jamies_room_blind
-                - cover.seans_room_blind
-            data: {}
+mode: single
+initial_state: true
