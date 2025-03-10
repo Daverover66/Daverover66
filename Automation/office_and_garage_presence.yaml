@@ -1,0 +1,90 @@
+alias: Office and Garage Presence
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.office_presence_sensor_occupancy
+    from: "off"
+    to: "on"
+    id: Office Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.garage_camera_cell_motion_detection
+    from: "off"
+    to: "on"
+    id: Garage Presence
+    trigger: state
+  - entity_id:
+      - media_player.office_pop
+    attribute: last_called
+    to: "true"
+    id: Alexa
+    trigger: state
+  - entity_id:
+      - binary_sensor.office_presence_sensor_occupancy
+    from: "on"
+    to: "off"
+    id: Office Absence
+    trigger: state
+  - entity_id:
+      - binary_sensor.garage_camera_cell_motion_detection
+    from: "on"
+    to: "off"
+    id: Garage Absence
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Office Presence
+              - Alexa
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: office
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_office
+      - conditions:
+          - condition: trigger
+            id:
+              - Garage Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: garage
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_garage
+      - conditions:
+          - condition: trigger
+            id:
+              - Garage Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_garage
+      - conditions:
+          - condition: trigger
+            id:
+              - Office Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_office
+mode: single
