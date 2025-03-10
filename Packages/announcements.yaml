@@ -5,7 +5,7 @@
 #   @description    :   Daily Announcements.
 #
 #   @modified by    :   Dave Forrester (Daverover66)
-#   @date           :   09/05/2024
+#   @date           :   01/09/2023
 ###############################################################################
 
 ###############################
@@ -24,6 +24,14 @@ input_datetime:
     name: Morning Report
     has_date: false
     has_time: true
+  morning_report_earliest_time:
+    name: Morning Report Earliest Time 
+    has_date: false
+    has_time: true
+  morning_report_latest_time:
+    name: Morning Report Latest Time 
+    has_date: false
+    has_time: true
   nightly_report:
     name: Nightly Report
     has_date: false
@@ -35,687 +43,83 @@ input_datetime:
   seans_morning_briefing:
     name: Seans Morning Briefing 
     has_date: false
-    has_time: true
-  #audible_notification_on:
-  #  name: Audible Notifications On
-  #  has_date: false
-  #  has_time: true
-  #audible_notification_off:
-  #  name: Audible Notifications Off
-  #  has_date: false
-  #  has_time: true
+    has_time: true  
+  get_ready_for_schools_out:
+    name: Get Ready For Schools Out
+    has_date: false 
+    has_time: true 
 
-##################################################
-#   Toggles for confirmation or rate limiting    #
-##################################################
-
+############################
+# input_booleans (https://www.home-assistant.io/integrations/input_boolean/)
+# 
 input_boolean:
- kids_bedtime_announcement_played:
-   name: Kids Bedtime Announcement Played
-   icon: mdi:bullhorn
- morning_briefing_played:
-   name: Morning Briefing Played
-   icon: mdi:bullhorn
- school_morning_announcement_played:
-   name: School Morning Announcement Played
-   icon: mdi:bullhorn
- school_pick_up_announcement_played:
-   name: School Pick Up Announcement Played
-   icon: mdi:bullhorn
- morning_briefing_played:
-   name: Morning Briefing Played
-   icon: mdi:bullhorn
- seans_morning_briefing_played:
-   name: Seans Morning Briefing Played 
-   icon: mdi:bullhorn
- 
+  # indicates that Seans briefing has been played 
+  seans_morning_briefing_played:
+    name: Seans Morning Briefing Played 
+  sean_dressed_first:
+    name: Sean Dressed First
+  announcement_playing:
+    name: Announcement Playing 
+    icon: mdi:bullhorn 
 
 ################################
 # Announcement Automation - fires at the time of the above input_datetimes
 ################################
-automation:
-  #- id: 81bee5ee-6820-4626-aebf-3deb8de69e4d
-  #  alias: Turn On Audible Notifications
-  #  initial_state: true
-  #  trigger:
-  #    platform: template
-  #    value_template: "{{ states('sensor.time') == (state_attr('input_datetime.audible_notification_on', 'timestamp') | int | timestamp_custom('%H:%M', False)) }}"
-  #  action:
-  #    - service: input_boolean.turn_on
-  #      entity_id: input_boolean.audible_notifications
+# automation:
 
-  # Turn off audible notifications if they haven't been turned off yet.
-  #- id: e0e9c774-6abe-42aa-bdab-32108bebb0e9
-  #  alias: Turn Off Audible Notifications
-  #  initial_state: true
-  #  trigger:
-  #    - platform: template
-  #      value_template: "{{ states('sensor.time') == (state_attr('input_datetime.audible_notification_off', 'timestamp') | int | timestamp_custom('%H:%M', False)) }}"
-  #  condition:
-  #    - condition: state
-  #      entity_id: input_boolean.audible_notifications
-  #      state: "on"
-  #  action:
-  #    - service: input_boolean.turn_off
-  #      entity_id: input_boolean.audible_notifications
-
-###########################
-#     Someone is home     #
-###########################
-
-  - alias: 'People Greeting'
-    id: 29c5c9dd-550a-4761-a224-78cdc3dd9f43
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id:
-          - person.carlo
-          - person.stacey
-          - person.paige
-          - person.justin
-        from: 'not_home'
-        to: 'home'
-  
-    action:
-      # This Group is defined in the presence package.
-  
-      - service: group.set
-        data:
-          object_id: "arriving"
-          add_entities: >-
-            {{ trigger.to_state.entity_id }}
-  
-      - wait_template: "{{ states.binary_sensor.kitchen_door.state == 'on' }}"
-        timeout: '00:1:00'
-  
-      - delay: '00:01:00'
-      - service: script.speech_engine
-        data:
-  #         {% set person = state_attr(trigger.entity_id, "friendly_name")%}      This is another way to do it.
-  #         {% set person = trigger.entity_id.split('.')[1]|replace('_', ' ')%}
-          personarriving: >
-            {% set person = expand('group.arriving')|map(attribute='name')|join(' and ') %}
-            {% set peoplecount = expand('group.arriving') | count %}
-            {% if peoplecount == 1 %}
-              {% set is_are = ' is ' %}
-            {% else %}
-              {% set is_are = ' are ' %}
-            {% endif %}
-            {%- macro greeting_sentence(person, is_are) -%}
-            {{ [
-            "Welcome back home " ~ person,
-            "You had me at hello " ~ person,
-            "Guess who is home?" ~ person ~ is_are ,
-            "The wifi just got a little more crowded.  Welcome Home" ~ person,
-            person  ~ is_are + " now in the house.",
-            "Welcome Home " ~ person + ".  We have missed you. Or at least Molly did.",
-            "Our home is now complete, Rest your head and relax your feet! Welcome Back " ~ person,
-            "Life is like a song, you’re back where you belong. Welcome home " ~ person,
-            "Hey there " ~ person + " Welcome Home!",
-            "Knock Knock. Who is There? "   ~ person  ~ is_are ,
-            "The garage door opener just told me that " ~ person  ~ is_are +" home.",
-            person + " can not hide from the system. Welcome home.",
-            person ~ "! You are home!",
-            "I know a secret! "  ~ person  ~ is_are +" home!",
-            "Hey "  ~ person +". Your arrival has been recorded by the Smartest house on the block.",
-            "Take note Molly! "  ~ person  ~ is_are +" home.",
-            "I am sensing a disturbance in the force. "  ~ person +" must be home!",
-            "And the house becomes a home. Welcome back " ~ person,
-            person  ~ is_are + " now here.  Hash tag Welcome Home.",
-            person  ~ is_are + " now here.  Hash tag Home.",
-            person  ~ is_are + " now here.  Hash tag Smart Home.",
-            "Just a quick announcement. " ~ person +" has arrived!",
-            "Hey" ~ person + "! High Five! Glad you are finally home.",
-            "Pardon the interruption but " ~ person ~ is_are +" home!",
-            "My systems are picking up the presence of additional humans. " ~ person  ~ is_are +" being identified as home.",
-            "Welcome home "~person + "! It is nice to see you again! Let me turn on the lights. ",
-            "It looks like "~person ~ is_are + " finally home! I will get the house ready for you. "
-            ] | random }}
-            {%- endmacro -%}
-  
-            {{greeting_sentence(person, is_are)}}
-
-  #################################
-  #    School Morning Routine     #
-  #################################
-  - id: schoolday_morning_routine
-    alias: School Morning Routine
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: time
-        at: input_datetime.get_ready_for_school_at
-    condition:
-      - condition: and
-        conditions:
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: binary_sensor.schoolday
-                state: "on"
-              - condition: state
-                entity_id: binary_sensor.fridayschool
-                state: "on"
-          - condition: state
-            entity_id: calendar.school_holidays
-            state: "off"
-    action:
-      - service: script.status_annc
-        data:
-          where: living_room
-          call_jetsons_chime: 1
-          call_get_dressed: 1
-      - delay:
-          hours: 0
-          minutes: 10
-          seconds: 0
-          milliseconds: 0
-      - service: script.status_annc
-        data:
-          where: living_room
-          call_brush_teeth: 1
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 10
-          milliseconds: 0
-      - service: switch.turn_off
-        data: {}
-        target:
-          entity_id: switch.living_room_tv
-        enabled: true
-      - service: media_player.turn_off
-        data: {}
-        target:
-          entity_id: media_player.sky_q_main
-        enabled: true
-      - if:
-          - condition: state
-            entity_id: light.dreamview_g1_pro
-            state: "on"
-        then:
-          - service: light.turn_off
-            data: {}
-            target:
-              entity_id: light.dreamview_g1_pro
-      - delay:
-          hours: 0
-          minutes: 10
-          seconds: 0
-          milliseconds: 0 
-      - service: script.status_annc
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          call_late_school: 1
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.school_morning_announcement_played
-
-  ###########################################
-  #    School Pick Up Monday to Thursday    #
-  ########################################### 
-  - id: school_pick_up_mon_to_thurs
-    alias: School Pick Up Monday to Thursday
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: time
-        at: input_datetime.school_pick_up_time_mon_to_thurs
-    condition:
-      - condition: state
-        entity_id: binary_sensor.schoolday
-        state: "on"
-      - condition: state
-        entity_id: calendar.school_holidays
-        state: "off"
-    action:
-      - service: script.status_annc
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          call_school_pick_up: 1
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.school_pick_up_announcement_played
-
-  ###################################################
-  #    School Morning Routine Friday                #
-  ###################################################
-  - id: school_pick_up_friday
-    alias: School Pick Up Friday
-    initial_state: true
-    mode: single
-    trigger:
-      platform: time
-      at: input_datetime.school_pick_up_time_friday
-    condition:
-    - condition: state
-      entity_id: binary_sensor.fridayschool
-      state: "on"
-    - condition: state
-      entity_id: calendar.school_holidays
-      state: "off"
-    action:
-      - service: script.status_annc
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          call_school_pick_up: 1 
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.school_pick_up_announcement_played 
-
-  ###################################################
-  #    Morning Briefing with Presence or time       #
-  ###################################################
-  - id: play_morning_briefing_annc
-    alias: Play Morning Briefing
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: state
-        entity_id:
-        - binary_sensor.kitchen_presence_sensor_presence_sensor_1
-        from: "off"
-        to: "on"
-        id: presence
-      - platform: time
-        at: input_datetime.morning_report
-        id: time
-    action:
-      - choose:
-        - conditions:
-          - condition: trigger
-            id: presence
-          - condition: state
-            entity_id: input_boolean.morning_briefing_played
-            state: 'off'
-          - condition: time
-            after: "09:15:00"
-            before: "10:15:00"
-          sequence:
-          - service: script.morning_briefing
-        - conditions:
-          - condition: trigger
-            id: time
-          - condition: state
-            entity_id: input_boolean.morning_briefing_played
-            state: 'off'
-          - condition: state
-            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
-            state: 'on'
-          sequence:
-          - service: script.morning_briefing
-    
-  ###################################################
-  #    Seans Morning Briefing with time             #
-  ###################################################
-  - id: play_seans_morning_briefing_annc
-    alias: Play Seans Morning Briefing
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: time
-        at: input_datetime.seans_morning_briefing 
-    condition:
-      - condition: state
-        entity_id: input_boolean.seans_morning_briefing_played
-        state: "off"
-    action:
-      - service: script.seans_morning_briefing 
-      
-  ###################################################
-  #    Bedtime                                      #
-  ###################################################
-  - id: time_for_bed_annc
-    alias: Time For Bed Announcement
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: time
-        at: "22:10:00"
-    condition: []
-    action:
-      - service: script.status_annc
-        data:
-          where: living_room
-          call_jetsons_chime: 1
-          call_time_is: 1
-          call_time_for_bed: 1
-
-  ###########################################
-  #    Boys Bedtime                         #
-  ########################################### 
-  - id: boys_bedtime
-    alias: Boys Bedtime
-    initial_state: true
-    mode: single
-    trigger:
-      - platform: time 
-        at: input_datetime.school_night
-        id: School Bedtime
-      - platform: time
-        at: input_datetime.non_school_night
-        id: Non School Bedtime
-    action:
-      - choose:
-        - conditions:
-          - condition: trigger
-            id: School Bedtime
-          - condition: state
-            entity_id: binary_sensor.schoolnight
-            state: "on"
-          - condition: state
-            entity_id: calendar.school_holidays
-            state: "off"
-          sequence:
-            - service: script.status_annc
-              data:
-                where: living_room
-                call_jetsons_chime: 1
-                call_boys_time_for_bed: 1
-            - service: input_boolean.turn_on
-              data: {}
-              target:
-                entity_id: input_boolean.kids_bedtime_announcement_played
-        - conditions:
-            - condition: trigger
-              id: Non School Bedtime
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: binary_sensor.schoolnight
-                  state: "off"
-                - condition: state
-                  entity_id: calendar.school_holidays
-                  state: "on"
-          sequence:
-            - service: script.status_annc
-              data:
-                where: living_room
-                call_jetsons_chime: 1
-                call_boys_time_for_bed: 1
-            - service: input_boolean.turn_on
-              data: {}
-              target:
-                entity_id: input_boolean.kids_bedtime_announcement_played
-
-  ###########################################
-  #      Announce Calendar Events           #
-  ########################################### 
-
-  - id: calendar_event_announcements
-    alias: Calendar Event Announcements
-    description: ""
-    mode: single
-    initial_state: true
-    trigger:
-      - platform: calendar
-        event: start
-        offset: "-0:30:0"
-        entity_id: calendar.forrester_events
-    condition:
-      - condition: state
-        entity_id: input_boolean.audible_notifications
-        state: "on"
-    action:
-      - service: script.speech_engine
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          message: !include ../templates/speech/calendar_event.yaml
-
-  ###########################################
-  #            Announce Birthdays           #
-  ########################################### 
-
-  - id: birthday_announcements
-    alias: Birthday Announcements
-    initial_state: true
-    mode: single
-    description: ""
-    trigger:
-      - platform: calendar
-        event: start
-        offset: "8:5:0"
-        entity_id: calendar.birthdays
-    condition:
-      - "{{ is_state('input_boolean.audible_notifications','on') }}"
-      - "{{ is_state('binary_sensor.quiet_time','off') }}"
-    action:
-      - service: script.speech_engine
-        data:
-          where: "{{ states('sensor.room_audio') }}"
-          message: !include ../templates/speech/birthday.yaml
-      - delay: 
-          hours: 0
-          minutes: 0
-          seconds: 15
-          milliseconds: 0
-      - service: media_player.play_media
-        data:
-          {
-            "entity_id": "media_player.dave_s_2nd_echo_pop",
-            "media_content_id": "Awesome Birthday Song in everywhere group",
-            "media_content_type": "AMAZON_MUSIC"
-          }
-    
-
-  ###########################################
-  #          Office Echo                    #
-  ########################################### 
-  - id: office_echo
-    alias: Office Echo
-    initial_state: true
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id:
-          - binary_sensor.office_hours
-        from: "off"
-        to: "on"
-        id: Office in use
-      - platform: state
-        entity_id:
-          - binary_sensor.office_hours
-        from: "on"
-        to: "off"
-        id: Office not in use
-      - platform: state
-        entity_id:
-          - binary_sensor.gems_samsung_galaxy_home
-        from: "on"
-        to: "off"
-        id: Gem out of office
-      - platform: state
-        entity_id:
-          - binary_sensor.gems_samsung_galaxy_home
-        from: "off"
-        to: "on"
-        id: Gem in office
-    condition:
-      - condition: state
-        entity_id: input_boolean.audible_notifications
-        state: "on"
-      - condition: state
-        entity_id: input_boolean.holiday_mode
-        state: "off"
-      - condition: state
-        entity_id: binary_sensor.quiet_time
-        state: "off"
-      - condition: state
-        entity_id: calendar.gem_holidays 
-        state: "off"  
-     action:
-      - choose:
-          - conditions:
-              - condition: trigger
-                id: Office in use
-              - condition: state
-                entity_id: binary_sensor.workday_sensor
-                state: "on"
-              - condition: state
-                entity_id: calendar.gem_holidays
-                state: "off"
-              - condition: state
-                entity_id: person.gem_forrester
-                state: home
-            sequence:
-              - type: turn_off
-                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-                entity_id: switch.office_echo_pop_socket_1
-                domain: switch
-          - conditions:
-              - condition: trigger
-                id: Office not in use
-              - condition: state
-                entity_id: binary_sensor.workday_sensor
-                state: "on"
-              - condition: state
-                entity_id: calendar.gem_holidays
-                state: "off"
-              - condition: state
-                entity_id: switch.office_echo_pop_socket_1
-                state: "off"
-            sequence:
-              - type: turn_on
-                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-                entity_id: switch.office_echo_pop_socket_1
-                domain: switch
-          - conditions:
-              - condition: trigger
-                id:
-                  - Gem out of office
-              - condition: state
-                entity_id: binary_sensor.workday_sensor
-                state: "on"
-              - condition: state
-                entity_id: switch.office_echo_pop_socket_1
-                state: "off"
-            sequence:
-              - type: turn_on
-                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-                entity_id: c87e83074cbfccb86ac70e0749a1f23f
-                domain: switch
-              - service: input_boolean.turn_on
-                data: {}
-                target:
-                  entity_id: input_boolean.gem_gone_out_to_office
-          - conditions:
-              - condition: trigger
-                id:
-                  - Gem in office
-              - condition: state
-                entity_id: binary_sensor.workday_sensor
-                state: "on"
-              - condition: state
-                entity_id: switch.office_echo_pop_socket_1
-                state: "on"
-              - condition: state
-                entity: binary_sensor.office_hours
-                state: "on"
-            sequence:
-              - service: input_boolean.turn_off
-                data: {}
-                target:
-                  entity_id: input_boolean.gem_gone_out_to_office
-              - type: turn_off
-                device_id: 0e85bd2f5080762ed21a6dfeb306afe9
-                entity_id: c87e83074cbfccb86ac70e0749a1f23f
-                domain: switch
-
-script:
-  # welcome_briefing:
-  #   sequence:
+  ####################################################################
+  #    School Pick Up Monday to Thursday   migrated to UI 08/03/2025 #
+  ################################################################## ### 
+  # - id: school_pick_up_mon_to_thurs
+  #   alias: School Pick Up Monday to Thursday
+  #   initial_state: true
+  #   mode: single
+  #   trigger:
+  #     - platform: time
+  #       at: input_datetime.school_pick_up_time_mon_to_thurs
+  #   condition:
   #     - condition: state
-  #       entity_id: input_boolean.welcome_home
+  #       entity_id: binary_sensor.schoolday
   #       state: "on"
-  #     - service: script.speech_engine
+  #     - condition: state
+  #       entity_id: calendar.school_holidays
+  #       state: "off"
+  #     - condition: state
+  #       entity_id: input_boolean.audible_notifications 
+  #       state: "on" 
+  #   action:
+  #     - action: script.status_annc
   #       data:
   #         where: "{{ states('sensor.room_audio') }}"
-  #         message: !include ../templates/speech/welcome_briefing.yaml
-  #     - delay: 00:02:00
-  #     - service: input_boolean.turn_off
-  #       entity_id: input_boolean.welcome_home
+  #         call_jetsons_chime: 1
+  #         call_time_is: 1
+  #         call_school_pick_up: 1
+  #     - action: input_boolean.turn_on
+  #       data: {}
+  #       target:
+  #         entity_id: input_boolean.school_pick_up_announcement_played
 
-  #sundown_briefing:
-  #  sequence:
-  #    - service: script.speech_engine
-  #      data:
-  #        where: "{{ states('sensor.room__audio') }}"
-  #        message: !include ../templates/speech/sundown_briefing.yaml
-  #    - service: script.text_notify
-  #      data:
-  #        where: "all_android"
-  #        message: "Sun is almost down. Time to call it a day."
 
-  morning_briefing:
-    sequence:
-      - service: script.speech_engine
-        data:
-          where: kitchen
-          message: !include ../templates/speech/morning_briefing.yaml
-          msg_summary: "morning briefing"
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 55
-          milliseconds: 0
-      - service: media_player.play_media
-        data:
-          media_content_id: Alexa.FunFact.Play
-          media_content_type: sequence
-        target:
-          entity_id: media_player.kitchen_echo_show
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 10
-          milliseconds: 0
-      - service: media_player.play_media
-        data:
-          media_content_id: Alexa.FlashBriefing.Play
-          media_content_type: sequence
-        target:
-          entity_id: media_player.kitchen_echo_show 
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.morning_briefing_played
+  ####################################################################
+  #      Announce Calendar Events    migrated to UI 06/03/2025       #
+  #################################################################### 
 
-  seans_morning_briefing:
-    sequence:
-      - service: script.speech_engine
-        data:
-          where: seans_room 
-          message: !include ../templates/speech/seans_morning_briefing.yaml
-          msg_summary: "seans morning briefing"
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.seans_morning_briefing_played 
-
-  #daily_briefing:
-  #  sequence:
-  #    - service: script.speech_engine
-  #      data:
-  #        where: "{{ states('sensor.room_audio') }}"
-  #        message: !include ../templates/speech/daily_briefing.yaml
-
-  #morning_wakeup_report:
-  #  sequence:
-  #    - service: media_player.play_media
-  #      target:
-  #        entity_id: media_player.main_bedroom_dot
-  #      data:
-  #       media_content_type: sound
-  #        media_content_id: amzn_sfx_rooster_crow_01
-  #    - service: script.speech_engine
-  #      data:
-  #        where: main_bedroom
-  #        message: !include ../templates/speech/morning_wakeup_report.yaml
-
-  #test_template_messages:
-  # sequence:
-  #    - service: script.speech_engine
-  #      data:
-  #        where: "{{ where }}"
-  #        message: !include ../templates/speech/sundown_briefing.yaml
+  # - id: calendar_event_announcements
+  #   alias: Calendar Event Announcements
+  #   description: ""
+  #   mode: single
+  #   initial_state: true
+  #   trigger:
+  #     - platform: calendar
+  #       event: start
+  #       offset: "-0:32:0"
+  #       entity_id: calendar.forrester_events
+  #   condition:
+  #     - condition: state
+  #       entity_id: input_boolean.audible_notifications
+  #       state: "on"
+  #   action:
+  #     - action: script.speech_engine
+  #       data:
+  #         where: "{{ states('sensor.room_audio') }}"
+  #         message: !include ../templates/speech/calendar_event.yaml
