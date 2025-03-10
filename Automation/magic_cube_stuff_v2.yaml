@@ -1,0 +1,156 @@
+alias: Magic Cube Stuff v2.0
+description: ""
+triggers:
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "1"
+    id: Side 1
+    trigger: state
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "2"
+    id: Side 2
+    trigger: state
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "3"
+    id: Side 3
+    trigger: state
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "4"
+    id: Side 4
+    trigger: state
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "5"
+    id: Side 5
+    trigger: state
+  - entity_id:
+      - sensor.magic_cube_side
+    to: "6"
+    id: Side 6
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 1
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.holiday_mode
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            data:
+              color_temp: 200
+              brightness: 255
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 2
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - action: media_player.play_media
+            data:
+              entity_id: media_player.all_jarvis_media_player
+              media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+              media_content_type: music
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 4
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              type: announcement
+              where: all
+              message: |
+                {{ [
+                  'Would you all please make your way to the kitchen where mummy has made us all a delicious meal', 
+                  'Food is now being served in the kitchen. Come and get it while its hot', 
+                  'If your hungry, the wait is over. Your tea is on the kitchen table', 
+                  'I thought you might be interested to hear that its time to head to the kitchen. When you get there, you might just find some food on the table',
+                  'My tummy is rumbly. If your tummy is also rumbly then please rumble on to the kitchen for some, yummy food'
+                  ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Side 3
+              - Side 4
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              type: announcement
+              where: kitchen
+              message: |-
+                {{ ['I have started a 4 minute coffee timer. It starts, now',  
+                    'I have begun counting to 240. When I am done, your coffee will be ready',
+                    'Ready, steady, fore minute coffee timer. Go',
+                    'When the Earth has rotated by 1 degree, your coffee will be ready',
+                    'In four minutes time, your caffiene fix for today will be. ready.'
+                    ] | random  }}
+          - delay:
+              hours: 0
+              minutes: 4
+              seconds: 0
+              milliseconds: 0
+            alias: Wait 4 minutes
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              type: announcement
+              where: kitchen
+              message: |
+                {{ ['Your coffee is ready.',
+                    'ahhhhh! smell that coffee. Get it while its hot',  
+                    'Finally, the wait is over and your coffee is ready.',
+                    'Bing Bong! Coffee time!',
+                    'Coffee, coffee everywhere and not a drop to drink. Only kidding! Your coffee is ready',     
+                   ] | random  }}
+      - conditions:
+          - condition: trigger
+            id: Side 6
+        sequence:
+          - action: light.turn_on
+            data:
+              color_temp: 367
+              brightness: 28
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id: Side 5
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - action: media_player.play_media
+            data:
+              entity_id: media_player.all_jarvis_media_player
+              media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+              media_content_type: music
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 4
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              type: announcement
+              where: all
+              message: |
+                {{ [
+                    'Would you mind please making your way to the Dining Room where Gemma has prepared a more than delicious Sunday dinner', 
+                    'I thought you might be interested to hear that dinner is now being served in the Dining Room. Get it while its still hot', 
+                    'I dont know about you, but I am hungry. If you are hungry, the wait is over. Dinner is on the Dining Room table. It might even be on a plate.', 
+                    'I have been informed by our head chef that it is time to head to the Dining Room. When you get there, you might just find that dinner is on the table. If your lucky, it might even be on a plate.',
+                    'I dont know about you, but my tummy feels a bit rumbly. Please rumble on to the Dining Room for some yummy dinner'
+                    ] | random }}
+mode: restart
+initial_state: true
