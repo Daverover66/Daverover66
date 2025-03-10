@@ -1,14 +1,14 @@
 ################################################################################## 
 #   @author                 :   Remko Van Der Veer                               #
 #   @date                   :   11/4/2020                                        #
-#   @package                :   energy_stats.yaml                                #
-#   @description            :   All energy stats for dashboard & analysis        # 
+#   @package                :   electricity_stats.yaml                           #
+#   @description            :   All electricity stats for dashboard & analysis   # 
 #                                                                                #
 #   @modified by            :   Ryan McLean                                      #
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   26/02/2024                                       #
+#   @date                   :   25/02/2024                                       #
 ##################################################################################
 
 ###########################
@@ -45,7 +45,7 @@ input_number:
     min: 0
     max: 24
     mode: box 
-    
+
 ###########################
 #       sensors           # 
 ########################### 
@@ -203,7 +203,7 @@ template:
           {%- set max_energy_w = (states('sensor.solaredge_b1_maximum_energy') | float(0) * 1000) %}
           {%- set energy_used_w = ((100 - states('sensor.solaredge_b1_state_of_energy') | float(0))/100) * max_energy_w %}
           {%- set hrs_to_full =  (energy_used_w / battery_power) | round(2) %}
-          {% if states('sensor.battery_state_of_charge') | float(0) > 99.5 %}
+          {% if states('sensor.battery_state_of_charge') | float(0) > 98 %}
             Full
           {% elif battery_power*-1 > 0.01 %}
             Discharging   
@@ -256,16 +256,16 @@ template:
           {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
           {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
           {%- set state = secs_to_empty - timetogosecs %}
-          {% if state < 0 %}
-          {% set state = 1800 %}
-          {% endif %}
           {% set month = now().month %}
+          {% set battcharging = states('sensor.solar_battery_empty_time') %}
           {% set batt = states('sensor.battery_state_of_charge')|float(-1) %}
-              {% if ((is_state('binary_sensor.lunchtime','on') or is_state('binary_sensor.afternoon','on')) and (month in [9,10,11,12,1,2,3,4] and batt < 50)) or (state < 1800) %}
-            true
-          {% else -%}
-            false
-          {% endif %}
+              {% if battcharging == 'The end of the day' %}
+                false
+              {% elif ((is_state('binary_sensor.lunchtime','on') or is_state('binary_sensor.afternoon','on')) and (month in [9,10,11,12,1,2,3,4] and batt < 40)) or (state < 1800) %}
+                true
+              {% else -%}
+                false
+              {% endif %}
         availability: >
           {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
 
@@ -285,13 +285,12 @@ template:
           {%- set secs_to_empty =  (energy_remaining_kws | float / battery_power_watts | float) | round(0) %}
           {%- set timetogosecs = ((as_timestamp(now().replace(hour=19, minute=0)) - as_timestamp(now()) | int) ) | round(0) %} 
           {% if is_state('sensor.solar_battery_time_to_empty','Charging') %}
-            The end of the day. 
+            The end of the day
           {% else %}
             {{ (as_timestamp(now()) + (secs_to_empty)) | timestamp_custom ("%I:%M %p")}}
           {% endif %}
         availability: >
           {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
-
 
       - name: "Solar Lifetime Production"
         unique_id: solar_lifetime_production
@@ -303,13 +302,6 @@ template:
           {{ (((ac_energy_i1_kwh + ac_energy_i2_kwh) / 1000) | round (2)) }}
         availability: >
           {{ states('sensor.solaredge_i1_ac_energy_kwh') | is_number }}
-
-      - name: "Solar Inverter Efficiency Int"
-        unique_id: solar_inverter_efficiency_int
-        icon: mdi:percent-outline
-        unit_of_measurement: "%"
-        state: >
-          {{ ((states('sensor.solar_inverter_efficiency') | float(0)) * 100) | round(2) }}
 
       - name: "Inverter 1 Production Int"
         unique_id: inverter_1_production_int
@@ -332,7 +324,6 @@ template:
         state: >
           {{ ((states('sensor.inverter_2_efficiency') | float(0)) * 100) | round (2) }}
 
-
       - name: "Solar Battery Efficiency Int"
         unique_id: solar_battery_efficiency_int
         icon: mdi:percent-outline
@@ -353,6 +344,25 @@ template:
         unit_of_measurement: "%"
         state: >
           {{ ((states('sensor.solar_battery_efficiency_average')| float(0)) * 100) | round(2) }}
+
+# MQTT Stored Sensors
+mqtt:
+  sensor:
+    - name: "Max Solar Generated"
+      state_topic: "energy/solar/maxgen"
+    - name: "Max Power Import"
+      state_topic: "energy/solar/maximport"
+    - name: "ATH Solar Generated"
+      state_topic: "energy/solar/athmaxgen"
+      unit_of_measurement: "kWh" 
+    - name: "ATH Power Import"
+      state_topic: "energy/solar/athmaximport"
+      unit_of_measurement: "W"
+    - name: "Min Solar Generated"
+      state_topic: "energy/solar/mingen"
+    - name: "ATL Solar Generated"
+      state_topic: "energy/solar/atlmingen"
+      unit_of_measurement: "kWh"
 
 sensor:
   - platform: integration
@@ -395,11 +405,11 @@ sensor:
     method: left 
     unit_prefix: k
     name: solar_grid_to_battery_kwh 
-  - platform: integration 
-    source: sensor.power_battery_grid  
-    method: left 
-    unit_prefix: k
-    name: solar_battery_to_grid_kwh 
+  # - platform: integration 
+  #   source: sensor.power_battery_grid  
+  #   method: left 
+  #   unit_prefix: k
+  #   name: solar_battery_to_grid_kwh 
   - platform: integration 
     source: sensor.power_battery_charging   
     method: left 
@@ -465,19 +475,19 @@ utility_meter:
     name: Solar Panel To House Daily
     cycle: daily
   solar_grid_to_battery_daily:
-    source: sensor.solar_grid_tobattery_kwh 
+    source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Daily 
     cycle: daily 
-  solar_battery_to_grid_daily:
-    source: sensor.solar_battery_to_grid_kwh 
-    name: Solar Battery To Grid Daily 
-    cycle: daily 
+  # solar_battery_to_grid_daily:
+  #   source: sensor.solar_battery_to_grid_kwh 
+  #   name: Solar Battery To Grid Daily 
+  #   cycle: daily 
   solar_battery_charge_daily:
-    source: sensor.solar_battery_charging_kwh 
+    source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Daily 
     cycle: daily 
   solar_battery_discharge_daily:
-    source: sensor.solar_battery_discharging_kwh 
+    source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Daily 
     cycle: daily 
 
@@ -514,16 +524,16 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Daily 
     cycle: weekly 
-  solar_battery_to_grid_weekly:
-    source: sensor.solar_battery_to_grid_kwh 
-    name: Solar Battery To Grid Weekly  
-    cycle: weekly  
+  # solar_battery_to_grid_weekly:
+  #   source: sensor.solar_battery_to_grid_kwh 
+  #   name: Solar Battery To Grid Weekly  
+  #   cycle: weekly  
   solar_battery_charge_weekly :
-    source: sensor.solar_battery_charging_kwh 
+    source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Weekly  
     cycle: weekly  
   solar_battery_discharge_weekly:
-    source: sensor.solar_battery_discharging_kwh 
+    source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Weekly  
     cycle: weekly 
 
@@ -560,16 +570,16 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Weekly  
     cycle: monthly 
-  solar_battery_to_grid_monthly:
-    source: sensor.solar_battery_to_grid_kwh 
-    name: Solar Battery To Grid Monthly 
-    cycle: monthly 
+  # solar_battery_to_grid_monthly:
+  #   source: sensor.solar_battery_to_grid_kwh 
+  #   name: Solar Battery To Grid Monthly 
+  #   cycle: monthly 
   solar_battery_charge_monthly:
-    source: sensor.solar_battery_charging_kwh 
+    source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Monthly  
     cycle: monthly  
   solar_battery_discharge_monthly:
-    source: sensor.solar_battery_discharging_kwh 
+    source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Monthly 
     cycle: monthly  
 
@@ -606,15 +616,15 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Yearly 
     cycle: yearly 
-  solar_battery_to_grid_yearly:
-    source: sensor.solar_battery_to_grid_kwh 
-    name: Solar Battery To Grid Yearly 
-    cycle: yearly
+  # solar_battery_to_grid_yearly:
+  #   source: sensor.solar_battery_to_grid_kwh 
+  #   name: Solar Battery To Grid Yearly 
+  #   cycle: yearly
   solar_battery_charge_yearly:
-    source: sensor.solar_battery_charging_kwh 
+    source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Yearly  
     cycle: yearly 
   solar_battery_discharge_yearly:
-    source: sensor.solar_battery_discharging_kwh 
+    source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Yearly 
-    cycle: yearly 
+    cycle: yearly           
