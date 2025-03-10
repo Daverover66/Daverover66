@@ -1,0 +1,92 @@
+sequence:
+  - condition: state
+    entity_id: input_boolean.welcome_home
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: kitchen
+      type: announcement
+      message: >
+        {# Event Report #} {%- macro getReport() -%}
+          <p>
+          {% set person = expand('group.family') | selectattr('state', 'eq', 'home') | rejectattr('name', 'search', 'Hoose') | map(attribute='name') | join(' and ') %}
+          {% set peoplecount = expand('group.family') | count %}
+          {% if peoplecount == 0 %}
+            <s>Welcome Home</s>
+          {% else %}
+            {% if peoplecount == 1 %}
+              {% set is_are = ' is ' %}
+              {% set has_have = ' has ' %}
+            {% else %}
+              {% set is_are = ' are ' %}
+              {% set has_have = ' have ' %}
+            {% endif %}
+            {%- macro greeting_sentence(person, is_are, has_have) -%}
+              {{ [
+              "Welcome back to the home " ~ person + ".",
+              "Hello " ~ person + "! Glad you are finally back home. ",
+              "Welcome home " ~ person + ".",
+              "Guess who is home?" ~ person ~ is_are ,
+              "The wifi just got a little more crowded.  Welcome Home" ~ person + ".",
+              person  ~ is_are + " now in the house.",
+              "Welcome Home " ~ person + ".  We have missed you. Or at least Max and Huxley did.",
+              "Our home is now complete, Rest your head and relax your feet! Welcome Back " ~ person + ".",
+              "Life is like a song, you’re back where you belong. Welcome home " ~ person + ".",
+              ] | random }}
+            {%- endmacro -%}
+            {{greeting_sentence(person, is_are, has_have)}}
+          {% endif %}
+          {{ [
+            'It was pretty quiet while you were gone. ', 
+            'Glad to see you made it back. ',
+            'Hopefully nothing too crazy happened out there. ',
+            'There definitely were not any wild parties while you were out. ',
+            'I would love to hear about your adventures. <break time="1s"/> On second thoughts. I am not fussed. '
+          ] | random }}
+
+          </p>
+
+          <p>
+          {%- if states('counter.front_door_motion_detected') | int > 0 %}
+            While you were out I detected motion at the front door {{ states('counter.front_door_motion_detected') | int }} time{{ 's' if states('counter.front_door_motion_detected') | int > 1 }}.
+          {% endif %}
+          </p>
+
+          <p>
+          {% if is_state('input_boolean.post','on') %}
+            Oh,and you also had some post.
+          {% endif %}
+          </p>
+
+        {%- endmacro -%}
+
+
+        {# a macro that removes all newline characters, empty spaces, and
+        returns formatted text  #} {%- macro cleanup(data) -%}
+          {%- for item in data.split("\n")  if item | trim != "" -%}
+            {{ item | trim }} {% endfor -%}
+        {%- endmacro -%}
+
+        {# a macro to call all macros :)  #} {%- macro mother_of_all_macros()
+        -%}
+          {{ getReport() }}
+        {%- endmacro -%}
+
+        {# Call the macro  #} {{- cleanup(mother_of_all_macros()) -}}
+  - delay: "00:02:00"
+  - action: input_boolean.turn_off
+    entity_id: input_boolean.welcome_home
+  - action: counter.reset
+    target:
+      entity_id: counter.front_door_motion_detected
+    data: {}
+  - condition: state
+    entity_id: input_boolean.post
+    state: "on"
+  - action: input_boolean.toggle
+    entity_id: input_boolean.post
+alias: Welcome Briefing
+description: ""
