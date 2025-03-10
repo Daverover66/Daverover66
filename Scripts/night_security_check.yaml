@@ -1,18 +1,44 @@
 alias: Night Security Check
 sequence:
-  - condition: state
-    entity_id: binary_sensor.all_secure_night
-    state: "off"
   - choose:
-      - conditions: []
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.all_secure_night
+            state: "off"
         sequence:
-          - data:
-              where: living_room
-              call_goodnight_secure: 1
-            action: script.status_annc
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: master bedroom
+              message: |
+                {{ [                   
+                    'Goodnight you two. The house is secure. So sleep well and I will see you in the morning.',                  
+                    'Goodnight both. The ground floor is secure. So get a good nights sleep',                  
+                    'Sleep well both. Safe in the knowledge that the house is secure.',      
+                    'Goodnight you two. Barn door protocol has been initiated and I will continue to monitor the house while you sleep.', 
+                    'Goodnight both. Sleep tight. The house is shut down tight.',   
+                    'Goodnight both. Pleasant dreams. The house is locked down for the night.',  
+                    'Have a good night both. Dont let the bedbugs bite. My bug zapper is on standby and the house is locked down.'   
+                    ] | random }}
     default:
-      - data:
-          where: living_room
-          call_goodnight_not_secure: 1
-        action: script.status_annc
+      - action: script.jarvis_speech_engine_v3_0
+        data:
+          where: master bedroom
+          message: |
+            {% set window_count = expand('binary_sensor.all_secure_night')  
+                                         | selectattr('state','eq','on')
+                                         | list
+                                         | count %}
+            {% set windows = expand('binary_sensor.all_secure_night')  
+                                    | selectattr('state','eq','on')  
+                                    | map(attribute='name')  
+                                    | list
+                                    | join(' and ') %}    
+            {%- if window_count == 1 %}    
+              {% set is_are = ' is ' %}     
+              {% set has_have = ' has ' %}    
+            {%- else -%}   
+              {% set is_are = ' are ' %}    
+              {% set has_have = ' have ' %}   
+            {%- endif -%}        
+              {{ 'Hold on a minute you two.  The house is not yet secure. The ' ~ windows ~ is_are + 'open.' }}
 description: ""
