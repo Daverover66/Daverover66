@@ -1,0 +1,161 @@
+alias: Main Bedroom Wakeup Lights v2.0
+description: Turn on wakeup lights once sunrise is later than 7am
+triggers:
+  - value_template: >-
+      {{ as_timestamp(states('sensor.sun_next_rising')) |
+      timestamp_custom('%H:%M') > '06:20' }}
+    id: Activate
+    trigger: template
+    alias: Activate wakeup lights
+  - value_template: >-
+      {{ as_timestamp(states('sensor.sun_next_rising')) |
+      timestamp_custom('%H:%M') < '06:20' }}
+    id: Deactivate
+    trigger: template
+    alias: Deactivate wakeup lights
+  - entity_id:
+      - binary_sensor.morning
+    from: "off"
+    to: "on"
+    id: Wake Up
+    trigger: state
+  - entity_id: calendar.school_holidays
+    from: "off"
+    to: "on"
+    id: school holiday on
+    trigger: state
+  - entity_id: calendar.school_holidays
+    from: "on"
+    to: "off"
+    id: school holiday off
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate
+        sequence:
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.wakeup_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Deactivate
+        sequence:
+          - action: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.wakeup_lights
+      - conditions:
+          - condition: trigger
+            id: school holiday on
+        sequence:
+          - action: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.wakeup_lights
+      - conditions:
+          - condition: trigger
+            id: school holiday off
+          - condition: template
+            value_template: >-
+              {{ as_timestamp(states('sensor.sun_next_rising')) |
+              timestamp_custom('%H:%M') > '06:20' }}
+        sequence:
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id: input_boolean.wakeup_lights
+      - conditions:
+          - condition: trigger
+            id:
+              - Wake Up
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.wakeup_lights
+                state: "on"
+              - condition: state
+                entity_id: calendar.schools_out
+                state: "on"
+          - condition: state
+            entity_id: binary_sensor.workday_sensor
+            state: "on"
+        sequence:
+          - delay:
+              hours: 0
+              minutes: 23
+              seconds: 0
+              milliseconds: 0
+          - target:
+              entity_id: light.bed_lamps_3
+            data:
+              brightness_pct: 5
+              effect: Sunrise
+            action: light.turn_on
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+          - target:
+              entity_id: light.bed_lamps_3
+            data:
+              brightness_pct: 5
+              rgb_color:
+                - 255
+                - 50
+                - 0
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Wake Up
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.wakeup_lights
+                state: "on"
+              - condition: state
+                entity_id: calendar.schools_out
+                state: "on"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "off"
+              - condition: state
+                entity_id: calendar.gem_holidays
+                state: "on"
+        sequence:
+          - delay:
+              hours: 1
+              minutes: 3
+              seconds: 0
+              milliseconds: 0
+          - target:
+              entity_id: light.bed_lamps_3
+            data:
+              brightness_pct: 5
+              effect: Sunrise
+            action: light.turn_on
+          - delay:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+          - target:
+              entity_id: light.bed_lamps_3
+            data:
+              brightness_pct: 5
+              rgb_color:
+                - 255
+                - 50
+                - 0
+            action: light.turn_on
+mode: single
+initial_state: true
