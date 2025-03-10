@@ -239,7 +239,7 @@ template:
           {{ states.binary_sensor
             | selectattr('entity_id', 'in', area_entities('office')) 
             | rejectattr('attributes.device_class', 'undefined') 
-            | selectattr('attributes.device_class', 'search', '(occupancy|motion)')
+            | selectattr('attributes.device_class', 'search', '(running|occupancy|motion)')
             | selectattr('state', 'eq', 'on')
             | map(attribute='entity_id')
             | list | count > 0}}
@@ -288,6 +288,29 @@ template:
           | selectattr('state', 'eq', 'garage') 
           | list 
           | count }}
+
+    - name: upstairs_occupied 
+      unique_id: upstairs_occupied 
+      icon: mdi:stairs-up
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('upstairs occupancy')) 
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0 }}
+      delay_off: '00:01:00'
+
+    - name: downstairs_occupied 
+      unique_id: downstairs_occupied 
+      icon: mdi:stairs-down 
+      state: >
+          {{ states.binary_sensor
+            | selectattr('entity_id', 'in', area_entities('downstairs occupancy')) 
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | list | count > 0 }}
+      delay_off: '00:01:00'
+
   
 
     - name: living_room_tv_status 
@@ -314,11 +337,41 @@ template:
         {{ is_state('media_player.sky_q_guest_bedroom_mini','playing') and is_state('switch.casper','on')}}
       device_class: running
 
+    - name: office_pc_status 
+      unique_id: office_pc_status
+      state: >
+        {{ is_state('sensor.dave_and_gemma_dave_and_gemma_loggeduser','overt') and is_state('sensor.dave_and_gemma_dave_and_gemma_monitorpowerstate','PowerOn')}}
+      device_class: running
+
+    - name: gem_workstation_status 
+      unique_id: gem_workstation_status
+      state: >
+        {{ states('sensor.gem_workstation_power')|int > 45 }}
+      device_class: running
+
+    - name: en_suite_light_status 
+      unique_id: en_suite_light_switch
+      state: >
+        {{ is_state('switch.en_suite_switch_left','on') }}
+      device_class: occupancy
+
+    - name: garage_light_status 
+      unique_id: garage_light_status
+      state: >
+        {{ is_state('switch.garage_lights','on') }}
+      device_class: occupancy
+
+    - name: loft_light_status 
+      unique_id: loft_light_status
+      state: >
+        {{ is_state('switch.loft_light','on') }}
+      device_class: occupancy
+
   - sensor:
     - name: dave_location 
       unique_id: dave_location 
       state: >
-        {% if states('sensor.dave_room') in ['not_home','NA'] %}
+        {% if states('sensor.dave_room') in ['unknown','NA'] %}
         {% set person = states('person.david_forrester') %}
         {% else %}
         {% set person = states('sensor.dave_room') %}
@@ -345,21 +398,27 @@ template:
             {% if person in ['not_home'] %}
               {{ state_attr('sensor.dave_location','city') }}
             {% else %}
-              {% if person in ['livingroom'] %}
+              {% if person in ['living_room'] %}
               Living Room
               {% elif person in ['kitchen'] %}
               Kitchen
+              {% elif person in ['dining_room'] %}
+              Dining Room
               {% elif person in ['office'] %}
               Office
-              {% elif person in ['jamiesroom'] %}
+              {% elif person in ['jamie_s_room'] %}
               Jamie's Room
-              {% elif person in ['seansroom'] %}
+              {% elif person in ['sean_s_room'] %}
               Sean's Room
-              {% elif person in ['spareroom'] %}
-              Guest Bedroom
-              {%- elif person in ['mainbedroom'] and (now().hour | int >= 22 or now().hour | int < 7 ) %}
+              {% elif person in ['guest_bedroom'] %}
+              Guest Bedroom			  
+              {% elif person in ['main_bathroom'] %}
+              Main Bathroom
+              {% elif person in ['en_suite_bathroom'] %}
+              En-Suite Bathroom
+              {%- elif person in ['master_bedroom'] and is_state('input_boolean.we_are_in_bed','on') %}
               In bed
-              {% elif person in ['mainbedroom'] %}
+              {% elif person in ['master_bedroom'] %}
               Master Bedroom
               {% else %}
               Undetermined
@@ -384,7 +443,7 @@ template:
           room_presence
           {% endif %}
         general: >
-          {% if states('sensor.dave_room') not in ['not_home','NA'] %}
+          {% if states('sensor.dave_room') not in ['unknown','NA'] %}
           home
           {% else %}
           {{ states('person.david_forrester') }}
@@ -393,7 +452,7 @@ template:
     - name: gem_location
       unique_id: gem_location
       state: >-
-        {% if states('sensor.gem_room') in ['not_home','NA'] %}
+        {% if states('sensor.gem_room') in ['unknown','NA'] %}
         {% set person = states('person.gem_forrester') %}
         {% else %}
         {% set person = states('sensor.gem_room') %}
@@ -424,21 +483,27 @@ template:
             {% if person in ['not_home'] %}
               {{ state_attr('sensor.gem_location','city') }}
             {% else %}
-              {% if person in ['livingroom'] %}
+              {% if person in ['living_room'] %}
               Living Room
               {% elif person in ['kitchen'] %}
               Kitchen
+              {% elif person in ['dining_room'] %}
+              Dining Room
               {% elif person in ['office'] %}
               Office
-              {% elif person in ['jamiesroom'] %}
+              {% elif person in ['jamie_s_room'] %}
               Jamie's Room
-              {% elif person in ['seansroom'] %}
+              {% elif person in ['sean_s_room'] %}
               Sean's Room
-              {% elif person in ['spareroom'] %}
-              Guest Bedroom
-              {%- elif person in ['mainbedroom'] and (now().hour | int >= 22 or now().hour | int < 7 ) %}
+              {% elif person in ['guest_bedroom'] %}
+              Guest Bedroom			  
+              {% elif person in ['main_bathroom'] %}
+              Main Bathroom
+              {% elif person in ['en_suite_bathroom'] %}
+              En-Suite Bathroom
+              {%- elif person in ['master_bedroom'] and is_state('input_boolean.we_are_in_bed','on') %}
               In bed
-              {% elif person in ['mainbedroom'] %}
+              {% elif person in ['master_bedroom'] %}
               Master Bedroom
               {% else %}
               Undetermined
@@ -463,141 +528,110 @@ template:
           room_presence
           {% endif %}
         general: >
-          {% if states('sensor.gem_room') not in ['not_home','NA'] %}
+          {% if states('sensor.gem_room') not in ['unknown','NA'] %}
           home
           {% else %}
           {{ states('person.gem_forrester') }}
           {% endif %}
 
-    - name: gem_distance
-      unique_id: gem_distance 
+    - name: sean_location
+      unique_id: sean_location
       state: >-
-        {{ state_attr('sensor.gems_phone_espresence','distance')}}
+        {% set person = states('sensor.bermuda_d0_b7_0a_f7_62_22_area') %}        
+          {% if person in ['unknown'] %}
+            Not Home
+          {% else %}
+              {% if person in ['Living Room'] %}
+              Living Room
+              {% elif person in ['Kitchen'] %}
+              Kitchen
+              {% elif person in ['Dining Room'] %}
+              Dining Room
+              {% elif person in ['Office'] %}
+              Office
+              {% elif person in ['Jamies Room'] %}
+              Jamie's Room
+              {% elif person in ['Seans Room'] %}
+              Sean's Room
+              {% elif person in ['Guest Bedroom'] %}
+              Guest Bedroom			  
+              {% elif person in ['Main Bathroom'] %}
+              Main Bathroom
+              {% elif person in ['En-Suite Bathroom'] %}
+              En-Suite Bathroom
+              {%- elif person in ['Master Bedroom'] and is_state('input_boolean.we_are_in_bed','on') %}
+              In bed
+              {% elif person in ['Master Bedroom'] %}
+              Master Bedroom
+              {% else %}
+              Undetermined
+              {% endif %}
+            {%- endif %}
 
-    - name: dave_phone_distance
-      unique_id: dave_phone_distance 
+
+    - name: max_location
+      unique_id: max_location
       state: >-
-        {{ state_attr('sensor.daves_phone_espresence','distance')}}
+        {% set person = states('sensor.bermuda_d2_6e_3f_e1_5d_98_area') %}        
+          {% if person in ['unknown'] %}
+            Not Home
+          {% else %}
+              {% if person in ['Living Room'] %}
+              Living Room
+              {% elif person in ['Kitchen'] %}
+              Kitchen
+              {% elif person in ['Dining Room'] %}
+              Dining Room
+              {% elif person in ['Office'] %}
+              Office
+              {% elif person in ['Jamies Room'] %}
+              Jamie's Room
+              {% elif person in ['Seans Room'] %}
+              Sean's Room
+              {% elif person in ['Guest Bedroom'] %}
+              Guest Bedroom			  
+              {% elif person in ['Main Bathroom'] %}
+              Main Bathroom
+              {% elif person in ['En-Suite Bathroom'] %}
+              En-Suite Bathroom
+              {%- elif person in ['Master Bedroom'] and is_state('input_boolean.we_are_in_bed','on') %}
+              In bed
+              {% elif person in ['Master Bedroom'] %}
+              Master Bedroom
+              {% else %}
+              Undetermined
+              {% endif %}
+            {%- endif %}
+  
 
-    - name: daves_keys_distance
-      unique_id: daves_keys_distance 
-      state: >-
-        {{ state_attr('sensor.daves_keys','distance')}}
 
-    - name: max_distance
-      unique_id: max_distance 
-      state: >-
-        {{ state_attr('sensor.max','distance')}}
-
-    - name: huxley_distance
-      unique_id: huxley_distance 
-      state: >-
-        {{ state_attr('sensor.huxley','distance')}}
-
-### ESPresence sensors  ######
-sensor:
-  - platform: mqtt_room
-    device_id: "iBeacon:ca4a4904-6b45-43cb-b423-84e83fe0e8c0-100-1"
-    name: 'Daves Phone ESPresence'
-    state_topic: 'espresense/devices/iBeacon:ca4a4904-6b45-43cb-b423-84e83fe0e8c0-100-1'
-    timeout: 10
-    away_timeout: 120
-
-  - platform: mqtt_room
-    device_id: "iBeacon:d551de33-0f97-445c-b5f0-084dee5cfd3f-100-1"
-    name: 'Gems Phone ESPresence'
-    state_topic: 'espresense/devices/iBeacon:d551de33-0f97-445c-b5f0-084dee5cfd3f-100-1'
-    timeout: 10
-    away_timeout: 120
-
-  - platform: mqtt_room 
-    device_id: "tile:fbb32130a48a"
-    name: 'Daves Keys'
-    state_topic: 'espresense/devices/tile:fbb32130a48a'
-    timeout: 10
-    away_timeout: 120
-
-  - platform: mqtt_room 
-    device_id: "tile:d26e3fe15d98"
-    name: 'Max'
-    state_topic: 'espresense/devices/tile:d26e3fe15d98'
-    timeout: 10
-    away_timeout: 120
-
-  - platform: mqtt_room 
-    device_id: "tile:f0171e3fc16b"
-    name: 'Huxley'
-    state_topic: 'espresense/devices/tile:f0171e3fc16b'
-    timeout: 10
-    away_timeout: 120
-
-###########################
-#    Automations          #
-###########################
-automation:
-
-##### Welcome Home ########
-
-  - id: welcome_home
-    alias: Welcome Home
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id:
-          - person.david_forrester
-          - person.gem_forrester
-        from: "not_home"
-        to: "home"
-    action:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.welcome_home
-                state: "on"
-            sequence:
-              - wait_for_trigger:
-                  - platform: state
-                    entity_id: binary_sensor.front_door_sense_contact
-                    from: "off"
-                    to: "on"
-              - delay:
-                  hours: 0
-                  minutes: 0
-                  seconds: 10
-                  milliseconds: 0
-              - service: script.welcome_briefing
-                data:{}
-        default:
-          - service: group.set
-            data:
-              object_id: "arriving"
-              add_entities: >-
-                {{ trigger.to_state.entity_id }}
-          - wait_for_trigger:
-              - platform: state
-                entity_id: binary_sensor.front_door_sense_contact
-                from: "off"
-                to: "on"
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 10
-              milliseconds: 0
-          - service: script.status_annc
-            data:
-              where: "{{ states('sensor.room_audio') }}"
-              call_interuption: 1
-              call_greeting_sentence: 1
-          - delay: 00:02:00
-          - service: group.set
-            data:
-              object_id: "arriving"
-              entities: []
-
-#################
-#    Scripts    # 
-################# 
-script:
+##########################################
+#    Scripts  migrated to UI 09/03/2025  # 
+########################################## 
+# script:
+#   welcome_briefing:
+#     sequence:
+#       - condition: state
+#         entity_id: input_boolean.welcome_home
+#         state: "on"
+#       - condition: state
+#         entity_id: input_boolean.audible_notifications 
+#         state: "on" 
+#       - action: script.speech_engine
+#         data:
+#           where: kitchen
+#           message: !include ../templates/speech/welcome_briefing.yaml
+#       - delay: 00:02:00
+#       - action: input_boolean.turn_off
+#         entity_id: input_boolean.welcome_home
+#       - action: counter.reset
+#         target:
+#           entity_id: counter.front_door_motion_detected 
+#       - condition: state 
+#         entity_id: input_boolean.post 
+#         state: "on"
+#       - action: input_boolean.toggle 
+#         entity_id: input_boolean.post 
 
   
 
