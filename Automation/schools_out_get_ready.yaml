@@ -1,0 +1,35 @@
+alias: Schools Out Get Ready
+description: ""
+triggers:
+  - at: input_datetime.get_ready_for_schools_out
+    trigger: time
+conditions:
+  - condition: state
+    entity_id: calendar.school_holidays
+    state: "on"
+  - condition: state
+    entity_id: calendar.schools_out
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.schools_out_morning_announcements_played
+    state: "off"
+actions:
+  - action: script.boys_get_dressed_schools_out
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - action: script.boys_brush_teeth_announcement
+    data: {}
+  - action: script.living_room_tv_toggle_2
+    data: {}
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.schools_out_morning_announcements_played
+    data: {}
+mode: single
