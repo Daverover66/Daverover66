@@ -1,0 +1,64 @@
+alias: Kitchen Smart Buttons Automation
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - event.smart_button_downstairs_2_action
+conditions:
+  - condition: template
+    value_template: "{{ trigger.from_state.state != 'unavailable' }}"
+actions:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'release' }}"
+            alias: Button Release
+        sequence:
+          - action: tts.cloud_say
+            data:
+              cache: false
+              entity_id: media_player.jarvis_kitchen_media_player
+              message: >-
+                did you mean to hold and release the button?  This has not been
+                programmed yet.  Please try again.
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'single' }}"
+            alias: Single Press
+        sequence:
+          - action: script.kitchen_tv_toggle
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'double' }}"
+            alias: Double Press
+        sequence:
+          - action: script.kitchen_tv_toggle
+            data: {}
+        alias: Double press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'triple' }}"
+        sequence:
+          - action: tts.cloud_say
+            data:
+              cache: false
+              entity_id: media_player.jarvis_kitchen_media_player
+              message: >-
+                did you mean to press the button three times?  This has not been
+                programmed yet.  Please try again.
+        alias: Triple Press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'quadruple' }}"
+        sequence:
+          - action: tts.cloud_say
+            data:
+              cache: false
+              entity_id: media_player.jarvis_kitchen_media_player
+              message: >-
+                did you mean to press the button four times?  This has not been
+                programmed yet.  Please try again.
+        alias: Quadruple Press
+mode: restart
+initial_state: true
