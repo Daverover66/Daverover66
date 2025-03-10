@@ -1,0 +1,85 @@
+alias: Clock Chime v2.0
+description: ""
+triggers:
+  - minutes: 0
+    id: "0"
+    trigger: time_pattern
+  - minutes: 15
+    id: "15"
+    trigger: time_pattern
+  - minutes: 30
+    id: "30"
+    trigger: time_pattern
+  - minutes: 45
+    id: "45"
+    trigger: time_pattern
+conditions:
+  - condition: time
+    after: input_datetime.clock_chime_on_time
+    before: input_datetime.clock_chime_off_time
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.clock_chime
+    state: "on"
+  - condition: or
+    conditions:
+      - condition: state
+        state: "on"
+        entity_id: binary_sensor.family_home
+      - condition: state
+        entity_id: input_boolean.guest_mode
+        state: "on"
+actions:
+  - choose:
+      - conditions:
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: "15"
+              - condition: trigger
+                id: "45"
+        sequence:
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: input_boolean.clock_chime_quarter_toll
+                state: "off"
+              - condition: state
+                entity_id: input_select.clock_chime_sound
+                state: Cuckoo Clock
+          - stop: Quarter Toll Disabled
+      - conditions:
+          - condition: trigger
+            id: "30"
+        sequence:
+          - condition: state
+            entity_id: input_boolean.clock_chime_half_toll
+            state: "off"
+          - stop: Half Toll Disabled
+    default: []
+  - action: script.clock_voice
+    data:
+      where: living room
+      message: >
+        {% if states("input_select.clock_chime_sound") == "Cuckoo Clock" %}
+          {% if trigger.id == "30" %}
+            http://192.168.0.95:8123/local/Sounds/CuckooClock/cuckoo-clock-01.wav
+          {% else %}
+            http://192.168.0.95:8123/local/Sounds/CuckooClock/cuckoo-clock-{{now().strftime("%I")}}.wav
+          {% endif %}
+        {% elif states("input_select.clock_chime_sound") == "Grandfather Clock"
+        %}
+          {% if trigger.id == "15" %}
+            http://192.168.0.95:8123/local/Sounds/GFClock/Toll-1Quarter.mp3
+          {% elif trigger.id == "30" %}
+            http://192.168.0.95:8123/local/Sounds/GFClock/Toll-2Quarter.mp3
+          {% elif trigger.id == "45" %}
+            http://192.168.0.95:8123/local/Sounds/GFClock/Toll-3Quarter.mp3
+          {% else %}
+            http://192.168.0.95:8123/local/Sounds/GFClock/{{now().strftime("%I")}}-hour.mp3
+          {% endif %}
+        {% endif %}
+      msg_summary: clock chime
+mode: restart
