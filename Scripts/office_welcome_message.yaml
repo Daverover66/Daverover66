@@ -3,10 +3,6 @@ sequence:
   - response_variable: greetings
     data: {}
     action: script.get_tts_greeting
-  - response_variable: room_services
-    data:
-      type: briefing
-    action: script.get_room_audio
   - response_variable: weather_info
     data: {}
     action: script.get_weather_info
@@ -16,19 +12,27 @@ sequence:
   - response_variable: gem_briefing
     data: {}
     action: script.get_gem_briefing
+  - response_variable: wrapup
+    data: {}
+    action: script.get_wrap_up
   - variables:
       message: |
-        {{ greetings.jarvis_morning }}
+        {{ greetings.general }}
         {{ briefing_data.current_time_full }}
         {{ weather_info.sun_status }}
         {{ briefing_data.moon_phase }} 
-        {{ gem_briefing.device_status}}
+        {{ briefing_data.family_birthday }}
         {{ briefing_data.bin_day }} 
         {{ briefing_data.annual_event }}
         {{ weather_info.current_conditions_detail }}
         {{ weather_info.current_warnings }}
         {{ weather_info.current_warnings_detail}}
-        {{ weather_info.clothing_forecast }}
+        {{ weather_info.clothing_forecast }} 
+        {{ gem_briefing.device_status}}
+        {{ briefing_data.holiday_info }}
+        {{ briefing_data.clocks_change }}
+        {{ wrapup.gem_wrap_up }}
+        {{ wrapup.one_more_thing }}
   - data:
       message: |
         {{ message }}
@@ -40,6 +44,5 @@ sequence:
       message: |
         {{ cleaned_briefing.text }}
       msg_summary: Gave the Office briefing.
-      type: priority
-    action: script.jarvis_speech_engine
+    action: script.jarvis_speech_engine_v3_0
 description: ""
