@@ -1,9 +1,5 @@
 alias: Birthday Announcement
 sequence:
-  - response_variable: room_services
-    data:
-      type: briefing
-    action: script.get_room_audio
   - response_variable: briefing_data
     data: {}
     action: script.get_briefing_data
@@ -22,5 +18,5 @@ sequence:
         {{ cleaned_briefing.text }}
       msg_summary: Gave the Birthday announcement.
       type: priority
-    action: script.jarvis_speech_engine
+    action: script.jarvis_speech_engine_v3_0
 description: ""
