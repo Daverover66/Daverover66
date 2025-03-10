@@ -35,5 +35,3 @@ actions:
       milliseconds: 0
   - action: script.update_occupancy_groups
     data: {}
-
-
