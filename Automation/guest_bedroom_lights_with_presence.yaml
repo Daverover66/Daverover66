@@ -1,0 +1,222 @@
+alias: Guest Bedroom Lights with presence
+description: ""
+triggers:
+  - entity_id:
+      - group.spare_room_motion
+    from: "off"
+    to: "on"
+    id: Light on
+    trigger: state
+  - entity_id:
+      - binary_sensor.guest_bedroom_occupied
+    from: "on"
+    to: "off"
+    id: Light off
+    trigger: state
+  - entity_id: sensor.guest_bedroom_motion_illuminance
+    below: input_number.low_light_threshold
+    id: Low Light
+    trigger: numeric_state
+  - entity_id: sensor.guest_bedroom_motion_illuminance
+    id: Good Light
+    above: input_number.upper_light_threshold_level
+    trigger: numeric_state
+  - entity_id:
+      - binary_sensor.guest_bed_motion_right_occupancy
+      - binary_sensor.guest_bed_motion_left_occupancy
+    from: "off"
+    to: "on"
+    id: Bedside light on
+    trigger: state
+  - entity_id:
+      - binary_sensor.guest_bed_motion_right_occupancy
+      - binary_sensor.guest_bed_motion_left_occupancy
+    from: "on"
+    to: "off"
+    id: Bedside light off
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - switch.spare_room_light_switch
+    from: "off"
+    to: "on"
+    id: Ironing on
+    trigger: state
+  - entity_id:
+      - switch.spare_room_light_switch
+    from: "on"
+    to: "off"
+    id: Ironing off
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Light on
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: sun
+                before: sunrise
+                after: sunset
+              - condition: numeric_state
+                entity_id: sensor.guest_bedroom_motion_illuminance
+                below: input_number.low_light_threshold
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "off"
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.spare_room_lights
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id: Light off
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_allow_lights_off
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.spare_room_lights
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            state: "on"
+            entity_id: binary_sensor.guest_bedroom_occupied
+          - condition: state
+            entity_id: binary_sensor.lights_out
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "off"
+        sequence:
+          - data: {}
+            target:
+              entity_id: light.spare_room_lights
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+                - light.guest_bedroom_bedside_lamp_right
+                - light.spare_room_lights
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Bedside light on
+          - condition: template
+            value_template: "{{ 'Right' in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: sun
+                before: sunrise
+                after: sunset
+              - condition: numeric_state
+                entity_id: sensor.guest_bedroom_motion_illuminance
+                below: input_number.low_light_threshold
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_right
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Bedside light off
+          - condition: template
+            value_template: "{{ 'Right' in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_allow_lights_off
+            state: "on"
+        sequence:
+          - target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_right
+            data: {}
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Bedside light on
+          - condition: template
+            value_template: "{{ 'Left' in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: sun
+                before: sunrise
+                after: sunset
+              - condition: numeric_state
+                entity_id: sensor.guest_bedroom_motion_illuminance
+                below: input_number.low_light_threshold
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Bedside light off
+          - condition: template
+            value_template: "{{ 'Left' in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: input_boolean.guest_bedroom_allow_lights_off
+            state: "on"
+        sequence:
+          - target:
+              entity_id:
+                - light.guest_bedroom_bedside_lamp_left
+            data: {}
+            enabled: true
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Ironing on
+              - Ironing off
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.guest_mode
+                state: "off"
+            then:
+              - data: {}
+                action: script.ironing_lights
+            else:
+              - action: light.toggle
+                target:
+                  entity_id: light.spare_room_lights
+                data: {}
+            alias: If guest mode - toggle lights - else - ironing lights
+mode: restart
+initial_state: true
