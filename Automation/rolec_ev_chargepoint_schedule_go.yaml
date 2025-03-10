@@ -7,12 +7,18 @@ triggers:
     alias: Activate Charge Session at 9pm
   - alias: Start Charge
     id: start
-    trigger: time
-    at: "00:30:00"
-  - id: stop
-    trigger: time
-    at: "05:30:00"
-    alias: Stop Charge
+    trigger: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_car_battery_charge
+    from: "off"
+    to: "on"
+  - alias: Stop Charge
+    id: stop
+    trigger: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_car_battery_charge
+    from: "on"
+    to: "off"
   - entity_id:
       - switch.shelly1_c45bbe7867c7
     from: unavailable
