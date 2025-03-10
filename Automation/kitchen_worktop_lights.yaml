@@ -1,0 +1,57 @@
+alias: Kitchen Worktop Lights
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_6
+    from: "off"
+    to: "on"
+    id: "On"
+  - trigger: state
+    entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_6
+    from: "on"
+    to: "off"
+    id: "Off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - "On"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: 90
+        sequence:
+          - alias: Turn on worktop lights
+            if:
+              - condition: state
+                entity_id: input_boolean.adaptive_lighting_sleep_mode_active
+                state: "on"
+            then:
+              - action: light.turn_on
+                target:
+                  entity_id: light.ikea_kitchen_lights
+                data:
+                  brightness_pct: 30
+            else:
+              - action: light.turn_on
+                target:
+                  entity_id: light.ikea_kitchen_lights
+                data:
+                  brightness_pct: 70
+      - conditions:
+          - condition: trigger
+            id:
+              - "Off"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: light.ikea_kitchen_lights
+            data: {}
+mode: single
