@@ -1,0 +1,171 @@
+alias: Main Bedroom Lights with Presence
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_4
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_3
+    id: Lights On
+    from: "off"
+    to: "on"
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_4
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_3
+    id: Lights Off
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+    trigger: state
+  - entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    id: Low Light
+    trigger: numeric_state
+  - entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+    id: Good Light
+    above: input_number.upper_light_threshold_level
+    trigger: numeric_state
+  - minutes: /10
+    id: Check
+    trigger: time_pattern
+conditions:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's side of bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: input_number.low_light_threshold
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.dad_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: template
+            value_template: "{{\"Gems\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's side of bed
+          - condition: numeric_state
+            entity_id: sensor.main_bedroom_fp2_light_sensor_light_level
+            below: input_number.low_light_threshold
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: state
+            state: "off"
+            entity_id: input_boolean.we_are_in_bed
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.mum_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: template
+            value_template: "{{\"Daves\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Dave's side of bed
+          - condition: state
+            state: "on"
+            entity_id: light.dad_s_bedside_lamp_light
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id: light.dad_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+          - condition: template
+            value_template: "{{\"Gems\" in trigger.to_state.attributes.friendly_name }}"
+            alias: Filter Gem's side of bed
+          - condition: state
+            state: "on"
+            entity_id: light.mum_s_bedside_lamp_light
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id: light.mum_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.presence_sensor_fp2_07ff_presence_sensor_3
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.presence_sensor_fp2_07ff_presence_sensor_4
+                state: "on"
+          - condition: state
+            entity_id: input_boolean.main_bedroom_bedside_lamps_active
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id:
+                - light.mum_s_bedside_lamp_light
+                - light.dad_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: light.dad_s_bedside_lamp_light
+                state: "on"
+              - condition: state
+                entity_id: light.mum_s_bedside_lamp_light
+                state: "on"
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id:
+                - light.mum_s_bedside_lamp_light
+                - light.dad_s_bedside_lamp_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Check
+          - condition: state
+            entity_id: switch.master_bedroom_light_switch
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.master_bedroom_occupied
+            state: "off"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.master_bedroom_light_switch
+            data: {}
+mode: restart
+initial_state: true
