@@ -1,0 +1,176 @@
+alias: Frost Warning
+description: ""
+triggers:
+  - entity_id:
+      - sensor.outdside_thermal_comfort_frost_risk
+    to: probable
+    id: Probable
+    trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - entity_id:
+      - sensor.outdside_thermal_comfort_frost_risk
+    to: high
+    id: High Probability
+    trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - entity_id:
+      - sensor.outdside_thermal_comfort_frost_risk
+    to: probable
+    id: Probable again
+    trigger: state
+    from: high
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - entity_id:
+      - sensor.outdside_thermal_comfort_frost_risk
+    to: no_risk
+    id: No Risk
+    trigger: state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Probable
+        sequence:
+          - action: script.text_notify_parents
+            metadata: {}
+            data:
+              title: FROST RISK - PROBABLE
+              message: There may be a frost tonight.
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.announcement_playing
+            state: "off"
+          - if:
+              - condition: template
+                value_template: "{{is_state('binary_sensor.dave_home','on')}}"
+            then:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: dave
+                type: announcement
+                message: It will probably be frosty tonight.
+            else:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: gem
+                type: announcement
+                message: It will probably be frosty tonight.
+            alias: Announce to Dave if he is home, else announce to Gem.
+      - conditions:
+          - condition: trigger
+            id:
+              - High Probability
+        sequence:
+          - action: script.text_notify_parents
+            metadata: {}
+            data:
+              title: FROST RISK - HIGHLY PROBABLE
+              message: There will most likely be a frost tonight.
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.announcement_playing
+            state: "off"
+          - if:
+              - condition: template
+                value_template: "{{is_state('binary_sensor.dave_home','on')}}"
+            then:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: dave
+                type: announcement
+                message: >-
+                  There is a good chance it will be
+                  frosty tonight.
+            else:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: gem
+                type: announcement
+                message: >-
+                  There is a good chance it will be
+                  frosty tonight.
+            alias: Announce to Dave if he is home, else announce to Gem.
+      - conditions:
+          - condition: trigger
+            id:
+              - Probable again
+        sequence:
+          - action: script.text_notify_parents
+            metadata: {}
+            data:
+              title: FROST RISK - PROBABLE AGAIN
+              message: The frost risk has dropped to probable again.
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.announcement_playing
+            state: "off"
+          - if:
+              - condition: template
+                value_template: "{{is_state('binary_sensor.dave_home','on')}}"
+            then:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: dave
+                type: announcement
+                message: It might not be frosty now.
+            else:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: gem
+                type: announcement
+                message: It might not be frosty now.
+            alias: Announce to Dave if he is home, else announce to Gem.
+      - conditions:
+          - condition: trigger
+            id:
+              - No Risk
+        sequence:
+          - action: script.text_notify_parents
+            metadata: {}
+            data:
+              title: FROST RISK - CANCELLED
+              message: There is no chance of frost at the moment.
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.announcement_playing
+            state: "off"
+          - if:
+              - condition: template
+                value_template: "{{is_state('binary_sensor.dave_home','on')}}"
+            then:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: dave
+                type: announcement
+                message: It is highly unlikely to be frosty tonight.
+            else:
+              action: script.jarvis_speech_engine_v3_0
+              data:
+                where: gem
+                type: announcement
+                message: It is highly unlikely to be frosty tonight..
+            alias: Announce to Dave if he is home, else announce to Gem.
+mode: single
