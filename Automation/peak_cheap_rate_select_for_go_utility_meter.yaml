@@ -1,0 +1,18 @@
+alias: Peak/Cheap rate select for Go Utility meter
+description: ""
+triggers:
+  - at: "00:30:00"
+    variables:
+      tariff: Cheap
+    trigger: time
+  - at: "05:30:00"
+    variables:
+      tariff: Peak
+    trigger: time
+actions:
+  - target:
+      entity_id: select.octopus_go
+    data:
+      option: "{{ tariff }}"
+    action: select.select_option
+mode: single
