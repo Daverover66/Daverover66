@@ -1,0 +1,176 @@
+alias: Hot Water, solar and gas
+description: >-
+  Turn on the immersion heater when the battery is full and solar export is
+  high. Check later in the day and, if needed, heat water with gas.
+triggers:
+  - entity_id:
+      - sensor.electricity_bill_today
+    below: 0
+    id: Activate
+    trigger: numeric_state
+    enabled: true
+  - entity_id:
+      - sensor.power_grid_export
+    above: 2500
+    id: Switch On
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    trigger: numeric_state
+  - entity_id:
+      - sensor.power_battery_load
+    above: 1000
+    id: Switch Off
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    trigger: numeric_state
+  - entity_id:
+      - sensor.hot_water_energy_consumption_daily
+    above: 6
+    id: 6kWh Energy Used
+    trigger: numeric_state
+  - at: "16:00:00"
+    id: Deactivate
+    trigger: time
+  - alias: Valkyrie off with Timer
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.solar_hot_water_heating
+    id: Timer Done
+    enabled: true
+    trigger: event
+  - at: "17:30:00"
+    id: Time On
+    trigger: time
+  - at: "21:00:00"
+    id: Last Check
+    trigger: time
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Activate
+          - condition: sun
+            after: sunrise
+            before: sunset
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_valkyrie_on
+            data: {}
+          - condition: numeric_state
+            entity_id: sensor.power_grid_export
+            above: 2500
+          - action: switch.turn_on
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+          - action: timer.start
+            data: {}
+            target:
+              entity_id:
+                - timer.solar_hot_water_heating
+      - conditions:
+          - condition: trigger
+            id:
+              - Switch On
+          - condition: sun
+            after: sunrise
+            before: sunset
+          - condition: numeric_state
+            entity_id: sensor.electricity_bill_today
+            below: 0
+          - condition: state
+            entity_id: input_boolean.allow_valkyrie_on
+            state: "on"
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "off"
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+          - action: timer.start
+            data: {}
+            target:
+              entity_id:
+                - timer.solar_hot_water_heating
+      - conditions:
+          - condition: trigger
+            id: Switch Off
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "on"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+            data: {}
+          - action: timer.pause
+            data: {}
+            target:
+              entity_id:
+                - timer.solar_hot_water_heating
+      - conditions:
+          - condition: trigger
+            id:
+              - Deactivate
+              - Timer Done
+              - 6kWh Energy Used
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_valkyrie_on
+            data: {}
+          - condition: state
+            entity_id: switch.valkyrie_solar_hot_water
+            state: "on"
+          - action: switch.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: switch.valkyrie_solar_hot_water
+          - action: timer.cancel
+            metadata: {}
+            data: {}
+            target:
+              entity_id: timer.solar_hot_water_heating
+      - conditions:
+          - condition: trigger
+            id:
+              - Time On
+          - condition: numeric_state
+            entity_id: sensor.hot_water_energy_consumption_daily
+            below: 6
+        sequence:
+          - action: tado.set_water_heater_timer
+            target:
+              entity_id: water_heater.hot_water
+            data:
+              time_period: "00:30:00"
+      - conditions:
+          - condition: trigger
+            id:
+              - Last Check
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.hot_water_energy_consumption_daily
+                below: 6
+              - condition: numeric_state
+                entity_id: >-
+                  sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption_kwh
+                below: 6
+        sequence:
+          - action: tado.set_water_heater_timer
+            target:
+              entity_id: water_heater.hot_water
+            data:
+              time_period: "00:30:00"
+mode: single
