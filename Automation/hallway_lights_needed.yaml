@@ -1,0 +1,33 @@
+alias: Hallway Lights Needed
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - switch.hallway_light_switch_1
+      - switch.hallway_light_switch_2_right
+    from: "off"
+    to: "on"
+    trigger: state
+  - entity_id:
+      - switch.hallway_light_switch_1
+      - switch.hallway_light_switch_2_right
+    from: "on"
+    to: "off"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: light.hallway_lights
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.hallway_lights
+    default:
+      - action: light.turn_off
+        data: {}
+        target:
+          entity_id: light.hallway_lights
