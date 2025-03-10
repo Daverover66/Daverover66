@@ -1,4 +1,4 @@
-oo###############################################################################
+###############################################################################
 #   @author                 :   Jeffrey Stone
 #   @date                   :   02/19/2019
 #   @package                :   Notify
@@ -10,7 +10,7 @@ oo##############################################################################
 #   @date                   :   05/12/2022
 #
 #   @further modified by    :   Dave Forrester (@Daverover66)
-#   @date                   :   15/04/2024
+#   @date                   :   02/09/2023
 ###############################################################################
 
 ###############################################################################
@@ -43,7 +43,7 @@ oo##############################################################################
 #   ordinal: Interprets the numerical text as an ordinal number, as in 1,234th.
 #   digits: Spells out each digit individually, as in 1-2-3-4.
 #   fraction: Interprets the numerical text as a fraction. This works for both common fractions such as 3/20, and mixed fractions, such as 2 ½. See below for more information.
-#   unit: Interprets a numerical text as a measurement. The value should be either a number or a fraction followed by a unit with no space in between as in 1/2inch, or by just a unit, as in 1meter.
+#   unit: Interprets a numerical text as a measurement. The value should be either a number or a fractions followed by a unit with no space in between as in 1/2inch, or by just a unit, as in 1meter.
 #   date: Interprets the text as a date. The format of the date must be specified with the format attribute. See below for more information.
 #   time: Interprets the numerical text as duration, in minutes and seconds, as in 1'21".
 #   address: Interprets the text as part of a street address.
@@ -56,19 +56,19 @@ group:
   echos:
     name: All Echos
     entities:
-      - media_player.dave_s_echo_pop
-      - media_player.dave_s_2nd_echo_pop
-      - media_player.dave_s_2nd_echo_pop_2
+      - media_player.dining_room_pop
+      - media_player.living_room_pop
       - media_player.kitchen_echo_show
-      - media_player.living_room_dot
+      - media_player.jamie_s_room_dot
+      - media_player.sean_s_room_dot
       - media_player.main_bedroom_dot
       - media_player.guest_bedroom_echo_dot
-      - media_player.seans_room_dot
+      - media_player.office_pop
 
   echos_main:
     name: All Main Echos
     entities:
-      - media_player.dave_s_2nd_echo_pop
+      - media_player.living_room_pop
       - media_player.kitchen_echo_show
       - media_player.main_bedroom_dot
 
@@ -77,7 +77,8 @@ group:
     entities:
       - media_player.downstairs
       - media_player.upstairs
-      - media_player.everywhere_2
+      - media_player.everywhere
+      - media_player.boys_rooms
 
 mqtt:
   sensor:
@@ -87,6 +88,12 @@ mqtt:
       state_topic: "house/alexa/lastloc"
     - name: "Jarvis Last Msg Time"
       state_topic: "house/alexa/msgtime"
+    - name: "Jarvis Verbal"
+      state_topic: "house/alexa/verbal"
+    - name: "Jarvis Verbal Time"
+      state_topic: "house/alexa/timestamp"
+    - name: "Jarvis Event Summary"
+      state_topic: "house/jarvis/event"
 
 template:
   - sensor:
@@ -107,22 +114,12 @@ input_boolean:
   text_notifications_gem:
     name: Texts Notifications Gem
     icon: mdi:cellphone-message
+  text_notifications_parents: 
+    name: Text Notifications Parents
+    icon: mdi:cellphone-message
   audible_notifications:
     name: Audible Notifications
-    icon: mdi:text-to-speech
-
-input_select:
-  echo_voice:
-    name: Echo voice
-    options:
-      - Brian
-      - Emma
-      - Amy
-      - Joanna
-      - Justin
-      - Matthew
-      - Salli
-    initial: Brian
+    icon: mdi:account-voice 
 
 notify:
   - name: all_devices
@@ -150,6 +147,11 @@ notify:
     platform: group
     services:
       - service: mobile_app_sm_s901b
+  - name: parents 
+    platform: group 
+    services: 
+      - service: mobile_app_daves_samsung_galaxy 
+      - service: mobile_app_sm_s901b
   - name: all_android
     platform: group
     services:
@@ -176,7 +178,7 @@ script:
   ###############################################################################
   text_notify_all:
     sequence:
-      - service: notify.all_devices
+      - action: notify.all_devices
         data:
           title: >
             {{ title }}
@@ -188,7 +190,7 @@ script:
       - condition: state
         entity_id: input_boolean.text_notifications_dave
         state: "on"
-      - service: notify.dave
+      - action: notify.dave
         data:
           title: >
             {{ title }}
@@ -200,7 +202,19 @@ script:
       - condition: state
         entity_id: input_boolean.text_notifications_gem
         state: "on"
-      - service: notify.gem
+      - action: notify.gem
+        data:
+          title: >
+            {{ title }}
+          message: >
+            {{ message }}
+
+  text_notify_parents:
+    sequence:
+      - condition: state
+        entity_id: input_boolean.text_notifications_parents 
+        state: "on"
+      - action: notify.parents 
         data:
           title: >
             {{ title }}
@@ -212,7 +226,7 @@ script:
       - condition: state
         entity_id: input_boolean.text_notifications
         state: "on"
-      - service: notify.all_android
+      - action: notify.all_android
         data:
           title: >
             {{ title }}
@@ -232,7 +246,7 @@ script:
                 entity_id: input_boolean.text_notifications_dave
                 state: "on"
             sequence:
-              - service: notify.dave
+              - action: notify.dave
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
@@ -243,7 +257,7 @@ script:
                 entity_id: input_boolean.text_notifications_gem
                 state: "on"
             sequence:
-              - service: notify.gem
+              - action: notify.gem
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
@@ -251,19 +265,19 @@ script:
               - condition: template
                 value_template: '{{ who == "all_android"}}'
             sequence:
-              - service: notify.all_android
+              - action: notify.all_android
                 data:
                   title: "{{ title }}"
                   message: "{{ message }}"
         default:
-          - service: notify.all_devices
+          - action: notify.all_devices
             data:
               title: "{{ title }}"
               message: "{{ message }}"
 
   text_alert:
     sequence:
-      - service: >
+      - action : >
           {% if who == 'dave' %}
             notify.dave
           {% elif who == 'gem' %}
@@ -277,7 +291,7 @@ script:
 
   text_alert_image:
     sequence:
-      - service: >
+      - action: >
           {% if who == 'dave' %}
             notify.dave
           {% elif who == 'gem' %}
@@ -291,7 +305,7 @@ script:
 
   text_urgent_alert:
     sequence:
-      - service: >
+      - action: >
           {% if who == 'dave' %}
             notify.dave
           {% elif who == 'gem' %}
@@ -327,7 +341,7 @@ script:
       - condition: state
         entity_id: input_boolean.holiday_mode
         state: "off"
-      - service: script.alexa_voice
+      - action: script.alexa_voice
         data:
           where: "{{ where }}"
           message: >
@@ -341,38 +355,38 @@ script:
             {% set loc = states('sensor.room_with_alexa_presence') if where in  ['presence','room_with_alexa_presence','current','current_room']  else where %}
             {% if loc in ['kitchen_echo_show','media_player.kitchen_echo_show','kitchen'] %}
               kitchen_echo_show
-            {% elif loc in ['dave_s_2nd_echo_pop','media_player.dave_s_2nd_echo_pop','living_room'] %}
-              dave_s_2nd_echo_pop
-            {% elif loc in ['dave_s_echo_pop','media_player.dave_s_echo_pop','dining_room'] %}
-              dave_s_echo_pop
+            {% elif loc in ['media_player.living_room_pop','living_room'] %}
+              living_room_pop
+            {% elif loc in ['media_player.dining_room_pop','dining_room'] %}
+              dining_room_pop
             {% elif loc in ['main_bedroom_dot','media_player.main_bedroom_dot','main_bedroom'] %}
               main_bedroom_dot
             {% elif loc in ['guest_bedroom_echo_dot','media_player.guest_bedroom_echo_dot','guest_bedroom'] %}
               guest_bedroom_echo_dot
-            {% elif loc in ['living_room_dot','media_player.living_room_dot','jamies_room','jamie'] %}
-              living_room_dot
-            {% elif loc in ['seans_room_dot','media_player.seans_room_dot','seans_room','sean'] %}
-              seans_room_dot
-            {% elif loc in ['dave_s_2nd_echo_pop_2','media_player.dave_s_2nd_echo_pop_2','office'] %}
-              dave_s_2nd_echo_pop_2
+            {% elif loc in ['jamie_s_room_dot','media_player.jamie__room_dot','jamies_room','jamie'] %}
+              jamie_s_room_dot
+            {% elif loc in ['sean_s_room_dot','media_player.sean_s_room_dot','sean_s_room','sean'] %}
+              sean_s_room_dot
+            {% elif loc in ['office_pop','media_player.office_pop','office'] %}
+              office_pop 
             {% elif loc in ['everywhere'] %}
-              everywhere_2
+              everywhere
             {% elif loc in ['upstairs'] %}
               upstairs
             {% elif loc in ['downstairs'] %}
               downstairs
             {% else %}
-              dave_s_2nd_echo_pop
+              living_room_pop 
             {% endif %}
           volume: >
             {%- set default = '0.5' if states('binary_sensor.quiet_time_boys') == 'off' else '0.3' -%}
-            {%- if volume_override is float -%}
-              {{ volume_override }}
-            {%- else -%}
+            # {%- if volume_override is float -%}
+              # {{ volume_override }}
+            # {%- else -%}
               {{ default }}
-            {%- endif -%}
+            # {%- endif -%}
       - alias: Save your message for recall
-        service: mqtt.publish
+        action: mqtt.publish
         data_template:
           topic: "house/alexa/lastmsg"
           payload: >
@@ -389,32 +403,32 @@ script:
               {{- cleanup( message | striptags | truncate(220) ) -}}
             {% endif %}
       - alias: Save time of last message
-        service: mqtt.publish
+        action: mqtt.publish
         data_template:
           topic: "house/alexa/msgtime"
           payload: >
             {{ now().strftime("%-I") }}:{{ now().strftime("%M") }} {{ now().strftime("%p") }}
           retain: true
       - alias: Save location
-        service: mqtt.publish
+        action: mqtt.publish
         data_template:
           topic: "house/alexa/lastloc"
           payload: |-
-            {% if echo == 'dave_s_2nd_echo_pop' %}
+            {% if echo == 'living_room_pop' %}
               Living Room Pop
             {% elif echo == 'kitchen_echo_show' %}
               Kitchen Show
-            {% elif echo == 'dave_s_echo_pop' %}
+            {% elif echo == 'dining_room_pop' %}
               Dining Room Pop
             {% elif echo == 'guest_bedroom_echo_dot' %}
               Spare Room Dot
             {% elif echo == 'main_bedroom_dot' %}
               Main Bedroom Dot
-            {% elif echo == 'seans_room_dot' %}
+            {% elif echo == 'sean_s_room_dot' %}
               Seans Room Dot
-            {% elif echo == 'living_room_dot' %}
+            {% elif echo == 'jamie_s_room_dot' %}
               Jamies Room Dot
-            {% elif echo == 'dave_s_2nd_echo_pop_2' %}
+            {% elif echo == 'office_pop' %}
               Office Pop
             {% endif %}
           retain: true
@@ -426,18 +440,18 @@ script:
                 value_template: >-
                   {{ is_state_attr('media_player.' + echo, 'volume_level', volume | float) }}
         then:
-          - service: media_player.volume_set
+          - action: media_player.volume_set
             data:
               volume_level: "{{ volume | float }}"
             target:
               entity_id: media_player.{{ echo }}
       - alias: Send the notification
-        service: notify.alexa_media
+        action: notify.alexa_media
         data:
           message: >
             <voice name="{{ states('input_select.echo_voice') }}">
             <amazon:auto-breaths>
-            <prosody rate="105%">
+            <prosody rate="115%">
             {{ message }}
             </prosody>
             </amazon:auto-breaths>
@@ -450,7 +464,7 @@ script:
   # Script for playing the last message.
   play_last_message:
     sequence:
-      - service: script.alexa_voice
+      - action: script.alexa_voice
         data:
           where: >
             {{ where or 'presence' }}
@@ -459,7 +473,7 @@ script:
             {% if states('sensor.jarvis_last_location') == 'everywhere' %}
               I said. {{ states('sensor.jarvis_last_msg') }}
             {% else %}
-              from the {{ states('sensor.jarvis_last_location') }} 
+              from the {{ states('sensor.jarvis_last_location') }}. 
               I said. {{ states('sensor.jarvis_last_msg') }}
             {% endif %}
           msg_summary: "recall"
@@ -469,7 +483,7 @@ script:
   ###############################################################################
   status_annc:
     sequence:
-      - service: script.speech_engine
+      - action: script.speech_engine
         data:
           where: |-
             {% if where %}
@@ -517,29 +531,11 @@ script:
               </p>
             {% endmacro %}
 
-            {% macro interruption() %}
-              <p>
-              {{ [
-                  'Pardon me, ',
-                  '<prosody pitch="high">Excuse me,</prosody> ',
-                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
-                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
-                  'I beg your pardon, ',
-                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
-                  'I am sorry to interrupt, but. ',
-                  'Just a quick heads up, ',
-                  '<prosody pitch="high">Information, </prosody>',
-                  'Pardon me for intruding on your relaxation once more.',
-                  'Excuse me for once again breaking the silence.'
-                  ] | random }}
-              </p>
-            {% endmacro %}
-
             {% macro time_is() %}
               <p>
               It is {{ now().strftime("%I:%M %p") }}
               </p>
-            {% endmacro %}            
+            {% endmacro %}
 
             {% macro confirmation() %}
               <p>
@@ -561,7 +557,25 @@ script:
               'There are still terabytes of calculations required before I can.<break time="1s"/> <prosody pitch="high">Oh, whatever.</prosody>'
               ] | random }}
               </p>
-            {% endmacro %}  
+            {% endmacro %}
+
+            {% macro interruption() %}
+              <p>
+              {{ [
+                  'Pardon me, ',
+                  '<prosody pitch="high">Excuse me,</prosody> ',
+                  '<prosody pitch="high">I do not mean to interrupt, </prosody>but,',
+                  '<prosody pitch="high">I hate to interrupt, </prosody>but,',
+                  'I beg your pardon, ',
+                  '<prosody pitch="high">I do not mean to intrude, </prosody>but, ',
+                  'I am sorry to interrupt, but. ',
+                  'Just a quick heads up, ',
+                  '<prosody pitch="high">Information, </prosody>',
+                  'Pardon me for intruding on your relaxation once more.',
+                  'Excuse me for once again breaking the silence.'
+                  ] | random }}
+              </p>
+            {% endmacro %}
 
             {% macro goodbye() %}
               <p>
@@ -595,8 +609,8 @@ script:
             {% macro goodnight() %}
               <p>
               {{ [
-                  'Goodnight you two and do not forget the dishwasher',
-                  'Goodnight both. Make sure you check the doors',
+                  'Goodnight you two. <break time="1s"/> Dont forget the dishwasher',
+                  'Goodnight both. <break time="1s"/> Make sure you check the doors',
                   'Sleep well both. I will see you in the morning',
                   'Goodnight you two. I will monitor the house while you sleep.',
                   'Goodnight both. Sleep tight.',
@@ -606,23 +620,99 @@ script:
               </p>
             {% endmacro %}
 
-            {% macro boys_time_for_bed() %}
+            {% macro goodnight_secure() %}
               <p>
               {{ [
-                  'Sean and Jamie. Its time for bed.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
-                  'Boys, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
-                  'Sean and Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
-                  'Boys. Thats the end of another day for you both. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
-                  'Sean and Jamie. <prosody pitch="high">If you are still downstairs then you are in the wrong place.</prosody> Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                  'Goodnight you two. <break time="1s"/> The house is secure. So sleep well and I will see you in the morning.',
+                  'Goodnight both. <break time="1s"/> The ground floor is secure. So get a good nights sleep',
+                  'Sleep well both. Safe in the knowledge that the house is secure.',
+                  'Goodnight you two. Barn door protocol has been initiated, but I will continue to monitor the house while you sleep.',
+                  'Goodnight both. Sleep tight. The house is shut down tight.',
+                  'Goodnight both. Pleasant dreams. The house is locked down for the night.',
+                  'Have a good night both. Dont let the bedbugs bite. My bug zapper is on standby and the house is locked down.'
                   ] | random }}
               </p>
             {% endmacro %}
 
-            {% macro get_dressed() %}
+            {%- macro goodnight_not_secure() -%}
+              <p>
+              {% set window_count = expand('binary_sensor.all_secure_night')
+                  | selectattr('state','eq','on') | list | count %}
+              {% set windows = expand('binary_sensor.all_secure_night')
+                  | selectattr('state','eq','on')
+                  | map(attribute='name')
+                  | list |join(' and ') %}
+              {%- if window_count == 1 %}
+                {% set is_are = ' is ' %}
+                {% set has_have = ' has ' %}
+              {%- else -%}
+                {% set is_are = ' are ' %}
+                {% set has_have = ' have ' %}
+              {%- endif -%}
+                {{ 'Hold on a minute you two. <break time="1s"/> The house is not yet secure. The ' 
+                  ~ windows ~ is_are + 'open.' }}
+              </p>
+            {%- endmacro -%}
+
+            {% macro jamie_time_for_bed() %}
               <p>
               {{ [
-                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Sean',
-                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. You first, master Jamie',
+                  'Jamie. Its time for bed.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
+                  'Jamie, its time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
+                  'Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+                  'Jamie. Thats the end of another day for you. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                  'Jamie. If you are still downstairs then you are in the wrong place. Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro sean_time_for_bed() %}
+              <p>
+              {{ [
+                  'Sean. Its your bedtime now.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
+                  'Sean, its now time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
+                  'Sean. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+                  'Sean. Thats the end of another day for you. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                  'Sean. If you are still downstairs then you are in the wrong place. Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro boys_time_for_bed() %}
+              <p>
+              {{ [
+                  'Boys. Its your bedtime now.<prosody pitch="high">Upstairs and brush your teeth</prosody>',
+                  'Sean and Jamie, its now time for you to visit the land of nod. <prosody pitch="high">Upstairs please and brush your teeth</prosody>',
+                  'Jamie and Sean. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+                  'Boys. Thats the end of another day for you. Please make your way upstairs to bed.  <prosody pitch="high">and dont forget to brush your teeth.</prosody>',
+                  'Boys. If you are still downstairs then you are in the wrong place. Upstairs and brush your teeth. <prosody pitch="high">It is time to go to bed.</prosody>' 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro get_dressed_sean() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. Today, its you first, Sean',
+                  '<prosody pitch="high">Attention master Jamie and master Sean.</prosody> Its time to get dressed. You first, Sean',
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro get_dressed_jamie() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed. Today, its you first Jamie',
+                  '<prosody pitch="high">Attention master Jamie and master Sean.</prosody> Its time to get dressed. You first Jamie',
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro get_dressed_schools_out() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed for schools out. You first, master Sean',
+                  '<prosody pitch="high">Attention master Sean and master Jamie.</prosody> Its time to get dressed for schools out. You first, master Jamie',
                   ] | random }}
               </p>
             {% endmacro %}
@@ -642,6 +732,16 @@ script:
                   '<prosody pitch="x-high">Attention master Sean and master Jamie. If you are still here, you are late for school</prosody>',
                   'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for school yet, <prosody pitch="x-high">why not</prosody>',
                   '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. School will not wait for you</prosody>'
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro late_schools_out() %}
+              <p>
+              {{ [ 
+                  '<prosody pitch="x-high">Attention master Sean and master Jamie. If you are still here, you are late for schools_out</prosody>',
+                  'Excuse my interruption Mummy and daddy. If master Sean and master Jamie have not left for schools out yet, <prosody pitch="x-high">why not</prosody>',
+                  '<prosody pitch="x-high">Come on folks. Get your skates on and get out the door. Schools out will not wait for you</prosody>'
                   ] | random }}
               </p>
             {% endmacro %}
@@ -671,10 +771,32 @@ script:
             {% macro fridge_warning_again() %}
               <p>
               {{ [
-                  '<prosody pitch="high">Pardon my continued interruptions, but the fridge door is still open. Someone needs to close it before the food starts to go off?</prosody>', 
+                  '<prosody pitch="high">Pardon my continued interruptions, but the fridge door is still open. Someone needs to close it before the food starts to go off</prosody>', 
                   '<prosody pitch="high">Pardon me interrupting again. Has anyone noticed that it is still getting colder? Perhaps it is something to do with the fridge door still being open</prosody>', 
                   '<prosody pitch="high">Sorry to harp on about this, but whoever was last in the fridge needs to check the door. It appears to be still open</prosody>', 
                   '<prosody pitch="x-high">Alert, Alert, Alert. Having informed you once that the automatic fridge door closing system seems to have failed, manual operation also seems to have failed. Unless you want a very smelly fridge, you need to close it yourself</prosody>', 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro fridge_too_warm() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Pardon me for intruding, but the fridge seems to be a bit warm and the door is closed. Someone needs to check it before the food starts to go off</prosody>', 
+                  '<prosody pitch="high">Excuse me. There seems to be a problem with the fridge. Might I suggest you check it out pronto! </prosody>', 
+                  '<prosody pitch="high">Attention in the house! Fridge alert! There is a problem with the fridge</prosody>', 
+                  '<prosody pitch="x-high">Important announcement so listen up! There is a problem with the fridge. Can someone hotfoot it to the kitchen and check it out</prosody>', 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro fridge_too_warm_again() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Pardon me for intruding. This is your second warning. The fridge seems to be a bit warm and the door is closed. Someone needs to check it before the food starts to go off</prosody>', 
+                  '<prosody pitch="high">Excuse me again. Clearly you did not hear me first time, but there seems to be a problem with the fridge. Might I suggest you check it out pronto! </prosody>', 
+                  '<prosody pitch="high">Attention in the house! Attention in the house! Fridge alert! There is still a problem with the fridge</prosody>', 
+                  '<prosody pitch="x-high">Important announcement, and this is the second time, so listen up! There is a problem with the fridge. Can someone hotfoot it to the kitchen and check it out</prosody>', 
                   ] | random }}
               </p>
             {% endmacro %}
@@ -711,7 +833,29 @@ script:
                   '<prosody pitch="x-high">Okay. Here is my honest assessment of our current predicament. The freezer is not going to close itself. Operation close the goddamn freezer door has commenced</prosody>'   
                   ] | random }}
               </p>
-             {% endmacro %}
+            {% endmacro %}
+
+            {% macro freezer_too_warm() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Pardon me for intruding, but the freezer seems to be a bit warm and the door is closed. Someone needs to check it before the food starts to defrost</prosody>', 
+                  '<prosody pitch="high">Excuse me. There seems to be a problem with the freezer. Might I suggest you check it out pronto! </prosody>', 
+                  '<prosody pitch="high">Attention in the house! Freezer alert! There is a problem with the freezer</prosody>', 
+                  '<prosody pitch="x-high">Important announcement so listen up! There is a problem with the freezer. Can someone hotfoot it to the kitchen and check it out</prosody>', 
+                  ] | random }}
+              </p>
+            {% endmacro %}
+
+            {% macro freezer_too_warm_again() %}
+              <p>
+              {{ [
+                  '<prosody pitch="high">Pardon me for intruding. This is your second warning. The freezer seems to be a bit warm and the door is closed. Someone needs to check it before the food starts to defrost</prosody>', 
+                  '<prosody pitch="high">Excuse me again. Clearly you did not hear me first time, but there seems to be a problem with the freezer. Might I suggest you check it out pronto! </prosody>', 
+                  '<prosody pitch="high">Attention in the house! Attention in the house! Freezer alert! There is still a problem with the freezer</prosody>', 
+                  '<prosody pitch="x-high">Important announcement, and this is the second time, so listen up! There is a problem with the freezer. Can someone hotfoot it to the kitchen and check it out</prosody>', 
+                  ] | random }}
+              </p>
+            {% endmacro %}
 
             {% macro freezer_closed() %}
               <p> 
@@ -730,31 +874,31 @@ script:
                   '<prosody pitch="high">Excuse me. This is an important announcement for the man of the house</prosody>. The garage dehumidifier water tray is full. <prosody pitch="x-high">Please empty it</prosody>',   
                   '<prosody pitch="high">Pardon my interruption</prosody>. I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
                   '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
-                  '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
+                  '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate service.'     
                   ] | random }} 
               </p>
             {% endmacro %}
 
             {% macro garage_dehumidifier_emptied() %}
               <p> 
-               {{ [  
-                   '<prosody pitch="low">Well now. Whoever emptied the garage dehumidifier, thank you.</prosody>',   
-                   '<prosody pitch="low">I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.</prosody>',   
-                   '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
-                   '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
-                   ] | random }}
+              {{ [  
+                  '<prosody pitch="low">Well now. Whoever emptied the garage dehumidifier, thank you.</prosody>',   
+                  '<prosody pitch="low">I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.</prosody>',   
+                  '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
+                  '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
+                  ] | random }}
               </p>
             {% endmacro %}
 
             {% macro home_battery_problem() %}
               <p> 
               {{ [
-                  'There is a problem with the home battery. Quickly. To the garage to rectify it.',
-                  'Quickly. Unless you want to consume terrawatts of energy, I would suggest investigating why the home battery has gone to sleep.',
+                  'There is a problem with the home battery. Quickly. To the bat cave to rectify it.',
+                  'Quickly. Unless you want to consume terawatts of energy, I would suggest investigating why the home battery has gone to sleep.',
                   'My monitoring systems have detected an issue with the home battery.  Please investigate immediately.',
                   'Sensors have detected a reversing of the polarity of the neutron flow. My fuzzy logic is a tad fuzzy today, but I think there may be a problem with the home battery.'
                   ] | random }}
-               </p>
+              </p>
             {% endmacro %}
 
             {% macro mc_side_not_set() %}
@@ -763,11 +907,10 @@ script:
                   'I regret to inform you that this side of the magic cube has not yet been programmed. Perhaps you should try a different side',
                   'Please try another side as this one appears to do nothing',  
                   'I believe you may have inadvertently selected a side does nothing, for now',  
-                  '<prosody pitch="x-high">Warning</prosody>. <prosody pitch="high">This cube will self destruct in 5 seconds 
-                   <break time="1s"/>, 5 <break time="1s"/>, 4 <break time="1s"/>, 3</prosody>, <break time="1s"/>2<break time="1s"/>, <prosody pitch="low">1 <break time="1s"/>.</prosody> <prosody pitch="x-high">Ha ha,<break time="1s"/>only kidding</prosody>'
+                  '<prosody pitch="x-high">Warning</prosody>. <prosody pitch="high">This cube will self destruct in 5 seconds <break time="1s"/>, 5 <break time="1s"/>, 4 <break time="1s"/>, 3</prosody>, <break time="1s"/>2<break time="1s"/>, <prosody pitch="low">1 <break time="1s"/>.</prosody> <prosody pitch="x-high">Ha ha,<break time="1s"/>only kidding</prosody>'
                   ] | random }}
-               </p>
-            {% endmacro %}  
+              </p>
+            {% endmacro %}
 
             {% macro coffee_timer() %}
               <p>
@@ -779,11 +922,11 @@ script:
                   'In 4 minutes time, <prosody pitch="high">your caffiene fix for today will be <break time="2s"/>ready.</prosody>'
                   ] | random  }}
               </p>
-           {% endmacro %} 
+            {% endmacro %} 
 
-           {% macro coffee_ready() %}
+            {% macro coffee_ready() %}
               <p>
-              {{ [  
+              {{ [
                   'Your coffee is ready. How would you like it?',          
                   '<prosody pitch="low">Ah</prosody>, smell that coffee. Get it while its hot',
                   'Your coffee is ready for pouring.',                    
@@ -815,7 +958,7 @@ script:
                   'My tummy feels a bit rumbly. Please rumble on to the Dining Room for some <prosody pitch="high">yummy</prosody> dinner'
                   ] | random }}
               </p>
-            {% endmacro %}  
+            {% endmacro %}
 
             {% macro media_system_on() %}
               <p>
@@ -825,11 +968,11 @@ script:
                   'The televisual devices have been turned on',
                   'I have turned on the gogglebox for your televisual viewing experience',
                   'I have activated the multimedia viewing apparatus, to help while away the time?'
-                  ] | random  }}
+                  ] | random }}
               </p>
             {% endmacro %}
 
-             {% macro media_system_off() %}
+            {% macro media_system_off() %}
               <p>
               {{ [
                   'media systems have been deactivated?',
@@ -837,11 +980,11 @@ script:
                   'The televisual devices have been turned off',
                   'I believe it might be time to see what is going on in the real world',
                   'now that you have had your fill of tv, might I suggest a return to reality'
-                  ] | random   }}
+                  ] | random }}
               </p>
             {% endmacro %}
 
-             {% macro washing_machine_done() %}
+            {% macro washing_machine_done() %}
               <p>
               {{ [
                   'The washing machine has completed its cycle. Better get the washing hung up to dry',   
@@ -852,7 +995,7 @@ script:
               </p>
             {% endmacro %}
 
-             {% macro washing_machine_done_again() %}
+            {% macro washing_machine_done_again() %}
               <p>
               {{ [
                   'The washing is still in the machine. Better get it out before it starts to smell, and I am sure you do not want that',   
@@ -862,7 +1005,6 @@ script:
                   ] | random }}
               </p>
             {% endmacro %}
-            
 
             {# a macro that removes all newline characters, empty spaces, and returns formatted text. Also replaces all Underscores with Spaces #}
             {%- macro cleanup(data) -%}
@@ -919,12 +1061,36 @@ script:
                 {{ goodnight() }}
               {% endif %}
 
+              {% if call_goodnight_secure == 1 %}
+                {{ goodnight_secure() }}
+              {% endif %}
+
+              {% if call_goodnight_not_secure == 1 %}
+                {{ goodnight_not_secure() }}
+              {% endif %}
+
+              {% if call_jamie_time_for_bed == 1 %}
+                {{ jamie_time_for_bed() }}
+              {% endif %}
+
+              {% if call_sean_time_for_bed == 1 %}
+                {{ sean_time_for_bed() }}
+              {% endif %}
+
               {% if call_boys_time_for_bed == 1 %}
                 {{ boys_time_for_bed() }}
               {% endif %}
 
-              {% if call_get_dressed == 1 %}
-                {{ get_dressed() }}
+              {% if call_get_dressed_sean == 1 %}
+                {{ get_dressed_sean() }}
+              {% endif %}
+
+              {% if call_get_dressed_jamie == 1 %}
+                {{ get_dressed_jamie() }}
+              {% endif %}
+
+              {% if call_get_dressed_schools_out == 1 %}
+                {{ get_dressed_schools_out() }}
               {% endif %}
 
               {% if call_brush_teeth == 1 %}
@@ -933,6 +1099,10 @@ script:
 
               {% if call_late_school == 1 %}
                 {{ late_school() }}
+              {% endif %}
+
+              {% if call_late_schools_out == 1 %}
+                {{ late_schools_out() }}
               {% endif %}
 
               {% if call_school_pick_up == 1 %}
@@ -951,6 +1121,14 @@ script:
                 {{ fridge_closed() }}
               {% endif %} 
 
+              {% if fridge_too_warm() == 1 %}
+                {{ fridge_too_warm() }}
+              {% endif %} 
+
+              {% if fridge_too_warm_again() == 1 %}
+                {{ fridge_too_warm_again() }}
+              {% endif %}
+
               {% if call_freezer_warning == 1 %}
                 {{ freezer_warning() }}
               {% endif %}
@@ -961,6 +1139,14 @@ script:
 
               {% if call_freezer_closed == 1 %}
                 {{ freezer_closed() }}
+              {% endif %} 
+
+              {% if freezer_too_warm() == 1 %}
+                {{ freezer_too_warm() }}
+              {% endif %} 
+
+              {% if freezer_too_warm_again() == 1 %}
+                {{ freezer_too_warm_again() }}
               {% endif %}
 
               {% if call_garage_dehumidifier_full == 1 %}
@@ -994,7 +1180,7 @@ script:
               {% if call_dinner_weekday == 1 %}
                 {{ dinner_weekday() }}
               {% endif %}
-              
+
               {% if call_media_system_on == 1 %}
                 {{ media_system_on() }}
               {% endif %}
@@ -1011,6 +1197,6 @@ script:
                 {{ washing_machine_done_again() }}
               {% endif %}
 
-              {%- endmacro -%}
+            {%- endmacro -%}
 
             {{- cleanup(mother_of_all_macros()) -}}
