@@ -1,0 +1,29 @@
+sequence:
+  - variables:
+      room: |
+        {% if where is defined %}
+          {{ where }}
+        {% elif room is defined %}
+          {{ room }}
+        {% else %}
+          NA
+        {% endif %}
+  - action: script.get_room_audio_v3_0
+    data:
+      room: |
+        {{room}}
+    response_variable: room_services
+  - alias: Wait for Jarvis to finish playing
+    wait_template: |
+      {{ not is_state(room_services.jarvis_speaker | string, "playing") }}
+    continue_on_timeout: true
+    timeout: "00:02:00"
+  - target:
+      entity_id: "{{ room_services.jarvis_speaker | string }} "
+    data:
+      media_content_type: music
+      media_content_id: |
+        {{ message }}
+    action: media_player.play_media
+alias: Clock Voice
+description: ""
