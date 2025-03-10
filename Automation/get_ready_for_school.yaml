@@ -1,0 +1,53 @@
+alias: Get ready for school
+description: ""
+triggers:
+  - at: input_datetime.get_ready_for_school_at
+    trigger: time
+conditions:
+  - condition: state
+    entity_id: calendar.school_day
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+actions:
+  - action: script.boys_get_dressed_announcement
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - action: script.boys_brush_teeth_announcement
+    data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  - action: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.living_room_tv
+    enabled: true
+  - action: media_player.turn_off
+    data: {}
+    target:
+      entity_id: media_player.sky_q_main
+    enabled: true
+  - delay:
+      hours: 0
+      minutes: 10
+      seconds: 0
+      milliseconds: 0
+  - action: script.boys_late_for_school
+    data: {}
+  - action: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.school_morning_announcement_played
+  - action: input_boolean.toggle
+    data: {}
+    target:
+      entity_id: input_boolean.sean_dressed_first
+mode: single
