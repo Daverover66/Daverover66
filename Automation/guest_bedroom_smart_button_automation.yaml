@@ -1,0 +1,31 @@
+alias: Guest Bedroom Smart Button Automation
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - event.smart_button_upstairs_1_action
+conditions:
+  - condition: template
+    value_template: "{{ trigger.from_state.state != 'unavailable' }}"
+actions:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'single' }}"
+            alias: Single Press
+        sequence:
+          - data: {}
+            action: script.spare_room_tv_toggle_2
+      - conditions:
+          - alias: Release
+            condition: template
+            value_template: "{{ trigger.to_state.attributes.event_type  == 'release' }}"
+          - condition: state
+            entity_id: input_boolean.guest_mode
+            state: "off"
+        sequence:
+          - data: {}
+            action: script.spare_room_night_light
+        alias: Activate Night Lights
+mode: single
+initial_state: true
