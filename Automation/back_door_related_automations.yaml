@@ -1,0 +1,166 @@
+alias: Back Door Related Automations
+description: Lights and announcements etc
+triggers:
+  - entity_id:
+      - binary_sensor.back_door_sensor_contact
+    to: "on"
+    id: Chime
+    from: "off"
+    trigger: state
+  - entity_id:
+      - binary_sensor.back_door_sensor_contact
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Door still open
+    trigger: state
+  - entity_id:
+      - binary_sensor.back_door_sensor_contact
+    from: "on"
+    to: "off"
+    id: Chime Off
+    trigger: state
+  - trigger: sun
+    event: sunrise
+    id: Sunrise
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Chime
+        sequence:
+          - alias: Turn on back door light if needed
+            if:
+              - condition: sun
+                before: sunrise
+                after: sunset
+            then:
+              - action: light.turn_on
+                target:
+                  entity_id: light.back_door_light
+                data:
+                  brightness: 255
+          - alias: Turn on back door zone light if needed
+            if: []
+            then:
+              - data: {}
+                target:
+                  entity_id: light.back_door_zone_light
+                action: light.turn_on
+          - if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.announcement_playing
+                state: "off"
+            then:
+              - action: media_player.play_media
+                data:
+                  entity_id: media_player.jarvis_kitchen_media_player
+                  media_content_id: http://192.168.0.95:8123/local/Sounds/tos-turboliftdoor.mp3
+                  media_content_type: music
+            alias: Play door swish if allowed
+      - conditions:
+          - condition: trigger
+            id:
+              - Chime Off
+        sequence:
+          - if:
+              - condition: state
+                entity_id: input_boolean.announcement_playing
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+            then:
+              - action: media_player.play_media
+                data:
+                  entity_id: media_player.jarvis_kitchen_media_player
+                  media_content_id: http://192.168.0.95:8123/local/Sounds/tos-turboliftdoor.mp3
+                  media_content_type: music
+            alias: Play door swish if allowed
+          - alias: Dim back door light to off if needed
+            if:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: light.back_door_light
+                    state: "on"
+            then:
+              - data: {}
+                action: script.back_door_light_dim_when_door_closed
+      - conditions:
+          - condition: trigger
+            id: Door Still Open
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.guest_mode
+                state: "off"
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{is_state('binary_sensor.dave_home','on')}}"
+            then:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: dave
+                  message: |
+                    The {{ trigger.to_state.attributes.friendly_name }} {{ [
+                      ' is standing open.',
+                      ' is open.',
+                      ' does not close on its own.',
+                      ' was left standing open.'
+                    ] | random }} {{ [
+                        'Can a human be so kind and close it?',
+                        'The air quality in this house has actually improved.',
+                        'Closing the door would improve the internal climate of the house.',
+                        'Hey. The door was just opened and this is crazy. But now you know. So close it maybe.',
+                        'If at first you do not succeed in closing the door, please try again. Like, Right now seems like a good time to try again.',
+                        'And the automatic door closer appears to be broken. So, you know what to do. Time to get physical.',
+                        'I would close it for you. But I lack legs. And Arms.'
+                    ] | random }}
+            else:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: gem
+                  message: |
+                    The {{ trigger.to_state.attributes.friendly_name }} {{ [
+                      ' is standing open.',
+                      ' is open.',
+                      ' does not close on its own.',
+                      ' was left standing open.'
+                    ] | random }} {{ [
+                        'Can a human be so kind and close it?',
+                        'The air quality in this house has actually improved.',
+                        'Closing the door would improve the internal climate of the house.',
+                        'Hey. The door was just opened and this is crazy. But now you know. So close it maybe.',
+                        'If at first you do not succeed in closing the door, please try again. Like, Right now seems like a good time to try again.',
+                        'And the automatic door closer appears to be broken. So, you know what to do. Time to get physical.',
+                        'I would close it for you. But I lack legs. And Arms.'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Sunrise
+        sequence:
+          - if:
+              - condition: state
+                entity_id: light.back_door_light
+                state: "on"
+            then:
+              - action: light.turn_off
+                target:
+                  entity_id: light.back_door_light
+                data: {}
+        alias: If the light is still on at sunrise, turn it off
+mode: restart
