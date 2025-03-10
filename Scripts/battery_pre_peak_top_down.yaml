@@ -22,10 +22,11 @@ sequence:
     action: timer.cancel
   - metadata: {}
     data:
-      where: "{{states('sensor.room_audio')}}"
-      message: >-
+      where: all
+      type: announcement
+      message: >
         Attention in the house.  The home battery has completed a half hour pree
         peak topup and its charge level is now a more healthy {{
         states('sensor.battery_state_of_charge') }}%.
-    action: script.speech_engine
+    action: script.jarvis_speech_engine_v3_0
 mode: single
