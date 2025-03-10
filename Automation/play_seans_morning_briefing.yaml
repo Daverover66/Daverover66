@@ -1,0 +1,26 @@
+alias: Play Seans Morning Briefing
+description: ""
+triggers:
+  - at: input_datetime.seans_morning_briefing
+    trigger: time
+conditions:
+  - condition: or
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.schoolday
+        state: "on"
+      - condition: state
+        entity_id: binary_sensor.fridayschool
+        state: "on"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.seans_morning_briefing_played
+    state: "off"
+actions:
+  - action: script.sean_briefing
+    data:
+      where: jamie's room
+mode: single
+initial_state: true
