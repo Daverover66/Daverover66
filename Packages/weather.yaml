@@ -6,7 +6,7 @@
 #   @original       :   https://github.com/Vasiley/Home-Assistant-Main/blob/master/packages/weather_alerts_nws.yaml
 # 
 #   @amended        :   Dave Forrester 
-#   @date           :   19/08/2024
+#   @date           :   09/03/2025
 ###############################################################################
 
 
@@ -200,7 +200,7 @@ template:
     - name: freeze_hours
       unique_id: freeze_hours_sensor
       state: >
-        {{ states('sensor.gw2000a_outdoor_temperature')  | int < 0 }}
+        {{ states('sensor.gw2000a_outdoor_temperature')  | float(0) < 0 }}
       device_class: cold
 
   - sensor:
@@ -755,7 +755,7 @@ template:
               'Later Today, ',
               'For the rest of the day,'
               ] | random }}
-            expect a high of {{ state_attr('sensor.current_forecast_summary','high_temp') }}.
+            expect a high of {{ state_attr('sensor.current_forecast_summary','high_temp') }}
             {%- if states('sensor.current_forecast_summary') == 'sunny' and is_state('binary_sensor.night','off')%}
               {{ [
                   'and sunny.', 
@@ -857,8 +857,8 @@ template:
           {{ [
               ' With a chance of frost. So you might want to consider covering plants up tonight. ', 
               ' With frosty conditions ahead. So I suggest you turn the greenhouse heater on.',
-              ' It is going to freeze overnight so get those plants covered up.',
-              ' Its going to be a chilly night tonight, so protect those tender plants. '
+              '. It is going to freeze overnight so get those plants covered up.',
+              '. Its going to be a chilly night tonight, so protect those tender plants. '
               ] | random }}
           {% endif %}
         {%- else -%}
@@ -866,8 +866,8 @@ template:
           {{ [
               ' With a chance of frost. So you might want to consider covering plants up tonight. ', 
               ' With frosty conditions ahead. So I suggest you turn the greenhouse heater on.',
-              ' It is going to freeze overnight so get those plants covered up.',
-              ' Its going to be a chilly night tonight, so protect those tender plants. '
+              '. It is going to freeze overnight so get those plants covered up.',
+              '. Its going to be a chilly night tonight, so protect those tender plants. '
               ] | random }}
           {% endif %}
         {% endif %} 
@@ -930,7 +930,7 @@ template:
       state: >-
         {%- macro getReport() -%}
         {% if is_state('binary_sensor.morning','on') %}
-          A little later the high temperature should be near {{ states('sensor.high_temperature_today') }}. 
+          A little later the high temperature should be near {{ states('sensor.high_temperature_today') }} 
           {% if is_state('sensor.clothing_forecast', 'Freezing') %} 
             so I suggest wearing a woolly hat and a thick coat.
           {% elif is_state('sensor.clothing_forecast','Cold') %} 
@@ -979,7 +979,7 @@ template:
               {{ states.sensor.clothing_forecast.state }} today so I suggest wearing shorts.
           {% endif %} 
         {% else %}
-          Based on the current temperature. 
+          Based on the current temperature
           {% if is_state('sensor.clothing_forecast', 'Freezing') %}
             It is freezing. so I suggest wearing a winter coat, hat and gloves if you are going out.
           {% elif is_state('sensor.clothing_forecast','Cold') %}
@@ -1200,429 +1200,6 @@ mqtt:
     - name: "ATH Max Soil Moisture"
       state_topic: "house/weather/athmaxsoilmoist"
 
-# automation:
 
-  ############ migrated to UI 19/09/2024 ############## 
-  # - id: update_weather_records 
-  #   alias: Update Weather Records
-  #   mode: queued
-  #   trigger:
-  #   # - platform: state
-  #   #   entity_id: sensor.recent_lightning_strikes
-  #   #   id: new_strike
-  #   - platform: state
-  #     entity_id: sensor.daily_max_wind_speed
-  #     id: new_gust
-  #   - platform: state
-  #     entity_id: sensor.gw2000a_wind_speed 
-  #     id: new_wind_speed
-  #   - platform: time
-  #     at: "23:55:00"
-  #     id: daily
-  #   - platform: time
-  #     at: "00:01:00"
-  #     id: save_stats
-  #   - platform: time
-  #     at: "00:03:00"
-  #     id: record_reset
-  #   - platform: time
-  #     at: "00:00:00"
-  #     id: record_reset
-  #   action:
-  #   - choose:
-  #     - conditions:
-  #         - condition: trigger
-  #           id: save_stats
-  #       sequence:
-  #         - action: mqtt.publish
-  #           data:
-  #             topic: house/weather/rain_guage_start
-  #             payload: "{{ states('sensor.gw2000a_daily_rain_rate') }}"
-  #             retain: true
-  #         - if:
-  #           - condition: numeric_state
-  #             entity_id: sensor.chill_time_yesterday
-  #             above: 0
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/chillhours
-  #               payload: >
-  #                 {% set total = (states('sensor.chill_time_yesterday') | float | round(1)) + (states('sensor.chill_hours') | float) | round(1) %}
-  #                 {{ total }}
-  #               retain: true
-  #         - if:
-  #           - condition: numeric_state
-  #             entity_id: sensor.freeze_time_yesterday
-  #             above: 0
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/freezehours
-  #               payload: >
-  #                 {% set total = (states('sensor.freeze_time_yesterday') | float | round(1)) + (states('sensor.freeze_hours') | float) | round(1) %}
-  #                 {{ total }}
-  #               retain: true
-  #     - conditions:
-  #         - condition: trigger
-  #           id: record_reset    
-  #       sequence:
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ now().day == 1 }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/monthlymaxtemp
-  #               payload: "{{ states('sensor.gw2000a_outdoor_temperature') }}"
-  #               retain: true
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/monthlylowtemp
-  #               payload: "{{ states('sensor.gw2000a_outdoor_temperature') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: time
-  #             weekday:
-  #             - sun
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/weekly_rainfall
-  #               payload: "{{ states('sensor.rainfall_last_week_2') }}"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ now().day == 28 }}"
-  #           - condition: template
-  #             value_template: "{{ now().month == 4 }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/chillhours
-  #               payload: "0"
-  #               retain: true
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/freezehours
-  #               payload: "0"
-  #               retain: true
-  #     # - conditions:
-  #     #     - condition: trigger
-  #     #       id: new_strike
-  #     #   sequence:
-  #     #     - if:
-  #     #       - condition: template
-  #     #         value_template: "{{ (states('sensor.recent_lightning_strikes') | float) > (states('sensor.max_lightning_strikes') | float) }}"
-  #     #       then:
-  #     #       - action: mqtt.publish
-  #     #         data:
-  #     #           topic: house/weather/maxstrikes
-  #     #           payload: "{{ states('sensor.recent_lightning_strikes') }}"
-  #     #           retain: true
-  #     - conditions:
-  #         - condition: trigger
-  #           id: new_wind_speed
-  #       sequence:
-  #         - action: mqtt.publish
-  #           data:
-  #             topic: house/weather/new_wind_speed
-  #             payload: >
-  #               {% if has_value('sensor.gw2000a_wind_speed') %}
-  #                 {{ states('sensor.gw2000a_wind_speed') | int }}
-  #               {% else %}
-  #                 0
-  #               {% endif %}
-  #             retain: true
-  #     - conditions:
-  #         - condition: trigger
-  #           id: new_gust
-  #       sequence:
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_wind_speed') | float) > (states('sensor.max_wind_gust') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxwind
-  #               payload: "{{ states('sensor.daily_max_wind_speed') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents
-  #             data:
-  #               title: "New Max Gust"
-  #               message: "Just recorded a gust at {{ states('sensor.daily_max_wind_speed') }} mph"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_wind_speed') | float) > (states('sensor.ath_wind_gust') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athwind
-  #               payload: "{{ states('sensor.daily_max_wind_speed') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH Gust"
-  #               message: "Just recorded a new ALL TIME HIGH WIND GUST: {{ states('sensor.daily_max_wind_speed') }} mph"
-  #           - delay: "00:00:30"
-  #     - conditions:
-  #         - condition: trigger
-  #           id: daily
-  #       sequence:
-  #         # - action: input_boolean.turn_off
-  #         #   entity_id: input_boolean.lightning_tweet
-  #         - action: mqtt.publish
-  #           data:
-  #             topic: house/weather/yesterday_rainfall_in
-  #             payload: "{{ state_attr('sensor.daily_rainfall_ut','last_period') | float }}"
-  #             retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_temp') | float) > (states('sensor.max_temp') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxtemp
-  #               payload: "{{ states('sensor.daily_max_temp') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_temp') | float) > (states('sensor.ath_max_temp') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxtemp
-  #               payload: "{{ states('sensor.daily_max_temp') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High Temp"
-  #               message: "Just recorded a new ALL TIME HIGH TEMP: {{ states('sensor.daily_max_temp') }} degrees."
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_low_temp') | float) < (states('sensor.low_temp') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/lowtemp
-  #               payload: "{{ states('sensor.daily_low_temp') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_low_temp') | float) < (states('sensor.ath_low_temp') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athlowtemp
-  #               payload: "{{ states('sensor.daily_low_temp') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH Low Temp"
-  #               message: "Just recorded a new ALL TIME LOW TEMP: {{ states('sensor.daily_low_temp') }} degrees."
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_rainfall_ut') | float) > (states('sensor.ath_daily_rain') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athdailyrain
-  #               payload: "{{ states('sensor.daily_rainfall_ut') }}"
-  #               retain: true
-  #           - action: script.text_notify
-  #             data_template:
-  #               who: "jeff"
-  #               title: "New Wettest Day"
-  #               message: "Just recorded a new ALL TIME Daily Rainfall: {{ states('sensor.ath_daily_rain') }} inches."
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_wind_speed') | float) > (states('sensor.max_wind_gust') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxwind
-  #               payload: "{{ states('sensor.daily_max_wind_speed') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: numeric_state
-  #             entity_id: sensor.daily_rainfall_ut
-  #             above: 0
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/daysrain
-  #               payload: >
-  #                 {% set total = states('sensor.days_with_rain') | int + 1 %}
-  #                 {{ total }}
-  #               retain: true
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/totalrainfall
-  #               payload: >
-  #                 {% set total = (states('sensor.daily_rainfall_ut') | float) + (states('sensor.total_rain_fall') | float) | round(1) %}
-  #                 {{ total }}
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_pressure') | float) > (states('sensor.max_pressure') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxpress
-  #               payload: "{{ states('sensor.daily_max_pressure') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_pressure') | float) > (states('sensor.ath_max_press') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxpress
-  #               payload: "{{ states('sensor.daily_max_pressure') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High Pressure"
-  #               message: "Just recorded a new ALL TIME HIGH BAROMETRIC PRESSURE: {{ states('sensor.daily_max_pressure') }} millibars."
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_low_pressure') | float) < (states('sensor.min_pressure') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/minpress
-  #               payload: "{{ states('sensor.daily_low_pressure') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_low_pressure') | float) < (states('sensor.ath_min_press') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athminpress
-  #               payload: "{{ states('sensor.daily_low_pressure') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH Low Pressure"
-  #               message: "Just recorded a new ALL TIME LOW BAROMETRIC PRESSURE: {{ states('sensor.daily_low_pressure') }} millibars."
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_humidity') | float) > (states('sensor.max_humidity') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxhum 
-  #               payload: "{{ states('sensor.daily_max_humidity') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_humidity') | float) > (states('sensor.ath_max_humidity') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxhum
-  #               payload: "{{ states('sensor.daily_max_humidity') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High Humidity Level"
-  #               message: "Just recorded a new ALL TIME HIGH HUMDITIY LEVEL: {{ states('sensor.daily_max_humidity') }}%"
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_min_humidity') | float) < (states('sensor.min_humidity') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/minhum
-  #               payload: "{{ states('sensor.daily_min_humidity') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_min_humidity') | float) < (states('sensor.ath_min_humidity') | float) }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athminhum
-  #               payload: "{{ states('sensor.daily_min_humidity') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH Low Humidity Level"
-  #               message: "Just recorded a new ALL TIME LOW HUMIDITY LEVEL: {{ states('sensor.daily_min_humidity') }}%"
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_solar_radiation') | float) > (states('sensor.max_solar_radiation') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxsolrad 
-  #               payload: "{{ states('sensor.daily_max_solar_radiation') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_solar_radiation') | float) > (states('sensor.ath_max_solar_radiation') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxsolrad
-  #               payload: "{{ states('sensor.daily_max_solar_radiation') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High Solar Radiation Level"
-  #               message: "Just recorded a new ALL TIME HIGH SOLAR RADIATION LEVEL: {{ states('sensor.daily_max_solar_radiation') }}%"
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_solar_lux') | float) > (states('sensor.max_solar_lux') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxsollux 
-  #               payload: "{{ states('sensor.daily_max_solar_lux') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_solar_lux') | float) > (states('sensor.ath_max_solar_lux') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxsollux
-  #               payload: "{{ states('sensor.daily_max_solar_lux') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High Solar Lux Level"
-  #               message: "Just recorded a new ALL TIME HIGH SOLAR LUX LEVEL: {{ states('sensor.daily_max_solar_lux') }}%"
-  #           - delay: "00:00:30"
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_uv_index') | float) > (states('sensor.max_uv_index') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/maxuv
-  #               payload: "{{ states('sensor.daily_max_uv_index') }}"
-  #               retain: true
-  #         - if:
-  #           - condition: template
-  #             value_template: "{{ (states('sensor.daily_max_uv_index') | float) > (states('sensor.ath_max_uv_index') | float)  }}"
-  #           then:
-  #           - action: mqtt.publish
-  #             data:
-  #               topic: house/weather/athmaxuv
-  #               payload: "{{ states('sensor.daily_max_uv_index') }}"
-  #               retain: true
-  #           - action: script.text_notify_parents 
-  #             data:
-  #               title: "New ATH High UV Index"
-  #               message: "Just recorded a new ALL TIME HIGH UV LEVEL: {{ states('sensor.daily_max_uv_index ') }}%"
-  #           - delay: "00:00:30"
 
 
