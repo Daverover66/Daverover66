@@ -1,14 +1,13 @@
 alias: Aurora Alert
 description: ""
-mode: single
 triggers:
   - entity_id:
-      - sensor.aurora_visibility_aurora_visibility
+      - sensor.aurora_aurora_visibility_visibility
     above: 10
     id: aurora on
     trigger: numeric_state
   - entity_id:
-      - sensor.aurora_visibility_aurora_visibility
+      - sensor.aurora_aurora_visibility_visibility
     below: 5
     id: aurora off
     trigger: numeric_state
@@ -27,12 +26,25 @@ actions:
           - condition: state
             entity_id: input_boolean.audible_notifications
             state: "on"
-          - action: script.jarvis_speech_engine
-            data:
-              where: dave
-              message: >-
-                Sorry to interrupt, but there is a good chance of seeing the
-                Northern Lights tonight.
+          - if:
+              - condition: state
+                entity_id: binary_sensor.dave_home
+                state: "on"
+            then:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: dave
+                  message: >-
+                    Sorry to interrupt, but there is a good chance of seeing the
+                    Northern Lights tonight.
+            else:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: gem
+                  message: >-
+                    Sorry to interrupt, but there is a good chance of seeing the
+                    Northern Lights tonight.
+            alias: Announce if Dave or Gem is home.
       - conditions:
           - condition: trigger
             id: aurora off
@@ -45,9 +57,23 @@ actions:
           - condition: state
             entity_id: input_boolean.audible_notifications
             state: "on"
-          - action: script.jarvis_speech_engine
-            data:
-              where: dave
-              message: >-
-                Sorry to interrupt, but there is a good chance you missed the
-                Northern Lights tonight.
+          - if:
+              - condition: state
+                entity_id: binary_sensor.dave_home
+                state: "on"
+            then:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: dave
+                  message: >-
+                    Sorry to interrupt, but there is a good chance you missed
+                    the Northern Lights tonight.
+            else:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: gem
+                  message: >-
+                    Sorry to interrupt, but there is a good chance you missed
+                    the Northern Lights tonight.
+            alias: Announce if Dave or Gem is home.
+mode: single
