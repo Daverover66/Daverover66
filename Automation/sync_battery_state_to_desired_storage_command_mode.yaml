@@ -1,0 +1,90 @@
+alias: Sync Battery State to Desired Storage Control Mode
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - input_select.desired_battery_storage_control_mode
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_select.desired_battery_storage_control_mode
+            state: Remote Control
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_control_mode
+                state: Remote Control
+            alias: If battery is not already in Remote Control
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_control_mode
+            type: select_option
+            option: Remote Control
+      - conditions:
+          - condition: state
+            entity_id: input_select.desired_battery_storage_control_mode
+            state: Maximize Self Consumption
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_control_mode
+                state: Maximize Self Consumption
+            alias: If battery is not already in MSC
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_control_mode
+            type: select_option
+            option: Maximize Self Consumption
+      - conditions:
+          - condition: state
+            entity_id: input_select.desired_battery_storage_control_mode
+            state: Time of Use
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_control_mode
+                state: Time of Use
+            alias: If battery is not already in TOU
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_control_mode
+            type: select_option
+            option: Time of Use
+      - conditions:
+          - condition: state
+            entity_id: input_select.desired_battery_storage_control_mode
+            state: Backup Only
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_control_mode
+                state: Backup Only
+            alias: If battery is not already in Backup Only
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_control_mode
+            type: select_option
+            option: Backup Only
+      - conditions:
+          - condition: state
+            entity_id: input_select.desired_battery_storage_control_mode
+            state: Disabled
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: select.solaredge_i1_storage_control_mode
+                state: Disabled
+            alias: If battery is not already in Remote Control
+        sequence:
+          - device_id: 952193e87f675ba7f7e32eda5500c572
+            domain: select
+            entity_id: select.solaredge_i1_storage_control_mode
+            type: select_option
+            option: Disabled
