@@ -40,6 +40,7 @@ triggers:
   - trigger: state
     entity_id:
       - binary_sensor.front_doorbell_camera_motion
+      - binary_sensor.front_door_person_detected
     id: Motion Detected
     from: "off"
     to: "on"
@@ -105,6 +106,21 @@ actions:
             data:
               option: Hi, please leave the package at the door. We will get it later.
             action: select.select_option
+          - action: browser_mod.popup
+            data:
+              dismissable: true
+              autoclose: false
+              browser_id:
+                - 026643b75a9d5ce11b9b97fd0df84055
+              content:
+                camera_view: live
+                type: picture-glance
+                entities: []
+                camera_image: camera.front_doorbell_camera_clear
+              title: Doorbell
+              timeout: 120000
+              size: normal
+            enabled: false
       - conditions:
           - condition: trigger
             id:
@@ -155,6 +171,9 @@ actions:
           - condition: state
             entity_id: input_boolean.doorbell_motion_no_trigger
             state: "off"
+          - condition: state
+            entity_id: binary_sensor.family_home
+            state: "off"
         sequence:
           - action: script.doorbell_camera_snapshot_ai_notify
             data: {}
@@ -176,5 +195,4 @@ actions:
             target:
               entity_id: input_boolean.doorbell_motion_no_trigger
             data: {}
-mode: parallel
-max: 10
+mode: restart
