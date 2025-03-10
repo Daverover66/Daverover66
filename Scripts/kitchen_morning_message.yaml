@@ -1,9 +1,5 @@
 alias: Kitchen Morning Message
 sequence:
-  - response_variable: room_services
-    data:
-      type: briefing
-    action: script.get_room_audio
   - response_variable: greeting
     data: {}
     action: script.get_tts_greeting
@@ -31,6 +27,8 @@ sequence:
         {{ briefing_data.family_birthday }}
 
         {{ briefing_data.bin_day }}
+
+        {{ briefing_data.clocks_change }}
 
         {{ dave_briefing.event}}
 
@@ -62,8 +60,6 @@ sequence:
 
         {{ energy_info.battery_charge_info }}
 
-        {{ energy_info.battery_grid_topup_needed }}
-
         {{ energy_info.car_battery_info }}
 
         {{ briefing_data.holiday_info }}
@@ -84,20 +80,20 @@ sequence:
     action: script.cleanup_text
   - data:
       where: kitchen
+      type: morning_briefing
       message: |
         {{ cleaned_briefing.text }}
       msg_summary: Gave the Kitchen briefing.
-      type: priority
-    action: script.jarvis_speech_engine
+    action: script.jarvis_speech_engine_v3_0
   - data: {}
     target:
-      entity_id: input_boolean.morning_briefing_playing
+      entity_id: input_boolean.announcement_playing
     action: input_boolean.toggle
   - delay:
       minutes: 3
   - data: {}
     target:
-      entity_id: input_boolean.morning_briefing_playing
+      entity_id: input_boolean.announcement_playing
     action: input_boolean.toggle
   - entity_id: input_boolean.morning_briefing_played
     action: input_boolean.turn_on
