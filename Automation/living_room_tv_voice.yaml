@@ -1,0 +1,23 @@
+alias: Living room tv voice
+description: ""
+triggers:
+  - trigger: conversation
+    command:
+      - TV on
+      - turn on the TV
+      - turn the TV on
+    id: "on"
+  - trigger: conversation
+    command:
+      - TV off
+      - turn off the TV
+      - turn the TV off
+    id: "off"
+conditions:
+  - condition: state
+    entity_id: assist_satellite.jarvis_downstairs_assist_satellite
+    state: processing
+actions:
+  - action: script.living_room_tv_toggle_2
+    data: {}
+mode: single
