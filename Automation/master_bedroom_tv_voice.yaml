@@ -1,0 +1,40 @@
+alias: Master Bedroom TV Voice
+description: ""
+triggers:
+  - trigger: conversation
+    command:
+      - TV on
+      - turn on the TV
+      - turn the TV on
+    id: "on"
+  - trigger: conversation
+    command:
+      - TV off
+      - turn off the TV
+      - turn the TV off
+    id: "off"
+conditions:
+  - condition: state
+    entity_id: assist_satellite.jarvis_main_bedroom_assist_satellite
+    state: processing
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - "on"
+        sequence:
+          - action: media_player.turn_on
+            data: {}
+            target:
+              entity_id: media_player.32_sharp_roku_tv
+      - conditions:
+          - condition: trigger
+            id:
+              - "off"
+        sequence:
+          - action: media_player.turn_off
+            data: {}
+            target:
+              entity_id: media_player.32_sharp_roku_tv
+mode: single
