@@ -1,0 +1,63 @@
+alias: Spare Bedroom Presence
+description: ""
+mode: parallel
+triggers:
+  - entity_id:
+      - binary_sensor.guest_bedroom_motion_occupancy
+    id: Room Presence
+    from: "off"
+    to: "on"
+    trigger: state
+  - entity_id:
+      - binary_sensor.guest_bedroom_motion_occupancy
+    id: Room Absence
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - switch.casper_switch_0
+    from: "off"
+    to: "on"
+    id: TV
+    trigger: state
+  - entity_id:
+      - media_player.guest_bedroom_echo_dot
+    id: Alexa
+    to: "true"
+    attribute: last_called
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Presence
+              - Alexa
+              - TV
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: guest_bedroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_guest_bedroom
+      - conditions:
+          - condition: trigger
+            id:
+              - Room Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_guest_bedroom
