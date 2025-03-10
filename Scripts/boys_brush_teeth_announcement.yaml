@@ -1,0 +1,46 @@
+sequence:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.8
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: living room
+      message: The time is {{ now().strftime("%I:%M %p") }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+  - action: media_player.play_media
+    data:
+      entity_id: media_player.jarvis_downstairs_media_player
+      media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+      media_content_type: music
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 4
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: living room
+      type: announcement
+      message: |
+        {{ [
+            'Sean and Jamie. Its time to go upstairs and brush your teeth. No pushing and no running, remember its not a race',
+            'Sean and Jamie. Its time to brush your teeth. Please go upstairs in an orderly fashion and no pushing or running',
+            ] | random }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.5
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+alias: Boys Brush Teeth Announcement
+description: ""
