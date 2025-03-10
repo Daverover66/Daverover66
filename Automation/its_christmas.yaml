@@ -1,0 +1,45 @@
+alias: Its Christmas
+description: Switches Govee lights to Christmas mode.
+triggers:
+  - trigger: numeric_state
+    entity_id:
+      - sensor.day_of_year
+    above: 334
+    id: "Christmas On "
+  - trigger: numeric_state
+    entity_id:
+      - sensor.day_of_year
+    above: 5
+    id: Christmas Off
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - "Christmas On "
+        sequence:
+          - action: automation.turn_off
+            target:
+              entity_id:
+                - automation.test_govee_lighting
+            data: {}
+          - action: automation.turn_on
+            target:
+              entity_id: automation.all_govee_lighting_christmas
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Christmas Off
+        sequence:
+          - action: automation.turn_off
+            target:
+              entity_id: automation.all_govee_lighting_christmas
+            data: {}
+          - action: automation.turn_on
+            target:
+              entity_id:
+                - automation.test_govee_lighting
+            data: {}
+mode: single
