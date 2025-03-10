@@ -1,0 +1,35 @@
+alias: HACS Updates Notify
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - sensor.hacs_updates_available
+    above: 1
+    id: Single Update
+    trigger: numeric_state
+  - entity_id:
+      - sensor.hacs_updates_available
+    above: 4
+    id: More Updates
+    trigger: numeric_state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Single Update
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: HACS Update
+              message: There is a new HACS component update available.
+      - conditions:
+          - condition: trigger
+            id:
+              - More Updates
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: More HACS Updates
+              message: There are now 5 HACS component updates waiting.
