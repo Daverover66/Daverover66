@@ -1,0 +1,212 @@
+alias: Kitchen Lights with Presence
+description: ""
+mode: parallel
+trace:
+  stored_traces: 20
+triggers:
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Lights On
+    trigger: state
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "on"
+    to: "off"
+    id: Lights Off
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+    from: "off"
+    to: "on"
+    id: BDZ On
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: BDZ Off
+    trigger: state
+  - entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+    below: input_number.low_light_threshold
+    id: Low Light
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    trigger: numeric_state
+  - entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    id: Good Light
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: numeric_state
+  - entity_id:
+      - binary_sensor.lights_out
+    to: "off"
+    id: Allow Lights on
+    trigger: state
+  - entity_id: binary_sensor.day
+    from: "on"
+    to: "off"
+    id: sunset
+    trigger: state
+  - entity_id:
+      - sensor.dave_location
+      - sensor.gem_location
+    from: Kitchen
+    id: Not in Kitchen
+    trigger: state
+  - entity_id:
+      - switch.adaptive_lighting_sleep_mode_kitchen_lights
+    from: "off"
+    to: "on"
+    id: Dim lights
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - sunset
+        sequence:
+          - action: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.under_shelf_lights_local
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights On
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights Off
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - BDZ On
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+                below: input_number.low_light_threshold
+              - condition: and
+                conditions:
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity_id: sensor.season
+                        state: autumn
+                      - condition: state
+                        entity_id: sensor.season
+                        state: winter
+                  - condition: time
+                    after: "17:35:00"
+                    before: "21:00:00"
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.back_door_zone_light
+      - conditions:
+          - condition: trigger
+            id:
+              - BDZ Off
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id: light.back_door_zone_light
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: light.kitchen_lights_2
+            state: "off"
+          - condition: state
+            entity_id: binary_sensor.kitchen_presence_sensor_presence_sensor_1
+            state: "on"
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - action: light.turn_off
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Allow Lights on
+          - condition: state
+            entity_id: input_boolean.room_occupied_kitchen
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_presence_sensor_light_sensor_light_level
+            below: input_number.low_light_threshold
+        sequence:
+          - action: light.turn_on
+            data: {}
+            target:
+              entity_id: light.kitchen_lights_2
+      - conditions:
+          - condition: trigger
+            id:
+              - Dim lights
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.kitchen_lights_2
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - condition: state
+            entity_id: binary_sensor.kitchen_occupied
+            state: "off"
+          - action: light.turn_off
+            target:
+              entity_id: light.kitchen_lights_2
+            data: {}
