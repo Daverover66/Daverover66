@@ -1,0 +1,62 @@
+alias: Kitchen Lights Needed
+description: Overrides kitchen lights with presence
+triggers:
+  - entity_id:
+      - switch.kitchen_light_switch_right
+    id: Light needed
+    from: "off"
+    to: "on"
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: binary_sensor.kitchen_occupied
+    state: "on"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Light needed
+        sequence:
+          - target:
+              entity_id: automation.kitchen_lights_with_presence_2
+            data:
+              stop_actions: true
+            action: automation.turn_off
+          - target:
+              entity_id: light.kitchen_lights_2
+            data:
+              kelvin: 6500
+              brightness_pct: 100
+            action: light.turn_on
+          - wait_for_trigger:
+              - entity_id:
+                  - binary_sensor.kitchen_occupied
+                from: "on"
+                to: "off"
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 0
+                trigger: state
+              - entity_id:
+                  - switch.kitchen_light_switch_right
+                id: Light not needed
+                from: "on"
+                to: "off"
+                trigger: state
+            timeout:
+              hours: 1
+              minutes: 0
+              seconds: 0
+              milliseconds: 0
+            continue_on_timeout: false
+          - target:
+              entity_id: automation.kitchen_lights_with_presence_2
+            data: {}
+            action: automation.turn_on
+          - target:
+              entity_id: light.kitchen_lights_2
+            data: {}
+            action: light.turn_off
+mode: restart
