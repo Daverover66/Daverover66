@@ -1,0 +1,60 @@
+alias: Dining Room Presence and Lights
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.dining_room_presence_sensor_occupancy
+    from: "off"
+    to: "on"
+    id: Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.dining_room_occupied
+    from: "on"
+    to: "off"
+    id: Absence
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Presence
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: dining_room
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_dining_room
+          - alias: If low light or nighttime turn on the light.
+            if:
+              - condition: or
+                conditions:
+                  - condition: numeric_state
+                    entity_id: sensor.dining_room_light_level
+                    below: 30
+                  - condition: sun
+                    before: sunrise
+                    after: sunset
+            then:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id:
+                    - input_boolean.dining_room_light_toggle
+                data: {}
+      - conditions:
+          - condition: trigger
+            id: Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.room_occupied_dining_room
+                - input_boolean.dining_room_light_toggle
+mode: restart
