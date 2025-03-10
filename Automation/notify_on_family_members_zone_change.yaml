@@ -1,0 +1,32 @@
+alias: Notify on family members zone change
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - person.david_forrester
+      - person.gem_forrester
+    to: null
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+conditions:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+actions:
+  - variables:
+      state_from: "{{ trigger.from_state.state }}"
+      state_to: "{{ trigger.to_state.state }}"
+      person: "{{ state_attr(trigger.entity_id, 'friendly_name') }}"
+      event: |-
+        {%- if state_from == 'not_home' -%}
+          {{ 'arrived' if state_to == 'home' else 'arrived at' }}
+        {%- else -%}
+          left
+        {%- endif -%}
+      zone: "{{ state_to if state_from == 'not_home' else state_from }}"
+      emoji: "{{ '🏠' if zone == 'home' else '📍' }}"
+  - action: script.text_notify_parents
+    data:
+      message: "{{ emoji }} {{ person }} has {{ event }} {{ zone }}"
