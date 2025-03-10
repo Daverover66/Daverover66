@@ -1,0 +1,239 @@
+alias: Heating Master Control
+description: Override heating when people are out
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.gem_home
+    from: "on"
+    to: "off"
+    id: Gem Out
+    for:
+      hours: 1
+      minutes: 0
+      seconds: 0
+  - trigger: state
+    entity_id:
+      - binary_sensor.gem_home
+    from: "off"
+    to: "on"
+    id: Gem In
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - trigger: state
+    entity_id:
+      - binary_sensor.family_home
+    from: "on"
+    to: "off"
+    id: Family Out
+  - trigger: state
+    entity_id:
+      - binary_sensor.family_home
+    from: "off"
+    to: "on"
+    id: Family Back
+  - trigger: state
+    entity_id:
+      - input_boolean.winter_mode
+    from: "on"
+    to: "off"
+    id: "Off"
+  - trigger: state
+    entity_id:
+      - input_boolean.winter_mode
+    from: "off"
+    to: "on"
+    id: "On"
+  - trigger: state
+    entity_id:
+      - climate.downstairs
+    attribute: temperature
+    id: Downstairs Target Temp
+    enabled: false
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Gem Out
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: sensor.day_of_week
+                state: Thursday
+              - condition: state
+                entity_id: sensor.day_of_week
+                state: Wednesday
+        sequence:
+          - alias: Capture heating status before
+            action: scene.create
+            data:
+              scene_id: office_heating_before
+              snapshot_entities:
+                - input_number.heating_comfort_temperature_office
+                - input_boolean.office_heating_on
+          - action: input_number.set_value
+            data:
+              value: 5
+            target:
+              entity_id:
+                - input_number.heating_comfort_temperature_office
+        alias: Office heating to min when Gem goes to Saughton House
+      - conditions:
+          - condition: trigger
+            id:
+              - Gem In
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: sensor.day_of_week
+                state: Thursday
+              - condition: state
+                entity_id: sensor.day_of_week
+                state: Wednesday
+        sequence:
+          - action: scene.turn_on
+            target:
+              entity_id: scene.office_heating_before
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Family Out
+          - condition: state
+            entity_id: input_boolean.winter_mode
+            state: "on"
+        sequence:
+          - action: scene.create
+            data:
+              scene_id: house_heating_before
+              snapshot_entities:
+                - input_boolean.winter_mode
+                - input_boolean.downstairs_heating_on
+                - input_boolean.upstairs_heating_on
+                - input_boolean.office_heating_on
+                - input_boolean.cloakroom_heating_on
+                - input_boolean.boys_rooms_heating_on
+                - input_boolean.en_suite_heating_on
+                - input_boolean.master_bedroom_heating_on
+                - input_number.heating_comfort_temperature
+                - input_number.heating_comfort_temperature_office
+                - input_number.heating_comfort_temperature_boys_rooms
+                - input_number.heating_comfort_temperature_cloakroom
+                - input_number.heating_comfort_temperature_downstairs
+                - input_number.heating_comfort_temperature_master_bedroom
+                - input_number.heating_comfort_temperature_upstairs
+                - input_number.heating_comfort_temperature_en_suite
+                - input_number.heating_eco_temperature
+                - input_number.heating_minimum_temperature
+            alias: Capture house heating before
+          - action: input_number.set_value
+            data:
+              value: 5
+            target:
+              entity_id:
+                - input_number.heating_comfort_temperature_boys_rooms
+                - input_number.heating_comfort_temperature_cloakroom
+                - input_number.heating_comfort_temperature_en_suite
+                - input_number.heating_comfort_temperature_master_bedroom
+                - input_number.heating_comfort_temperature_downstairs
+                - input_number.heating_comfort_temperature_upstairs
+                - input_number.heating_comfort_temperature_office
+      - conditions:
+          - condition: trigger
+            id:
+              - Family Back
+          - condition: state
+            entity_id: input_boolean.winter_mode
+            state: "on"
+        sequence:
+          - action: scene.turn_on
+            target:
+              entity_id: scene.house_heating_before
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.winter_mode
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.winter_mode
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - "On"
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id:
+                - input_boolean.downstairs_heating_on
+                - input_boolean.upstairs_heating_on
+                - input_boolean.cloakroom_heating_on
+                - input_boolean.master_bedroom_heating_on
+                - input_boolean.en_suite_heating_on
+                - input_boolean.office_heating_on
+                - input_boolean.boys_rooms_heating_on
+                - input_boolean.master_bedroom_heating_on
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - "Off"
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id:
+                - input_boolean.downstairs_heating_on
+                - input_boolean.upstairs_heating_on
+                - input_boolean.cloakroom_heating_on
+                - input_boolean.master_bedroom_heating_on
+                - input_boolean.en_suite_heating_on
+                - input_boolean.office_heating_on
+                - input_boolean.boys_rooms_heating_on
+                - input_boolean.master_bedroom_heating_on
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Downstairs Target Temp
+          - condition: template
+            value_template: "{{ trigger.to_state.context.id != none }}"
+          - condition: template
+            value_template: "{{ trigger.to_state.context.parent_id != none }}"
+          - condition: template
+            value_template: "{{ trigger.to_state.context.user_id == none }}"
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              message: target temp changed by automation
+              title: DOWNSTAIRS HEATING
+      - conditions:
+          - condition: trigger
+            id:
+              - Downstairs Target Temp
+          - condition: template
+            value_template: "{{ trigger.to_state.context.id != none }}"
+          - condition: template
+            value_template: "{{ trigger.to_state.context.parent_id == none }}"
+          - condition: template
+            value_template: "{{ trigger.to_state.context.user_id != none }}"
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              message: target temp changed by dashboard
+              title: DOWNSTAIRS HEATING
+mode: parallel
+max: 10
