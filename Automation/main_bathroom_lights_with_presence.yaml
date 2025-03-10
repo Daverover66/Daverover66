@@ -1,0 +1,184 @@
+alias: Main Bathroom Lights with Presence
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.main_bathroom_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Light On
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bathroom_presence_occupancy
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: Light Off
+    trigger: state
+  - alias: Bathroom Light off with Timer
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bathroom_light
+    id: Timer Done
+    enabled: true
+    trigger: event
+  - entity_id:
+      - binary_sensor.overnight
+    to: "on"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: Dim Lights
+    trigger: state
+  - entity_id:
+      - switch.main_bathroom_switch_light
+    from: "off"
+    id: Switch On
+    to: "on"
+    trigger: state
+  - entity_id:
+      - switch.main_bathroom_switch_light
+    from: "on"
+    id: Switch Off
+    to: "off"
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On
+          - condition: state
+            entity_id: binary_sensor.overnight
+            state: "off"
+          - condition: numeric_state
+            entity_id: sensor.main_bathroom_presence_illuminance
+            below: input_number.low_light_threshold
+        sequence:
+          - data:
+              color_temp: 200
+              brightness: 64
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_on
+          - target:
+              entity_id: timer.bathroom_light
+            data: {}
+            action: timer.start
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On
+          - condition: state
+            entity_id: binary_sensor.overnight
+            state: "on"
+        sequence:
+          - data:
+              rgb_color:
+                - 255
+                - 248
+                - 52
+              brightness: 26
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_on
+          - target:
+              entity_id: timer.bathroom_light
+            data: {}
+            action: timer.start
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off
+          - condition: state
+            entity_id: light.main_bathroom_light
+            state: "on"
+          - condition: state
+            entity_id: timer.bathroom_light
+            state: idle
+          - condition: state
+            entity_id: input_boolean.allow_main_bathroom_lights_max
+            state: "off"
+        sequence:
+          - data: {}
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Timer Done
+          - condition: state
+            entity_id: binary_sensor.main_bathroom_presence_occupancy
+            state: "off"
+          - condition: state
+            entity_id: light.main_bathroom_light
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.allow_main_bathroom_lights_max
+            state: "off"
+        sequence:
+          - target:
+              entity_id: light.main_bathroom_light
+            data: {}
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Dim Lights
+          - condition: state
+            entity_id: input_boolean.allow_main_bathroom_lights_max
+            state: "off"
+        sequence:
+          - data:
+              rgb_color:
+                - 255
+                - 248
+                - 52
+              brightness: 26
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_on
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - condition: state
+            entity_id: binary_sensor.main_bathroom_occupied
+            state: "off"
+          - data: {}
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Switch On
+        sequence:
+          - data:
+              color_temp: 200
+              brightness: 64
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Switch Off
+          - condition: state
+            entity_id: light.main_bathroom_light
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: light.main_bathroom_light
+            action: light.turn_off
+mode: single
