@@ -1,0 +1,32 @@
+alias: "Family has left "
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - binary_sensor.family_home
+    from: "on"
+    to: "off"
+    id: Auto
+    trigger: state
+  - entity_id:
+      - input_boolean.family_is_home
+    from: "on"
+    to: "off"
+    id: Manual
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Auto
+        sequence:
+          - action: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id: input_boolean.family_is_home
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.welcome_home
+            data: {}
