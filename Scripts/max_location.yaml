@@ -1,19 +1,8 @@
 alias: Max Location
 sequence:
-  - data: {}
-    action: alexa_media.update_last_called
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
   - data:
-      where: "{{ states('sensor.room_audio')}}"
+      where: all
       message: |
-        {% if states('sensor.max')  == 'not_home' %} 
-          I am unble to determine the exact location of Max at this time. 
-        {% else %}
-          Max is in the "{{ states('sensor.max')}}"
-        {% endif %}
-    action: script.speech_engine
+        Max is in the {{ states('sensor.max_location')}}
+    action: script.jarvis_speech_engine_v3_0
 description: ""
