@@ -1,0 +1,18 @@
+alias: Lightning Detected
+description: ""
+triggers:
+  - entity_id: binary_sensor.lightning_detected
+    to: "on"
+    from: "off"
+    trigger: state
+conditions:
+  - condition: state
+    entity_id: input_boolean.lightning_warning
+    state: "off"
+actions:
+  - action: script.text_notify_dave
+    data:
+      title: Lightning Detected!
+      message: "Lightning has been detected within 20 miles of the house. "
+  - action: input_boolean.turn_on
+    entity_id: input_boolean.lightning_warning
