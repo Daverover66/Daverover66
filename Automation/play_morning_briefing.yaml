@@ -1,0 +1,49 @@
+alias: Play Morning Briefing
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: presence
+    trigger: state
+  - at: input_datetime.morning_report
+    id: time
+    trigger: time
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: presence
+          - condition: state
+            entity_id: input_boolean.morning_briefing_played
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: time
+            after: input_datetime.morning_report_earliest_time
+            before: input_datetime.morning_report_latest_time
+        sequence:
+          - action: script.kitchen_morning_message
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: time
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: calendar.school_holidays
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.workday_sensor
+                state: "off"
+          - condition: state
+            entity_id: input_boolean.morning_briefing_played
+            state: "off"
+        sequence:
+          - action: script.kitchen_morning_message
+            data: {}
+mode: single
+initial_state: true
