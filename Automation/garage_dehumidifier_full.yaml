@@ -1,53 +1,42 @@
-############################################################ 
-#   @author         :   Dave Forrester                     #
-#   @date           :   17/08/2023                         #
-#   @automation     :   Garage Dehumidifier Water Tray     #
-#   @description    :   Lets me know when it's full        #
-#                                                          #
-#                                                          #
-#   @version        :   1.02                               #
-#   @modified       :   31/01/2024                         #
-############################################################
-
 alias: Garage Dehumdifier Water Tray Full
 description: ""
-trigger:
-  - platform: state
-    entity_id:
+triggers:
+  - entity_id:
       - sensor.garage_dehumidifier_water_tray_full
     from: not_full
     to: full
     id: Full
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sensor.garage_dehumidifier_water_tray_full
     from: full
     to: not_full
     id: Not Full
-  - platform: numeric_state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sensor.garage_thermometer_temperature
     below: sensor.garage_thermal_comfort_dew_point
     id: Rust Risk
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
       - sensor.garage_thermometer_temperature
-    above: 6
+    above: 8
     id: Restart
-  - platform: state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
       - humidifier.garage_dehumidifier_2
     to: "off"
     id: "Off"
-condition: []
-action:
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
             id:
               - Full
         sequence:
-          - service: script.text_notify_dave
+          - action: script.text_notify_dave
             data:
               message: |
                 {{[ 'The garage dehumidifier is full',
@@ -55,28 +44,39 @@ action:
                     'The garage humidity level is increasing exponentially']|random }}
               title: GARAGE DEHUMIDIFIER
             alias: Send a notification based on an input text helper
-          - if:
-              - condition: state
-                entity_id: binary_sensor.quiet_time
-                state: "off"
+          - alias: Broadcast message outside quiet time
+            if:
               - condition: state
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: script.speech_engine
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.announcement_playing
+                data: {}
+              - action: script.jarvis_speech_engine_v3_0
                 data:
-                  where: "{{ states('sensor.room_audio') }}"
+                  where: dave
+                  type: announcement
                   message: >-
-                    {{ [  '<prosody pitch="high">Excuse me. This is an important
-                    announcement for the man of the house</prosody>. The garage
-                    dehumidifier water tray is full. <prosody
-                    pitch="x-high">Please empty it</prosody>',   
-                          '<prosody pitch="high">Pardon my interruption</prosody>. I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
-                          '<prosody pitch="high">Information!</prosody> The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
-                          '<prosody pitch="high">Information!</prosody> The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
+                    {{ [  'This is an important announcement for the man of the
+                    house. The garage dehumidifier water tray is full. Please
+                    empty it.',   
+                          'I have detected a momentary increase in humidity in the garage. Perhaps the atmospheric water extraction device has extracted as much moisture as it can hold',   
+                          'The weather girls have reported a rise in humidity and a fall in barometric pressure. While it is not raining men, perhaps the garage dehumidifier is full',   
+                          'The garage rust prevention device has stalled. Unless you want your cars to disintegrate into a heap of iron oxide, might I suggest you take immediate action.'     
                         ]|random }}
-            alias: Broadcast message outside quiet time
-          - service: light.turn_on
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 15
+                  milliseconds: 0
+              - action: input_boolean.turn_off
+                target:
+                  entity_id:
+                    - input_boolean.announcement_playing
+                data: {}
+          - action: light.turn_on
             data:
               rgb_color:
                 - 133
@@ -85,125 +85,114 @@ action:
               brightness: 10
             target:
               entity_id: light.kitchen_aura_lamp_2
-          - service: input_boolean.turn_on
+          - action: input_boolean.turn_on
             data: {}
             target:
               entity_id: input_boolean.garage_dehumidifier_full
-          - service: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.allow_kitchen_aura_lamp
-            data: {}
       - conditions:
           - condition: trigger
             id:
               - Not Full
         sequence:
-          - service: input_boolean.turn_off
+          - action: input_boolean.turn_off
             data: {}
             target:
               entity_id: input_boolean.garage_dehumidifier_full
-          - if:
-              - condition: state
-                entity_id: binary_sensor.quiet_time
-                state: "off"
+          - alias: Broadcast message outside quiet time
+            if:
               - condition: state
                 entity_id: input_boolean.audible_notifications
                 state: "on"
             then:
-              - service: script.speech_engine
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.announcement_playing
+                data: {}
+              - action: script.jarvis_speech_engine_v3_0
                 data:
-                  where: "{{ states('sensor.room_audio') }}"
+                  where: dave
+                  type: announcement
                   message: >-
-                    {{ [  '<prosody pitch="low">Well now. Whoever emptied the
-                    garage dehumidifier, thank you.</prosody>',   
-                          '<prosody pitch="low">I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.</prosody>',   
-                          '<prosody pitch="low">The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more</prosody>',   
-                          '<prosody pitch="low">The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.</prosody>'     
+                    {{ [  'Well now. Whoever emptied the garage dehumidifier,
+                    thank you.',   
+                          'I have detected a slightly longer term reduction in humidity in the garage. Thankfully, its because the atmospheric water extraction device has once again commenced extracting moisture.',   
+                          'The weather girls have reported a fall in humidity and a increase in barometric pressure. While it is not raining men, it is good to see the garage dehumidifier is empty once more',   
+                          'The garage rust prevention device has recommenced operation. You have saved your cars from disintegrating into a heap of iron oxide.'     
                         ]|random }}
-            alias: Broadcast message outside quiet time
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 15
+                  milliseconds: 0
+              - action: input_boolean.turn_off
+                target:
+                  entity_id:
+                    - input_boolean.announcement_playing
+                data: {}
           - if:
-              - condition: template
-                value_template: >-
-                  {{is_state('sensor.current_energy_rate','input_boolean.plunge_pricing')}}
-                alias: If Plunge Pricing
+              - condition: state
+                entity_id: binary_sensor.morning
+                state: "on"
+                alias: If Morning
             then:
-              - service: light.turn_on
+              - action: light.turn_on
                 data:
-                  rgb_color:
-                    - 0
-                    - 0
-                    - 255
+                  effect: Morning
                   brightness_pct: 1
                 target:
                   entity_id: light.kitchen_aura_lamp_2
             else:
               - if:
-                  - condition: template
-                    value_template: >-
-                      {{is_state('sensor.current_energy_rate','input_boolean.cheap_energy')}}
-                    alias: If Cheap Energy
+                  - condition: state
+                    entity_id: binary_sensor.lunchtime
+                    state: "on"
+                    alias: If Lunchtime
                 then:
-                  - service: light.turn_on
+                  - action: light.turn_on
                     data:
-                      rgb_color:
-                        - 0
-                        - 255
-                        - 0
+                      effect: Falling Petals
                       brightness_pct: 1
                     target:
                       entity_id: light.kitchen_aura_lamp_2
                 else:
                   - if:
-                      - condition: template
-                        value_template: >-
-                          {{is_state('sensor.current_energy_rate','input_boolean.medium_cost_energy')}}
-                        alias: If Medium Cost Energy
+                      - condition: state
+                        entity_id: binary_sensor.afternoon
+                        state: "on"
+                        alias: If Afternoon
                     then:
-                      - service: light.turn_on
+                      - action: light.turn_on
                         data:
-                          rgb_color:
-                            - 255
-                            - 255
-                            - 0
+                          effect: Forest
                           brightness_pct: 1
                         target:
                           entity_id: light.kitchen_aura_lamp_2
                     else:
                       - if:
-                          - condition: template
-                            value_template: >-
-                              {{is_state('sensor.current_energy_rate','input_boolean.expensive_energy')}}
-                            alias: If Expensive Energy
+                          - condition: state
+                            entity_id: binary_sensor.dinner_time
+                            state: "on"
+                            alias: If Dinnertime
                         then:
-                          - service: light.turn_on
+                          - action: light.turn_on
                             data:
-                              rgb_color:
-                                - 255
-                                - 153
-                                - 0
+                              effect: Eating Dots
                               brightness_pct: 1
                             target:
                               entity_id: light.kitchen_aura_lamp_2
                         else:
-                          - service: light.turn_on
+                          - action: light.turn_on
                             target:
-                              entity_id: light.kitchen_aura_lamp
+                              entity_id: light.kitchen_aura_lamp_2
                             data:
-                              rgb_color:
-                                - 255
-                                - 0
-                                - 0
+                              effect: Firefly
                               brightness_pct: 1
-          - service: input_boolean.turn_on
-            target:
-              entity_id: input_boolean.allow_kitchen_aura_lamp
-            data: {}
       - conditions:
           - condition: trigger
             id:
               - Rust Risk
         sequence:
-          - service: script.text_notify_dave
+          - action: script.text_notify_dave
             data:
               message: Risk of condensation in the garage
               title: RISK OF RUST FORMATION
@@ -214,27 +203,24 @@ action:
           - condition: state
             entity_id: humidifier.garage_dehumidifier_2
             state: "off"
+          - condition: numeric_state
+            entity_id: sensor.garage_thermometer_humidity
+            above: 60
         sequence:
-          - service: humidifier.turn_on
+          - action: humidifier.turn_on
             target:
               entity_id: humidifier.garage_dehumidifier_2
             data: {}
-          - service: script.text_notify_dave
-            data:
-              message: The garage temp has risen enough to restart the dehumidifier
-              title: DEHUMIDIFIER ON
       - conditions:
           - condition: trigger
             id:
               - "Off"
           - condition: numeric_state
             entity_id: sensor.garage_thermometer_temperature
-            below: 6
+            below: 10
         sequence:
-          - service: script.text_notify_dave
+          - action: script.text_notify_dave
             data:
               title: DEHUMIDIFIER OFF
               message: The garage dehumdifier has turned off due to low temperature.
 mode: restart
-
-
