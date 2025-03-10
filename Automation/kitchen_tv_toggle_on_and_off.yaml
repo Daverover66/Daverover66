@@ -1,0 +1,38 @@
+alias: Kitchen TV Toggle On and Off
+description: ""
+triggers:
+  - entity_id:
+      - media_player.sky_q_kitchen_mini_2
+    id: Ingrid & Sky toggle on
+    not_from:
+      - unknown
+      - unavailable
+      - paused
+    to: playing
+    trigger: state
+  - entity_id:
+      - media_player.sky_q_kitchen_mini_2
+    id: Ingrid & Sky toggle off
+    not_from:
+      - unknown
+      - unavailable
+      - paused
+    to: "off"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Ingrid & Sky toggle on
+        sequence:
+          - action: script.kitchen_tv_toggle
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: Ingrid & Sky toggle off
+        sequence:
+          - action: script.kitchen_tv_toggle
+            data: {}
+mode: single
+initial_state: true
