@@ -1,0 +1,93 @@
+alias: Bedtime and Get up Actions
+description: A list of things that happen in the house when we go to bed and then get up.
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.master_bed_occupancy_bed_occupied_both
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: someone is up
+  - trigger: state
+    entity_id:
+      - binary_sensor.master_bed_occupancy_bed_occupied_both
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: we are in bed
+    enabled: true
+  - trigger: state
+    entity_id:
+      - binary_sensor.master_bed_occupancy_bed_occupied_either
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: we are up
+  - trigger: state
+    entity_id:
+      - binary_sensor.master_bed_occupancy_bed_occupied_either
+    from: "off"
+    to: "on"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: someone is in bed
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - we are in bed
+          - condition: time
+            after: "21:30:00"
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - action: script.goodnight_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - we are up
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "on"
+          - condition: time
+            after: "06:55:00"
+            before: "21:00:00"
+        sequence:
+          - action: script.good_morning_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - someone is in bed
+          - condition: time
+            after: "21:00:00"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.dave_home
+                state: "off"
+              - condition: state
+                entity_id: binary_sensor.gem_home
+                state: "off"
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - action: script.goodnight_2
+            data: {}
+mode: single
