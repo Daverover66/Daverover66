@@ -1,1 +1,21 @@
+alias: Battery pre-peak top up
+sequence:
+  - metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.home_battery_grid_charging
+    action: input_boolean.turn_on
+  - metadata: {}
+    data:
+      where: all
+      type: announcement
+      message: >
+        Attention in the house.  The home battery is performing a half hour pree
+        peak topup, as its charge level is {{
+        states('sensor.battery_state_of_charge') }}%.
+    action: script.jarvis_speech_engine_v3_0
+  - metadata: {}
+    data: {}
+    action: script.grid_charge_battery
+mode: single
 
