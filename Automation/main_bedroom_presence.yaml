@@ -1,0 +1,155 @@
+alias: Main Bedroom Presence
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Bedroom Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_1
+    from: "on"
+    to: "off"
+    id: Bedroom Absence
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_4
+    from: "off"
+    to: "on"
+    id: Dads Side Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_4
+    from: "on"
+    to: "off"
+    id: Dads Side Absence
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_3
+    from: "off"
+    to: "on"
+    id: Mums Side Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_07ff_presence_sensor_3
+    from: "on"
+    to: "off"
+    id: Mums Side Absence
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+    from: "off"
+    to: "on"
+    id: En Suite Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.main_bedroom_fp2_presence_sensor_2
+    from: "on"
+    to: "off"
+    id: En Suite Absence
+    trigger: state
+  - entity_id:
+      - media_player.main_bedroom_dot
+    attribute: last_called
+    to: "true"
+    id: Alexa
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Bedroom Presence
+              - Alexa
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: main_bedroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_main_bedroom
+      - conditions:
+          - condition: trigger
+            id: Bedroom Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_main_bedroom
+      - conditions:
+          - condition: trigger
+            id: Dads Side Presence
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: dads_side_of_bed
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.dad_s_side_of_bed_occupied
+      - conditions:
+          - condition: trigger
+            id: Dads Side Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.dad_s_side_of_bed_occupied
+      - conditions:
+          - condition: trigger
+            id: Mums Side Presence
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: mums_side_of_bed
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.mum_s_side_of_bed_occupied
+      - conditions:
+          - condition: trigger
+            id: Mums Side Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.mum_s_side_of_bed_occupied
+      - conditions:
+          - condition: trigger
+            id: En Suite Presence
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: en_suite_bathroom
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_en_suite_bathroom
+      - conditions:
+          - condition: trigger
+            id: En Suite Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_en_suite_bathroom
+mode: parallel
