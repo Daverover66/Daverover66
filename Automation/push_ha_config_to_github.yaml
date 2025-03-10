@@ -1,0 +1,10 @@
+alias: Push HA Config to GitHub
+description: ""
+triggers:
+  - trigger: time
+    at: "02:00:00"
+conditions: []
+actions:
+  - action: shell_command.pushupdates_to_github
+    data: {}
+mode: single
