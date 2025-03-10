@@ -1,0 +1,67 @@
+alias: Kitchen Tablet Charge Toggle
+description: Maintain charge level of kitchen tablet between 30% and 100%
+triggers:
+  - entity_id: sensor.sm_t220_battery_level
+    below: 30
+    id: Kitchen Tablet Battery Low
+    trigger: numeric_state
+  - entity_id:
+      - sensor.sm_t220_battery_level
+    above: 98
+    id: Kitchen Tablet Battery Charged
+    trigger: numeric_state
+  - entity_id:
+      - sensor.weather_display_battery_level_2
+    below: 30
+    id: Weather Tablet Battery Low
+    trigger: numeric_state
+  - entity_id:
+      - sensor.weather_display_battery_level_2
+    above: 99
+    id: Weather Tablet Battery Charged
+    trigger: numeric_state
+    enabled: true
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Kitchen Tablet Battery Low
+        sequence:
+          - action: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.kitchen_tablet_local
+      - conditions:
+          - condition: trigger
+            id: Kitchen Tablet Battery Charged
+        sequence:
+          - action: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.kitchen_tablet_local
+      - conditions:
+          - condition: trigger
+            id:
+              - Weather Tablet Battery Low
+        sequence:
+          - action: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.weather_display_none
+      - conditions:
+          - condition: trigger
+            id:
+              - Weather Tablet Battery Charged
+        sequence:
+          - action: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.weather_display_none
+mode: queued
+initial_state: true
+max: 10
