@@ -1,0 +1,56 @@
+sequence:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: "{{ states('input_number.jarvis_volume_level_announcement') | float(0) }}"
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+  - action: tts.cloud_say
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+    data:
+      cache: false
+      message: The time is {{ now().strftime("%I:%M %p") }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+  - action: media_player.play_media
+    data:
+      entity_id: media_player.jarvis_downstairs_media_player
+      media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+      media_content_type: music
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 4
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: living room
+      type: announcement
+      message: |
+        {{ [
+            'Jamie. Its your bedtime now. Please go upstairs, brush your teeth and get ready for bed',
+            'Jamie, its now time for you to visit the land of nod. Upstairs please and get ready for bed',
+            'Jamie. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day',
+            'Jamie. Thats the end of another day for you. Please make your way upstairs and get ready for bed.  and dont forget to brush your teeth.',
+            'Jamie. You look really tired after a busy day. So, off you go to bed and get some much needed sleep.' 
+            ] | random }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: "{{ states('input_number.jarvis_volume_level_default') | float(0) }}"
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+  - action: input_boolean.turn_on
+    target:
+      entity_id:
+        - input_boolean.jamies_bedtime_announcement_played
+    data: {}
+alias: Jamie Bedtime Announcement
+description: ""
