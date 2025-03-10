@@ -1,0 +1,42 @@
+alias: Good Morning
+sequence:
+  - parallel:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.guest_bedroom_night_lights_active
+            - input_boolean.security_system_status
+            - input_boolean.we_are_in_bed
+        data: {}
+      - action: input_boolean.turn_on
+        target:
+          entity_id:
+            - input_boolean.guest_bedroom_bedside_lamps_active
+            - input_boolean.main_bedroom_bedside_lamps_active
+            - input_boolean.guest_bedroom_allow_lights_off
+            - input_boolean.audible_notifications
+            - input_boolean.allow_en_suite_lights_on
+        data: {}
+      - target:
+          entity_id: light.xmas_string_lights_3_2
+        data:
+          brightness_pct: 50
+          effect: Morning
+        action: light.turn_on
+      - target:
+          entity_id:
+            - light.bed_lamps_3
+            - light.stair_lights_2
+        data:
+          brightness_pct: 5
+          effect: Morning
+        action: light.turn_on
+    alias: Set lighting toggles and turn on mood lighting.
+  - condition: state
+    entity_id: binary_sensor.living_room_occupied
+    state: "off"
+  - action: scene.turn_on
+    target:
+      entity_id: scene.ready_for_morning
+    data: {}
+description: ""
