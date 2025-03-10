@@ -1,0 +1,15 @@
+alias: Safe Shutdown on power loss
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - sensor.myups_battery_charge
+    below: 20
+    trigger: numeric_state
+conditions:
+  - condition: numeric_state
+    entity_id: sensor.solaredge_m1_ac_voltage_ln
+    below: 100
+actions:
+  - action: hassio.host_shutdown
+    data: {}
