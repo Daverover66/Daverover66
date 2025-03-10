@@ -1,0 +1,14 @@
+alias: "ESPHome: Update all ESPHome devices"
+description: ""
+triggers:
+  - trigger: template
+    value_template: >-
+      {{ integration_entities('esphome') | select('match','^update.') |
+      select('is_state','on') | list | count > 0 }}
+    alias: When an ESPHome update is available
+conditions: []
+actions:
+  - action: script.esphome_update_all_esphome_devices
+    metadata: {}
+    data: {}
+mode: single
