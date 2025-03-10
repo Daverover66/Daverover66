@@ -1,0 +1,54 @@
+sequence:
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.8
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: living room
+      message: The time is {{ now().strftime("%I:%M %p") }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+  - action: media_player.play_media
+    data:
+      entity_id: media_player.jarvis_downstairs_media_player
+      media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+      media_content_type: music
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 4
+  - action: script.jarvis_speech_engine_v3_0
+    data:
+      where: living room
+      message: |
+        {{ [
+            'Boys. Its bedtime now for you both. Please go upstairs, brush your teeth and get ready for bed',
+            'Sean and Jamie. its now time for you both to visit the land of nod. Upstairs please and get ready for bed',
+            'Jamie and Sean. The time has come to say goodnight. To say sleep tight till the morning light. The time has come to say goodnight. At the end of a lovely day. For you both.',
+            'Boys. Thats the end of another day for you both. Please make your way upstairs and get ready for bed.  and dont forget to brush your teeth.',
+            'Boys. You both look really tired. I know that you are both completely engrossed in what your doing. However, its now time to go to bed. So, off the two of you go' 
+            ] | random }}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - action: media_player.volume_set
+    metadata: {}
+    data:
+      volume_level: 0.5
+    target:
+      entity_id: media_player.jarvis_downstairs_media_player
+  - action: input_boolean.turn_on
+    target:
+      entity_id:
+        - input_boolean.seans_bedtime_announcement_played
+        - input_boolean.jamies_bedtime_announcement_played
+    data: {}
+alias: Boys Bedtime Announcement
+description: ""
