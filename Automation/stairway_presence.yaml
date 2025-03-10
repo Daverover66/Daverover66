@@ -1,0 +1,75 @@
+alias: Stairway Presence
+description: ""
+mode: parallel
+triggers:
+  - entity_id:
+      - binary_sensor.lower_landing_motion_occupancy
+      - binary_sensor.upper_landing_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.lower_landing_motion_occupancy
+      - binary_sensor.upper_landing_presence_occupancy
+    from: "on"
+    to: "off"
+    id: Absence
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Presence
+          - condition: template
+            value_template: "{{ \"Lower\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: lower_landing
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.lower_landing_occupancy
+      - conditions:
+          - condition: trigger
+            id: Presence
+          - condition: template
+            value_template: "{{ \"Upper\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - action: input_text.set_value
+            data:
+              value: upper_landing
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.upper_landing_occupied
+      - conditions:
+          - condition: trigger
+            id: Absence
+          - condition: template
+            value_template: "{{ \"Lower\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.lower_landing_occupancy
+      - conditions:
+          - condition: trigger
+            id: Absence
+          - condition: template
+            value_template: "{{ \"Upper\" in trigger.to_state.attributes.friendly_name }}"
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.upper_landing_occupied
