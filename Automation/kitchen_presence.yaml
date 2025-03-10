@@ -1,0 +1,231 @@
+alias: Kitchen Presence
+description: ""
+mode: parallel
+max: 10
+triggers:
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Kitchen Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_2
+    from: "off"
+    to: "on"
+    id: Table Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+    from: "off"
+    to: "on"
+    id: Back Door Presence
+    trigger: state
+  - entity_id:
+      - sensor.utility_room_motion
+    from: Clear
+    to: Detected
+    id: Utility Presence
+    trigger: state
+  - entity_id: binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_5
+    from: "off"
+    to: "on"
+    id: Sink Presence
+    trigger: state
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_1
+    from: "on"
+    to: "off"
+    id: Kitchen Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.kitchen_presence_sensor_presence_sensor_2
+    from: "on"
+    to: "off"
+    id: Table Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3
+    from: "on"
+    to: "off"
+    id: Back Door Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - sensor.utility_room_motion
+    from: Detected
+    to: Clear
+    id: Utility Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id: binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_5
+    from: "on"
+    to: "off"
+    id: Sink Absence
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - media_player.kitchen_echo_show
+    attribute: last_called
+    to: "true"
+    id: Alexa
+    trigger: state
+  - entity_id:
+      - switch.ingrid
+    from: "off"
+    to: "on"
+    id: TV
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Kitchen Presence
+              - Alexa
+              - TV
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: kitchen
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.room_occupied_kitchen
+      - conditions:
+          - condition: trigger
+            id:
+              - Kitchen Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.room_occupied_kitchen
+      - conditions:
+          - condition: trigger
+            id:
+              - Table Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: kitchen_table
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_table_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Table Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_table_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Back Door Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: back_door_zone
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.back_door_zone_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Back Door Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.back_door_zone_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Sink Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: kitchen_sink
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_sink_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Sink Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.kitchen_sink_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Utility Presence
+        sequence:
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: utility_room
+            target:
+              entity_id: input_text.room_presence
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.utility_room_occupied
+      - conditions:
+          - condition: trigger
+            id:
+              - Utility Absence
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.utility_room_occupied
