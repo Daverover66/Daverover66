@@ -1,0 +1,72 @@
+alias: Tado Controller & Bridge Monitor
+description: >-
+  Notify me if the Tado Controller or Tado Bridge goes offline for more than 5
+  minutes.
+triggers:
+  - entity_id:
+      - binary_sensor.bp2744464640_connection_state
+    from: "on"
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Tado Controller Unavailable
+    trigger: state
+  - entity_id:
+      - binary_sensor.bp2744464640_connection_state
+    from: "on"
+    to: unknown
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Tado Controller State Unknown
+    trigger: state
+  - type: not_connected
+    device_id: 863461778a01242acbfb0853707e2890
+    entity_id: binary_sensor.ib1613380096_connection_state
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Tado Bridge Disconnected
+    trigger: device
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: Tado Controller Unavailable
+              - condition: trigger
+                id: Tado Controller State Unknown
+        sequence:
+          - action: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+            data:
+              message: The heating controller is offline
+              title: HEATING
+            alias: Send a notification based on an input text helper
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              type: announcement
+              message: The heating controller is offline
+      - conditions:
+          - condition: trigger
+            id: Tado Bridge Disconnected
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              type: announcement
+              message: The tado bridge is offline
+mode: single
