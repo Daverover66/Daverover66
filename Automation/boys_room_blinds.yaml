@@ -1,0 +1,83 @@
+alias: Boys' room blinds
+description: ""
+triggers:
+  - at: "07:30:00"
+    id: weekday open
+    trigger: time
+  - at: "08:00:00"
+    id: weekend open
+    trigger: time
+  - trigger: sun
+    event: sunset
+    offset: 0
+    id: Winter close
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - weekday open
+          - condition: state
+            entity_id: sensor.day_of_week
+            state:
+              - Monday
+              - Tuesday
+              - Wednesday
+              - Thursday
+              - Friday
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.schoolday
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.fridayschool
+                state: "on"
+            alias: If it is a school day
+        sequence:
+          - action: cover.open_cover
+            target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - weekday open
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: sensor.day_of_week
+                state:
+                  - Saturday
+                  - Sunday
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: binary_sensor.schoolday
+                    state: "off"
+                  - condition: state
+                    entity_id: binary_sensor.fridayschool
+                    state: "off"
+            alias: If weekend or school holiday
+        sequence:
+          - action: cover.open_cover
+            target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Winter close
+        sequence:
+          - action: cover.close_cover
+            target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            data: {}
+mode: single
