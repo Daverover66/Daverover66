@@ -20,32 +20,50 @@ schedule:
   general_heating_schedule:
     name: "General Heating Schedule"
     monday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     tuesday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     wednesday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     thursday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     friday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     saturday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
     sunday:
-      - from: "06:45:00"
+      - from: "06:50:00"
         to: "21:30:00"
 
-  dining_room_heating_schedule:
-    name: "Dining Room Heating Schedule"
+  boys_heating_schedule:
+    name: "Boys Heating Schedule"
+    monday:
+      - from: "07:15:00"
+        to: "19:30:00"
+    tuesday:
+      - from: "07:15:00"
+        to: "19:30:00"
+    wednesday:
+      - from: "07:15:00"
+        to: "19:30:00"
+    thursday:
+      - from: "07:15:00"
+        to: "19:30:00"
+    friday:
+      - from: "07:15:00"
+        to: "20:00:00"
+    saturday:
+      - from: "07:15:00"
+        to: "20:00:00"
     sunday:
-      - from: "14:00:00"
-        to: "16:00:00"
+      - from: "07:15:00"
+        to: "20:00:00"
 
   office_heating_schedule:
     name: "Office Heating Schedule"
@@ -63,21 +81,157 @@ schedule:
         to: "17:30:00"
     friday:
       - from: "06:45:00"
-        to: "17:30:00" 
+        to: "17:30:00"
+
+  holiday_heating_schedule: 
+    name: Holiday Heating Schedule 
+    monday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    tuesday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    wednesday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    thursday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    friday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    saturday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+    sunday:
+      - from: "06:35:00"
+        to: "07:35:00"
+      - from: "21:00:00"
+        to: "22:00:00"
+
+  
+
+###########################
+#         Select          #
+###########################
+input_select:
+  heating_schedules:
+    name: Heating Schedules 
+    options:
+      - General Heating Schedule
+      - Holiday Heating Schedule
+      - Office Heating Schedule
+      - Boys Heating Schedule
+    initial: General Heating Schedule
+    icon: mdi:form-dropdown 
+
 
 ###########################
 #         Number          #
 ###########################
 
 input_number:
-  heating_comfort_temperature:
-    name: Heating Comfort Temperature
-    initial: 12
-    min: 12
+  heating_comfort_temperature_upstairs:
+    name: Comfort Temperature Upstairs 
+    initial: 19
+    min: 5
     max: 25
     step: 0.5
-    mode: slider
-    icon: mdi:heatwave
+    mode: box 
+    icon: mdi:bed
+
+  heating_comfort_temperature_downstairs:
+    name: Comfort Temperature Downstairs 
+    initial: 18
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:sofa 
+
+  heating_comfort_temperature_office:
+    name: Comfort Temperature Office 
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:desk 
+
+  heating_comfort_temperature_boys_rooms:
+    name: Comfort Temperature Boys Rooms 
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:bunk-bed
+
+  heating_comfort_temperature_cloakroom:
+    name: Comfort Temperature Cloakroom 
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:toilet
+
+  heating_comfort_temperature_master_bedroom:
+    name: Comfort Temperature Master Bedroom 
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:bed-king
+
+  heating_comfort_temperature:
+    name: Heating Comfort Temperature
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:sofa 
+
+  heating_comfort_temperature_en_suite:
+    name: Comfort Temperature En Suite 
+    initial: 19
+    min: 5
+    max: 25
+    step: 0.5
+    mode: box 
+    icon: mdi:shower-head 
+  
+  heating_minimum_temperature:
+    name: Heating Minimum Temperature
+    initial: 5
+    min: 5
+    max: 12
+    step: 0.5
+    mode: box 
+    icon: mdi:snowflake-thermometer 
+
+  heating_eco_temperature:
+    name: Heating Eco Temperature
+    initial: 12
+    min: 0
+    max: 20
+    step: 0.5 
+    mode: box 
+    icon: mdi:sprout 
 
 ###########################
 #         Toggle          #
@@ -92,6 +246,533 @@ input_boolean:
     name: Party Mode
     icon: mdi:wrench
 
-###########################
-#       Automation        #
-###########################
+  winter_mode:
+    name: Winter Mode
+    icon: mdi:snowflake
+
+  upstairs_heating_on:
+    name: Upstairs Heating On
+    icon: mdi:snowflake
+
+  downstairs_heating_on:
+    name: Downstairs Heating On
+    icon: mdi:snowflake
+
+  office_heating_on:
+    name: Office Heating On
+    icon: mdi:snowflake
+
+  cloakroom_heating_on:
+    name: Cloakroom Heating On
+    icon: mdi:snowflake
+
+  boys_rooms_heating_on:
+    name: Boys Rooms Heating On
+    icon: mdi:snowflake
+
+  master_bedroom_heating_on:
+    name: Master Bedroom Heating On
+    icon: mdi:snowflake
+
+  en_suite_heating_on:
+    name: En Suite Heating On
+    icon: mdi:snowflake
+    
+
+################################
+#       Template Sensor        #
+################################ 
+
+template:
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.cloakroom_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Cloakroom Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Cloakroom Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.downstairs_heating   #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Downstairs Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Downstairs Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.upstairs_heating   #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Upstairs Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Upstairs Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  # - trigger:
+  #     - platform: event
+  #       event_type: ahc_event
+  #       event_data:
+  #         automation: automation.dining_room_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+  #   binary_sensor:
+  #     - name: "AHC Dining Room Data" #SET A NAME FOR YOUR SENSOR
+  #       unique_id: AHC Dining Room Data  #SET A UNIQUE ID
+  #       state: "{{ trigger.event.data.state }}"
+  #       attributes:
+  #         mode: "{{ trigger.event.data.mode }}"
+  #         automation: "{{ trigger.event.data.automation }}"
+  #         is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+  #         is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+  #         is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+  #         is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+  #         active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+  #         state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+  #         state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+  #         state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+  #         state_presence: "{{ trigger.event.data.state_presence }}"
+  #         state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+  #         state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+  #         is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+  #         active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+  #         party_temp: "{{ trigger.event.data.party_temp }}"
+  #         is_away: "{{ trigger.event.data.is_away }}"
+  #         state_window: "{{ trigger.event.data.state_window }}"
+  #         is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+  #         is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+  #         state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+  #         entry_time: "{{ trigger.event.data.entry_time }}"
+  #         hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+  #         temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+  #         temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+  #         target_temperature: "{{ trigger.event.data.target_temperature}}"
+  #         set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+  #         last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+  #         last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+  #         last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.en_suite_bathroom_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC En Suite Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC En Suite Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  # - trigger:
+  #     - platform: event
+  #       event_type: ahc_event
+  #       event_data:
+  #         automation: automation.guest_bedroom_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+  #   binary_sensor:
+  #     - name: "AHC Spare Room Data" #SET A NAME FOR YOUR SENSOR
+  #       unique_id: AHC Spare Room Data  #SET A UNIQUE ID
+  #       state: "{{ trigger.event.data.state }}"
+  #       attributes:
+  #         mode: "{{ trigger.event.data.mode }}"
+  #         automation: "{{ trigger.event.data.automation }}"
+  #         is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+  #         is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+  #         is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+  #         is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+  #         active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+  #         state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+  #         state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+  #         state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+  #         state_presence: "{{ trigger.event.data.state_presence }}"
+  #         state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+  #         state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+  #         is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+  #         active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+  #         party_temp: "{{ trigger.event.data.party_temp }}"
+  #         is_away: "{{ trigger.event.data.is_away }}"
+  #         state_window: "{{ trigger.event.data.state_window }}"
+  #         is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+  #         is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+  #         state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+  #         entry_time: "{{ trigger.event.data.entry_time }}"
+  #         hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+  #         temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+  #         temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+  #         target_temperature: "{{ trigger.event.data.target_temperature}}"
+  #         set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+  #         last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+  #         last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+  #         last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.boys_rooms_heating   #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Kids Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Kids Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.main_bedroom_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Master Bedroom Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Master Bedroom Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  - trigger:
+      - platform: event
+        event_type: ahc_event
+        event_data:
+          automation: automation.office_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+    binary_sensor:
+      - name: "AHC Office Data" #SET A NAME FOR YOUR SENSOR
+        unique_id: AHC Office Data  #SET A UNIQUE ID
+        state: "{{ trigger.event.data.state }}"
+        attributes:
+          mode: "{{ trigger.event.data.mode }}"
+          automation: "{{ trigger.event.data.automation }}"
+          is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+          is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+          is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+          is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+          active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+          state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+          state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+          state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+          state_presence: "{{ trigger.event.data.state_presence }}"
+          state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+          state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+          is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+          active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+          party_temp: "{{ trigger.event.data.party_temp }}"
+          is_away: "{{ trigger.event.data.is_away }}"
+          state_window: "{{ trigger.event.data.state_window }}"
+          is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+          is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+          state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+          entry_time: "{{ trigger.event.data.entry_time }}"
+          hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+          temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+          temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+          target_temperature: "{{ trigger.event.data.target_temperature}}"
+          set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+          last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+          last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+          last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  # - trigger:
+  #     - platform: event
+  #       event_type: ahc_event
+  #       event_data:
+  #         automation: automation.living_room_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+  #   binary_sensor:
+  #     - name: "AHC Living Room Data" #SET A NAME FOR YOUR SENSOR
+  #       unique_id: AHC Living Room Data  #SET A UNIQUE ID
+  #       state: "{{ trigger.event.data.state }}"
+  #       attributes:
+  #         mode: "{{ trigger.event.data.mode }}"
+  #         automation: "{{ trigger.event.data.automation }}"
+  #         is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+  #         is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+  #         is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+  #         is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+  #         active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+  #         state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+  #         state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+  #         state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+  #         state_presence: "{{ trigger.event.data.state_presence }}"
+  #         state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+  #         state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+  #         is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+  #         active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+  #         party_temp: "{{ trigger.event.data.party_temp }}"
+  #         is_away: "{{ trigger.event.data.is_away }}"
+  #         state_window: "{{ trigger.event.data.state_window }}"
+  #         is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+  #         is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+  #         state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+  #         entry_time: "{{ trigger.event.data.entry_time }}"
+  #         hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+  #         temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+  #         temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+  #         target_temperature: "{{ trigger.event.data.target_temperature}}"
+  #         set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+  #         last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+  #         last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+  #         last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  # - trigger:
+  #     - platform: event
+  #       event_type: ahc_event
+  #       event_data:
+  #         automation: automation.kitchen_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+  #   binary_sensor:
+  #     - name: "AHC Kitchen Data" #SET A NAME FOR YOUR SENSOR
+  #       unique_id: AHC Kitchen Data  #SET A UNIQUE ID
+  #       state: "{{ trigger.event.data.state }}"
+  #       attributes:
+  #         mode: "{{ trigger.event.data.mode }}"
+  #         automation: "{{ trigger.event.data.automation }}"
+  #         is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+  #         is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+  #         is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+  #         is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+  #         active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+  #         state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+  #         state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+  #         state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+  #         state_presence: "{{ trigger.event.data.state_presence }}"
+  #         state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+  #         state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+  #         is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+  #         active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+  #         party_temp: "{{ trigger.event.data.party_temp }}"
+  #         is_away: "{{ trigger.event.data.is_away }}"
+  #         state_window: "{{ trigger.event.data.state_window }}"
+  #         is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+  #         is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+  #         state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+  #         entry_time: "{{ trigger.event.data.entry_time }}"
+  #         hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+  #         temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+  #         temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+  #         target_temperature: "{{ trigger.event.data.target_temperature}}"
+  #         set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+  #         last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+  #         last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+  #         last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
+
+  # - trigger:
+  #     - platform: event
+  #       event_type: ahc_event
+  #       event_data:
+  #         automation: automation.main_bathroom_heating  #CHANGE YOUR AUTOMATION ENTITY-ID HERE
+  #   binary_sensor:
+  #     - name: "AHC Main Bathroom Data" #SET A NAME FOR YOUR SENSOR
+  #       unique_id: AHC Main Bathroom Data  #SET A UNIQUE ID
+  #       state: "{{ trigger.event.data.state }}"
+  #       attributes:
+  #         mode: "{{ trigger.event.data.mode }}"
+  #         automation: "{{ trigger.event.data.automation }}"
+  #         is_person_defined: "{{ trigger.event.data.is_person_defined }}"
+  #         is_proximity_defined: "{{ trigger.event.data.is_proximity_defined }}"
+  #         is_anybody_home: "{{ trigger.event.data.is_anybody_home }}"
+  #         is_guest_mode: "{{ trigger.event.data.is_guest_mode }}"
+  #         active_scheduler: "{{ trigger.event.data.active_scheduler }}"
+  #         state_scheduler: "{{ trigger.event.data.state_scheduler }}"
+  #         state_presence_sensor: "{{ trigger.event.data.state_presence_sensor }}"
+  #         state_presence_scheduler: "{{ trigger.event.data.state_presence_scheduler }}"
+  #         state_presence: "{{ trigger.event.data.state_presence }}"
+  #         state_proximity_arrived: "{{ trigger.event.data.state_proximity_arrived }}"
+  #         state_proximity_way_home: "{{ trigger.event.data.state_proximity_way_home }}"
+  #         is_force_max_temperature: "{{ trigger.event.data.is_force_max_temperature }}"
+  #         active_party_entity: "{{ trigger.event.data.active_party_entity }}"
+  #         party_temp: "{{ trigger.event.data.party_temp }}"
+  #         is_away: "{{ trigger.event.data.is_away }}"
+  #         state_window: "{{ trigger.event.data.state_window }}"
+  #         is_frost_protection: "{{ trigger.event.data.is_frost_protection }}"
+  #         is_liming_protection: "{{ trigger.event.data.is_liming_protection }}"
+  #         state_outside_temp: "{{ trigger.event.data.state_outside_temp }}"
+  #         entry_time: "{{ trigger.event.data.entry_time }}"
+  #         hvac_mode: "{{ trigger.event.data.hvac_mode }}"
+  #         temperature_comfort: "{{ trigger.event.data.temperature_comfort }}"
+  #         temperature_eco: "{{ trigger.event.data.temperature_eco}}"
+  #         target_temperature: "{{ trigger.event.data.target_temperature}}"
+  #         set_max_temperature: "{{ trigger.event.data.set_max_temperature}}"
+  #         last_trigger_id: "{{ trigger.event.data.last_trigger_id}}"
+  #         last_calibration: "{{ iif(trigger.event.data.calibration_trigger, now(), this.attributes.last_calibration)}}" 
+  #         last_temperature_change: "{{ iif(trigger.event.data.change_trigger, now(), this.attributes.last_temperature_change)}}"
