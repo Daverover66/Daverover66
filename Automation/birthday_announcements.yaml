@@ -1,7 +1,5 @@
 alias: Birthday Announcements
 description: ""
-mode: single
-initial_state: true
 triggers:
   - event: start
     offset: "7:45:0"
@@ -11,16 +9,30 @@ conditions:
   - condition: template
     value_template: "{{ is_state('input_boolean.audible_notifications','on') }}"
 actions:
+  - action: media_player.volume_set
+    target:
+      entity_id: media_player.living_room_pop
+    data:
+      volume_level: 0.6
+    alias: Pump up the volume
   - action: script.birthday_announcement
     data:
-      where: kitchen
+      where: living_room
   - delay:
       hours: 0
       minutes: 0
       seconds: 15
       milliseconds: 0
   - data:
-      entity_id: media_player.dave_s_2nd_echo_pop
+      entity_id: media_player.living_room_pop
       media_content_id: Awesome Birthday Song in everywhere group
       media_content_type: AMAZON_MUSIC
     action: media_player.play_media
+  - action: media_player.volume_set
+    target:
+      entity_id: media_player.living_room_pop
+    data:
+      volume_level: 0.4
+    alias: Let down the volume
+mode: single
+initial_state: true
