@@ -1,0 +1,34 @@
+alias: Office Tablet Charger Toggle
+description: Maintain charge level of office tablet between 30% and 100%
+triggers:
+  - entity_id: sensor.kindle_tablet_battery_level
+    below: 30
+    id: Battery Low
+    trigger: numeric_state
+  - entity_id:
+      - sensor.kindle_tablet_battery_level
+    above: 99
+    id: Battery Charged
+    trigger: numeric_state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: Battery Low
+        sequence:
+          - action: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.office_tablet_charger_local
+      - conditions:
+          - condition: trigger
+            id: Battery Charged
+        sequence:
+          - action: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.office_tablet_charger_local
+mode: queued
+initial_state: true
+max: 10
