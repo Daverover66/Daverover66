@@ -1,0 +1,28 @@
+alias: "Notify: Any downstairs windows left open when we leave the house"
+description: ""
+mode: single
+triggers:
+  - entity_id:
+      - group.family
+    to: not_home
+    from: "on"
+    trigger: state
+conditions:
+  - condition: state
+    entity_id:
+      - binary_sensor.living_room_window_left_contact
+      - binary_sensor.living_room_window_right_contact
+      - binary_sensor.dining_room_window_left_contact
+      - binary_sensor.dining_room_window_right_contact
+      - binary_sensor.kitchen_window_left_contact
+      - binary_sensor.kitchen_window_right_contact
+      - binary_sensor.hallway_window_contact
+      - binary_sensor.cloakroom_window_contact
+      - binary_sensor.back_door_sensor_contact
+    state: "on"
+actions:
+  - action: notify.mobile_app_{{states('input_text.my_mobile_phone_id')}}
+    data:
+      message: The {{trigger.to_state.attributes.friendly_name}} has been left open!
+      title: HOUSE INSECURE!
+    alias: Send a notification based on an input text helper
