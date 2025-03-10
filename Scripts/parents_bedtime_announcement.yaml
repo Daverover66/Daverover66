@@ -20,16 +20,21 @@ sequence:
         {{ message }}
     response_variable: cleaned_briefing
     action: script.cleanup_text
-  - action: script.status_annc
+  - action: media_player.play_media
     data:
-      where: living_room
-      call_jetsons_chime: 1
+      entity_id: media_player.jarvis_downstairs_media_player
+      media_content_id: http://192.168.0.95:8123/local/Sounds/Jetsons-doorbell.mp3
+      media_content_type: music
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 4
+      milliseconds: 0
   - data:
       where: |
         {{ where }}
       message: |
         {{ cleaned_briefing.text }}
-      msg_summary: Gave the Office briefing.
-      type: priority
-    action: script.jarvis_speech_engine
+      msg_summary: Gave the Bedtime Announcement.
+    action: script.jarvis_speech_engine_v3_0
 description: ""
