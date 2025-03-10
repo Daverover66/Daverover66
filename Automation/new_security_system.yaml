@@ -1,0 +1,341 @@
+alias: New Security System
+description: ""
+triggers:
+  - entity_id:
+      - input_boolean.security_system_status
+    from: "off"
+    to: "on"
+    id: Arm Night
+    alias: When Night alarm ARMED
+    trigger: state
+  - entity_id:
+      - input_boolean.security_system_status
+    from: "on"
+    to: "off"
+    id: Disarm Night
+    alias: When Night alarm DISARMED
+    trigger: state
+  - entity_id:
+      - binary_sensor.family_home
+    from: "on"
+    to: "off"
+    id: Arm Away
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    trigger: state
+  - entity_id:
+      - binary_sensor.family_home
+    from: "off"
+    to: "on"
+    id: Disarm Away
+    trigger: state
+  - event_type: alarmo_failed_to_arm
+    id: Failed to arm
+    alias: When Alarmo fails to arm
+    trigger: event
+  - entity_id:
+      - alarm_control_panel.garage
+    to: triggered
+    id: Garage Triggered
+    alias: When the Garage alarm is triggered
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Arm Night
+        sequence:
+          - action: alarmo.arm
+            data:
+              mode: night
+              skip_delay: false
+              force: false
+              entity_id: alarm_control_panel.downstairs
+        alias: Arm the alarm in Night mode
+      - conditions:
+          - condition: trigger
+            id:
+              - Disarm Night
+        sequence:
+          - action: alarmo.disarm
+            data:
+              entity_id: alarm_control_panel.downstairs
+              code: "1503"
+        alias: Disarm the alarm in Night mode
+      - conditions:
+          - condition: trigger
+            id:
+              - Arm Away
+        sequence:
+          - action: alarmo.arm
+            data:
+              mode: away
+              skip_delay: false
+              force: true
+              entity_id: alarm_control_panel.upstairs
+          - action: alarmo.arm
+            data:
+              mode: away
+              skip_delay: false
+              force: false
+              entity_id: alarm_control_panel.downstairs
+          - action: switch.turn_on
+            target:
+              entity_id: switch.g3_sentry_bot
+            data: {}
+        alias: Arm the house alarm when we are away
+      - conditions:
+          - condition: trigger
+            id:
+              - Disarm Away
+            alias: Disarm house alarm when we are back home
+        sequence:
+          - action: alarmo.disarm
+            data:
+              code: "1503"
+              entity_id: alarm_control_panel.upstairs
+          - action: alarmo.disarm
+            data:
+              code: "1503"
+              entity_id: alarm_control_panel.downstairs
+          - action: switch.turn_off
+            target:
+              entity_id: switch.g3_sentry_bot
+            data: {}
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              type: announcement
+              message: >
+                {{ [ "Barn door protocol has been deactivated.", "Lockdown
+                procedure disengaged! ", "Sentry Mode is no longer active. ", "I
+                am no longer monitoring the doors and windows.", "Shields have
+                been lowered." ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Failed to arm
+        sequence:
+          - action: notify.mobile_app_daves_samsung_galaxy
+            data:
+              title: LOCKDOWN ISSUE!
+              message: >-
+                Unable to initiate lockdown because the following sensor(s) are
+                open: {{ trigger.event.data.open_sensors | join(', ') }}. Do you
+                want to force lockdown anyway? 
+              data:
+                actions:
+                  - action: "YES"
+                    title: "Yes"
+                  - action: "NO"
+                    title: "No"
+          - alias: Wait for a response
+            wait_for_trigger:
+              - event_type: mobile_app_notification_action
+                event_data:
+                  action: "YES"
+                trigger: event
+              - event_type: mobile_app_notification_action
+                event_data:
+                  action: "NO"
+                trigger: event
+            timeout:
+              hours: 0
+              minutes: 5
+              seconds: 0
+              milliseconds: 0
+            continue_on_timeout: true
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ not wait.trigger }}"
+                    alias: No response
+                sequence:
+                  - action: alarmo.arm
+                    data:
+                      mode: away
+                      skip_delay: false
+                      force: true
+                      entity_id: alarm_control_panel.upstairs
+                  - action: alarmo.arm
+                    data:
+                      mode: away
+                      skip_delay: false
+                      force: true
+                      entity_id: alarm_control_panel.downstairs
+                alias: Force ARM if no response after 5 minutes
+              - conditions:
+                  - condition: template
+                    value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
+                    alias: YES response
+                sequence:
+                  - action: alarmo.arm
+                    data:
+                      mode: away
+                      skip_delay: false
+                      force: true
+                      entity_id: alarm_control_panel.upstairs
+                  - action: alarmo.arm
+                    data:
+                      mode: away
+                      skip_delay: false
+                      force: true
+                      entity_id: alarm_control_panel.downstairs
+                alias: Force ARM if response YES
+              - conditions:
+                  - condition: template
+                    value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
+                    alias: NO response
+                sequence:
+                  - action: script.text_notify_dave
+                    data:
+                      title: ALARM NOT ARMED!
+                      message: The House alarm was not armed.
+                alias: Do not ARM if response NO
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              type: announcement
+              message: >
+                {{ [ "I was unable to activate barn door protocol due to an open
+                door or window.", "You may want to check the external doors and
+                ground floor windows. I was unable to secure them all.", "My
+                systems check has failed. Please check the external doors and
+                ground floor windows." ] | random }} I sent a message to your
+                phone.
+        alias: Notify us when alarm fails to arm
+      - conditions:
+          - condition: trigger
+            id:
+              - Garage Triggered
+        sequence:
+          - alias: Send a notification to Dave
+            action: notify.mobile_app_daves_samsung_galaxy
+            data:
+              message: >
+                The Garage alarm triggered/disarmed. Would you like to clear and
+                rearm it?  
+              title: ALARM RESET?
+              data:
+                actions:
+                  - action: "YES"
+                    title: "Yes"
+                  - action: "NO"
+                    title: "No"
+          - alias: Wait for a response
+            wait_for_trigger:
+              - event_type: mobile_app_notification_action
+                event_data:
+                  action: "YES"
+                trigger: event
+              - event_type: mobile_app_notification_action
+                event_data:
+                  action: "NO"
+                trigger: event
+            timeout:
+              hours: 0
+              minutes: 5
+              seconds: 0
+              milliseconds: 0
+            continue_on_timeout: true
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ not wait.trigger }}"
+                    alias: REARM after 5 minutes if no response
+                sequence:
+                  - action: alarmo.disarm
+                    data:
+                      entity_id: alarm_control_panel.garage
+                      code: "1503"
+                  - action: alarmo.arm
+                    data:
+                      mode: home
+                      skip_delay: false
+                      force: false
+                      entity_id: alarm_control_panel.garage
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.announcement_playing
+                    state: "off"
+                  - action: script.jarvis_speech_engine_v3_0
+                    data:
+                      where: dave
+                      type: announcement
+                      message: >
+                        {{ [ "Barn door protocol initiated in the garage only.",
+                        "Garage lockdown procedure engaged! ", "Sentry Mode is
+                        now active in the garage. ", "I am now monitoring the
+                        garage doors and camera.", "Shields have been raised.
+                        The garage is now protected" ] | random }}
+              - conditions:
+                  - condition: template
+                    value_template: "{{ wait.trigger.event.data.action == \"YES\" }}"
+                    alias: REARM if response is YES
+                sequence:
+                  - action: alarmo.disarm
+                    data:
+                      entity_id: alarm_control_panel.garage
+                      code: "1503"
+                  - action: alarmo.arm
+                    data:
+                      mode: home
+                      skip_delay: false
+                      force: false
+                      entity_id: alarm_control_panel.garage
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.announcement_playing
+                    state: "off"
+                  - action: script.jarvis_speech_engine_v3_0
+                    data:
+                      where: dave
+                      type: announcement
+                      message: >
+                        {{ [ "Barn door protocol initiated in the garage only.",
+                        "Garage lockdown procedure engaged! ", "Sentry Mode is
+                        now active in the garage. ", "I am now monitoring the
+                        garage doors and camera.", "Shields have been raised.
+                        The garage is now protected" ] | random }}
+              - conditions:
+                  - condition: template
+                    value_template: "{{ wait.trigger.event.data.action == \"NO\" }}"
+                sequence:
+                  - action: alarmo.disarm
+                    data:
+                      entity_id: alarm_control_panel.garage
+                      code: "1503"
+                  - action: script.text_notify_dave
+                    data:
+                      title: GARAGE ALARM DISARMED!
+                      message: The Garage alarm has been disarmed.
+                  - condition: state
+                    entity_id: input_boolean.audible_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.announcement_playing
+                    state: "off"
+                  - action: script.jarvis_speech_engine_v3_0
+                    data:
+                      where: dave
+                      type: announcement
+                      message: >
+                        {{ [ "Barn door protocol rescinded in the garage only.",
+                        "Garage lockdown procedure disengaged! ", "Sentry Mode
+                        is no longer active in the garage. ", "I am no longer
+                        monitoring the garage doors and camera.", "Shields have
+                        been lowered. The garage is not protected" ] | random }}
+                alias: Do not REARM if response is NO
+        alias: Notify me when Garage alarm TRIGGERS or DISARMS
+mode: restart
