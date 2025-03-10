@@ -1,0 +1,60 @@
+alias: System Monitor
+description: Monitors bluetooth dongle, CPU use and RAM use.
+mode: single
+triggers:
+  - entity_id:
+      - sensor.greenhouse_thermometer_temperature
+    to: unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: Bluetooth
+    trigger: state
+  - entity_id:
+      - sensor.processor_use
+    above: 50
+    id: CPU
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    trigger: numeric_state
+  - entity_id:
+      - sensor.memory_use
+    above: 50
+    id: RAM
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    trigger: numeric_state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Bluetooth
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              message: The bluetooth dongle has lost connection.
+      - conditions:
+          - condition: trigger
+            id:
+              - CPU
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              message: CPU use has risen above 50%.
+              title: HIGH CPU USE!
+      - conditions:
+          - condition: trigger
+            id:
+              - RAM
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              message: RAM use is above 50%.
+              title: RAM USE HIGH!
