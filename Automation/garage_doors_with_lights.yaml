@@ -1,29 +1,19 @@
-############################################################ 
-#   @author         :   Dave Forrester                     #
-#   @date           :   19/08/2023                         #
-#   @automation     :   Garage Doors With Lights           #
-#   @description    :                                      #
-#                                                          #
-#                                                          #
-#   @version        :   1.02                               #
-#   @modified       :                                      #
-############################################################
-
 alias: Garage Lights With Doors
 description: ""
-trigger:
-  - platform: state
-    entity_id:
+mode: single
+triggers:
+  - entity_id:
       - sensor.garage_door_state
     to: Open
     id: Open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - sensor.garage_door_state
     to: Closed
     id: Closed
-condition: []
-action:
+    trigger: state
+conditions: []
+actions:
   - choose:
       - conditions:
           - condition: trigger
@@ -34,7 +24,7 @@ action:
             entity_id: light.garage_lights
             state: "off"
         sequence:
-          - service: light.turn_on
+          - action: light.turn_on
             data: {}
             target:
               entity_id: light.garage_lights
@@ -46,9 +36,7 @@ action:
             entity_id: light.garage_lights
             state: "on"
         sequence:
-          - service: light.turn_off
+          - action: light.turn_off
             target:
               entity_id: light.garage_lights
             data: {}
-mode: single
-
