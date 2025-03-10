@@ -1,0 +1,179 @@
+alias: En Suite Lights with presence
+description: Lights on and off with presence and timer
+triggers:
+  - entity_id:
+      - binary_sensor.en_suite_presence_occupancy
+    from: "off"
+    to: "on"
+    id: Presence Detected
+    trigger: state
+  - entity_id:
+      - binary_sensor.en_suite_presence_occupancy
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Absence Detected
+    trigger: state
+  - entity_id:
+      - binary_sensor.en_suite_door_contact
+    from: "on"
+    to: "off"
+    id: Door Closed
+    trigger: state
+  - entity_id:
+      - binary_sensor.en_suite_door_contact
+    from: "off"
+    to: "on"
+    id: Door Open
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    trigger: state
+  - event_type: timer.finished
+    event_data:
+      entity_id: timer.en_suite_light
+    id: Timer Done
+    alias: When En-Suite timer runs down
+    trigger: event
+  - at: "18:30:00"
+    id: Auto Off
+    trigger: time
+  - at: "19:30:00"
+    id: Auto On
+    trigger: time
+  - event_type: timer.finished
+    event_data:
+      entity_id: timer.en_suite_light_long
+    id: Long Timer Done
+    alias: When long En-Suite timer runs down
+    trigger: event
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Presence Detected
+              - Door Open
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: input_boolean.allow_en_suite_lights_on
+                state: "on"
+              - condition: state
+                entity_id: switch.en_suite_switch_left
+                state: "off"
+            alias: Light is off and is allowed to come on
+          - condition: or
+            conditions:
+              - condition: numeric_state
+                entity_id: sensor.en_suite_presence_illuminance
+                below: input_number.low_light_threshold
+              - condition: sun
+                before: sunrise
+                after: sunset
+            alias: Light level is low or between sunset & sunrise
+        sequence:
+          - action: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.en_suite_switch_left
+          - action: timer.start
+            target:
+              entity_id:
+                - timer.en_suite_light
+                - timer.en_suite_light_long
+            data: {}
+        alias: Turn on lights when entering
+      - conditions:
+          - condition: trigger
+            id:
+              - Timer Done
+              - Absence Detected
+          - condition: state
+            entity_id: binary_sensor.en_suite_door_contact
+            state: "on"
+          - condition: state
+            entity_id: timer.en_suite_light
+            state: idle
+          - condition: state
+            entity_id: switch.en_suite_switch_left
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.allow_en_suite_auto_lights
+            state: "on"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id:
+                - switch.en_suite_switch_left
+            data: {}
+        alias: >-
+          Turn off lights after 5 minutes if door left open, otherwise leave the
+          light on
+      - conditions:
+          - condition: trigger
+            id:
+              - Door Open
+          - condition: state
+            entity_id: switch.en_suite_switch_left
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.allow_en_suite_auto_lights
+            state: "on"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id:
+                - switch.en_suite_switch_left
+            data: {}
+        alias: Turn off lights when door is opened
+      - conditions:
+          - condition: trigger
+            id:
+              - Auto Off
+          - condition: state
+            entity_id: sensor.day_of_week
+            state: Sunday
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.allow_en_suite_auto_lights
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Auto On
+          - condition: state
+            entity_id: sensor.day_of_week
+            state: Sunday
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id:
+                - input_boolean.allow_en_suite_auto_lights
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Long Timer Done
+          - condition: state
+            entity_id: binary_sensor.en_suite_door_contact
+            state: "off"
+          - condition: state
+            entity_id: switch.en_suite_switch_left
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.room_occupied_en_suite
+            state: "off"
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.en_suite_switch_left
+            data: {}
+        alias: Turn of light after 30 mins regardless.
+mode: restart
