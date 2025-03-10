@@ -1,0 +1,23 @@
+alias: Kitchen TV Voice
+description: ""
+triggers:
+  - trigger: conversation
+    command:
+      - turn on the TV
+      - TV on
+      - turn the TV on
+    id: "on"
+  - trigger: conversation
+    command:
+      - TV off
+      - turn off the TV
+      - turn the TV off
+    id: "off"
+conditions:
+  - condition: state
+    entity_id: assist_satellite.jarvis_kitchen_assist_satellite
+    state: processing
+actions:
+  - action: script.kitchen_tv_toggle
+    data: {}
+mode: single
