@@ -1,0 +1,26 @@
+alias: "Schedule: Hourly"
+description: ""
+mode: single
+triggers:
+  - seconds: "00"
+    minutes: "00"
+    trigger: time_pattern
+conditions: []
+actions:
+  - data:
+      overwrite: true
+      url: https://sdo.gsfc.nasa.gov/assets/img/latest/mpeg/latest_1024_0193.mp4
+    action: downloader.download_file
+  - data:
+      overwrite: true
+      url: https://sdo.gsfc.nasa.gov/assets/img/latest/mpeg/latest_1024_0335.mp4
+    action: downloader.download_file
+  - delay:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+  - target:
+      entity_id: counter.sun_335_downloads
+    data: {}
+    action: counter.increment
