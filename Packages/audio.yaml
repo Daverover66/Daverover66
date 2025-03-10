@@ -8,7 +8,7 @@
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   18/05/24                                         #
+#   @date                   :   12/09/2023                                       #
 ##################################################################################
 
 #################################################################################
@@ -17,16 +17,52 @@
 # For more info on Media Players visit https://www.home-assistant.io/integrations/media_player/
 # MODIFY this section as needed or comment it out completely if not needed.
 #################################################################################
-
-################################
-# Media extractor is used for playing youtube audio. For more info ->https://www.home-assistant.io/integrations/media_extractor/
-#
-# If you have this enabled in another package or in your configuration.yaml comment out the line below
-media_extractor:
   
 ############################
 #         Helpers          #
 ############################
+
+input_select:
+  echo_voice:
+    name: Echo voice
+    options:
+      - Brian
+      - Emma
+      - Amy
+      - Joanna
+      - Justin
+      - Matthew
+      - Sally 
+    initial: Brian
+
+  jarvis_voice:
+    name: Jarvis Voice 
+    options:
+      - LibbyNeural 
+      - AbbiNeural 
+      - AlfieNeural 
+      - BellaNeural 
+      - ElliotNeural 
+      - EthanNeural 
+      - HollieNeural 
+      - MaisieNeural 
+      - NoahNeural 
+      - OliverNeural 
+      - OliviaNeural 
+      - RyanNeural 
+      - SoniaNeural 
+      - ThomasNeural 
+
+  jarvis_language:
+    name: Jarvis Language
+    options:
+      - en-GB 
+      - en-IE 
+      - en-CA
+      - en-US 
+      - en-AU 
+      
+
 
 ############################
 #         Datetime         #
@@ -99,6 +135,38 @@ input_number:
     step: 0.05
     mode: box 
     icon: mdi:volume-equal
+  jarvis_volume_level_default:
+    name: Jarvis Volume Level Default 
+    initial: 0.7
+    min: 0
+    max: 1
+    step: 0.05
+    mode: box 
+    icon: mdi:volume-equal
+  jarvis_volume_level_announcement:
+    name: Jarvis Volume Level Announcement 
+    initial: 0.7
+    min: 0
+    max: 1
+    step: 0.05
+    mode: box 
+    icon: mdi:volume-equal
+  jarvis_volume_level_high:
+    name: Jarvis Volume Level High
+    initial: 1.0
+    min: 0
+    max: 1
+    step: 0.05
+    mode: box 
+    icon: mdi:volume-equal
+  jarvis_volume_level_low:
+    name: Jarvis Volume Level Low
+    initial: 0.4
+    min: 0
+    max: 1
+    step: 0.05
+    mode: box 
+    icon: mdi:volume-equal
 
 ############################
 #        Groups            #
@@ -130,8 +198,8 @@ group:
     name: "Boys Bedroom Echos"
     icon: mdi:multimedia
     entities:
-      - media_player.seans_room_dot
-      - media_player.living_room_dot
+      - media_player.sean_s_room_dot
+      - media_player.jamie_s_room_dot
 
   bedroom_echos:
     name: "Bedroom Echos"
@@ -152,95 +220,45 @@ automation:
       - platform: state
         entity_id: sensor.room_audio
     action:
-      - service: input_text.set_value
+      - action: input_text.set_value
         data:
           entity_id: input_text.room_with_alexa_presence
           value: "{{ states('sensor.room_audio') }}"
-      - service: mqtt.publish
+      - action: mqtt.publish
         data:
           topic: house/presence/current_room
           payload: "{{ states('sensor.room_audio') }}"
           retain: true
-      - service: mqtt.publish
+      - action: mqtt.publish
         data:
           topic: house/presence/backup_room
           payload: "{{ states('input_text.room_presence') }}"
           retain: true
-
-  - id: 8a2711f5-a034-4df0-ba67-4b8f85ceaaee
-    alias: Notification Volume Dim
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: binary_sensor.quiet_time_boys
-        to: "on"
-    action:
-      - service: media_player.volume_set
-        data:
-          entity_id:
-            - media_player.kitchen_echo_show
-            - media_player.dave_s_2nd_echo_pop
-              # living room #
-            - media_player.dave_s_echo_pop
-              # dining room #
-            - media_player.main_bedroom_dot
-            - media_player.guest_bedroom_echo_dot
-            - media_player.dave_s_2nd_echo_pop_2
-              # office #
-            - media_player.living_room_dot
-              # jamies room #
-            - media_player.seans_room_dot
-          volume_level: "{{ states('input_number.alexa_volume_level_low') | float(0) }}"
-
-  - id: d5fe0a64-9012-4446-b946-cbcafb2c0728
-    alias: Notification Volume Normal
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: binary_sensor.quiet_time_boys
-        to: "off"
-    action:
-      - service: media_player.volume_set
-        data:
-          entity_id:
-            - media_player.kitchen_echo_show
-            - media_player.dave_s_2nd_echo_pop
-              # living room #
-            - media_player.dave_s_echo_pop
-              # dining room #
-            - media_player.main_bedroom_dot
-            - media_player.guest_bedroom_echo_dot
-            - media_player.dave_s_2nd_echo_pop_2
-              # office #
-            - media_player.living_room_dot
-              # jamies room #
-            - media_player.seans_room_dot
-          volume_level: "{{ states('input_number.alexa_volume_level_announcements') | float(0) }}"
-  
-  - id: alexa_set_default_volume
-    alias: Alexa Set Default Volume
-    description: ""
-    mode: single
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id:
-          - input_number.alexa_volume_level_default_all
-    condition: []
-    action:
-      - service: media_player.volume_set
-        target:
-          entity_id:
-            - media_player.dave_s_echo_pop
-            - media_player.guest_bedroom_echo_dot
-            - media_player.living_room_dot
-            - media_player.kitchen_echo_show
-            - media_player.main_bedroom_dot
-            - media_player.dave_s_2nd_echo_pop_2
-            - media_player.seans_room_dot
-            - media_player.dave_s_2nd_echo_pop
-        data:
-          volume_level: "{{ states('input_number.alexa_volume_level_default_all') | float(0) }}"
+  ###################### migrated to UI 05/03/2025 ############# 
+  # - id: alexa_set_default_volume
+  #   alias: Alexa Set Default Volume
+  #   description: ""
+  #   mode: single
+  #   initial_state: true
+  #   trigger:
+  #     - platform: state
+  #       entity_id:
+  #         - input_number.alexa_volume_level_default_all
+  #   condition: []
+  #   action:
+  #     - action: media_player.volume_set
+  #       target:
+  #         entity_id:
+  #           - media_player.living_room_pop 
+  #           - media_player.dining_room_pop
+  #           - media_player.kitchen_echo_show
+  #           - media_player.main_bedroom_dot
+  #           - media_player.guest_bedroom_echo_dot
+  #           - media_player.jamie_s_room_dot
+  #           - media_player.sean_s_room_dot
+  #           - media_player.office_pop
+  #       data:
+  #         volume_level: "{{ states('input_number.alexa_volume_level_default_all') | float(0) }}"
 
 
 
@@ -252,22 +270,22 @@ automation:
       - platform: state
         entity_id:
           - media_player.kitchen_echo_show
-          - media_player.dave_s_2nd_echo_pop
+          - media_player.living_room_pop 
               # living room #
-          - media_player.dave_s_echo_pop
+          - media_player.dining_room_pop
               # dining room #
           - media_player.main_bedroom_dot
           - media_player.guest_bedroom_echo_dot
-          - media_player.dave_s_2nd_echo_pop_2
+          - media_player.office_pop 
               # office #
-          - media_player.living_room_dot
+          - media_player.jamie_s_room_dot 
               # jamies room #
-          - media_player.seans_room_dot
+          - media_player.sean_s_room_dot
     condition:
       - condition: template
         value_template: "{{ trigger.to_state.attributes.last_called_timestamp | float > trigger.from_state.attributes.last_called_timestamp | float }}" # Alexa has been triggered
     action:
-      - service: input_datetime.set_datetime
+      - action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.last_time_alexa_called
         data:
@@ -285,72 +303,73 @@ mqtt:
       state_topic: "house/presence/backup_room"
 
 template:
-  ### Room audio for Alexa ###
-  # - sensor:
-  #     - name: "Room Audio Alternative"
-  #       unique_id: room_audio_alternative
-  #       state: |-
-  #         {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
-  #         {% if sensor.name is defined %}
-  #           {% if is_state('binary_sensor.quiet_time_boys','on') %}
-  #             {% if sensor.name == 'Living Room All Areas' or is_state('media_player.sky_q_main', 'playing') %}
-  #               dave_s_2nd_echo_pop
-  #             {% elif sensor.name == 'Kitchen Presence Sensor all areas' or is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
-  #               kitchen_echo_show 
-  #             {% else %}
-  #               main_bedroom_dot
-  #             {%- endif %}
-  #           {% elif sensor.name == 'Living Room All Areas' and is_state('media_player.sky_q_main', 'playing') %}
-  #           dave_s_2nd_echo_pop
-  #           {% elif sensor.name == 'Kitchen Presence Sensor all areas' and is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
-  #           kitchen_echo_show
-  #           {% else %}
-  #             {% if sensor.name == 'Living Room All Areas' %}
-  #               dave_s_2nd_echo_pop
-  #             {% elif sensor.name == 'Main Bedroom All Areas' %}
-  #               main_bedroom_dot
-  #             {% elif sensor.name == 'Dining Room Presence Sensor Motion' %}  
-  #               dave_s_echo_pop
-  #             {% elif sensor.name == 'Guest Bedroom Motion Occupancy' %}
-  #               guest_bedroom_echo_dot
-  #             {% elif sensor.name == 'Office Presence Sensor Motion' %}
-  #               {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
-  #                 guest_bedroom_echo_dot
-  #               {% else %}
-  #                 dave_s_2nd_echo_pop_2 
-  #               {%- endif %}
-  #             {% elif sensor.name == 'Seans Room Camera Cell Motion Detection' %}
-  #               seans_room_dot
-  #             {% elif sensor.name == "Jamie's Room Cam Cell Motion Detection" %}
-  #               living_room_dot
-  #             {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
-  #               kitchen_echo_show
-  #             {% elif sensor.name == 'Hallway Camera Cell Motion Detection' %}
-  #               kitchen_echo_show  
-  #             {% elif sensor.name == 'Upper Landing Presence Motion' %}
-  #               main_bedroom_dot 
-  #             {% elif sensor.name == 'Lower Landing Motion Motion' %}
-  #               kitchen_echo_show  
-  #             {% elif sensor.name == 'Main Bathroom Presence Motion' %}
-  #               guest_bedroom_echo_dot 
-  #             {% elif sensor.name == 'Jack and Jill Presence Motion' %}
-  #               seans_room_dot 
-  #             {% elif sensor.name == 'Cloakroom Presence Motion' %}
-  #               kitchen_echo_show 
-  #             {% else %}
-  #               {{ states('sensor.room_presence') }}
-  #             {%- endif %}
-  #            {%- endif %}
-  #         {% else %}
-  #           dave_s_2nd_echo_pop 
-  #         {% endif %}
-  #      availability: >
-  #         {{ states('group.room_with_alexa_presence') !='Unknown' }}
 
   ### This one has last called Alexa ### 
   - sensor:
       - name: "Room Audio"
+        icon: mdi:account-voice 
         unique_id: room_audio
+        state: |-
+          {%- set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba|chromecast|living_room_tv)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds -%}
+          {%- if last_alexa_called_seconds <= 60 %} 
+            {{ states.media_player | selectattr('attributes.last_called','eq',True) | map(attribute='entity_id') | first }}
+          {% elif expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | list | count >= 1 %}
+          {% set sensor = expand('group.room_with_alexa_presence') | selectattr('state', 'eq', 'on') | sort(attribute='last_changed') | last %}
+            {% if is_state('binary_sensor.quiet_time_boys','on') %}
+              {% if sensor.name == 'Living Room All Areas' or is_state('media_player.sky_q_main', 'playing') %}
+                living_room_pop 
+              {% elif sensor.name == 'Kitchen Presence Sensor all areas' or is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
+                kitchen_echo_show
+              {% else %}
+                main_bedroom_dot
+              {%- endif %}
+            {% elif sensor.name == 'Living Room All Areas' and is_state('media_player.sky_q_main', 'playing') %}
+              living_room_pop 
+            {% elif sensor.name == 'Kitchen Presence Sensor all areas' and is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
+              kitchen_echo_show
+            {% elif sensor.name == 'Living Room All Areas' %}
+              living_room_pop 
+            {% elif sensor.name == 'Main Bedroom All Areas' or is_state('media_player.32_sharp_roku_tv','o') %}
+              main_bedroom_dot
+            {% elif sensor.name == 'Dining Room Presence Sensor Motion' %}  
+              dining_room_pop 
+            {% elif sensor.name == 'Guest Bedroom Motion Occupancy' or is_state('media_player.sky_q_kitchen_mini', 'playing')%}
+              guest_bedroom_echo_dot
+            {% elif sensor.name == 'Office Presence Sensor Motion' %}
+                {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
+                  guest_bedroom_echo_dot
+                {% else %}
+                  office_pop  
+                {%- endif %}
+            {% elif sensor.name == 'Sean Room Presence Motion' %}
+              sean_s_room_dot
+            {% elif sensor.name == "Jamie Room Presence Motion" %}
+              jamie_s_room_dot
+            {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
+              kitchen_echo_show
+            {% elif sensor.name == 'Hallway Presence Motion' %}
+              kitchen_echo_show  
+            {% elif sensor.name == 'Upper Landing Presence Motion' %}
+              main_bedroom_dot 
+            {% elif sensor.name == 'Lower Landing Motion Motion' %}
+              kitchen_echo_show  
+            {% elif sensor.name == 'Main Bathroom Presence Motion' %}
+              guest_bedroom_echo_dot 
+            {% elif sensor.name == 'Jack and Jill Presence Motion' %}
+              sean_s_room_dot 
+            {% elif sensor.name == 'Cloakroom Presence Motion' %}
+              kitchen_echo_show 
+            {% else %}
+              living_room_pop 
+            {%- endif %}
+          {% else %}
+            living_room_pop 
+          {% endif %}
+
+  ### Development sensor for room audio  ### 
+  - sensor:
+      - name: "Room Audio Dev"
+        unique_id: room_audio_dev 
         state: |-
           {%- set last_alexa_called_seconds = (now() - as_local(states.media_player | rejectattr('object_id','match', '(sky_q|toshiba|chromecast|living_room_tv)') | selectattr('attributes.last_called','eq',True) | map(attribute='last_updated') | first)).seconds -%}
           {%- if last_alexa_called_seconds <= 60 %} 
@@ -366,44 +385,38 @@ template:
                 main_bedroom_dot
               {%- endif %}
             {% elif sensor.name == 'Living Room All Areas' and is_state('media_player.sky_q_main', 'playing') %}
-              dave_s_2nd_echo_pop
+              living_room_pop
             {% elif sensor.name == 'Kitchen Presence Sensor all areas' and is_state('media_player.sky_q_kitchen_mini_2', 'playing') %}
               kitchen_echo_show
             {% elif sensor.name == 'Living Room All Areas' %}
-              dave_s_2nd_echo_pop
+              living_room_pop 
             {% elif sensor.name == 'Main Bedroom All Areas' or is_state('media_player.32_sharp_roku_tv','o') %}
               main_bedroom_dot
             {% elif sensor.name == 'Dining Room Presence Sensor Motion' %}  
-              dave_s_echo_pop
+              dining_room_pop 
             {% elif sensor.name == 'Guest Bedroom Motion Occupancy' or is_state('media_player.sky_q_kitchen_mini', 'playing')%}
               guest_bedroom_echo_dot
             {% elif sensor.name == 'Office Presence Sensor Motion' %}
                 {% if is_state('input_boolean.gem_gone_out_to_office','off') %}
                   guest_bedroom_echo_dot
                 {% else %}
-                  dave_s_2nd_echo_pop_2 
+                  officee_pop 
                 {%- endif %}
-            {% elif sensor.name == 'Sean Room Presence Motion' %}
-              seans_room_dot
-            {% elif sensor.name == "Jamie Room Presence Motion" %}
-              living_room_dot
-            {% elif sensor.name == 'Kitchen Presence Sensor all areas' %}
+            {% elif 'Kitchen' or 'Hallway' or 'Cloakroom' or 'Lower' in sensor.name %}
               kitchen_echo_show
-            {% elif sensor.name == 'Hallway Presence Motion' %}
-              kitchen_echo_show  
+            {% elif sensor.name == 'Sean Room Presence Motion' %}
+              sean_s_room_dot
+            {% elif sensor.name == "Jamie Room Presence Motion" %}
+              jamie_s_room_dot
             {% elif sensor.name == 'Upper Landing Presence Motion' %}
               main_bedroom_dot 
-            {% elif sensor.name == 'Lower Landing Motion Motion' %}
-              kitchen_echo_show  
             {% elif sensor.name == 'Main Bathroom Presence Motion' %}
               guest_bedroom_echo_dot 
             {% elif sensor.name == 'Jack and Jill Presence Motion' %}
-              seans_room_dot 
-            {% elif sensor.name == 'Cloakroom Presence Motion' %}
-              kitchen_echo_show 
+              sean_s_room_dot 
             {% else %}
-              dave_s_2nd_echo_pop 
+              living_room_pop 
             {%- endif %}
           {% else %}
-            dave_s_2nd_echo_pop 
+            living_room_pop 
           {% endif %}
