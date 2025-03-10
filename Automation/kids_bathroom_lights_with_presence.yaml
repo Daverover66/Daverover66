@@ -1,14 +1,13 @@
 alias: Kids Bathroom Lights with presence
 description: ""
-trigger:
-  - platform: state
-    entity_id:
+triggers:
+  - entity_id:
       - binary_sensor.jack_and_jill_presence_occupancy
     from: "off"
     to: "on"
     id: Light On
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
       - binary_sensor.jack_and_jill_presence_occupancy
     from: "on"
     to: "off"
@@ -17,42 +16,65 @@ trigger:
       minutes: 2
       seconds: 0
     id: Light Off
-condition:
+    trigger: state
+  - at: "20:00:10"
+    id: Dim on
+    trigger: time
+  - entity_id:
+      - switch.jamie_bathroom_switch_left
+      - switch.sean_bathroom_switch_right
+    from: "off"
+    to: "on"
+    id: Lights to Max
+    trigger: state
+  - entity_id:
+      - switch.jamie_bathroom_switch_left
+      - switch.sean_bathroom_switch_right
+    from: "on"
+    to: "off"
+    id: Lights to Presence
+    trigger: state
+conditions:
   - condition: state
     entity_id: input_boolean.holiday_mode
     state: "off"
-action:
+actions:
   - choose:
       - conditions:
           - condition: trigger
             id:
               - Light On
+          - condition: state
+            entity_id: input_boolean.allow_kids_bathroom_lights_max
+            state: "off"
           - condition: time
-            after: "08:00:00"
+            after: "07:00:00"
             before: "20:00:00"
           - condition: numeric_state
-            entity_id: sensor.jack_and_jill_presence_illuminance_lux
-            below: input_number.daytime_light_needed
+            entity_id: sensor.jack_and_jill_presence_illuminance
+            below: input_number.low_light_threshold
         sequence:
-          - service: light.turn_on
-            data:
+          - data:
               color_temp: 200
               brightness: 64
             target:
               entity_id: light.kids_bathroom_light
+            action: light.turn_on
       - conditions:
           - condition: trigger
             id:
               - Light On
+          - condition: state
+            entity_id: input_boolean.allow_kids_bathroom_lights_max
+            state: "off"
           - condition: time
             after: "20:00:00"
-            before: "08:00:00"
+            before: "07:00:00"
           - condition: numeric_state
-            entity_id: sensor.jack_and_jill_presence_illuminance_lux
-            below: input_number.daytime_light_needed
+            entity_id: sensor.jack_and_jill_presence_illuminance
+            below: input_number.low_light_threshold
         sequence:
-          - service: light.turn_on
-            data:
+          - data:
               rgb_color:
                 - 255
                 - 248
@@ -60,6 +82,7 @@ action:
               brightness: 26
             target:
               entity_id: light.kids_bathroom_light
+            action: light.turn_on
       - conditions:
           - condition: trigger
             id:
@@ -67,26 +90,66 @@ action:
           - condition: state
             entity_id: light.kids_bathroom_light
             state: "on"
+          - condition: state
+            entity_id: input_boolean.allow_kids_bathroom_lights_max
+            state: "off"
         sequence:
-          - if:
-              - condition: time
-                weekday:
-                  - sun
-                after: "17:30:00"
-                before: "19:00:00"
-            then:
-              - delay:
-                  hours: 0
-                  minutes: 30
-                  seconds: 0
-                  milliseconds: 0
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kids_bathroom_light
-            else:
-              - service: light.turn_off
-                data: {}
-                target:
-                  entity_id: light.kids_bathroom_light
+          - target:
+              entity_id: light.kids_bathroom_light
+            data: {}
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Dim on
+        sequence:
+          - data:
+              rgb_color:
+                - 255
+                - 248
+                - 52
+              brightness: 26
+            target:
+              entity_id: light.kids_bathroom_light
+            action: light.turn_on
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - condition: state
+            entity_id: binary_sensor.kids_bathroom_occupied
+            state: "off"
+          - target:
+              entity_id: light.kids_bathroom_light
+            data: {}
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights to Max
+        sequence:
+          - target:
+              entity_id: input_boolean.allow_kids_bathroom_lights_max
+            data: {}
+            action: input_boolean.turn_on
+          - target:
+              entity_id: light.kids_bathroom_light
+            data:
+              brightness: 255
+              color_temp: 154
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - Lights to Presence
+        sequence:
+          - target:
+              entity_id: input_boolean.allow_kids_bathroom_lights_max
+            data: {}
+            action: input_boolean.turn_off
+          - target:
+              entity_id: light.kids_bathroom_light
+            data: {}
+            action: light.turn_off
 mode: restart
