@@ -1,0 +1,45 @@
+alias: Overnight Device Charging
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_car_battery_charge
+    from: "off"
+    to: "on"
+    id: Start
+  - trigger: state
+    entity_id:
+      - binary_sensor.octopus_energy_target_car_battery_charge
+    from: "on"
+    to: "off"
+    id: Stop
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Start
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: switch.ad_hoc_charging_local
+            data: {}
+          - action: switch.turn_on
+            target:
+              entity_id: switch.ad_hoc_charging_2_local
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.ad_hoc_charging_local
+            data: {}
+          - action: switch.turn_off
+            target:
+              entity_id: switch.ad_hoc_charging_2_local
+            data: {}
+mode: single
