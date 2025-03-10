@@ -8,7 +8,7 @@ So, in February 2025 I moved my Home Assistant instance onto a Beelink S12 Pro. 
 
 For anyone wondering, every time I've moved my Home Assistant instance, the move has been straightforward and completed in a couple of hours.
 
-The Lenovo M93p has now been freed up to reinstall a later version on Proxmox and use as a Frigate server for my cameras and a media server once I upgrade the SSD.
+The Lenovo M93p has now been freed up to reinstall a later version of Proxmox and use as a Frigate server for my cameras and a media server once I upgrade the SSD.
 
 I'll try to add content to the repository and this Readme when I can. Until then, feel free to browse and comment.
 
