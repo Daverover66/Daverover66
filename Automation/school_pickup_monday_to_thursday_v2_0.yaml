@@ -1,0 +1,51 @@
+alias: School Pick Up Monday to Thursday v2.0
+description: ""
+triggers:
+  - at: input_datetime.school_pick_up_time_mon_to_thurs
+    trigger: time
+conditions:
+  - condition: state
+    entity_id: binary_sensor.schoolday
+    state: "on"
+  - condition: state
+    entity_id: calendar.school_holidays
+    state: "off"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+actions:
+  - alias: Inform Gem if home,  else Dave.
+    if:
+      - condition: state
+        entity_id: binary_sensor.gem_home
+        state: "on"
+    then:
+      - action: script.jarvis_speech_engine_v3_0
+        data:
+          where: dave
+          type: announcement
+          message: |
+            {{ [ 
+               ' It is almost time for the school pickup. Please prepare to pick up Jamie from school',
+               ' I know you are in the middle of something, but it is almost time to collect Jamie from school',
+               ' This is an urgent announcement for a parent. Its time to clock out and get Jamie from School. Chop chop!',
+               ' I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up Jamie yourself.'
+               ] | random }}
+    else:
+      - action: script.jarvis_speech_engine_v3_0
+        data:
+          where: gem
+          type: announcement
+          message: |
+            {{ [ 
+               ' It is almost time for the school pickup. Please prepare to pick up Jamie from school',
+               ' I know you are in the middle of something, but it is almost time to collect Jamie from school',
+               ' This is an urgent announcement for a parent. Its time to clock out and get Jamie from School. Chop chop!',
+               ' I have received a message from the school pick up fairies telling me they are on strike. I guess that means you will have to go and pick up Jamie yourself.'
+               ] | random }}
+  - action: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.school_pick_up_announcement_played
+mode: single
+initial_state: true
