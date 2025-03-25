@@ -33,26 +33,29 @@ sequence:
       minutes: 0
       seconds: 0
       milliseconds: 500
-  - action: google_generative_ai_conversation.generate_content
-    metadata: {}
+  - action: llmvision.image_analyzer
     data:
-      prompt: >-
+      provider: 01JP4YW4N12R828GZP72CNX013
+      message: |-
         Motion has been detected, compare and very briefly describe what you see
         in the following sequence of images from my doorbell camera. What do you
         think caused the motion? If a person or moving car is present, describe
-        them in detail. Do not describe stationary objects such as trees, or
+        them in detail. Do not describe stationary objects such as trees, cars,
         walls or buildings. If you see no obvious causes of motion, reply with
         "No Obvious Motion Detected." Your message needs to be concise and
-        accurate enough to fit in a phone notification. 
-      image_filename:
-        - ./www/snapshots/doorbell_snapshot1.jpg
-        - ./www/snapshots/doorbell_snapshot2.jpg
-        - ./www/snapshots/doorbell_snapshot3.jpg
+        accurate enough to fit in a phone notification and can be a bit cheeky. 
+      image_file: |-
+        /config/www/snapshots/doorbell_snapshot1.jpg
+        /config/www/snapshots/doorbell_snapshot2.jpg
+        /config/www/snapshots/doorbell_snapshot3.jpg
+      include_filename: true
+      max_tokens: 50
+      temperature: 0.2
     response_variable: generated_content
   - alias: Send an image and text of cause of motion.
     if:
       - condition: template
-        value_template: "{{ 'No Obvious Motion Detected.' in generated_content.text }}"
+        value_template: "{{ 'No Obvious Motion Detected.' in generated_content.response_text }}"
     then:
       - stop: ""
     else:
@@ -65,6 +68,17 @@ sequence:
       - action: notify.mobile_app_daves_samsung_galaxy
         data:
           title: Front Doorbell Motion Detected
-          message: "{{generated_content['text']}}"
+          message: "{{generated_content['response_text']}}"
+        alias: Send text analysis of image
+      - alias: Send image
+        action: notify.mobile_app_sm_s901b
+        data:
+          message: Image
+          data:
+            image: /local/snapshots/doorbell_snapshot2.jpg
+      - action: notify.mobile_app_sm_s901b
+        data:
+          title: Front Doorbell Motion Detected
+          message: "{{generated_content['response_text']}}"
         alias: Send text analysis of image
 description: ""
