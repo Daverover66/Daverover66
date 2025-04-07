@@ -1,0 +1,142 @@
+mqtt:
+  host: <YOUR HA IP ADDRESS>
+  user: <YOUR MQTT USERNAME>
+  password: <YOUR MQTT PASSWORD>
+ffmpeg:
+  hwaccel_args: preset-vaapi
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+# Recording note v14 config 
+record:
+  enabled: true
+  retain:
+    days: 5
+    mode: motion
+  events:
+    retain:
+      default: 10
+# Snapshots 
+snapshots:
+  enabled: true
+  required_zones:
+    - doorstep
+    - Drive
+  retain:
+    default: 30
+# Audio 
+audio:
+  enabled: true
+  listen:
+    - bark
+    - cough
+    - snoring
+    - yell
+
+#Global Object Settings
+objects:
+  track:
+    - person
+    - dog
+    - cat
+    - bird
+    - car
+  filters:
+    person:
+      threshold: 0.8
+      min_area: 5000
+      max_area: 100000
+cameras:
+  GardenCam1:
+    ffmpeg:
+      inputs:
+        # High Resolution Stream
+        - path: rtsp://admin:<PASSWORD>@<CAMERA IP ADDRESS>:554/Preview_01_main
+          roles:
+            - record
+        # Low Resolution Stream
+        - path: rtsp://admin:<PASSWORD>@<CAMERA IP ADDRESS>:554/Preview_01_sub
+          roles:
+            - detect
+            - audio
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+    motion:
+      mask: 0.59,0.021,0.587,0.063,0.553,0.065,0.555,0.019
+  DoorbellCam:
+    ffmpeg:
+      inputs:
+        # High Resolution Stream
+        - path: rtsp://admin:<PASSWORD>@<CAMERA IP ADDRESS>:554/Preview_01_main
+          roles:
+            - record
+        # Low Resolution Stream
+        - path: rtsp://admin:<PASSWORD>@<CAMERA IP ADDRESS>:554/Preview_01_sub
+          roles:
+            - detect
+            - audio
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+    zones:
+      doorstep:
+        coordinates: 0.776,0.99,0.557,0.886,0.438,0.913,0.421,0.775,0.071,0.849,0.005,1
+        loitering_time: 2
+        objects:
+          - person
+          - cat
+          - dog
+        filters:
+          person:
+            min_area: 5000
+            max_area: 100000
+            threshold: 0.7
+        inertia: 3
+      Drive:
+        coordinates: 0.714,0.937,0.559,0.864,0.337,0.696,0.557,0.594,0.756,0.653,0.743,0.817
+        loitering_time: 5
+        objects:
+          - person
+          - dog
+          - cat
+          - car
+        filters:
+          person:
+            min_area: 5000
+            max_area: 100000
+            threshold: 0.8
+        inertia: 3
+    motion:
+      mask:
+        - 0.561,0.012,0.559,0.054,0.589,0.051,0.592,0.013
+        - 0.078,0.606,0.088,0.426,0,0.424,0,0.839
+        - 0.757,0.6,0.763,0.534,0.762,0.385,0.467,0.273,0.455,0.529,0.572,0.531,0.648,0.574
+    review:
+      alerts:
+        required_zones:
+          - doorstep
+          - Drive
+      detections: {}
+  GarageCam:
+    ffmpeg:
+      inputs:
+        # High Resolution Stream
+        - path: rtsp://GarageCam:9Pb2vpOy2@192.168.0.94:554/stream1
+          roles:
+            - record
+        # Low Resolution Stream
+        - path: rtsp://GarageCam:9Pb2vpOy2@192.168.0.94:554/stream2
+          roles:
+            - detect
+            - audio
+    detect:
+      width: 1280
+      height: 720
+      fps: 10
+    motion:
+      mask: 0.363,0,0.364,0.048,0.318,0.051,0.317,0
+version: 0.14
