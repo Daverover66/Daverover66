@@ -8,7 +8,7 @@
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   25/02/2024                                       #
+#   @date                   :   28/04/2025                                       #
 ##################################################################################
 
 ###########################
@@ -405,11 +405,11 @@ sensor:
     method: left 
     unit_prefix: k
     name: solar_grid_to_battery_kwh 
-  # - platform: integration 
-  #   source: sensor.power_battery_grid  
-  #   method: left 
-  #   unit_prefix: k
-  #   name: solar_battery_to_grid_kwh 
+  - platform: integration 
+    source: sensor.power_grid_load  
+    method: left 
+    unit_prefix: k
+    name: solar_grid_to_house_kwh 
   - platform: integration 
     source: sensor.power_battery_charging   
     method: left 
@@ -478,10 +478,10 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Daily 
     cycle: daily 
-  # solar_battery_to_grid_daily:
-  #   source: sensor.solar_battery_to_grid_kwh 
-  #   name: Solar Battery To Grid Daily 
-  #   cycle: daily 
+  solar_grid_to_house_daily:
+    source: sensor.solar_grid_to_house_kwh 
+    name: Solar Grid To House Daily 
+    cycle: daily 
   solar_battery_charge_daily:
     source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Daily 
@@ -522,12 +522,12 @@ utility_meter:
     cycle: weekly
   solar_grid_to_battery_weekly:
     source: sensor.solar_grid_to_battery_kwh 
-    name: Solar Grid To Battery Daily 
+    name: Solar Grid To Battery Weekly 
     cycle: weekly 
-  # solar_battery_to_grid_weekly:
-  #   source: sensor.solar_battery_to_grid_kwh 
-  #   name: Solar Battery To Grid Weekly  
-  #   cycle: weekly  
+  solar_grid_to_house_weekly:
+    source: sensor.solar_grid_to_house_kwh 
+    name: Solar Grid To House Weekly 
+    cycle: weekly 
   solar_battery_charge_weekly :
     source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Weekly  
@@ -570,10 +570,10 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Weekly  
     cycle: monthly 
-  # solar_battery_to_grid_monthly:
-  #   source: sensor.solar_battery_to_grid_kwh 
-  #   name: Solar Battery To Grid Monthly 
-  #   cycle: monthly 
+  solar_grid_to_house_monthly:
+    source: sensor.solar_grid_to_house_kwh 
+    name: Solar Grid To House Monthly
+    cycle: monthly
   solar_battery_charge_monthly:
     source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Monthly  
@@ -616,10 +616,10 @@ utility_meter:
     source: sensor.solar_grid_to_battery_kwh 
     name: Solar Grid To Battery Yearly 
     cycle: yearly 
-  # solar_battery_to_grid_yearly:
-  #   source: sensor.solar_battery_to_grid_kwh 
-  #   name: Solar Battery To Grid Yearly 
-  #   cycle: yearly
+  solar_grid_to_house_yearly:
+    source: sensor.solar_grid_to_house_kwh 
+    name: Solar Grid To House Yearly 
+    cycle: yearly
   solar_battery_charge_yearly:
     source: sensor.solar_battery_charge_kwh 
     name: Solar Battery Charge Yearly  
@@ -627,4 +627,4 @@ utility_meter:
   solar_battery_discharge_yearly:
     source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Yearly 
-    cycle: yearly           
+    cycle: yearly     
