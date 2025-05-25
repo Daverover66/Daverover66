@@ -1,16 +1,19 @@
 ################################################################################## 
 #   @author                 :   Remko Van Der Veer                               #
 #   @date                   :   11/4/2020                                        #
-#   @package                :   electrical_power.yaml                            #
-#   @description            :   All electrical power config for dashboard        # 
+#   @package                :   energy.yaml                                      #
+#   @description            :   All energy config for dashboard                  # 
 #                                                                                #
 #   @modified by            :   Ryan McLean                                      #
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   26/02/2024                                       #
+#   @date                   :   25/05/2025                                       #
+#   @description            :   Added dynamic battery charge rate sensor         #
 ##################################################################################
-   
+
+
+    
 ###########################
 #       sensors           # 
 ########################### 
@@ -61,7 +64,6 @@ template:
             {{ total_ac_power }}
         availability: >
           {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_i2_ac_power') | is_number }}
-          
 
 ##########################################################
 #    energy flow from Modbus config documentation 
@@ -151,7 +153,7 @@ template:
         # Grid -> Battery is I1 AC + I2 AC power, when negative                         
         # Battery -> Grid is what is being exported, if the battery is discharging
         state: "{{ max([-(float(states('sensor.solaredge_i1_ac_power'), 0) + float(states('sensor.solaredge_i2_ac_power'), 0)), 0]) - (float(states('sensor.power_grid_export'), 0) if float(states('sensor.solaredge_b1_dc_power'), 0) < 0 else 0) }}"
-                                                                                  
+
       - name: "Power - Battery - Load"  
         unique_id: power_battery_load                                        
         unit_of_measurement: "W"                                                
@@ -159,273 +161,40 @@ template:
         state_class: "measurement"                                              
         # What is being discharged minus what is being exported, if positive    
         state: "{{ max([float(states('sensor.power_battery_discharging'), 0) - float(states('sensor.power_grid_export'), 0), 0]) }}"
-          
-
-        ####################################################################
-        #                     old template sensors                         #
-        ####################################################################
-
-      # - name: "Solar Panel Production W"
-      # # replaced by Power Solar Generation #
-      #   unique_id: solar_panel_production_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:solar-power
-      #   state: >
-      #     {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float (0)%}
-      #     {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float (0)%}
-      #     {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float (0)%}
-
-      #     {% if (is_state ('sensor.solaredge_i1_dc_power' + 'sensor.solaredge_i2_dc_power', 'unknown') or is_state ('sensor.solaredge_b1_dc_power','unknown')) %}
-      #       0
-      #     {% elif (i_total_dc_power + b1_dc_power <= 0) %}
-      #       0
-      #     {% elif (i_total_dc_power + b1_dc_power < 10) %}
-      #       0
-      #     {% else %}
-      #       {{ i_total_dc_power  + b1_dc_power }}
-      #     {%  endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_i1_dc_power') | is_number and states('sensor.solaredge_i2_dc_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number }}
-
-      # - name: "Solar Panel To House W"
-      # # replaced by Power PV Load #
-      #   unique_id: solar_panel_to_house_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:solar-power
-      #   state: >
-      #     {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
-      #     {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float(0) %}
-      #     {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
-      #     {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
-      #     {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float(0) %}
-      #     {% set i_total_ac_power = (i1_ac_power + i2_ac_power) | float(0) %}
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
-      #     {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
-      #     {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') | float(0) %}
-      #     {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float (0) %}
-      #     {% set panel_production_w = states('sensor.solar_panel_production_w') | float (0) %}
-      #     {% set panel_to_grid_w = states('sensor.solar_panel_to_grid_w') | float (0) %}
-      #     {% set battery_to_grid_w = states('sensor.solar_battery_to_grid_w') | float (0) %}
-          
-      #     {% if b1_dc_power >= 0 and m1_ac_power >=0 %}
-      #       {% if i_total_dc_power < 0 and i_total_ac_power <= 0 %}
-      #         {{ i_total_dc_power - m1_ac_power }}
-      #       {% else %}
-      #         {{ i_total_ac_power - m1_ac_power }}
-      #       {% endif %}
-      #     {% elif b1_dc_power >= 0 and m1_ac_power <= 0 %}
-      #       {% if i_total_dc_power < 0 and i_total_ac_power <= 0 %}
-      #         {{ i_total_ac_power + grid_to_battery_w }}
-      #       {% else %}
-      #         {{ i_total_ac_power }}
-      #       {% endif %}
-      #     {% elif battery_to_grid_w > 0 %}
-      #       {{ panel_production_w - panel_to_grid_w }}
-      #     {% elif (b1_dc_power < 0) %} 
-      #       {% if (i1_dc_power + b1_dc_power < 0) %} 
-      #         0 
-      #       {% else %}
-      #         {{ ((i_total_dc_power + b1_dc_power) * inverter_efficiency) }}
-      #       {% endif %}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_i1_dc_power') | is_number and 
-      #     states('sensor.solaredge_i2_dc_power') | is_number and 
-      #     states('sensor.solaredge_i1_ac_power') | is_number and 
-      #     states('sensor.solaredge_i2_ac_power') | is_number and 
-      #     states('sensor.solaredge_b1_dc_power') | is_number and 
-      #     states('sensor.solaredge_m1_ac_power') | is_number }}
-
-      # - name: "Solar Panel To Battery W"
-      # # replaced by Power PV Battery #
-      #   unique_id: solar_panel_to_battery_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:solar-power
-      #   state: >
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
-      #     {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float(0) %}
-      #     {% set i1_dc_power = states('sensor.solaredge_i1_dc_power') | float(0) %}
-      #     {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
-      #     {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float(0) %}
-      #     {% set i2_dc_power = states('sensor.solaredge_i2_dc_power') | float(0) %}
-      #     {% set i_total_dc_power = (i1_dc_power + i2_dc_power) | float(0) %}
-          
-      #     {% if (b1_dc_power > 0) %}
-      #       {% if (grid_to_battery_w > 0) %}
-      #         {% if (i1_dc_power < 0 and i1_ac_power <= 0) %}
-      #           {% if ((b1_dc_power + i_total_dc_power) <=0) %}
-      #             0
-      #           {% else %}
-      #             {{ (b1_dc_power + i_total_dc_power) }}
-      #           {% endif %}
-      #         {% else %}
-      #           0
-      #         {% endif %}
-      #       {% else %}
-      #         {{ b1_dc_power }}
-      #       {% endif %} 
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_b1_dc_power') | is_number }}
         
-      # - name: "Solar Panel To Grid W"
-      # # replaced by Power PV Grid #
-      #   unique_id: solar_panel_to_grid_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:solar-power
-      #   state: >
-      #     {% set panel_production_w = states('sensor.solar_panel_production_w') | float(0) %}
-      #     {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
-      #     {% set house_consumption_w = states('sensor.solar_house_consumption_w') | float(0) %}
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
+##################################################################
+#  Dynamic battery charge rate with sun elevation  
+##################################################################
+
+      - name: "Battery Charge Limit Dynamic"
+        unique_id: battery_charge_dynamic_limit
+        unit_of_measurement: 'W'
+        state: >
+          {% set sun_elevation = state_attr('sun.sun', 'elevation') | float(0) %}
+          {% set min_elev = 10 %}
+          {% set max_elev = 50 %}
+          {% set max_power = 2160 %}
+          {% if sun_elevation < min_elev %}
+            0
+          {% elif sun_elevation > max_elev %}
+            {{ max_power }}
+          {% else %}
+            {{ ((sun_elevation - min_elev) / (max_elev - min_elev) * max_power) | round(0) }}
+          {% endif %}
+      - name: "Solar Elevation Match Percentage"
+        unique_id: solar_elevation_match_percentage
+        unit_of_measurement: '%'
+        state: >
+          {% set sun_elevation = state_attr('sun.sun', 'elevation') | float(0) %}
+          {% set min_elev = 10 %}
+          {% set max_elev = 50 %}
+          {% if sun_elevation < min_elev %}
+            0
+          {% elif sun_elevation > max_elev %}
+            100
+          {% else %}
+            {{ ((sun_elevation - min_elev) / (max_elev - min_elev) * 100) | round(0) }}
+          {% endif %}
           
-      #     {% if (exported_power_w > 0 and panel_production_w > 0) %}
-      #       {% if panel_production_w <= house_consumption_w %}
-      #         0
-      #       {% elif (panel_production_w > exported_power_w) %}
-      #         {{ exported_power_w }}
-      #       {% else %}
-      #         {{ exported_power_w + b1_dc_power  }}
-      #       {% endif %}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-          
-      # - name: "Solar Battery To House W"
-      # # replaced by Power Battery Load #
-      #   unique_id: solar_battery_to_house_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:battery-negative
-      #   state: >
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %} 
-      #     {% set battery_efficiency = states('sensor.solar_battery_efficiency') | float(0) %} 
-      #     {% set inverter_efficiency = states('sensor.solar_inverter_efficiency') | float(0) %}
-      #     {% set battery_to_grid_w = states('sensor.solar_battery_to_grid_w') | float (0) %}
-      #     {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
-
-      #     {% if b1_dc_power < 0 %} 
-      #       {% if battery_to_grid_w > 0 and exported_power_w > 0 %}
-      #         {{ (b1_dc_power * -1) - battery_to_grid_w }}
-      #       {% elif exported_power_w > 0 %}
-      #         {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}} 
-      #       {% else %}
-      #         {{ (b1_dc_power * -1 * battery_efficiency * inverter_efficiency) | float(0) | round (2)}}
-      #       {% endif %}
-      #     {% else %}
-      #       0
-      #     {% endif %}          
-      #   availability: >
-      #     {{ states('sensor.solaredge_b1_dc_power') | is_number }}
-          
-      # - name: "Solar Battery To Grid W"
-      # # replaced by Power Battery Discharging #
-      #   unique_id: solar_battery_to_grid_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:solar-power
-      #   state: >
-      #     {% set exported_power_w = states('sensor.solar_exported_power_w') | float(0) %}
-      #     {% set panel_to_grid_w = states('sensor.solar_panel_to_grid_w') | float(0) %}
-
-      #     {% if ((exported_power_w + 1) > panel_to_grid_w) %}
-      #       {{ exported_power_w - panel_to_grid_w }}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-
-      # - name: "Solar Grid To House W"
-      # # replaced by Power Grid Load #
-      #   unique_id: solar_grid_to_house_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:transmission-tower-export
-      #   state: >
-      #     {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
-      #     {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float(0) %}
-
-      #     {% if (m1_ac_power <= 0) %}
-      #       {{ (m1_ac_power * -1) - grid_to_battery_w }}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_m1_ac_power') | is_number }}
-          
-      # - name: "Solar Grid To Battery W"
-      # # replaced by Power Grid Battery #
-      #   unique_id: solar_grid_to_battery_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:battery-positive
-      #   state: >
-      #     {% set i1_ac_power = states('sensor.solaredge_i1_ac_power') | float(0) %}
-      #     {% set i2_ac_power = states('sensor.solaredge_i2_ac_power') | float (0) %}
-      #     {% set i_total_ac_power = (i1_ac_power + i2_ac_power) | float(0) %}
-      #     {% set b1_dc_power = states('sensor.solaredge_b1_dc_power') | float(0) %}
-
-      #     {% if (i_total_ac_power <= -25 and b1_dc_power > 0) %}
-      #       {{ i_total_ac_power * -1 }}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_i1_ac_power') | is_number and states('sensor.solaredge_b1_dc_power') | is_number}}
-
-      # - name: "Solar Battery In W"
-      # # replaced by Power Battery Charging #
-      #   unique_id: solar_battery_in_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:battery-positive
-      #   state: >
-      #     {% set grid_to_battery_w = states('sensor.solar_grid_to_battery_w') | float(0) %}
-      #     {% set panel_to_battery_w = states('sensor.solar_panel_to_battery_w') | float(0) %}
-
-      #     {{ (grid_to_battery_w + panel_to_battery_w) }}
-
-      # - name: "Solar House Consumption W"
-      # # replaced by Power Consumption #
-      #   unique_id: solar_house_consumption_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:home
-      #   state: >
-      #     {% set panel_to_house_w = states('sensor.solar_panel_to_house_w') | float(0) %}
-      #     {% set battery_to_house_w = states('sensor.solar_battery_to_house_w') | float(0) %}
-      #     {% set grid_to_house_w = states('sensor.solar_grid_to_house_w') | float(0) %}
-
-      #     {{ (panel_to_house_w + battery_to_house_w + grid_to_house_w) }}
-
-      # - name: "Solar Imported Power W"
-      # # replaced by Power Grid Import #
-      #   unique_id: solar_imported_power_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:transmission-tower-export
-      #   state: >
-      #     {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
-
-      #     {% if (m1_ac_power < 0) %}
-      #       {{ (m1_ac_power * -1) }}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_m1_ac_power') | is_number}}
-
-      # - name: "Solar Exported Power W"
-      # # replaced by Power Grid Export #
-      #   unique_id: solar_exported_power_w
-      #   unit_of_measurement: "W"
-      #   icon: mdi:transmission-tower-import
-      #   state: >
-      #     {% set m1_ac_power = states('sensor.solaredge_m1_ac_power') | float(0) %}
-
-      #     {% if (m1_ac_power > 20) %}
-      #       {{ (m1_ac_power) }}
-      #     {% else %}
-      #       0
-      #     {% endif %}
-      #   availability: >
-      #     {{ states('sensor.solaredge_m1_ac_power') | is_number }}
     
- 
+  
