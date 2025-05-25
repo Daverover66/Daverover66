@@ -1,0 +1,20 @@
+###### Ceiling Lights Only
+
+light.living_room_light_1_light:
+  light_type: "ceiling"
+light.living_room_light_2_light:
+  light_type: "ceiling"
+light.living_room_light_3_light:
+  light_type: "ceiling"
+light.living_room_light_4_light:
+  light_type: "ceiling"
+light.living_room_light_5_light:
+  light_type: "ceiling"
+light.kitchen_lights_2:
+  light_type: "ceiling"
+light.spare_room_lights:
+  light_type: "ceiling"
+switch.office_light_switch:
+  light_type: "ceiling"
+switch.master_bedroom_light_switch:
+  light_type: "ceiling"
