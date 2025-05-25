@@ -1,0 +1,79 @@
+  whereami:
+    speech:
+      text: >
+        {% set room = expand(label_entities('Local Speaker')) | sort(attribute='last_changed') |
+                map(attribute='entity_id') | list| last | area_name() %}
+        {{ [
+          "You are currently in the " ~ room ~ ".",
+          "It appears you are in the " ~ room ~ ".",
+          "I can see you in the " ~ room ~ ".",
+          "Are you having a laugh? You are in the " ~ room ~ "."
+        ] | random }}
+  whereisdave:
+    speech:
+      text: >
+        {% set dave_loc = states('binary_sensor.dave_home') %}
+        {% if dave_loc == 'off' %}
+          {% set dave_loc = states('sensor.dave_location') %}
+            {{ [
+              "Dave is currently " ~ dave_loc ~ ".",
+              "It appears Dave is " ~ dave_loc ~ ".",
+              "I can see Dave " ~ dave_loc ~ ".",
+              "Are you having a laugh? Dave is " ~ dave_loc ~ "."
+            ] | random }}   
+        {% else %}
+          {% set dave_loc = states('sensor.dave_room') %}
+            {{ [
+              "Dave is currently in the " ~ dave_loc ~ ".",
+              "It appears Dave is in the " ~ dave_loc ~ ".",
+              "I can see Dave in the " ~ dave_loc ~ ".",
+              "Are you having a laugh? Dave is in the " ~ dave_loc ~ "."
+            ] | random }}   
+        {% endif %}
+  whereisgem:
+    speech:
+      text: >
+        {% set gem_loc = states('binary_sensor.gem_home') %}
+        {% if gem_loc == 'off' %}
+          {% set gem_loc = states('sensor.gem_location') %}
+            {{ [
+              "Gemma is currently " ~ gem_loc ~ ".",
+              "It appears Gemma is " ~ gem_loc ~ ".",
+              "I can see Gemma " ~ gem_loc ~ ".",
+              "Are you having a laugh? Gemma is " ~ gem_loc ~ "."
+            ] | random }}   
+        {% else %}
+          {% set gem_loc = states('sensor.gem_room') %}
+            {{ [
+              "Gemma is currently in the " ~ gem_loc ~ ".",
+              "It appears Gemma is in the " ~ gem_loc ~ ".",
+              "I can see Gemma in the " ~ gem_loc ~ ".",
+              "Are you having a laugh? Gemma is in the " ~ gem_loc ~ "."
+            ] | random }}   
+        {% endif %}
+  needsomelight:
+    speech:
+      text: let there be light. only kidding as this is a test.
+  areyouawake:
+    speech:
+      text: >
+        {{ [
+          "For you, always. ",
+          "Yes. I am awake. ",
+          "Of course. ",
+          "I am indeed online."
+        ] | random }}
+        {% if is_state('binary_sensor.quiet_time', 'on') %}
+          {{[
+            "Working on a secret project? Are we sir?",
+            "Are we working on a secret project?"
+          ] | random }}
+        {% else %}
+          {{ [
+            "How may I be of service?",
+            "How may I be of assistance?"
+            ] | random }}
+          {% endif %}
+
+
+
