@@ -8,7 +8,8 @@
 #   @date                   :   05/12/2022                                       #    
 #                                                                                #
 #   @further modified by    :   Dave Forrester (@Daverover66)                    #
-#   @date                   :   28/04/2025                                       #
+#   @date                   :   25/05/2025                                       #
+#   @description            :   Added some integral and battery sensors          #
 ##################################################################################
 
 ###########################
@@ -291,6 +292,22 @@ template:
           {% endif %}
         availability: >
           {{ states('sensor.solaredge_b1_dc_power') | is_number }} 
+          
+      - name: Target Battery Charge Level
+        unit_of_measurement: "%"
+        state: >
+          {% set duration = states('input_number.home_battery_charge_length') | float(0) %}
+          {% if duration <= 0.5 %}
+            20
+          {% elif duration <= 1 %}
+            40
+          {% elif duration <= 1.5 %}
+            60
+          {% elif duration <= 2 %}
+            80
+          {% else %}
+            99.9
+          {% endif %}
 
       - name: "Solar Lifetime Production"
         unique_id: solar_lifetime_production
@@ -344,6 +361,15 @@ template:
         unit_of_measurement: "%"
         state: >
           {{ ((states('sensor.solar_battery_efficiency_average')| float(0)) * 100) | round(2) }}
+          
+######## This one determines how much the house consumes from the battery and is used in the Sankey Chart only ##########
+          
+      - name: "Solar House Battery Consumption Daily"
+        unique_id: solar_house_battery_consumption_daily
+        unit_of_measurement: "kWh"
+        state_class: measurement
+        device_class: energy
+        state: "{{ states('sensor.solar_battery_discharge_daily') | float(0) }}"
 
 # MQTT Stored Sensors
 mqtt:
@@ -419,7 +445,47 @@ sensor:
     source: sensor.power_battery_discharging   
     method: left 
     unit_prefix: k
-    name: solar_battery_discharge_kwh 
+    name: solar_battery_discharge_kwh
+  - platform: integration
+    source: sensor.power_kettle_only
+    name: Estimated Energy Kettle Only
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
+    source: sensor.power_single_oven_only
+    name: Estimated Energy Single Oven Only
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
+    source: sensor.power_kettle_and_single_oven
+    name: Estimated Energy Kettle and Single Oven
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: trapezoidal
+
+  - platform: integration
+    source: sensor.power_both_ovens_on
+    name: Estimated Energy Both Ovens On
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: trapezoidal
+    
+  - platform: integration
+    source: sensor.power_kettle_and_both_ovens_on
+    name: Estimated Energy Kettle and Both Ovens On
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: trapezoidal
+
 
   - platform: statistics
     name: "Solar Battery Efficiency Average"
@@ -627,4 +693,4 @@ utility_meter:
   solar_battery_discharge_yearly:
     source: sensor.solar_battery_discharge_kwh 
     name: Solar Battery Discharge Yearly 
-    cycle: yearly     
+    cycle: yearly          
