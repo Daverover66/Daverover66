@@ -1,7 +1,8 @@
 ##################################################
 #              Current configuration             #     
-#                 August 2024                    #
+#                 May 2025                       #
 ##################################################
+
                   
 # Loads default set of integrations. Do not remove.
 default_config:
@@ -33,6 +34,9 @@ group: !include groups.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
 mqtt: !include mqtt.yaml
+intent_script: !include intent_script.yaml
+device_tracker: !include device_tracker.yaml
+
 
 # location for sunrise and sunset times
 # latitude: !secret latitude
@@ -45,12 +49,7 @@ homeassistant:
   packages: !include_dir_named packages
   media_dirs: 
     media: /media
-    images: /media/images
-    haunted_sounds: /media/haunted_sounds
-    music: /media/music
-    sounds: /media/sounds
-    disney: /media/disney
-    books: /media/books
+  customize: !include customise.yaml
 
         
 # influx db
@@ -66,12 +65,6 @@ homeassistant:
 # influx db size
 
 
-# Alexa media player set up
-alexa_media:
-  accounts:
-    - email: !secret amazon_user
-      password: !secret amazon_password
-      url: "amazon.co.uk"
 
 # Battery Notes Config 
 battery_notes:
@@ -92,6 +85,37 @@ command_line:
       command: "find /config -name '*.yaml' | xargs cat | wc -l"
       scan_interval: 20000
 
+  - sensor:
+      unique_id: "ahc_blueprint_version"
+      command: "curl https://raw.githubusercontent.com/panhans/HomeAssistant/refs/heads/main/blueprints/automation/panhans/advanced_heating_control.yaml"
+      name: "AHC Blueprint Version"
+      value_template: "{{ value | regex_findall('\\*\\*Version\\*\\*:(.+\\d+.\\d+.\\d+)', '\\1') | first | trim }}"
+      scan_interval: 3600 # every hour
+
+
+########## Shell Commands #############
+
+shell_command:
+  pushupdates_to_github: /bin/bash pushupdates.sh
+  log_nmap_devices: /bin/bash log_nmap_devices.sh
+  update_nmap_json: python3 /config/python_scripts/nmap_to_json.py
+
+########## powercalc ##########  
+powercalc:
+
+####  python script #####
+
+python_script:
+  path: python_scripts
+
+###### Rest Commands ######
+
+rest_command:
+  tablet_reboot:
+    url: "http://192.168.0.154:2323/?cmd=rebootDevice&password=W3ath3r39"
+
+
+  
 
 
       
