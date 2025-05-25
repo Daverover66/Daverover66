@@ -1,0 +1,30 @@
+###########################################################
+#                 Custom sentences                        #
+#    these are in the config/custom_sentences/en folder   #
+###########################################################
+
+language: "en"
+intents:
+  whereami:
+    data:
+      - sentences:
+          - "where am (I | are you)"
+          - "what room (is this | are we in)"
+  whereisdave:
+    data:
+      - sentences:
+          - "where is (dave | daddy)"
+          - "what room is ( dave in | daddy in)"
+  whereisgem:
+    data:
+      - sentences:
+          - "where is (gemma | mummy)"
+          - "what room is ( gemma in | mummy in)"
+  areyouawake:
+    data:
+      - sentences:
+          - "are you (awake | up)"
+  needsomelight:
+    data:
+      - sentences:
+          - "can you make it brighter in here"
