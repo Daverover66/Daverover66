@@ -5,22 +5,18 @@
 #   @description    :   not in a package file              #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   1.2                                #
+#   @modified       :   25/05/2025                         #
 ############################################################
 
 
-##################################################
-    Kitchen Light Indicator Garage Dehumidifier
-##################################################
-
-- id: '1692688134088'
-  name: Kitchen Light Indicator Garage Dehumidifier
+- id: '1699774195719'
+  name: Spare room night lights
   entities:
-    light.kitchen_light_1:
+    light.guest_bedroom_bedside_lamp_left:
       min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
+      max_color_temp_kelvin: 7042
+      min_mireds: 142
       max_mireds: 500
       effect_list:
       - blink
@@ -29,1581 +25,5850 @@
       - channel_change
       - finish_effect
       - stop_effect
+      - colorloop
+      - stop_colorloop
       supported_color_modes:
       - color_temp
       - xy
-      color:
-        x: 0.151
-        y: 0.343
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 1
-      supported_features: 44
+      effect:
       color_mode: xy
-      brightness: 26
+      brightness: 2
+      color_temp_kelvin:
+      color_temp:
       hs_color:
-      - 179.765
-      - 100
-      rgb_color:
-      - 0
-      - 255
-      - 254
-      xy_color:
-      - 0.151
-      - 0.343
-      state: 'on'
-    switch.kitchen_light_1_do_not_disturb:
-      brightness: 26
-      color:
-        x: 0.151
-        y: 0.343
-      color_mode: xy
-      color_power_on_behavior: previous
-      color_temp: 153
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 1 do_not_disturb
-      state: 'on'
-  icon: mdi:garage-variant
-  metadata: {}
-
-##################################################
-    Kitchen Light Indicator Washing Machine
-##################################################
-
-- id: '1692692252026'
-  name: Kitchen Light Indicator Washing Machine Finished
-  entities:
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color:
-        x: 0.596
-        y: 0.388
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 33.176
-      - 100
+      - 2.008
+      - 93.725
       rgb_color:
       - 255
-      - 141
-      - 0
+      - 24
+      - 16
       xy_color:
-      - 0.596
-      - 0.388
-      state: 'on'
-    switch.kitchen_light_2_do_not_disturb:
-      brightness: 26
-      color:
-        x: 0.596
-        y: 0.388
-      color_mode: xy
-      color_power_on_behavior: previous
-      color_temp: 500
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 2 do_not_disturb
-      state: 'on'
-  icon: mdi:washing-machine-alert
-  metadata: {}
-
-##################################################
-             Kitchen Lights Normal
-##################################################
-
-- id: '1694412152715'
-  name: Kitchen Lights Normal
-  entities:
-    light.kitchen_lights_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      color_temp_kelvin: 2724
-      color_temp: 367
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      icon: mdi:lightbulb-group
-      friendly_name: Kitchen Lights
+      - 0.695
+      - 0.301
+      icon: mdi:lamp
+      friendly_name: Guest Bedroom Bedside Lamp Left
       supported_features: 44
       state: 'on'
-    switch.kitchen_lights_switch_switch_0:
-      friendly_name: Kitchen Lights Switch
-      state: 'on'
-  metadata:
-    light.kitchen_lights_2:
-      entity_only: true
-    switch.kitchen_lights_switch_switch_0:
-      entity_only: true
-
-##################################################
-    Living Room Lamps
-##################################################
-
-- id: '1694412351431'
-  name: Living Room Lamps
-  entities:
-    light.corner_lamp:
+    light.guest_bedroom_bedside_lamp_right:
       min_color_temp_kelvin: 2000
       max_color_temp_kelvin: 6535
       min_mireds: 153
       max_mireds: 500
       effect_list:
       - bright
-      - colorful
       - goodNight
-      - leisure
+      - read
       - nightLight
       - party
-      - read
+      - leisure
       - soft
+      - colorful
       supported_color_modes:
       - color_temp
       - rgb
-      color_mode: color_temp
-      brightness: 75
-      color_temp_kelvin: 2000
-      color_temp: 500
+      effect:
+      color_mode:
+      brightness:
+      color_temp_kelvin:
+      color_temp:
       hs_color:
-      - 30.601
-      - 94.547
       rgb_color:
-      - 255
-      - 136
-      - 13
       xy_color:
-      - 0.599
-      - 0.382
-      entity_id:
-      - light.sonoff_1001f6db20
-      - light.sonoff_1001f6dac6
-      - light.sonoff_1001f6d9ea
-      icon: mdi:lightbulb-group
-      friendly_name: Corner Lamp
-      supported_features: 4
-      state: 'on'
-    light.standard_lamp:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - bright
-      - colorful
-      - goodNight
-      - leisure
-      - nightLight
-      - party
-      - read
-      - soft
-      supported_color_modes:
-      - color_temp
-      - rgb
-      color_mode: color_temp
-      brightness: 75
-      color_temp_kelvin: 2000
-      color_temp: 500
-      hs_color:
-      - 30.601
-      - 94.547
-      rgb_color:
-      - 255
-      - 136
-      - 13
-      xy_color:
-      - 0.599
-      - 0.382
-      entity_id:
-      - light.sonoff_1001f6da0c
-      - light.sonoff_1001f6d78c
-      - light.sonoff_1001f6d860
-      icon: mdi:lightbulb-group
-      friendly_name: Standard Lamp
-      supported_features: 4
+      icon: mdi:lamp
+      friendly_name: Guest Bedroom Bedside Lamp Right
+      supported_features: 36
+      state: 'off'
+    input_boolean.guest_bedroom_allow_lights_off:
+      editable: false
+      icon: mdi:check
+      friendly_name: Guest Bedroom Allow Lights Off
+      state: 'off'
+    input_boolean.guest_bedroom_bedside_lamps_active:
+      editable: false
+      icon: mdi:lamp
+      friendly_name: Guest Bedroom Bedside Lamps Active
+      state: 'off'
+  metadata:
+    light.guest_bedroom_bedside_lamp_left:
+      entity_only: true
+    light.guest_bedroom_bedside_lamp_right:
+      entity_only: true
+    input_boolean.guest_bedroom_allow_lights_off:
+      entity_only: true
+    input_boolean.guest_bedroom_bedside_lamps_active:
+      entity_only: true
+- id: '1703961832652'
+  name: Adaptive Lighting On
+  entities:
+    input_boolean.adaptive_lighting_active:
+      editable: true
+      friendly_name: Adaptive Lighting Active
       state: 'on'
   metadata:
-    light.corner_lamp:
+    input_boolean.adaptive_lighting_active:
       entity_only: true
-    light.standard_lamp:
-      entity_only: true
-
-##################################################
-           Kitchen Lights Mealtimes
-##################################################
-
-- id: '1694454322626'
-  name: Kitchen Lights Mealtimes
+- id: '1703961949243'
+  name: Adaptive Lighting Off
   entities:
-    switch.kitchen_lights_switch_switch_0:
-      friendly_name: Kitchen Lights Switch
-      state: 'on'
-    light.kitchen_lights_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color:
-        x: 0.3451
-        y: 0.3516
-      icon: mdi:lightbulb-group
-      friendly_name: Kitchen Lights
-      supported_features: 44
-      color_mode: color_temp
-      brightness: 255
-      color_temp_kelvin: 5000
-      color_temp: 200
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      state: 'on'
+    input_boolean.adaptive_lighting_active:
+      editable: true
+      friendly_name: Adaptive Lighting Active
+      state: 'off'
   metadata:
-    switch.kitchen_lights_switch_switch_0:
+    input_boolean.adaptive_lighting_active:
       entity_only: true
-    light.kitchen_lights_2:
-      entity_only: true
-
-#######################################################################
-    Kitchen Light Indicator Garage Dehumidifier and Washing Machine
-#######################################################################
-
-- id: '1694930675653'
-  name: Kitchen Lights Normal On with Garage Dehumidifier and Washing Machine Indicator
-    On
+- id: '1747811443605'
+  name: ready_for_morning
   entities:
-    light.kitchen_light_1:
+    light.floor_lamp_pro_1:
       min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 179.765
-      - 100
-      rgb_color:
-      - 0
-      - 255
-      - 254
-      xy_color:
-      - 0.151
-      - 0.343
-      color:
-        x: 0.151
-        y: 0.343
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 212
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 33.176
-      - 100
-      rgb_color:
-      - 255
-      - 141
-      - 0
-      xy_color:
-      - 0.596
-      - 0.388
-      color:
-        x: 0.596
-        y: 0.388
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 100
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 116
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 124
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 136
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-###################################################################
-    Kitchen Lights Normal On with Washing Machine Indicator On
-###################################################################
-
-- id: '1694930934140'
-  name: Kitchen Lights Normal On with Washing Machine Indicator On
-  entities:
-    light.kitchen_light_1:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 84
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 33.176
-      - 100
-      rgb_color:
-      - 255
-      - 141
-      - 0
-      xy_color:
-      - 0.596
-      - 0.388
-      color:
-        x: 0.596
-        y: 0.388
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 92
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 136
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-######################################################################
-    Kitchen Lights Normal On with Garage Dehumidifier Indicator On
-######################################################################
-
-- id: '1694931078964'
-  name: Kitchen Lights Normal On with Garage Dehumdifier Indicator On
-  entities:
-    light.kitchen_light_1:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 179.765
-      - 100
-      rgb_color:
-      - 0
-      - 255
-      - 254
-      xy_color:
-      - 0.151
-      - 0.343
-      color:
-        x: 0.151
-        y: 0.343
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 84
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 96
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 124
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 28
-      hs_color:
-      - 28.343
-      - 64.962
-      rgb_color:
-      - 255
-      - 167
-      - 89
-      xy_color:
-      - 0.524
-      - 0.387
-      color:
-        x: 0.4582
-        y: 0.4102
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 140
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 2724
-      color_temp: 367
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-###########################################################################
-    Kitchen Lights Mealtimes On with Garage Dehumidifier Indicator On
-###########################################################################
-
-- id: '1694931239713'
-  name: Kitchen Lights Mealtimes On with Garage Dehumidifier Indicator On
-  entities:
-    light.kitchen_light_1:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 179.765
-      - 100
-      rgb_color:
-      - 0
-      - 255
-      - 254
-      xy_color:
-      - 0.151
-      - 0.343
-      color:
-        x: 0.151
-        y: 0.343
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 84
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 84
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 136
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-################################################################################################
-    Kitchen Lights Mealtimes On with Garage Dehumidifier and Washing Machine Indicator On
-################################################################################################
-
-- id: '1694931340691'
-  name: Kitchen Lights Mealtimes On with Garage Dehumdifier and Washing Machine Indicator
-    On
-  entities:
-    light.kitchen_light_1:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 179.765
-      - 100
-      rgb_color:
-      - 0
-      - 255
-      - 254
-      xy_color:
-      - 0.151
-      - 0.343
-      color:
-        x: 0.151
-        y: 0.343
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 108
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 33.176
-      - 100
-      rgb_color:
-      - 255
-      - 141
-      - 0
-      xy_color:
-      - 0.596
-      - 0.388
-      color:
-        x: 0.596
-        y: 0.388
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 76
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 116
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 124
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 132
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-######################################################################
-    Kitchen Lights Mealtimes On with Washing Machine Indicator On
-######################################################################
-
-- id: '1694931496341'
-  name: Kitchen Lights Mealtimes On with Washing Machine Indicator On
-  entities:
-    light.kitchen_light_1:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: initial
-      do_not_disturb: true
-      linkquality: 108
-      friendly_name: Kitchen Light 1
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_2:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: xy
-      brightness: 26
-      hs_color:
-      - 33.176
-      - 100
-      rgb_color:
-      - 255
-      - 141
-      - 0
-      xy_color:
-      - 0.596
-      - 0.388
-      color:
-        x: 0.596
-        y: 0.388
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 104
-      friendly_name: Kitchen Light 2
-      supported_features: 44
-      state: 'on'
-    light.kitchen_light_3:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 116
-      friendly_name: Kitchen Light 3
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_4:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: previous
-      do_not_disturb: true
-      linkquality: 120
-      friendly_name: Kitchen Light 4
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-    light.kitchen_light_5:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 6535
-      min_mireds: 153
-      max_mireds: 500
-      effect_list:
-      - blink
-      - breathe
-      - okay
-      - channel_change
-      - finish_effect
-      - stop_effect
-      supported_color_modes:
-      - color_temp
-      - xy
-      color_mode: color_temp
-      brightness: 255
-      hs_color:
-      - 27.001
-      - 19.243
-      rgb_color:
-      - 255
-      - 228
-      - 205
-      xy_color:
-      - 0.372
-      - 0.35
-      color:
-        x: 0.3451
-        y: 0.3516
-      color_power_on_behavior: initial
-      do_not_disturb: false
-      linkquality: 136
-      friendly_name: Kitchen Light 5
-      supported_features: 44
-      color_temp_kelvin: 5000
-      color_temp: 200
-      state: 'on'
-  metadata:
-    light.kitchen_light_1:
-      entity_only: true
-    light.kitchen_light_2:
-      entity_only: true
-    light.kitchen_light_3:
-      entity_only: true
-    light.kitchen_light_4:
-      entity_only: true
-    light.kitchen_light_5:
-      entity_only: true
-
-###################################
-#  Bed Lights Scenes for Dimming  #
-###################################
-
-###############
-#     100%    #
-###############
-
-- id: '1695072452629'
-  name: Bed Lights Night 100%
-  entities:
-    light.bed_lamps:
-      min_color_temp_kelvin: 2000
-      max_color_temp_kelvin: 9000
+      max_color_temp_kelvin: 9009
       min_mireds: 111
       max_mireds: 500
+      effect_list:
+      - ''
+      - Afternoon
+      - Alternate
+      - Aurora
+      - Berry
+      - Birthday
+      - Blue Sky
+      - Blue Sky & Grasslands
+      - Breathe
+      - Candlelight
+      - Candy
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Carnival
+      - Cherry blossoms
+      - Christmas
+      - Christmas Bell
+      - Christmas Tree
+      - Cornfield
+      - Crossing
+      - Dance Party
+      - Dancing
+      - Dense fog
+      - Desert
+      - Dreamland
+      - Dreamlike
+      - Dripping
+      - Earth
+      - Easter
+      - Excited
+      - Fascination
+      - Father's Day
+      - Fire
+      - Firefly
+      - Fireworks
+      - Fish tank
+      - Flow
+      - Flower Field
+      - Fluctuate
+      - Forest
+      - Garden
+      - Glacier
+      - Gleam
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Graffiti
+      - Graveyard
+      - Halloween
+      - Happy
+      - Intersection
+      - Jupiter
+      - Karst Cave
+      - Lake
+      - Lava
+      - Little Train
+      - Marbles
+      - Mars
+      - Mavericks
+      - Meditation
+      - Mercury
+      - MFFL
+      - Milky Way
+      - Moonlit Night
+      - Morning
+      - Mother's Day
+      - Movie
+      - 'Music: Alternate'
+      - 'Music: ColorPainting'
+      - 'Music: FallingSand'
+      - 'Music: Hopping'
+      - 'Music: Separation'
+      - 'Music: Spectrum'
+      - Mysterious
+      - New Years
+      - Night
+      - Night Light
+      - Ocean
+      - Peach Orchard
+      - Profound
+      - Quiet
+      - Rainbow
+      - Raindrops in Mountains
+      - Raining
+      - Reading
+      - Ripple
+      - River
+      - Romantic
+      - Rustling leaves
+      - Saint Patrick's Day
+      - Saturn
+      - Snowing
+      - Soothing
+      - Split
+      - Sports
+      - Spring Wind
+      - Sprinkle
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset glow
+      - Sunset Glow
+      - Sweet
+      - Technology
+      - Tenderness
+      - Thanksgiving
+      - Thunderstorm
+      - Twilight
+      - Uranus
+      - Valentine's Day
+      - Warm
+      - Wave
+      - White Light
+      - Work
       supported_color_modes:
-      - brightness
       - color_temp
       - rgb
-      color_mode: rgb
-      brightness: 255
+      effect: Morning
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2000
+      color_temp: 500
       hs_color:
-      - 255
-      - 50.196
+      - 30.601
+      - 94.547
       rgb_color:
-      - 159
-      - 127
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      icon: mdi:light-bulb
+      friendly_name: Floor Lamp Pro 1
+      supported_features: 44
+      state: 'on'
+    switch.floor_lamp_pro_1_power_switch:
+      friendly_name: Floor Lamp Pro 1 Power Switch
+      state: 'on'
+    switch.floor_lamp_pro_1_gradient_toggle:
+      friendly_name: Floor Lamp Pro 1 Gradient Toggle
+      state: unknown
+    switch.floor_lamp_pro_1_dream_view_toggle:
+      friendly_name: Floor Lamp Pro 1 Dream View Toggle
+      state: unknown
+    light.floor_lamp_pro_1_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 001
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 002
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 003
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 004
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 005
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 006
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 007
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 008
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 009
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 010
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 011
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 012
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 013
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 014
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 015
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Morning
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 9009
+      color_temp: 111
+      hs_color:
+      - 222.449
+      - 17.843
+      rgb_color:
+      - 210
+      - 223
       - 255
       xy_color:
-      - 0.248
-      - 0.168
-      http_enabled: true
-      ble_enabled: true
-      lan_enabled: false
-      update_status: ok at Mon Sep 18 22:24:41 2023
-      timeout_count: 0
-      icon: mdi:string-lights
-      friendly_name: Bed Lamps
-      supported_features: 0
+      - 0.285
+      - 0.293
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Right
+      supported_features: 44
       state: 'on'
-  metadata:
-    light.bed_lamps:
-      entity_only: true
+    switch.glide_lights_right_power_switch:
+      friendly_name: Glide Lights Right Power Switch
+      state: 'on'
+    switch.glide_lights_right_gradient_toggle:
+      friendly_name: Glide Lights Right Gradient Toggle
+      state: unknown
+    light.glide_lights_right_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 001
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 002
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 003
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 004
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 005
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 006
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 007
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 008
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 009
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 010
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 011
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 012
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 013
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 014
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 015
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 017
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 018
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 019
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 020
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 021
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 022
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 023
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 024
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 025
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 026
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 027
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 028
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Morning
+      color_mode: rgb
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 227.368
+      - 14.902
+      rgb_color:
+      - 217
+      - 225
+      - 255
+      xy_color:
+      - 0.292
+      - 0.296
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Left
+      supported_features: 44
+      state: 'on'
+    switch.govee_glide_left_power_switch:
+      friendly_name: Govee Glide Left Power Switch
+      state: 'on'
+    switch.govee_glide_left_gradient_toggle:
+      friendly_name: Govee Glide Left Gradient Toggle
+      state: unknown
+    light.govee_glide_left_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 001
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 002
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 003
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 004
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 005
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 006
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 007
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 008
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 009
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 010
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 011
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 012
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 013
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 014
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 015
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 016
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 017
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 018
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 019
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 020
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 021
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 022
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 023
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 024
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 025
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 026
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 027
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 028
+      supported_features: 44
+      state: 'off'
+    light.corner_lamp_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6993
+      min_mireds: 143
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - hs
+      color_mode: hs
+      brightness: 255
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 26.538
+      - 20.392
+      rgb_color:
+      - 255
+      - 226
+      - 203
+      xy_color:
+      - 0.375
+      - 0.35
+      icon: mdi:floor-lamp
+      friendly_name: Corner Lamp
+      supported_features: 40
+      state: 'on'
+  metadata: {}
+- id: '1747857483901'
+  name: lunchtime_govee
+  entities:
+    light.floor_lamp_pro_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - Afternoon
+      - Alternate
+      - Aurora
+      - Berry
+      - Birthday
+      - Blue Sky
+      - Blue Sky & Grasslands
+      - Breathe
+      - Candlelight
+      - Candy
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Carnival
+      - Cherry blossoms
+      - Christmas
+      - Christmas Bell
+      - Christmas Tree
+      - Cornfield
+      - Crossing
+      - Dance Party
+      - Dancing
+      - Dense fog
+      - Desert
+      - Dreamland
+      - Dreamlike
+      - Dripping
+      - Earth
+      - Easter
+      - Excited
+      - Fascination
+      - Father's Day
+      - Fire
+      - Firefly
+      - Fireworks
+      - Fish tank
+      - Flow
+      - Flower Field
+      - Fluctuate
+      - Forest
+      - Garden
+      - Glacier
+      - Gleam
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Graffiti
+      - Graveyard
+      - Halloween
+      - Happy
+      - Intersection
+      - Jupiter
+      - Karst Cave
+      - Lake
+      - Lava
+      - Little Train
+      - Marbles
+      - Mars
+      - Mavericks
+      - Meditation
+      - Mercury
+      - MFFL
+      - Milky Way
+      - Moonlit Night
+      - Morning
+      - Mother's Day
+      - Movie
+      - 'Music: Alternate'
+      - 'Music: ColorPainting'
+      - 'Music: FallingSand'
+      - 'Music: Hopping'
+      - 'Music: Separation'
+      - 'Music: Spectrum'
+      - Mysterious
+      - New Years
+      - Night
+      - Night Light
+      - Ocean
+      - Peach Orchard
+      - Profound
+      - Quiet
+      - Rainbow
+      - Raindrops in Mountains
+      - Raining
+      - Reading
+      - Ripple
+      - River
+      - Romantic
+      - Rustling leaves
+      - Saint Patrick's Day
+      - Saturn
+      - Snowing
+      - Soothing
+      - Split
+      - Sports
+      - Spring Wind
+      - Sprinkle
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset glow
+      - Sunset Glow
+      - Sweet
+      - Technology
+      - Tenderness
+      - Thanksgiving
+      - Thunderstorm
+      - Twilight
+      - Uranus
+      - Valentine's Day
+      - Warm
+      - Wave
+      - White Light
+      - Work
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Forest
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      icon: mdi:light-bulb
+      friendly_name: Floor Lamp Pro 1
+      supported_features: 44
+      state: 'on'
+    switch.floor_lamp_pro_1_power_switch:
+      friendly_name: Floor Lamp Pro 1 Power Switch
+      state: 'on'
+    switch.floor_lamp_pro_1_gradient_toggle:
+      friendly_name: Floor Lamp Pro 1 Gradient Toggle
+      state: unknown
+    switch.floor_lamp_pro_1_dream_view_toggle:
+      friendly_name: Floor Lamp Pro 1 Dream View Toggle
+      state: unknown
+    light.floor_lamp_pro_1_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 001
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 002
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 003
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 004
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 005
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 006
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 007
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 008
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 009
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 010
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 011
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 012
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 013
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 014
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 015
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 016
+      supported_features: 44
+      state: 'off'
+    light.corner_lamp_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6993
+      min_mireds: 143
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - hs
+      color_mode: hs
+      brightness: 229
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 28.71
+      - 72.941
+      rgb_color:
+      - 255
+      - 158
+      - 69
+      xy_color:
+      - 0.548
+      - 0.389
+      icon: mdi:floor-lamp
+      friendly_name: Corner Lamp
+      supported_features: 40
+      state: 'on'
+    light.glide_lights_right_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Forest
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 9009
+      color_temp: 111
+      hs_color:
+      - 222.449
+      - 17.843
+      rgb_color:
+      - 210
+      - 223
+      - 255
+      xy_color:
+      - 0.285
+      - 0.293
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Right
+      supported_features: 44
+      state: 'on'
+    switch.glide_lights_right_power_switch:
+      friendly_name: Glide Lights Right Power Switch
+      state: 'on'
+    switch.glide_lights_right_gradient_toggle:
+      friendly_name: Glide Lights Right Gradient Toggle
+      state: unknown
+    light.glide_lights_right_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 001
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 002
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 003
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 004
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 005
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 006
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 007
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 008
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 009
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 010
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 011
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 012
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 013
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 014
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 015
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 017
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 018
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 019
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 020
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 021
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 022
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 023
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 024
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 025
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 026
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 027
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 028
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Forest
+      color_mode: rgb
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 227.368
+      - 14.902
+      rgb_color:
+      - 217
+      - 225
+      - 255
+      xy_color:
+      - 0.292
+      - 0.296
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Left
+      supported_features: 44
+      state: 'on'
+    switch.govee_glide_left_power_switch:
+      friendly_name: Govee Glide Left Power Switch
+      state: 'on'
+    switch.govee_glide_left_gradient_toggle:
+      friendly_name: Govee Glide Left Gradient Toggle
+      state: unknown
+    light.govee_glide_left_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 001
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 002
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 003
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 004
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 005
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 006
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 007
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 008
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 009
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 010
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 011
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 012
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 013
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 014
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 015
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 016
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 017
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 018
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 019
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 020
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 021
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 022
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 023
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 024
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 025
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 026
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 027
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 028
+      supported_features: 44
+      state: 'off'
+  metadata: {}
+- id: '1747857653520'
+  name: afternoon_govee
+  entities:
+    light.corner_lamp_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6993
+      min_mireds: 143
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - hs
+      color_mode: hs
+      brightness: 229
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 28.71
+      - 72.941
+      rgb_color:
+      - 255
+      - 158
+      - 69
+      xy_color:
+      - 0.548
+      - 0.389
+      icon: mdi:floor-lamp
+      friendly_name: Corner Lamp
+      supported_features: 40
+      state: 'on'
+    light.floor_lamp_pro_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - Afternoon
+      - Alternate
+      - Aurora
+      - Berry
+      - Birthday
+      - Blue Sky
+      - Blue Sky & Grasslands
+      - Breathe
+      - Candlelight
+      - Candy
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Carnival
+      - Cherry blossoms
+      - Christmas
+      - Christmas Bell
+      - Christmas Tree
+      - Cornfield
+      - Crossing
+      - Dance Party
+      - Dancing
+      - Dense fog
+      - Desert
+      - Dreamland
+      - Dreamlike
+      - Dripping
+      - Earth
+      - Easter
+      - Excited
+      - Fascination
+      - Father's Day
+      - Fire
+      - Firefly
+      - Fireworks
+      - Fish tank
+      - Flow
+      - Flower Field
+      - Fluctuate
+      - Forest
+      - Garden
+      - Glacier
+      - Gleam
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Graffiti
+      - Graveyard
+      - Halloween
+      - Happy
+      - Intersection
+      - Jupiter
+      - Karst Cave
+      - Lake
+      - Lava
+      - Little Train
+      - Marbles
+      - Mars
+      - Mavericks
+      - Meditation
+      - Mercury
+      - MFFL
+      - Milky Way
+      - Moonlit Night
+      - Morning
+      - Mother's Day
+      - Movie
+      - 'Music: Alternate'
+      - 'Music: ColorPainting'
+      - 'Music: FallingSand'
+      - 'Music: Hopping'
+      - 'Music: Separation'
+      - 'Music: Spectrum'
+      - Mysterious
+      - New Years
+      - Night
+      - Night Light
+      - Ocean
+      - Peach Orchard
+      - Profound
+      - Quiet
+      - Rainbow
+      - Raindrops in Mountains
+      - Raining
+      - Reading
+      - Ripple
+      - River
+      - Romantic
+      - Rustling leaves
+      - Saint Patrick's Day
+      - Saturn
+      - Snowing
+      - Soothing
+      - Split
+      - Sports
+      - Spring Wind
+      - Sprinkle
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset glow
+      - Sunset Glow
+      - Sweet
+      - Technology
+      - Tenderness
+      - Thanksgiving
+      - Thunderstorm
+      - Twilight
+      - Uranus
+      - Valentine's Day
+      - Warm
+      - Wave
+      - White Light
+      - Work
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Forest
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      icon: mdi:light-bulb
+      friendly_name: Floor Lamp Pro 1
+      supported_features: 44
+      state: 'on'
+    switch.floor_lamp_pro_1_power_switch:
+      friendly_name: Floor Lamp Pro 1 Power Switch
+      state: 'on'
+    switch.floor_lamp_pro_1_gradient_toggle:
+      friendly_name: Floor Lamp Pro 1 Gradient Toggle
+      state: unknown
+    switch.floor_lamp_pro_1_dream_view_toggle:
+      friendly_name: Floor Lamp Pro 1 Dream View Toggle
+      state: unknown
+    light.floor_lamp_pro_1_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 001
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 002
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 003
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 004
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 005
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 006
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 007
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 008
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 009
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 010
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 011
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 012
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 013
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 014
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 015
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Rustling Leaves
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 9009
+      color_temp: 111
+      hs_color:
+      - 222.449
+      - 17.843
+      rgb_color:
+      - 210
+      - 223
+      - 255
+      xy_color:
+      - 0.285
+      - 0.293
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Right
+      supported_features: 44
+      state: 'on'
+    switch.glide_lights_right_power_switch:
+      friendly_name: Glide Lights Right Power Switch
+      state: 'on'
+    switch.glide_lights_right_gradient_toggle:
+      friendly_name: Glide Lights Right Gradient Toggle
+      state: unknown
+    light.glide_lights_right_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 001
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 002
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 003
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 004
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 005
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 006
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 007
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 008
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 009
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 010
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 011
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 012
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 013
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 014
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 015
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 017
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 018
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 019
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 020
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 021
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 022
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 023
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 024
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 025
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 026
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 027
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 028
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Rustling Leaves
+      color_mode: rgb
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 227.368
+      - 14.902
+      rgb_color:
+      - 217
+      - 225
+      - 255
+      xy_color:
+      - 0.292
+      - 0.296
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Left
+      supported_features: 44
+      state: 'on'
+    switch.govee_glide_left_power_switch:
+      friendly_name: Govee Glide Left Power Switch
+      state: 'on'
+    switch.govee_glide_left_gradient_toggle:
+      friendly_name: Govee Glide Left Gradient Toggle
+      state: unknown
+    light.govee_glide_left_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 001
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 002
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 003
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 004
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 005
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 006
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 007
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 008
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 009
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 010
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 011
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 012
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 013
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 014
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 015
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 016
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 017
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 018
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 019
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 020
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 021
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 022
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 023
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 024
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 025
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 026
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 027
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 028
+      supported_features: 44
+      state: 'off'
+  metadata: {}
+- id: '1747857787848'
+  name: evening_govee
+  entities:
+    light.corner_lamp_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 6993
+      min_mireds: 143
+      max_mireds: 500
+      supported_color_modes:
+      - color_temp
+      - hs
+      color_mode: hs
+      brightness: 229
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 28.71
+      - 72.941
+      rgb_color:
+      - 255
+      - 158
+      - 69
+      xy_color:
+      - 0.548
+      - 0.389
+      icon: mdi:floor-lamp
+      friendly_name: Corner Lamp
+      supported_features: 40
+      state: 'on'
+    light.floor_lamp_pro_1:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - Afternoon
+      - Alternate
+      - Aurora
+      - Berry
+      - Birthday
+      - Blue Sky
+      - Blue Sky & Grasslands
+      - Breathe
+      - Candlelight
+      - Candy
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Carnival
+      - Cherry blossoms
+      - Christmas
+      - Christmas Bell
+      - Christmas Tree
+      - Cornfield
+      - Crossing
+      - Dance Party
+      - Dancing
+      - Dense fog
+      - Desert
+      - Dreamland
+      - Dreamlike
+      - Dripping
+      - Earth
+      - Easter
+      - Excited
+      - Fascination
+      - Father's Day
+      - Fire
+      - Firefly
+      - Fireworks
+      - Fish tank
+      - Flow
+      - Flower Field
+      - Fluctuate
+      - Forest
+      - Garden
+      - Glacier
+      - Gleam
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Graffiti
+      - Graveyard
+      - Halloween
+      - Happy
+      - Intersection
+      - Jupiter
+      - Karst Cave
+      - Lake
+      - Lava
+      - Little Train
+      - Marbles
+      - Mars
+      - Mavericks
+      - Meditation
+      - Mercury
+      - MFFL
+      - Milky Way
+      - Moonlit Night
+      - Morning
+      - Mother's Day
+      - Movie
+      - 'Music: Alternate'
+      - 'Music: ColorPainting'
+      - 'Music: FallingSand'
+      - 'Music: Hopping'
+      - 'Music: Separation'
+      - 'Music: Spectrum'
+      - Mysterious
+      - New Years
+      - Night
+      - Night Light
+      - Ocean
+      - Peach Orchard
+      - Profound
+      - Quiet
+      - Rainbow
+      - Raindrops in Mountains
+      - Raining
+      - Reading
+      - Ripple
+      - River
+      - Romantic
+      - Rustling leaves
+      - Saint Patrick's Day
+      - Saturn
+      - Snowing
+      - Soothing
+      - Split
+      - Sports
+      - Spring Wind
+      - Sprinkle
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset glow
+      - Sunset Glow
+      - Sweet
+      - Technology
+      - Tenderness
+      - Thanksgiving
+      - Thunderstorm
+      - Twilight
+      - Uranus
+      - Valentine's Day
+      - Warm
+      - Wave
+      - White Light
+      - Work
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Fire
+      color_mode: color_temp
+      brightness: 13
+      color_temp_kelvin: 2000
+      color_temp: 500
+      hs_color:
+      - 30.601
+      - 94.547
+      rgb_color:
+      - 255
+      - 137
+      - 14
+      xy_color:
+      - 0.598
+      - 0.383
+      icon: mdi:light-bulb
+      friendly_name: Floor Lamp Pro 1
+      supported_features: 44
+      state: 'on'
+    switch.floor_lamp_pro_1_power_switch:
+      friendly_name: Floor Lamp Pro 1 Power Switch
+      state: 'on'
+    switch.floor_lamp_pro_1_gradient_toggle:
+      friendly_name: Floor Lamp Pro 1 Gradient Toggle
+      state: unknown
+    switch.floor_lamp_pro_1_dream_view_toggle:
+      friendly_name: Floor Lamp Pro 1 Dream View Toggle
+      state: unknown
+    light.floor_lamp_pro_1_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 001
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 002
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 003
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 004
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 005
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 006
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 007
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 008
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 009
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 010
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 011
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 012
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 013
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 014
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 015
+      supported_features: 44
+      state: 'off'
+    light.floor_lamp_pro_1_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Floor Lamp Pro 1 Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Fire
+      color_mode: color_temp
+      brightness: 3
+      color_temp_kelvin: 9009
+      color_temp: 111
+      hs_color:
+      - 222.449
+      - 17.843
+      rgb_color:
+      - 210
+      - 223
+      - 255
+      xy_color:
+      - 0.285
+      - 0.293
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Right
+      supported_features: 44
+      state: 'on'
+    switch.glide_lights_right_power_switch:
+      friendly_name: Glide Lights Right Power Switch
+      state: 'on'
+    switch.glide_lights_right_gradient_toggle:
+      friendly_name: Glide Lights Right Gradient Toggle
+      state: unknown
+    light.glide_lights_right_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 001
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 002
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 003
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 004
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 005
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 006
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 007
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 008
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 009
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 010
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 011
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 012
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 013
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 014
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 015
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 016
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 017
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 018
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 019
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 020
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 021
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 022
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 023
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 024
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 025
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 026
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 027
+      supported_features: 44
+      state: 'off'
+    light.glide_lights_right_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Glide Lights Right Segment 028
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_2:
+      min_color_temp_kelvin: 2000
+      max_color_temp_kelvin: 9009
+      min_mireds: 111
+      max_mireds: 500
+      effect_list:
+      - ''
+      - ARRAKIS
+      - Aurora
+      - Awaken A
+      - Awaken B
+      - Awaken C
+      - Birthday
+      - Bouncing Ball
+      - Breathe
+      - Breeze
+      - Bubble
+      - Candlelight
+      - Candy
+      - Candy Cane
+      - Candy Cane Chase
+      - Candy Cane Flow Down
+      - Care
+      - Christmas
+      - Crossing
+      - Desert
+      - Dreamlike
+      - Energetic
+      - Excited
+      - Falling in Love
+      - Fashion
+      - Fight
+      - Fire
+      - Fireworks
+      - Flower Field
+      - Forest
+      - Glacier
+      - Glide Candy Cane
+      - GoveeBotPro
+      - Gradient
+      - Greedy Snake
+      - Halloween
+      - Heartbeat
+      - Joyful
+      - Lake
+      - Leisure
+      - Light
+      - Longing
+      - Meditation
+      - Meet
+      - Meteor
+      - Moonlight
+      - Morning
+      - Movie
+      - 'Music: Bounce'
+      - 'Music: DayAndNight'
+      - 'Music: Energic'
+      - 'Music: Fountain'
+      - 'Music: Hopping'
+      - 'Music: PianoKeys'
+      - 'Music: Rhythm'
+      - 'Music: Separation'
+      - 'Music: Shiny'
+      - 'Music: Sprouting'
+      - 'Music: Strike'
+      - 'Music: Vibrate'
+      - Mysterious
+      - Night Light
+      - Ocean
+      - Optimistic
+      - Party
+      - Quiet
+      - Rainbow
+      - Release
+      - Ripple
+      - Romantic
+      - Rustling leaves
+      - Siren
+      - SPICE
+      - Split
+      - Stacking
+      - Stair Candy Cane Chase
+      - Starry Sky
+      - Stream
+      - Strike
+      - Sunrise
+      - Sunset
+      - Sunset Glow
+      - Sunshine
+      - Swing
+      - Technology
+      - Universe
+      - Valentine's Day
+      - Warm
+      - White Light
+      supported_color_modes:
+      - color_temp
+      - rgb
+      effect: Fire
+      color_mode: rgb
+      brightness: 3
+      color_temp_kelvin:
+      color_temp:
+      hs_color:
+      - 227.368
+      - 14.902
+      rgb_color:
+      - 217
+      - 225
+      - 255
+      xy_color:
+      - 0.292
+      - 0.296
+      icon: mdi:led-strip-variant
+      friendly_name: Govee Glide Left
+      supported_features: 44
+      state: 'on'
+    switch.govee_glide_left_power_switch:
+      friendly_name: Govee Glide Left Power Switch
+      state: 'on'
+    switch.govee_glide_left_gradient_toggle:
+      friendly_name: Govee Glide Left Gradient Toggle
+      state: unknown
+    light.govee_glide_left_segment_001:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 001
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_002:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 002
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_003:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 003
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_004:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 004
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_005:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 005
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_006:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 006
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_007:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 007
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_008:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 008
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_009:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 009
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_010:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 010
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_011:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 011
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_012:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 012
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_013:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 013
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_014:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 014
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_015:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 015
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_016:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 016
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_017:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 017
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_018:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 018
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_019:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 019
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_020:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 020
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_021:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 021
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_022:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 022
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_023:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 023
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_024:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 024
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_025:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 025
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_026:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 026
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_027:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 027
+      supported_features: 44
+      state: 'off'
+    light.govee_glide_left_segment_028:
+      effect_list:
+      supported_color_modes:
+      - rgb
+      effect:
+      color_mode:
+      brightness:
+      hs_color:
+      rgb_color:
+      xy_color:
+      assumed_state: true
+      friendly_name: Govee Glide Left Segment 028
+      supported_features: 44
+      state: 'off'
+  metadata: {}
+
 
 
