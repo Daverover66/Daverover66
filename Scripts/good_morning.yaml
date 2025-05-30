@@ -7,6 +7,8 @@ sequence:
             - input_boolean.guest_bedroom_night_lights_active
             - input_boolean.security_system_status
             - input_boolean.we_are_in_bed
+            - input_boolean.frost_risk_likely
+            - input_boolean.probable_frost_risk
         data: {}
       - action: input_boolean.turn_on
         target:
