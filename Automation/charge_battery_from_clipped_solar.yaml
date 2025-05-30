@@ -1,21 +1,30 @@
 alias: "Charge Battery from Clipped Solar "
-description: Charges battery from clipped DC power when solar production estimate is high.
-mode: single
+description: >-
+  Effectively charges battery from clipped DC power when solar production
+  estimate is high. In reality, the charge rate is dynamically adjusted to allow
+  max DC production while the battery charges.
 triggers:
-  - entity_id:
+  - alias: When battery finishes grid charge or car finishes charging.
+    entity_id:
       - input_boolean.home_battery_grid_charging
-      - >-
-        binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight
+      - input_boolean.rolec_battery_master
     to: "off"
     from: "on"
     id: Grid Charge Finished
-    alias: When battery finishes grid charge.
     trigger: state
+  - trigger: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    above: 10
+    id: Smart Sunrise Trigger
   - entity_id:
       - sensor.solaredge_b1_state_of_energy
     above: 99.5
     id: Charge Complete
     trigger: numeric_state
+  - trigger: time_pattern
+    minutes: /5
+    id: Update
 conditions: []
 actions:
   - choose:
@@ -23,13 +32,9 @@ actions:
           - condition: trigger
             id:
               - Grid Charge Finished
-          - condition: template
-            value_template: >-
-              {{
-              is_state_attr('binary_sensor.octopus_energy_target_intermittent_best_rates_3_hours_overnight','next_duration_in_hours',0)}}
           - condition: numeric_state
             entity_id: sensor.solcast_pv_forecast_forecast_today
-            above: 40
+            above: 30
         sequence:
           - action: input_boolean.turn_on
             data: {}
@@ -41,6 +46,28 @@ actions:
                 - number.solaredge_i1_storage_charge_limit
             data:
               value: "{{states('input_number.storage_charge_limit')|float(0)}}"
+      - conditions:
+          - condition: trigger
+            id: Smart Sunrise Trigger
+          - condition: state
+            entity_id: input_boolean.charge_rate_limited
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.home_battery_grid_charging
+            state: "off"
+          - condition: numeric_state
+            entity_id: sensor.solcast_pv_forecast_forecast_today
+            above: 30
+        sequence:
+          - target:
+              entity_id: input_boolean.charge_rate_limited
+            action: input_boolean.turn_on
+            data: {}
+          - target:
+              entity_id: number.solaredge_i1_storage_charge_limit
+            data:
+              value: "{{ states('input_number.storage_charge_limit') | float(0) }}"
+            action: number.set_value
       - conditions:
           - condition: trigger
             id:
@@ -60,3 +87,19 @@ actions:
               value: "7000"
             target:
               entity_id: number.solaredge_i1_storage_charge_limit
+      - conditions:
+          - condition: trigger
+            id:
+              - Update
+          - condition: state
+            entity_id: input_boolean.charge_rate_limited
+            state: "on"
+        sequence:
+          - action: number.set_value
+            target:
+              entity_id: number.solaredge_i1_storage_charge_limit
+            data:
+              value: "{{ states('sensor.battery_charge_limit_dynamic') | float(0) }}"
+            alias: Set charge rate limit dynamically to a max 2160W
+mode: parallel
+max: 3
