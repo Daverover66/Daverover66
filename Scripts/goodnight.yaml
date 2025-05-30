@@ -1,6 +1,9 @@
 alias: Goodnight
 sequence:
-  - parallel:
+  - alias: >-
+      Reset toggles, turn off lights, activate security system, set time for
+      Seans Morning Announcement, check the house is secure.
+    parallel:
       - action: input_boolean.turn_off
         target:
           entity_id:
@@ -14,9 +17,16 @@ sequence:
             - input_boolean.office_welcome_played
             - input_boolean.morning_briefing_played
             - input_boolean.seans_morning_briefing_played
+            - input_boolean.jamies_morning_briefing_played
             - input_boolean.allow_en_suite_lights_on
             - input_boolean.landing_lamp_state
             - input_boolean.toothbrushing_song_playing
+            - input_boolean.gw2000a_soil_moisture_1_alert_sent
+            - input_boolean.gw2000a_soil_moisture_2_alert_sent
+            - input_boolean.gw2000a_soil_moisture_3_alert_sent
+            - input_boolean.gw2000a_soil_moisture_4_alert_sent
+            - input_boolean.gw2000a_soil_moisture_5_alert_sent
+            - input_boolean.gw2000a_soil_moisture_6_alert_sent
         data: {}
       - action: switch.turn_off
         target:
@@ -44,13 +54,17 @@ sequence:
         data: {}
       - action: input_datetime.set_datetime
         target:
-          entity_id: input_datetime.seans_morning_briefing
+          entity_id:
+            - input_datetime.seans_morning_briefing
+            - input_datetime.sean_s_room_blind_opening_time
+            - input_datetime.jamies_morning_briefing
+            - input_datetime.jamie_s_room_blind_opening_time
         data_template:
           time: |
-            {% if is_state('binary_sensor.schoolday','on') %}
-              07:15
-            {% else %}
+            {% if is_state('sensor.school_tomorrow','True') %}
               07:30
+            {% else %}
+              07:45
             {% endif %}
       - action: input_boolean.turn_on
         target:
@@ -58,61 +72,29 @@ sequence:
             - input_boolean.security_system_status
             - input_boolean.we_are_in_bed
         data: {}
-    alias: >-
-      Reset toggles, turn off lights, activate security system, set time for
-      Seans Morning Announcement.
-  - parallel:
-      - action: light.turn_on
-        target:
-          entity_id: light.bed_lamps_3
-        data:
-          brightness_pct: 5
-          effect: Sunset
-      - action: light.turn_on
-        target:
-          entity_id:
-            - light.floor_lamp_pro_1
-            - light.govee_glide_left_2
-            - light.glide_lights_right_2
-        data:
-          effect: Morning
-      - action: light.turn_on
-        target:
-          entity_id: light.corner_lamp_2
+      - action: script.bedtime_house_check
         data: {}
-    alias: Set bedlamps to sunset, turn on lights to set morning scene.
-  - action: script.night_security_check
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 8
-      seconds: 0
-      milliseconds: 0
-  - action: input_boolean.turn_off
-    data: {}
+  - action: light.turn_on
     target:
-      entity_id: input_boolean.audible_notifications
-  - action: scene.create
+      entity_id: light.bed_lamps_3
     data:
-      snapshot_entities:
-        - light.floor_lamp_pro_1
-        - light.govee_glide_left_2
-        - light.glide_lights_right_2
-        - light.corner_lamp_2
-      scene_id: ready_for_morning
+      effect: Sunset
   - delay:
       hours: 0
-      minutes: 0
-      seconds: 30
+      minutes: 5
+      seconds: 0
       milliseconds: 0
   - action: light.turn_off
     target:
       entity_id:
         - light.bed_lamps_3
-        - light.floor_lamp_pro_1
-        - light.corner_lamp_2
-        - light.govee_glide_left_2
-        - light.glide_lights_right_2
     data: {}
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.audible_notifications
+    data: {}
+  - action: script.update_govee_scene_tracker
+    data:
+      new_scene: ready_for_morning
 mode: single
 description: ""
