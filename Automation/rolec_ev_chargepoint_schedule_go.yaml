@@ -9,14 +9,14 @@ triggers:
     id: start
     trigger: state
     entity_id:
-      - binary_sensor.octopus_energy_target_car_battery_charge
+      - binary_sensor.target_timeframes_octopus_energy_charge_car
     from: "off"
     to: "on"
   - alias: Stop Charge
     id: stop
     trigger: state
     entity_id:
-      - binary_sensor.octopus_energy_target_car_battery_charge
+      - binary_sensor.target_timeframes_octopus_energy_charge_car
     from: "on"
     to: "off"
   - entity_id:
@@ -32,15 +32,7 @@ triggers:
     to: "on"
     id: Inverter Reset
     for:
-      hours: 0
       minutes: 1
-      seconds: 0
-    trigger: state
-  - entity_id:
-      - input_boolean.car_plugged_in
-    from: "off"
-    to: "on"
-    id: Session start
     trigger: state
   - entity_id:
       - input_boolean.car_plugged_in
@@ -48,6 +40,22 @@ triggers:
     to: "off"
     id: Session end
     trigger: state
+  - trigger: state
+    entity_id:
+      - binary_sensor.rolec_chargepoint_flap
+    from: "off"
+    to: "on"
+    for:
+      minutes: 1
+    id: Flap open
+  - trigger: state
+    entity_id:
+      - binary_sensor.rolec_chargepoint_flap
+    from: "on"
+    to: "off"
+    for:
+      minutes: 1
+    id: Flap closed
 conditions: []
 actions:
   - choose:
@@ -63,6 +71,17 @@ actions:
             target:
               entity_id: input_boolean.rolec_battery_master
             action: input_boolean.turn_on
+          - action: mqtt.publish
+            data:
+              retain: true
+              payload: >-
+                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
+              topic: rolec/energy/start
+          - action: mqtt.publish
+            data:
+              retain: true
+              payload: "{{states('input_number.car_battery_charge_level')|float(0)}}"
+              topic: car/battery/start
       - conditions:
           - condition: trigger
             id:
@@ -79,10 +98,7 @@ actions:
               entity_id: switch.shelly1_c45bbe7867c7
             action: switch.turn_on
           - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
+              seconds: 5
           - data:
               value: >-
                 {{
@@ -95,16 +111,19 @@ actions:
           - condition: trigger
             id:
               - stop
+          - condition: state
+            entity_id: input_boolean.rolec_battery_master
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.car_plugged_in
+            state: "on"
         sequence:
           - data: {}
             target:
               entity_id: switch.shelly1_c45bbe7867c7
             action: switch.turn_off
           - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
+              seconds: 5
           - data:
               value: >-
                 {{ states('input_number.default_battery_output_limit') |
@@ -112,12 +131,66 @@ actions:
             target:
               entity_id: number.solaredge_i1_storage_discharge_limit
             action: number.set_value
-          - action: script.car_plugged_in
-            data: {}
           - action: input_boolean.turn_off
             target:
               entity_id: input_boolean.rolec_battery_master
             data: {}
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: rolec/energy/end
+              payload: >-
+                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
+          - delay:
+              seconds: 5
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: rolec/energy/used
+              payload: >-
+                {{ (states('sensor.rolec_energy_end_session')|float(0) -
+                states('sensor.rolec_energy_start_session')|float(0))|round(1)}}
+          - delay:
+              seconds: 5
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: car/battery/end
+              payload: >-
+                {% set energy = states('sensor.rolec_energy_used') | float(0) %}
+                {% set efficiency = 0.98 %} {% set usable_battery_kwh = 57.4 %}
+                {% set delivered = energy * efficiency %} {% set oldbatt =
+                states('sensor.battery_level_start_session') | float(0) %} {%
+                set added = (delivered / usable_battery_kwh) * 100 %} {% set
+                newbatt = oldbatt + added %} {{ [newbatt, 100] | min | round(1)
+                }}
+          - delay:
+              seconds: 5
+          - action: mqtt.publish
+            data:
+              retain: true
+              topic: car/battery/added
+              payload: >-
+                {% set energy = states('sensor.rolec_energy_used') | float(0) %}
+                {% set efficiency = 0.98 %} {% set usable_battery_kwh = 57.4 %}
+                {% set delivered = energy * efficiency %} {% set added =
+                (delivered / usable_battery_kwh) * 100 %} {{ added | round(1) }}
+          - delay:
+              seconds: 5
+          - target:
+              entity_id:
+                - input_number.car_battery_charge_level
+            data:
+              value: "{{states('sensor.battery_level_end_session')|float(0)}}"
+            action: input_number.set_value
+          - delay:
+              seconds: 5
+          - target:
+              entity_id:
+                - input_number.ev_charge_length_hrs
+            data:
+              value: 1
+            action: input_number.set_value
       - conditions:
           - condition: trigger
             id:
@@ -146,10 +219,7 @@ actions:
               title: ROLEC ON
             action: script.text_notify_dave
           - delay:
-              hours: 0
-              minutes: 0
               seconds: 30
-              milliseconds: 0
           - data:
               value: >-
                 {{
@@ -212,100 +282,21 @@ actions:
       - conditions:
           - condition: trigger
             id:
-              - Session start
+              - Flap open
         sequence:
-          - action: mqtt.publish
-            data:
-              retain: true
-              payload: >-
-                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
-              topic: rolec/energy/start
-          - action: mqtt.publish
-            data:
-              retain: true
-              payload: "{{states('input_number.car_battery_charge_level')|float(0)}}"
-              topic: car/battery/start
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.car_plugged_in
+            data: {}
       - conditions:
           - condition: trigger
             id:
-              - Session end
+              - Flap closed
         sequence:
-          - action: mqtt.publish
-            data:
-              retain: true
-              topic: rolec/energy/end
-              payload: >-
-                {{states('sensor.rolec_energy_consumption_yearly')|float(0)|round(1)}}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - action: mqtt.publish
-            data:
-              retain: true
-              topic: rolec/energy/used
-              payload: >-
-                {{ (states('sensor.rolec_energy_end_session')|float(0) -
-                states('sensor.rolec_energy_start_session')|float(0))|round(1)}}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - action: mqtt.publish
-            data:
-              retain: true
-              topic: car/battery/end
-              payload: >-
-                {% set energy = states('sensor.rolec_energy_used')|float(0) %}
-
-                {% set oldbatt =
-                states('sensor.battery_level_start_session')|float(0)%}
-
-                {% set newbatt = oldbatt +  ((energy / 63)*100)|int %}
-
-                {{ newbatt }}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - action: mqtt.publish
-            data:
-              retain: true
-              topic: car/battery/added
-              payload: >-
-                {% set energy = states('sensor.rolec_energy_used')|float(0) %}
-
-                {% set oldbatt =
-                states('sensor.battery_level_start_session')|float(0)%}
-
-                {% set newbatt = oldbatt +  ((energy / 58)*100)|int %}
-
-                {{ newbatt - oldbatt }}
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - target:
-              entity_id:
-                - input_number.car_battery_charge_level
-            data:
-              value: "{{states('sensor.battery_level_end_session')|float(0)}}"
-            action: input_number.set_value
-          - delay:
-              hours: 0
-              minutes: 0
-              seconds: 30
-              milliseconds: 0
-          - target:
-              entity_id:
-                - input_number.ev_charge_length_hrs
-            data:
-              value: 1
-            action: input_number.set_value
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.car_plugged_in
+            data: {}
 mode: parallel
 max: 10
 trace:
