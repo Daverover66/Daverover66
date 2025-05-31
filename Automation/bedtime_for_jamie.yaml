@@ -1,0 +1,79 @@
+alias: Bedtime for Jamie
+description: ""
+triggers:
+  - trigger: conversation
+    command:
+      - it's bedtime
+      - goodnight
+      - It is bedtime
+    id: Voice
+  - trigger: state
+    entity_id:
+      - input_boolean.we_are_in_bed
+    from: "off"
+    to: "on"
+    id: Stop play
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Voice
+          - condition: state
+            entity_id: assist_satellite.jarvis_jamie_assist_satellite
+            state: processing
+        sequence:
+          - alias: Silence normal response.
+            set_conversation_response: ""
+          - alias: Respond with a goodnight message.
+            action: assist_satellite.announce
+            target:
+              entity_id: assist_satellite.jarvis_jamie_assist_satellite
+            metadata: {}
+            data:
+              message: |-
+                {{ [
+                    "The Minecraft mobs are asleep — so power up your dreams Jamie for tomorrow's building adventures!",
+                    "Blaze has crossed the finish line and left Crusher in the dust — now it's your turn Jamie, to race into dreamland!",
+                    "Topsy and Tim have finished their busy day — rest up for your next big adventure Jamie!",
+                    "Blippi’s backpack is packed away — I hope yours is too Jamie because it's time to dream up tomorrow’s discoveries!",
+                    "The Ninjago team have defended the city — now it's your mission to rest like a true ninja Jamie!",
+                    "Paw Patrol mission complete — even Chase knows heroes, like you Jamie, need their sleep!",
+                    "Bluey’s imagination is recharging overnight — what stories will you dream up to share with her tomorrow Jamie?",
+                    "Peppa Pig’s day of adventures is done — time to jump into bed Jamie, not muddy puddles!",
+                    "Minecraft Steve just built the best base ever — it's  epic. So now, Jamie, it's time for you to build the best dreams!",
+                    "Ryder has called all pups to the lookout for a nap. Dream big, Jamie, and be ready for tomorrow’s rescue!"
+                  ] | random }}
+              preannounce: false
+          - action: media_player.volume_set
+            target:
+              entity_id:
+                - media_player.jamie_s_room_dot
+            data:
+              volume_level: "{{ states('input_number.alexa_volume_level_low') | float(0) }}"
+          - parallel:
+              - action: media_player.play_media
+                data:
+                  media_content_id: Play Bedtime music from Amazon Music
+                  media_content_type: custom
+                target:
+                  entity_id:
+                    - media_player.jamie_s_room_dot
+              - action: input_boolean.turn_off
+                target:
+                  entity_id:
+                    - input_boolean.jamies_light_toggle
+                data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop play
+        sequence:
+          - action: media_player.media_stop
+            metadata: {}
+            data: {}
+            target:
+              entity_id:
+                - media_player.jamie_s_room_dot
+mode: single
