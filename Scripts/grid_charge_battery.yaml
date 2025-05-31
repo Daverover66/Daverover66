@@ -29,16 +29,12 @@ sequence:
     target:
       entity_id: timer.home_battery_3_hour_charge_period
     action: timer.start
-  - wait_for_trigger:
-      - platform: numeric_state
-        entity_id:
-          - sensor.solaredge_b1_state_of_energy
-        above: 99.9
-    timeout:
-      hours: 3
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
+  - wait_template: >
+      {{ states('sensor.solaredge_b1_state_of_energy') | float(0) >=
+      states('sensor.target_battery_charge_level') | float(0) }}
+    continue_on_timeout: true
+    timeout: "02:30:00"
+    alias: When charge level reaches desired state.
   - data:
       value: >-
         {{ states('input_number.storage_command_timeout_default_period') |
@@ -55,4 +51,5 @@ sequence:
     alias: "Set Storage Command Mode to Maximize Self Consumption "
 mode: restart
 icon: mdi:battery-charging
+
 
