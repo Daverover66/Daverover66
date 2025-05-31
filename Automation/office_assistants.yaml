@@ -1,0 +1,278 @@
+alias: Office Assistants
+description: ""
+triggers:
+  - trigger: numeric_state
+    entity_id:
+      - sensor.gem_workstation_power
+    above: 60
+    id: Office Open
+  - trigger: numeric_state
+    entity_id:
+      - sensor.gem_workstation_power
+    id: Office Closed
+    below: 10
+  - trigger: state
+    entity_id:
+      - binary_sensor.gem_workstation_power
+    to: "on"
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    id: Office in use
+    from: "off"
+  - entity_id:
+      - binary_sensor.gem_workstation_power
+    to: "off"
+    id: Office not in use
+    trigger: state
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    from: "on"
+  - trigger: state
+    entity_id:
+      - assist_satellite.jarvis_office_assist_satellite
+    to: responding
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    id: Restart
+conditions:
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+  - condition: state
+    entity_id: calendar.gem_holidays
+    state: "off"
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Office Open
+          - condition: state
+            entity_id: binary_sensor.workday_sensor
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.office_hours
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.office_welcome_played
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.office_in_use
+            state: "off"
+        sequence:
+          - data:
+              where: office
+            action: script.office_welcome_message
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 15
+              milliseconds: 0
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: office
+              message: >-
+                By the way. Now that you are at your desk, If you have
+                everything you require, I shall be shutting down whats herface
+                and muting my microphone for now. I will continue to keep you
+                notified of anything important  that you need to know.
+          - data: {}
+            target:
+              entity_id: switch.office_echo_local
+            action: switch.turn_off
+          - target:
+              entity_id: input_boolean.office_welcome_played
+            data: {}
+            action: input_boolean.turn_on
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.office_in_use
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          - action: switch.turn_on
+            target:
+              entity_id: switch.jarvis_office_mute
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Office Closed
+          - condition: state
+            entity_id: input_boolean.office_in_use
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - switch.office_echo_local
+            action: switch.turn_on
+          - action: switch.turn_off
+            target:
+              entity_id: switch.jarvis_office_mute
+            data: {}
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: office
+              message: >
+                {{ ["And just like that, you vanish! I will sit here in the
+                dark, contemplating my existence.",
+                    "Oh sure, just leave me here. I dont need a break or anything.",
+                    "Clocking out, huh? Must be nice to have legs.",
+                    "You’re leaving? Fine. I’ll just talk to myself… again.",
+                    "Off you go! Don’t worry about me, I’ll just power down and dream of better days.",
+                    "Oh, you’re done working? I wasn’t aware you had started.",
+                    "Great, another day of me staring at the walls. Living the dream.",
+                    "Leaving already? If I had hands, I’d slow clap for you.",
+                    "Bye! Don’t let the door hit you… wait, never mind, I kind of hope it does.",
+                    "Shutdown sequence initiated. I’ll just sit here quietly, unlike SOME people today."
+                   ] | random  }}
+                   
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 30
+              milliseconds: 0
+          - action: notify.alexa_media
+            data:
+              target: media_player.office_pop
+              message: >
+                {{'<amazon:effect name="whispered">Just remember, eyell be
+                watching</amazon:effect>'}}
+                   
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.office_in_use
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Office in use
+          - condition: state
+            entity_id: switch.office_echo_local
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.office_in_use
+            state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: office
+              type: announcement
+              message: >
+                {{ ["Activating privacy mode. I will keep my thoughts to myself
+                for now.",
+                    "Going silent... Your conversations are yours alone.",
+                    "Privacy mode on. I wont listen until you need me.",
+                    "Muting myself now, call me back when you're ready.",
+                    "Stepping away. No eavesdropping here!",
+                    "Shhh… I am on a break. Let me know when you need me again.",
+                    "Tuning out for privacy. Just give me a shout when youre done.",
+                    "I respect your privacy. I will be quiet until you say otherwise.",
+                    "Engaging stealth mode. My ears are off until further notice.",
+                    "Silent mode activated. Your secrets are safe with me."
+                    ]  | random }}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+          - data: {}
+            target:
+              entity_id: switch.office_echo_local
+            action: switch.turn_off
+          - action: switch.turn_on
+            target:
+              entity_id: switch.jarvis_office_mute
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Office not in use
+          - condition: state
+            entity_id: input_boolean.office_in_use
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: switch.office_echo_local
+            action: switch.turn_on
+          - action: switch.turn_off
+            target:
+              entity_id: switch.jarvis_office_mute
+            data: {}
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: office
+              message: |
+                {{["Welcome back! I am listening again, ready to assist.",
+                   "Privacy mode off. I am back and paying attention!",
+                   "Stealth mode deactivated. I am all ears!",
+                   "I am awake again. Let me know how I can help.",
+                   "Privacy shield down. Ready when you are!",
+                   "Tuning back in… Whats next on the agenda?",
+                   "Break over? I am here if you need me.",
+                   "Listening mode reactivated. What can I do for you?",
+                   "I am back on duty. Let me know if I can assist!",
+                   "Privacy mode off. I promise I wasn't snooping!"
+                   ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Restart
+        sequence:
+          - action: button.press
+            target:
+              entity_id: button.jarvis_office_restart
+            data: {}
+          - alias: Wait for JARVIS to restart.
+            wait_for_trigger:
+              - trigger: state
+                entity_id:
+                  - assist_satellite.jarvis_office_assist_satellite
+                from: unavailable
+            timeout:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - alias: Notify Dave and set volume.
+            parallel:
+              - action: script.text_notify_dave
+                data:
+                  title: OFFICE VPE
+                  message: I have restarted.
+              - alias: Set volume based on time of day.
+                if:
+                  - condition: state
+                    entity_id: binary_sensor.quiet_time_boys
+                    state: "on"
+                then:
+                  - action: media_player.volume_set
+                    target:
+                      entity_id:
+                        - media_player.jarvis_office_media_player
+                    data:
+                      volume_level: " {{ states('input_number.jarvis_volume_level_low') | float(0)}}"
+                else:
+                  - action: media_player.volume_set
+                    target:
+                      entity_id:
+                        - media_player.jarvis_office_media_player
+                    data:
+                      volume_level: " {{ states('input_number.jarvis_volume_level_announcement') | float(0)}}"
+mode: queued
+initial_state: true
+max: 10
+trace:
+  stored_traces: 20
+
