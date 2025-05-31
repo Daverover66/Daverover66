@@ -1,0 +1,512 @@
+alias: All Govee Lighting v2.0
+description: Uses scene snapshots for sunset and sunrise lights
+triggers:
+  - entity_id:
+      - sun.sun
+    from: below_horizon
+    to: above_horizon
+    id: sunrise
+    trigger: state
+    enabled: true
+  - entity_id:
+      - binary_sensor.lunchtime
+    from: "off"
+    to: "on"
+    id: Lunchtime
+    trigger: state
+  - entity_id:
+      - binary_sensor.afternoon
+    from: "off"
+    to: "on"
+    id: Afternoon
+    trigger: state
+  - entity_id:
+      - binary_sensor.dinner_time
+    from: "off"
+    to: "on"
+    id: Dinnertime
+    trigger: state
+  - entity_id:
+      - binary_sensor.evening
+    from: "off"
+    to: "on"
+    id: Evening
+    trigger: state
+  - entity_id:
+      - sun.sun
+    from: above_horizon
+    to: below_horizon
+    id: sunset
+    trigger: state
+    enabled: true
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    id: Low Light
+    for:
+      seconds: 20
+    trigger: numeric_state
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    id: Good Light
+    for:
+      seconds: 20
+    trigger: numeric_state
+  - entity_id:
+      - switch.living_room_tv
+    from: "off"
+    to: "on"
+    id: TV on
+    trigger: state
+  - entity_id:
+      - switch.living_room_tv
+    from: "on"
+    to: "off"
+    id: TV off
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - sunrise
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - action: scene.create
+            data:
+              scene_id: before_sunrise
+              snapshot_entities:
+                - light.bed_lamps_3
+                - light.stair_lights_2
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.floor_lamp_pro_1
+                - light.xmas_string_lights_3_2
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.govee_glide_left_2
+                    - light.glide_lights_right_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Sunrise
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Sunrise
+                action: light.turn_on
+            alias: Set lights to sunrise setting.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Sunrise
+          - delay:
+              minutes: 30
+          - action: scene.turn_on
+            target:
+              entity_id: scene.before_sunrise
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Lunchtime
+        sequence:
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.glide_lights_right_2
+                    - light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Forest
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 20
+                  effect: Spring
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Spring
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Forest
+                action: light.turn_on
+              - data:
+                  effect: Forest
+                action: light.turn_on
+                target:
+                  entity_id: light.corner_lamp_2
+            alias: Set lights to lunchtime effects.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Lunchtime
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+          - condition: state
+            entity_id: binary_sensor.living_room_occupied
+            state: "off"
+          - action: light.turn_off
+            target:
+              entity_id:
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Afternoon
+        sequence:
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.glide_lights_right_2
+                    - light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Rustling Leaves
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 10
+                  effect: Rustling Leaves
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Rustling Leaves
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Forest
+                action: light.turn_on
+              - data:
+                  effect: Forest
+                action: light.turn_on
+                target:
+                  entity_id: light.corner_lamp_2
+            alias: Set lights to Afternoon effects.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Afternoon
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+          - condition: state
+            entity_id: binary_sensor.living_room_occupied
+            state: "off"
+          - action: light.turn_off
+            target:
+              entity_id:
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Dinnertime
+        sequence:
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.glide_lights_right_2
+                    - light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Candlelight
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 1
+                  effect: Fall
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 20
+                  effect: Fall
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Twilight
+                action: light.turn_on
+              - data:
+                  effect: Forest
+                action: light.turn_on
+                target:
+                  entity_id: light.corner_lamp_2
+            alias: Set lights to Dinnertime effects.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Dinnertime
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+          - condition: state
+            entity_id: binary_sensor.living_room_occupied
+            state: "off"
+          - action: light.turn_off
+            target:
+              entity_id:
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Evening
+        sequence:
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.glide_lights_right_2
+                    - light.govee_glide_left_2
+                data:
+                  brightness_pct: 1
+                  effect: Fire
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Fall
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Fire
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Fire
+                action: light.turn_on
+              - data:
+                  effect: Forest
+                action: light.turn_on
+                target:
+                  entity_id: light.corner_lamp_2
+            alias: Set lights to Evening effects.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Evening
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+          - condition: state
+            entity_id: binary_sensor.living_room_occupied
+            state: "off"
+          - action: light.turn_off
+            target:
+              entity_id:
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - sunset
+          - condition: state
+            entity_id: input_boolean.we_are_in_bed
+            state: "off"
+        sequence:
+          - parallel:
+              - target:
+                  entity_id:
+                    - light.stair_lights_2
+                    - light.bed_lamps_3
+                data:
+                  brightness_pct: 5
+                  effect: Warm
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.govee_glide_left_2
+                    - light.glide_lights_right_2
+                data:
+                  brightness_pct: 5
+                  effect: Sunset Glow
+                action: light.turn_on
+              - target:
+                  entity_id: light.xmas_string_lights_3_2
+                data:
+                  brightness_pct: 50
+                  effect: Warm
+                action: light.turn_on
+              - target:
+                  entity_id:
+                    - light.floor_lamp_pro_1
+                data:
+                  brightness_pct: 5
+                  effect: Sunset
+                action: light.turn_on
+            alias: Set lights to Sunset effects.
+          - action: script.update_govee_scene_tracker
+            data:
+              new_scene: Sunset
+          - delay:
+              minutes: 30
+          - alias: If afternoon reapply scene else apply evening
+            if:
+              - condition: state
+                entity_id: binary_sensor.afternoon
+                state: "on"
+            then:
+              - action: scene.turn_on
+                target:
+                  entity_id:
+                    - scene.afternoon_govee
+                data: {}
+              - action: script.update_govee_scene_tracker
+                data:
+                  new_scene: Afternoon
+            else:
+              - parallel:
+                  - target:
+                      entity_id:
+                        - light.glide_lights_right_2
+                        - light.govee_glide_left_2
+                    data:
+                      brightness_pct: 1
+                      effect: Fire
+                    action: light.turn_on
+                  - target:
+                      entity_id:
+                        - light.stair_lights_2
+                        - light.bed_lamps_3
+                    data:
+                      brightness_pct: 5
+                      effect: Fall
+                    action: light.turn_on
+                  - target:
+                      entity_id: light.xmas_string_lights_3_2
+                    data:
+                      brightness_pct: 20
+                      effect: Fire
+                    action: light.turn_on
+                  - target:
+                      entity_id:
+                        - light.floor_lamp_pro_1
+                    data:
+                      brightness_pct: 5
+                      effect: Fire
+                    action: light.turn_on
+                alias: Set lights to Evening effects.
+              - action: script.update_govee_scene_tracker
+                data:
+                  new_scene: Evening
+      - conditions:
+          - condition: trigger
+            id: Low Light
+          - condition: state
+            entity_id: switch.living_room_tv
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: light.dreamview_g1_pro_2
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id: Good Light
+          - condition: state
+            entity_id: switch.living_room_tv
+            state: "on"
+        sequence:
+          - data: {}
+            target:
+              entity_id: light.dreamview_g1_pro_2
+            action: light.turn_off
+      - conditions:
+          - condition: trigger
+            id:
+              - TV on
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.day
+                state: "off"
+              - condition: numeric_state
+                entity_id: sensor.living_room_fp2_light_sensor_light_level
+                below: input_number.low_light_threshold
+        sequence:
+          - target:
+              entity_id: light.dreamview_g1_pro_2
+            data: {}
+            action: light.turn_on
+      - conditions:
+          - condition: trigger
+            id:
+              - TV off
+          - condition: state
+            entity_id: light.dreamview_g1_pro_2
+            state: "on"
+        sequence:
+          - target:
+              entity_id: light.dreamview_g1_pro_2
+            data: {}
+            action: light.turn_off
+mode: parallel
