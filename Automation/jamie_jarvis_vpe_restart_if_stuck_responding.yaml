@@ -1,0 +1,55 @@
+alias: Jamie JARVIS VPE Restart if stuck responding.
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - assist_satellite.jarvis_jamie_assist_satellite
+    to: responding
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Restart
+conditions: []
+actions:
+  - action: button.press
+    target:
+      entity_id: button.home_assistant_voice_0963e5_restart
+    data: {}
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_jamie_assist_satellite
+        from: unavailable
+    timeout:
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
+    alias: Wait for JARVIS to restart.
+  - parallel:
+      - action: script.text_notify_dave
+        data:
+          title: JAMIE VPE
+          message: I have restarted.
+      - if:
+          - condition: state
+            entity_id: binary_sensor.quiet_time_boys
+            state: "on"
+        then:
+          - action: media_player.volume_set
+            target:
+              entity_id:
+                - media_player.jarvis_jamie_media_player
+            data:
+              volume_level: " {{ states('input_number.jarvis_volume_level_low') | float(0)}}"
+        else:
+          - action: media_player.volume_set
+            target:
+              entity_id:
+                - media_player.jarvis_jamie_media_player
+            data:
+              volume_level: " {{ states('input_number.jarvis_volume_level_announcement') | float(0)}}"
+        alias: Set volume based on time of day.
+    alias: Notify Dave and set volume.
+mode: single
