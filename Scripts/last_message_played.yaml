@@ -5,19 +5,41 @@
 #   @description    :   Repeat last tts announcement       #
 #                                                          #
 #                                                          #
-#   @version        :   1.0                                #
-#   @modified       :                                      #
+#   @version        :   2.0                                #
+#   @modified       :   31/05/2025                         #
 ############################################################
 
-alias: Play Last Message
 sequence:
-  - service: script.speech_engine_for_tts
-    data:
-      voice: Brian
-      where: "{{ states('sensor.room_audio') }}"
-      message: |-
-        At {{ states('sensor.jarvis_last_msg_time') }} 
-        in the {{ states('sensor.jarvis_last_location') }} 
-        I said. {{ states('sensor.jarvis_last_msg') }}
-      msg_summary: recall
-mode: single
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.dave_home
+            state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                At {{ states('sensor.jarvis_last_msg_time') }}  {% if
+                states('sensor.jarvis_last_location') == 'everywhere' %}
+                  I said. {{ states('sensor.jarvis_last_msg') }}
+                {% else %}
+                  from the {{ states('sensor.jarvis_last_location') }}. 
+                  I said. {{ states('sensor.jarvis_last_msg') }}
+                {% endif %}
+              msg_summary: recall
+    default:
+      - action: script.jarvis_speech_engine_v3_0
+        data:
+          where: gem
+          message: >
+            At {{ states('sensor.jarvis_last_msg_time') }}  {% if
+            states('sensor.jarvis_last_location') == 'everywhere' %}
+              I said. {{ states('sensor.jarvis_last_msg') }}
+            {% else %}
+              from the {{ states('sensor.jarvis_last_location') }}. 
+              I said. {{ states('sensor.jarvis_last_msg') }}
+            {% endif %}
+          msg_summary: recall
+alias: Play Last Message
+description: ""
