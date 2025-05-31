@@ -7,6 +7,12 @@ triggers:
     to: "on"
     id: Presence Detected
     trigger: state
+  - trigger: state
+    entity_id:
+      - switch.en_suite_switch_left
+    from: "off"
+    to: "on"
+    id: Light  On
   - entity_id:
       - binary_sensor.en_suite_presence_occupancy
     from: "on"
@@ -58,8 +64,8 @@ actions:
           - condition: trigger
             id:
               - Presence Detected
-              - Door Open
-          - condition: and
+          - alias: Light is off and is allowed to come on.
+            condition: and
             conditions:
               - condition: state
                 entity_id: input_boolean.allow_en_suite_lights_on
@@ -67,7 +73,6 @@ actions:
               - condition: state
                 entity_id: switch.en_suite_switch_left
                 state: "off"
-            alias: Light is off and is allowed to come on
           - condition: or
             conditions:
               - condition: numeric_state
@@ -78,16 +83,11 @@ actions:
                 after: sunset
             alias: Light level is low or between sunset & sunrise
         sequence:
-          - action: switch.turn_on
+          - alias: Turn on light.
+            action: switch.turn_on
             data: {}
             target:
               entity_id: switch.en_suite_switch_left
-          - action: timer.start
-            target:
-              entity_id:
-                - timer.en_suite_light
-                - timer.en_suite_light_long
-            data: {}
         alias: Turn on lights when entering
       - conditions:
           - condition: trigger
@@ -120,18 +120,42 @@ actions:
             id:
               - Door Open
           - condition: state
-            entity_id: switch.en_suite_switch_left
-            state: "on"
-          - condition: state
-            entity_id: input_boolean.allow_en_suite_auto_lights
+            entity_id: input_boolean.allow_en_suite_lights_on
             state: "on"
         sequence:
-          - action: switch.turn_off
-            target:
-              entity_id:
-                - switch.en_suite_switch_left
-            data: {}
-        alias: Turn off lights when door is opened
+          - alias: Turn on light when opening door to enter and off when leaving
+            if:
+              - condition: state
+                entity_id: switch.en_suite_switch_left
+                state: "on"
+            then:
+              - action: switch.turn_off
+                target:
+                  entity_id:
+                    - switch.en_suite_switch_left
+                data: {}
+            else:
+              - if:
+                  - condition: state
+                    entity_id: binary_sensor.en_suite_presence_occupancy
+                    state: "off"
+                  - alias: Light level is low or between sunset & sunrise
+                    condition: or
+                    conditions:
+                      - condition: numeric_state
+                        entity_id: sensor.en_suite_presence_illuminance
+                        below: input_number.low_light_threshold
+                      - condition: sun
+                        before: sunrise
+                        after: sunset
+                then:
+                  - alias: Turn on light.
+                    action: switch.turn_on
+                    data: {}
+                    target:
+                      entity_id: switch.en_suite_switch_left
+                alias: If no motion, and allowed, turn on the light.
+        alias: Turn on or off lights when door is opened
       - conditions:
           - condition: trigger
             id:
@@ -176,4 +200,16 @@ actions:
               entity_id: switch.en_suite_switch_left
             data: {}
         alias: Turn of light after 30 mins regardless.
+      - conditions:
+          - condition: trigger
+            id:
+              - Light  On
+        sequence:
+          - action: timer.start
+            target:
+              entity_id:
+                - timer.en_suite_light
+                - timer.en_suite_light_long
+            data: {}
+        alias: When the light turns on, start the timers.
 mode: restart
