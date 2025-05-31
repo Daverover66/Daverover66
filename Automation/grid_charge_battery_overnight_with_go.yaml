@@ -5,11 +5,17 @@ triggers:
     at: "21:00:00"
     trigger: time
   - id: Start Grid Charge
-    trigger: time
-    at: "03:00:00"
+    trigger: state
+    entity_id:
+      - binary_sensor.target_timeframes_octopus_energy_charge_home_battery
+    from: "off"
+    to: "on"
   - id: Stop Grid Charge
-    trigger: time
-    at: "05:30:00"
+    trigger: state
+    entity_id:
+      - binary_sensor.target_timeframes_octopus_energy_charge_home_battery
+    from: "on"
+    to: "off"
   - entity_id:
       - switch.solaredge_i1_advanced_power_control
     from: unavailable
@@ -72,9 +78,16 @@ actions:
           - condition: state
             entity_id: input_boolean.grid_charge_home_battery
             state: "on"
-          - condition: time
-            after: "00:30:00"
-            before: "05:30:00"
+          - alias: Within charge window and active
+            condition: and
+            conditions:
+              - condition: time
+                after: "00:30:00"
+                before: "05:30:00"
+              - condition: state
+                entity_id: >-
+                  binary_sensor.target_timeframes_octopus_energy_charge_home_battery
+                state: "on"
         sequence:
           - action: script.grid_charge_battery
             data: {}
