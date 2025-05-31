@@ -17,6 +17,17 @@ actions:
         - media_player.sean_s_room_dot
         - media_player.office_pop
       volume_level: "{{ states('input_number.alexa_volume_level_announcements') | float(0) }}"
+  - action: media_player.volume_set
+    data:
+      volume_level: "{{ states('input_number.jarvis_volume_level_announcement') | float(0) }}"
+    target:
+      entity_id:
+        - media_player.jarvis_downstairs_media_player
+        - media_player.jarvis_main_bedroom_media_player
+        - media_player.jarvis_kitchen_media_player
+        - media_player.jarvis_jamie_media_player
+        - media_player.jarvis_sean_media_player
+        - media_player.jarvis_office_media_player
   - delay:
       hours: 0
       minutes: 28
@@ -27,14 +38,5 @@ actions:
       entity_id:
         - media_player.main_bedroom_dot
       volume_level: "{{ states('input_number.alexa_volume_level_announcements') | float(0) }}"
-  - action: media_player.volume_set
-    data:
-      volume_level: "{{ states('input_number.jarvis_volume_level_announcement') | float(0) }}"
-    target:
-      entity_id:
-        - media_player.jarvis_downstairs_media_player
-        - media_player.jarvis_main_bedroom_media_player
-        - media_player.jarvis_kitchen_media_player
-        - media_player.jarvis_jamie_media_player
 mode: single
 initial_state: true
