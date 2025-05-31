@@ -33,75 +33,79 @@ actions:
             id:
               - Jamie Presence
         sequence:
-          - action: input_text.set_value
-            metadata: {}
-            data:
-              value: jamies_room
-            target:
-              entity_id: input_text.room_presence
-          - action: input_boolean.turn_on
-            metadata: {}
-            data: {}
-            target:
-              entity_id: input_boolean.room_occupied_jamie_s_room
-          - if:
-              - condition: numeric_state
-                entity_id: sensor.jamies_room_light_level
-                below: input_number.low_light_threshold
-              - condition: time
-                after: "08:00:00"
-                before: "19:45:00"
-                weekday:
-                  - sun
-                  - sat
-                  - fri
-                  - thu
-                  - wed
-                  - tue
-                  - mon
-            then:
-              - action: input_boolean.turn_on
+          - parallel:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: jamies_room
                 target:
-                  entity_id: input_boolean.jamies_light_toggle
+                  entity_id: input_text.room_presence
+              - action: input_boolean.turn_on
+                metadata: {}
                 data: {}
-            alias: If low light between 8am and 7:45pm turn on the light.
+                target:
+                  entity_id: input_boolean.room_occupied_jamie_s_room
+              - if:
+                  - condition: numeric_state
+                    entity_id: sensor.jamies_room_light_level
+                    below: input_number.low_light_threshold
+                  - condition: time
+                    after: "08:00:00"
+                    before: "19:45:00"
+                    weekday:
+                      - sun
+                      - sat
+                      - fri
+                      - thu
+                      - wed
+                      - tue
+                      - mon
+                then:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.jamies_light_toggle
+                    data: {}
+                alias: If low light between 8am and 7:45pm turn on the light.
+            alias: Set text and toggles.
       - conditions:
           - condition: trigger
             id:
               - Sean Presence
         sequence:
-          - action: input_text.set_value
-            metadata: {}
-            data:
-              value: seans_room
-            target:
-              entity_id: input_text.room_presence
-          - action: input_boolean.turn_on
-            metadata: {}
-            data: {}
-            target:
-              entity_id: input_boolean.room_occupied_sean_s_room
-          - if:
-              - condition: numeric_state
-                entity_id: sensor.seans_room_light_level
-                below: input_number.low_light_threshold
-              - condition: time
-                after: "08:00:00"
-                before: "20:00"
-                weekday:
-                  - sun
-                  - sat
-                  - fri
-                  - thu
-                  - wed
-                  - tue
-                  - mon
-            then:
-              - action: input_boolean.turn_on
+          - alias: Set text and toggles.
+            parallel:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: seans_room
                 target:
-                  entity_id: input_boolean.seans_light_toggle
+                  entity_id: input_text.room_presence
+              - action: input_boolean.turn_on
+                metadata: {}
                 data: {}
-            alias: If low light between 8am and 8pm turn on the light.
+                target:
+                  entity_id: input_boolean.room_occupied_sean_s_room
+              - alias: If low light between 8am and 7:45pm turn on the light.
+                if:
+                  - condition: numeric_state
+                    entity_id: sensor.seans_room_light_level
+                    below: input_number.low_light_threshold
+                  - condition: time
+                    after: "08:00:00"
+                    before: "19:45:00"
+                    weekday:
+                      - sun
+                      - sat
+                      - fri
+                      - thu
+                      - wed
+                      - tue
+                      - mon
+                then:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.seans_light_toggle
+                    data: {}
       - conditions:
           - condition: trigger
             id:
