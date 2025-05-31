@@ -1,0 +1,66 @@
+alias: JARVIS Daily Restart
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.lunchtime
+    from: "off"
+    to: "on"
+conditions: []
+actions:
+  - action: button.press
+    target:
+      entity_id: button.home_assistant_voice_09152e_restart
+    data: {}
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_kitchen_assist_satellite
+        from: unavailable
+        to: idle
+  - action: button.press
+    data: {}
+    target:
+      entity_id: button.home_assistant_voice_09399c_restart
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_downstairs_assist_satellite
+        from: unavailable
+        to: idle
+  - action: button.press
+    data: {}
+    target:
+      entity_id: button.jarvis_office_restart
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_office_assist_satellite
+        from: unavailable
+        to: idle
+  - action: button.press
+    data: {}
+    target:
+      entity_id:
+        - button.home_assistant_voice_0963e5_restart
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_jamie_assist_satellite
+        from: unavailable
+        to: idle
+  - action: button.press
+    data: {}
+    target:
+      entity_id: button.home_assistant_voice_095e21_restart
+  - wait_for_trigger:
+      - trigger: state
+        entity_id:
+          - assist_satellite.jarvis_sean_assist_satellite
+        from: unavailable
+        to: idle
+  - action: button.press
+    data: {}
+    target:
+      entity_id: button.home_assistant_voice_09387b_restart
+mode: single
