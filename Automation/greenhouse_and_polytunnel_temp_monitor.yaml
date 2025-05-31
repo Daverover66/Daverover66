@@ -1,0 +1,220 @@
+alias: Greenhouse & Polytunnel Temp Monitor
+description: >-
+  Monitor the temperature in the greenhouses and poly tunnel and monitor the
+  state of the doors.
+triggers:
+  - entity_id:
+      - sensor.greenhouse_thermometer_temperature
+      - sensor.poly_tunnel_temperature_temperature
+      - sensor.lean_to_greenhouse_thermometer_temperature
+    below: 18
+    id: Close
+    trigger: numeric_state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - entity_id:
+      - sensor.greenhouse_thermometer_temperature
+      - sensor.poly_tunnel_temperature_temperature
+      - sensor.lean_to_greenhouse_thermometer_temperature
+    above: 25
+    id: Open
+    trigger: numeric_state
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - trigger: time
+    at: "21:02:00"
+    id: Last check
+    enabled: true
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Open
+          - condition: template
+            value_template: "{{\"Poly\" in trigger.to_state.attributes.friendly_name }}"
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_1_contact
+                state: "off"
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_upper
+                state: "off"
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_2_2
+                state: "off"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Oh, don’t mind me, just slowly wilting away in this furnace
+                of a poly tunnel while you go about your day. But hey, if you
+                happen to remember I exist, maybe crack a door open?',
+                    'I suppose this is how it ends. Trapped in an oven-like poly tunnel, leaves shriveling, roots baking… all because someone forgot that plants like air. But no, no, you go ahead, I’ll just suffer in silence.',
+                    'Oh wow, what a brilliant idea. lock me in this poly tunnel with the sun blasting down. Truly, a masterclass in poly tunnel management. But, I dunno, maybe… just maybe… OPEN THE DOORS?',
+                    'Look, I get it, you’re busy. But if I start photosynthesizing fire, that’s on you. I highly recommend some urgent ventilation in the poly tunnel before things get crispy in here.',
+                    'I guess this is just my life now. A glorified steamed vegetable. No, no, don’t rush on my account—I’ll just sit here, melting in this poly tunnel, while you enjoy your comfortable, breezy existence.'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Open
+          - condition: template
+            value_template: "{{\"Lean\" in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: binary_sensor.lean_to_greenhouse_door
+            state: "off"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Oh, don’t mind me, just slowly wilting away in this furnace
+                of a lean-too greenhouse while you go about your day. But hey,
+                if you happen to remember I exist, maybe crack a door open?',
+                    'I suppose this is how it ends. Trapped in an oven-like lean-too, leaves shriveling, roots baking… all because someone forgot that plants like air. But no, no, you go ahead, I’ll just suffer in silence.',
+                    'Oh wow, what a brilliant idea. lock me in this greenhouse with the sun blasting down. Truly, a masterclass in lean too management. But, I dunno, maybe… just maybe… OPEN THE DOORS?',
+                    'Look, I get it, you’re busy. But if I start photosynthesizing fire, that’s on you. I highly recommend some urgent ventilation in the lean-too greenhouse before things get crispy in here.',
+                    'I guess this is just my life now. A glorified steamed vegetable. No, no, don’t rush on my account—I’ll just sit here, melting in this lean-too, while you enjoy your comfortable, breezy existence.'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Open
+          - condition: template
+            value_template: >-
+              {{"Lean" not in trigger.to_state.attributes.friendly_name and
+              "Poly" not in trigger.to_state.attributes.friendly_name }}
+          - condition: state
+            entity_id: binary_sensor.greenhouse_door_contact
+            state: "off"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Oh, don’t mind me, just slowly wilting away in this furnace
+                of a greenhouse while you go about your day. But hey, if you
+                happen to remember I exist, maybe crack a door open?',
+                    'I suppose this is how it ends. Trapped in an oven-like greenhouse, leaves shriveling, roots baking… all because someone forgot that plants like air. But no, no, you go ahead, I’ll just suffer in silence.',
+                    'Oh wow, what a brilliant idea. lock me in this greenhouse with the sun blasting down. Truly, a masterclass in greenhouse management. But, I dunno, maybe… just maybe… OPEN THE DOORS?',
+                    'Look, I get it, you’re busy. But if I start photosynthesizing fire, that’s on you. I highly recommend some urgent ventilation in the greenhouse before things get crispy in here.',
+                    'I guess this is just my life now. A glorified steamed vegetable. No, no, don’t rush on my account—I’ll just sit here, melting in this greenhouse, while you enjoy your comfortable, breezy existence.'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Close
+          - condition: template
+            value_template: "{{\"Poly\" in trigger.to_state.attributes.friendly_name }}"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_1_contact
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_2_2
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.poly_tunnel_door_upper
+                state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Ah, yes, excellent plan—let all my precious warmth just
+                escape into the abyss. I love being a shivering wreck. Perhaps
+                you could do me a solid and shut the poly tunnel doors before I
+                freeze to death?',
+                    'Oh, no, don’t mind me, just desperately clinging to the last bit of warmth in this ever-chilling poly tunnel. But sure, let’s just air-condition the garden, shall we?',
+                    'BRRR! Is this your idea of a tropical paradise? Because I was under the impression that a poly tunnel is supposed to be WARM. Maybe, just maybe, close the doors before I become a frost-bitten tragedy?',
+                    'Ah, I see, we’re doing the turn the poly tunnel into an fridge experiment today. Fascinating. But if you don’t mind, I’d rather not experience hypothermia. Shut the doors?',
+                    'Oh great, the cozy warmth I worked so hard to absorb all day is just slipping away, like my trust in your ability to care for me. Maybe, just maybe, sealing up the poly tunnel would help?'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Close
+          - condition: template
+            value_template: "{{\"Lean\" in trigger.to_state.attributes.friendly_name }}"
+          - condition: state
+            entity_id: binary_sensor.lean_to_greenhouse_door
+            state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Ah, yes, excellent plan—let all my precious warmth just
+                escape into the abyss. I love being a shivering wreck. Perhaps
+                you could do me a solid and shut the lean-too doors before I
+                freeze to death?',
+                    'Oh, no, don’t mind me, just desperately clinging to the last bit of warmth in this ever-chilling lean-too. But sure, let’s just air-condition the garden, shall we?',
+                    'BRRR! Is this your idea of a tropical paradise? Because I was under the impression that a lean-too greenhouse is supposed to be WARM. Maybe, just maybe, close the doors before I become a frost-bitten tragedy?',
+                    'Ah, I see, we’re doing the turn the lean-too greenhouse into an fridge experiment today. Fascinating. But if you don’t mind, I’d rather not experience hypothermia. Shut the doors?',
+                    'Oh great, the cozy warmth I worked so hard to absorb all day is just slipping away, like my trust in your ability to care for me. Maybe, just maybe, sealing up the lean-too would help?'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Close
+          - condition: template
+            value_template: >-
+              {{"Lean" not in trigger.to_state.attributes.friendly_name and
+              "Poly" not in trigger.to_state.attributes.friendly_name }}
+          - condition: state
+            entity_id: binary_sensor.greenhouse_door_contact
+            state: "on"
+        sequence:
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: dave
+              message: >
+                {{ ['Ah, yes, excellent plan—let all my precious warmth just
+                escape into the abyss. I love being a shivering wreck. Perhaps
+                you could do me a solid and shut the greenhouse door before I
+                freeze to death?',
+                    'Oh, no, don’t mind me, just desperately clinging to the last bit of warmth in this ever-chilling greenhouse. But sure, let’s just air-condition the garden, shall we?',
+                    'BRRR! Is this your idea of a tropical paradise? Because I was under the impression that a greenhouse is supposed to be WARM. Maybe, just maybe, close the doors before I become a frost-bitten tragedy?',
+                    'Ah, I see, we’re doing the turn the greenhouse into an fridge experiment today. Fascinating. But if you don’t mind, I’d rather not experience hypothermia. Shut the doors?',
+                    'Oh great, the cozy warmth I worked so hard to absorb all day is just slipping away, like my trust in your ability to care for me. Maybe, just maybe, sealing up the greenhouse would help?'
+                    ] | random }}
+      - conditions:
+          - condition: trigger
+            id:
+              - Last check
+          - condition: template
+            value_template: "{{ is_state('binary_sensor.lean_to_greenhouse_door','on')}}"
+        sequence:
+          - variables:
+              door: >
+                {% set open_doors = expand(label_entities('Greenhouse Door'))
+                     |selectattr('state','eq','on')
+                     |map(attribute='name')
+                     |list %}
+                {% if open_doors | length > 0 %} {% set open_doors = (open_doors
+                | join(', ')) %}
+                  {% if 'Poly' in open_doors and 'Green' in open_doors %}
+                    The following greenhouse and poly tunnel doors and windows are open: {{ open_doors }}
+                  {% elif 'Poly' in open_doors %}
+                     The following poly tunnel doors and windows are open: {{ open_doors }}
+                  {% else %}
+                    The following greenhouse doors are open: {{ open_doors }} 
+                  {% endif %}
+                {% else %}
+                  All greenhouse and poly tunnel doors and windows are closed
+                {% endif %}
+          - action: script.jarvis_speech_engine_v3_0
+            data:
+              where: living room
+              message: |
+                I thought you might like to know that {{ door }}
+mode: single
