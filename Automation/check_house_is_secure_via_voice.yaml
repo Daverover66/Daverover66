@@ -1,0 +1,68 @@
+alias: Check the house is secure via Voice
+description: >-
+  Runs a Security Check based on voice command and announces the result when
+  ready.
+triggers:
+  - command:
+      - Run a security check
+      - Check the house security
+      - Perform a security check
+      - Check for motion
+      - Check the doors
+      - Check the security cameras
+      - Check the garage security
+    trigger: conversation
+actions:
+  - variables:
+      query_map:
+        Run a security check.: General Security Check | Query Everything
+        Check the house security.: General Security Check | Query Everything
+        Perform a security check.: General Security Check | Query Everything
+        Check for motion.: Security Check | Query Motion and Door Contact Sensors
+        Check the doors.: Security Check | Query Motion and Door Contact Sensors
+        Check the security cameras.: Security Check | Query Camera Snapshots
+        Check the garage security.: Security Check | Query Garage Camera Snapshot and Door Sensors
+      selected_query: >
+        {{ query_map[trigger.sentence] | default('General Security Check | Query
+        Everything') }}
+  - action: persistent_notification.create
+    data:
+      title: Security Query Debug
+      message: "Security Query: {{ selected_query }}"
+  - data:
+      security_query: "{{ selected_query }}"
+    action: script.security_check
+    response_variable: response
+  - variables:
+      camera_response: |
+        {{ response.camera_check }}
+      response: |
+        {{ response.query_all_contact_sensors }}
+        {{ response.query_all_motion_sensors }}
+  - wait_template: "{{ camera_response != '' or response != '' }}"
+    timeout: "00:00:30"
+    continue_on_timeout: true
+    enabled: true
+  - action: google_generative_ai_conversation.generate_content
+    metadata: {}
+    data:
+      prompt: >-
+        You are a a security guard who has done a sweep of the house. You have
+        checked the state of doors and windows and are now reporting your
+        findings back to the house owner.   Be brief and tell me tell me the
+        state of the alarm, only mention doors or windows that are open and if
+        you detected motion anywhere.  Keep it conversational with no emojis as
+        your response will be broadcast on a speaker.  Here is the variable with
+        the data to check {{ response }}.
+    response_variable: security_response
+    enabled: true
+  - variables:
+      full_response: |
+        {{ camera_response.text}}  {{ security_response.text }}
+  - action: persistent_notification.create
+    data:
+      title: Script Response Debug
+      message: "Full Response: {{ full_response }}"
+  - set_conversation_response: "{{ full_response.text }}"
+    enabled: true
+mode: single
