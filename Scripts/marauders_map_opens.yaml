@@ -1,26 +1,44 @@
-data:
-  room: kitchen
-  type: priority
-  message: |
-    {{ [
-        "What are you doing wandering the corridors at night?, ",
-        "Out for a little walk in the moonlight, are we?, ",
-        "I am pretty sure you won't find Peter Pettigrew.",
-        "Training for the ballet Potter? ",
-        "A wise man once said, Happiness can be found, even in the darkest of times, if one only remembers to turn on the light.",
-        "Nothing like a night time stroll to give you ideas. ",
-        "You ought to be careful. People will think you’re… up to something. "
+alias: Marauders Map Opens
+sequence:
+  - data:
+      room: office
+      type: announcement
+      message: |
+        {{ [
+            "What are you doing wandering the corridors at night?",
+            "Out for a little walk in the moonlight, are we?",
+            "I am pretty sure you won't find Peter Pettigrew.",
+            "Training for the ballet, Potter?",
+            "A wise man once said, happiness can be found, even in the darkest of times, if one only remembers to turn on the light.",
+            "Nothing like a night-time stroll to give you ideas.",
+            "You ought to be careful. People will think you’re… up to something.",
+            "Sneaking around again, are we?",
+            "Back again? You really do enjoy the thrill of rule-breaking.",
+            "Hope you brought your invisibility cloak.",
+            "The castle is never truly asleep.",
+            "Be sure no portraits are watching.",
+            "Careful... the stairs have been known to shift at night."
         ] | random }}
-    {{ [
-        "Oh well.",
-        "Guess we might as well get to it then. ",
-        "Right. ",
-        "So that is what I did. "
+        {{ [
+            "Oh well.",
+            "Guess we might as well get to it then.",
+            "Right.",
+            "So that is what I did.",
+            "Let's get on with it then.",
+            "No point in pretending otherwise.",
+            "So be it.",
+            "As you wish, troublemaker."
         ] | random }}
-    {{ [
-        "I have disabled the light timer.",
-        "I have configured the office for light. ",
-        "The lights are now on indefinitely. "
+        {{ [
+            "I have configured the office for light.",
+            "The lights are now on indefinitely.",
+            "Office warding protocols overridden.",
+            "I've ensured the office remains suitably lit.",
+            "Ambient control has been transferred to you.",
+            "The light shall remain... for now.",
+            "Shadows begone."
         ] | random }}
-action: script.jarvis_speech_engine
+    action: script.jarvis_speech_engine_v3_0
+description: ""
+
 
