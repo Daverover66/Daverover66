@@ -1,0 +1,85 @@
+alias: Kindle Tablet WiFi Check
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.weather_display_battery_level_2
+    id: Batt Level Cx
+  - trigger: state
+    entity_id:
+      - sensor.kindle_tablet_battery_level
+    id: Kindle Batt Level Cx
+  - trigger: time_pattern
+    minutes: /30
+    id: Weather Display Periodic
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Batt Level Cx
+        sequence:
+          - action: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.weather_tablet_battery_last_updated
+            data:
+              datetime: "{{ now().isoformat() }}"
+      - conditions:
+          - condition: trigger
+            id:
+              - Kindle Batt Level Cx
+        sequence:
+          - action: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.office_tablet_battery_last_update
+            data:
+              datetime: "{{ now().isoformat() }}"
+      - conditions:
+          - condition: trigger
+            id:
+              - Weather Display Periodic
+        sequence:
+          - condition: template
+            value_template: >-
+              {{ as_timestamp(now()) -
+              as_timestamp(states('input_datetime.weather_tablet_battery_last_updated'))
+              > 3600 }}
+          - action: script.text_notify_dave
+            data:
+              title: ALERT!
+              message: >-
+                The Weather Tablet battery in the kitchen has not updated in
+                over an hour. Check the Wi-Fi.
+          - action: persistent_notification.create
+            metadata: {}
+            data:
+              title: "ALERT ⚠️ "
+              message: >-
+                The Weather Tablet battery in the kitchen has not updated in
+                over an hour. Please check the WiFi. 
+      - conditions:
+          - condition: trigger
+            id:
+              - Weather Display Periodic
+        sequence:
+          - condition: template
+            value_template: >-
+              {{ as_timestamp(now()) -
+              as_timestamp(states('input_datetime.office_tablet_battery_last_update'))
+              > 3600 }}
+          - action: script.text_notify_dave
+            data:
+              title: ALERT!
+              message: >-
+                The Office Tablet battery in the kitchen has not updated in over
+                an hour. Check the Wi-Fi.
+          - action: persistent_notification.create
+            metadata: {}
+            data:
+              title: "ALERT ⚠️ "
+              message: >-
+                The Office Tablet battery has not updated in over an hour.
+                Please check the WiFi. 
+mode: parallel
+max: 10
