@@ -1,0 +1,60 @@
+sequence:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - action: camera.snapshot
+    target:
+      entity_id: camera.front_doorbell_camera_snapshots_clear
+    data:
+      filename: /config/www/doorbell/snapshot_person_doorbell.jpg
+  - action: llmvision.image_analyzer
+    data:
+      remember: false
+      use_memory: false
+      include_filename: false
+      target_width: 1280
+      max_tokens: 50
+      temperature: 0.2
+      generate_title: false
+      expose_images: false
+      provider: 01JP4YW4N12R828GZP72CNX013
+      message: >-
+        Describe the image in one short sentence. If you see a person, describe
+        what they look like.  Remember that we live in Scotland so use British
+        English terms in your response, but don't specifically mention Scotland
+        in the response. Make the description a bit humourous and avoid
+        repetition.
+      image_file: /config/www/doorbell/snapshot_person_doorbell.jpg
+    response_variable: generated_content
+  - alias: Send image
+    action: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: Person Detected at Door
+      data:
+        image: /local/doorbell/snapshot_person_doorbell.jpg
+  - action: notify.mobile_app_daves_samsung_galaxy
+    data:
+      message: >-
+        {{generated_content.response_text}}
+        {{as_timestamp(states.binary_sensor.front_door_person_detected.last_changed)
+        | timestamp_custom("%-I:%M %p (%d-%m-%y)")}}
+      title: Front Door Person
+    alias: Send message
+  - alias: Send image
+    action: notify.mobile_app_sm_s901b
+    data:
+      message: Image
+      data:
+        image: /local/doorbell/snapshot_person_doorbell.jpg
+  - action: notify.mobile_app_sm_s901b
+    data:
+      message: >-
+        {{generated_content.response_text}}
+        {{as_timestamp(states.binary_sensor.front_door_person_detected.last_changed)
+        | timestamp_custom("%-I:%M %p (%d-%m-%y)")}}
+      title: Front Door Person
+    alias: Send message
+alias: Doorbell Person Detection and AI Notification
+description: ""
