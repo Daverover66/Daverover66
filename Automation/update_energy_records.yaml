@@ -1,0 +1,118 @@
+alias: Update Energy Records
+description: ""
+triggers:
+  - at: "23:55:00"
+    id: daily
+    trigger: time
+  - trigger: state
+    entity_id:
+      - sensor.power_grid_import
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    id: Grid Import
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: daily
+        sequence:
+          - alias: Record daily max generation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.solar_panel_production_daily') | float) >
+                  (states('sensor.max_solar_generated') | float)  }}
+            then:
+              - data:
+                  topic: energy/solar/maxgen
+                  payload: "{{ states('sensor.solar_panel_production_daily') }}"
+                  retain: true
+                action: mqtt.publish
+              - delay: "00:00:30"
+          - alias: Record ATH Max Generation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.max_solar_generated') | float) >
+                  (states('sensor.ath_solar_generated') | float)  }}
+            then:
+              - data:
+                  payload: "{{ states('sensor.max_solar_generated') }}"
+                  retain: true
+                  topic: energy/solar/athmaxgen
+                action: mqtt.publish
+              - data:
+                  title: New ATH Solar Generation
+                  message: >-
+                    Just recorded a new ALL TIME HIGH SOLAR GENERATION: {{
+                    states('sensor.max_solar_generated') }} kWh.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily low generation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.solar_panel_production_daily') | float) <
+                  (states('sensor.min_solar_generated') | float) }}
+            then:
+              - data:
+                  payload: "{{ states('sensor.solar_panel_production_daily') }}"
+                  retain: true
+                  topic: energy/solar/mingen
+                action: mqtt.publish
+              - delay: "00:00:30"
+          - alias: Record ATL generation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.min_solar_generated') | float) <
+                  (states('sensor.atl_solar_generated') | float) }}
+            then:
+              - data:
+                  payload: "{{ states('sensor.min_solar_generated') }}"
+                  retain: true
+                  topic: energy/solar/atlmingen
+                action: mqtt.publish
+              - data:
+                  title: New ATH Solar Generation
+                  message: >-
+                    Just recorded a new ALL TIME LOW SOLAR GENERATION: {{
+                    states('sensor.min_solar_generated') }} kWh.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+        alias: At the end of the day
+      - conditions:
+          - condition: trigger
+            id:
+              - Grid Import
+        sequence:
+          - data:
+              topic: energy/solar/maximport
+              payload: "{{ states('sensor.power_grid_import') }}"
+              retain: true
+            action: mqtt.publish
+          - delay: "00:00:30"
+          - alias: Record ATH Max import power
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.max_power_import') | float) >
+                  (states('sensor.ath_power_import') | float)  }}
+            then:
+              - data:
+                  payload: "{{ states('sensor.max_power_import') }}"
+                  retain: true
+                  topic: energy/solar/athmaximport
+                action: mqtt.publish
+              - data:
+                  title: New ATH Grid Power Import
+                  message: >-
+                    Just recorded a new ALL TIME HIGH GRID POWER IMPORT: {{
+                    states('sensor.max_power_import') }} W.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+        alias: Update grid import power
+mode: queued
