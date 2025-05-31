@@ -1,0 +1,104 @@
+alias: Update Part of Day
+triggers:
+  - entity_id:
+      - binary_sensor.lunchtime
+      - binary_sensor.dinner_time
+      - binary_sensor.evening
+      - binary_sensor.master_bed_occupancy_bed_occupied_both
+      - binary_sensor.overnight
+      - binary_sensor.kitchen_occupied
+      - input_boolean.kitchen_table_occupied
+      - binary_sensor.morning
+      - binary_sensor.afternoon
+    trigger: state
+conditions:
+  - condition: template
+    value_template: |
+      {{ not is_state('input_select.part_of_day', 'Manual Override') }}
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.master_bed_occupancy_bed_occupied_both
+            state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Bedtime
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.lunchtime
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.kitchen_occupied
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.kitchen_table_occupied
+                state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Lunchtime
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.dinner_time
+            state: "on"
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: binary_sensor.kitchen_occupied
+                state: "on"
+              - condition: state
+                entity_id: input_boolean.kitchen_table_occupied
+                state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Dinnertime
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.evening
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.kitchen_occupied
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.kitchen_table_occupied
+            state: "off"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Evening
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.morning
+            state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Morning
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.afternoon
+            state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Afternoon
+            action: input_select.select_option
+      - conditions:
+          - condition: state
+            entity_id: binary_sensor.overnight
+            state: "on"
+        sequence:
+          - data:
+              entity_id: input_select.part_of_day
+              option: Overnight
+            action: input_select.select_option
