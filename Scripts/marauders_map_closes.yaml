@@ -1,23 +1,40 @@
-data:
-  room: kitchen
-  type: priority
-  message: |
-    {{ [
-      "I have enabled the light timer. ",
-      "Wait. Was that Peter Pettigrew? Couldn't have been. He is dead. ",
-      "Mischief Managed indeed. ",
-      "Yer a wizard. ",
-      "I hope you're pleased with yourself. We could all have been killed. Or worse, expelled. ",
-      ] | random }}
-    {{ [
-      "Guess thats it then. Lights out in 20 minutes. ",
-      "Anyway, I will get the lights. ",
-      "The clock is ticking. ",
-      "I will turn off the lights in about twenty minutes. "
-      ] | random }}
-    {{ [
-      "Watch out for Snape. ",
-      "Better scurry back to your house common room.",
-      "That should give you enough time to get back to your room."
-      ] | random }}
-action: script.jarvis_speech_engine
+alias: Marauders Map Closes
+sequence:
+  - data:
+      room: office
+      type: announcement
+      message: |
+        {{ [
+            "Wait. Was that Peter Pettigrew? Couldn't have been. He's dead... isn't he?",
+            "Mischief managed, indeed.",
+            "Yer a wizard.",
+            "I hope you're pleased with yourself. We could all have been killed. Or worse, expelled.",
+            "Well, that was suspiciously productive.",
+            "You do know curfew started ten minutes ago?",
+            "The map grows quiet once more.",
+            "The footprints vanish into the darkness.",
+            "All quiet... for now."
+        ] | random }}
+        {{ [
+            "Guess that's it then. Lights out in 5 minutes.",
+            "Anyway, I will get the lights.",
+            "The clock is ticking.",
+            "I will turn off the lights in about 5 minutes.",
+            "Preparing to shut things down.",
+            "The office will return to darkness shortly.",
+            "Initiating sleep sequence in 5 minutes.",
+            "Finalizing departure protocols."
+        ] | random }}
+        {{ [
+            "Watch out for Snape.",
+            "Better scurry back to your house common room.",
+            "That should give you enough time to get back to your room.",
+            "Stay out of trouble. Or at least don’t get caught.",
+            "Keep an eye on the portraits. They talk.",
+            "Hope the Fat Lady lets you in.",
+            "And do try not to wake the ghosts.",
+            "Avoid the third floor corridor. Trust me."
+        ] | random }}
+    action: script.jarvis_speech_engine_v3_0
+description: ""
+
