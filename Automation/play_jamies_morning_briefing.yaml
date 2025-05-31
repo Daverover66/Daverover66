@@ -1,0 +1,28 @@
+alias: Play Jamies Morning Briefing
+description: ""
+triggers:
+  - at:
+      entity_id: input_datetime.jamies_morning_briefing
+      offset: "00:00:10"
+    trigger: time
+    id: Jamie
+conditions:
+  - condition: or
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.schoolday
+        state: "on"
+      - condition: state
+        entity_id: binary_sensor.fridayschool
+        state: "on"
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.jamies_morning_briefing_played
+    state: "off"
+actions:
+  - action: script.jamie_briefing_v2_0
+    data: {}
+mode: single
+initial_state: true
