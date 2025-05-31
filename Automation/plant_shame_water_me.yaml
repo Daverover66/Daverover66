@@ -1,0 +1,59 @@
+alias: Plant Shame - Water Me!
+description: Snarky audible reminders when plants need watering — mornings only
+triggers:
+  - entity_id:
+      - sensor.gw2000a_soil_moisture_1
+      - sensor.gw2000a_soil_moisture_2
+      - sensor.gw2000a_soil_moisture_3
+      - sensor.gw2000a_soil_moisture_4
+      - sensor.gw2000a_soil_moisture_5
+      - sensor.gw2000a_soil_moisture_6
+    below: 25
+    trigger: numeric_state
+conditions:
+  - condition: template
+    value_template: >
+      {% set id = trigger.entity_id.split('.')[-1] %} {{
+      is_state("input_boolean." ~ id ~ "_alert_sent", "off") }}
+actions:
+  - variables:
+      id: "{{ trigger.entity_id.split('.')[-1] }}"
+      alert_flag: input_boolean.{{ id }}_alert_sent
+      plant_name: "{{ trigger.to_state.name }}"
+      moisture: "{{ trigger.to_state.state }}"
+      message: |
+        {% set quotes = [
+          plant_name ~ " is at " ~ moisture ~ "% moisture. Unless you're going for the 'dried herb' aesthetic, maybe water it.",
+          "Moisture in " ~ plant_name ~ " has dipped to " ~ moisture ~ "%. You do remember you own plants, right?",
+          plant_name ~ " is thirsty — " ~ moisture ~ "% soil moisture. Water it before it turns to dust.",
+          "Hey! " ~ plant_name ~ " called. It said, and I quote, '" ~ moisture ~ "% moisture? Really?!'"
+        ] %}
+        {{ quotes | random }}
+  - choose:
+      - conditions:
+          - condition: time
+            after: "08:00:00"
+            before: "12:00:00"
+        sequence:
+          - data:
+              where: dave
+              message: "{{ message }}"
+            action: script.jarvis_speech_engine_v3_0
+          - target:
+              entity_id: "{{ alert_flag }}"
+            action: input_boolean.turn_on
+    default:
+      - wait_for_trigger:
+          - at: "08:00:00"
+            trigger: time
+        continue_on_timeout: false
+      - condition: time
+        before: "12:00:00"
+      - data:
+          where: dave
+          message: "{{ message }}"
+        action: script.jarvis_speech_engine_v3_0
+      - target:
+          entity_id: "{{ alert_flag }}"
+        action: input_boolean.turn_on
+mode: queued
