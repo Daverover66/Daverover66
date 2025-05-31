@@ -1,0 +1,143 @@
+alias: Boys' room blinds V2.0
+description: Opens and closes Jamie's and Sean's blinds depending on school schedule.
+triggers:
+  - at: input_datetime.jamie_s_room_blind_opening_time
+    id: jamie_open
+    trigger: time
+  - at: input_datetime.sean_s_room_blind_opening_time
+    id: sean_open
+    trigger: time
+  - at: "07:32:00"
+    id: fallback_school_open
+    trigger: time
+  - at: "07:47:00"
+    id: fallback_weekend_open
+    trigger: time
+  - event: sunset
+    id: winter_close
+    trigger: sun
+  - at: "19:30:00"
+    id: summer_close
+    trigger: time
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: jamie_open
+        sequence:
+          - target:
+              entity_id: cover.jamies_room_blind
+            action: cover.open_cover
+            data: {}
+          - target:
+              entity_id: input_boolean.jamie_s_bedside_lamp
+            action: input_boolean.turn_off
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: sean_open
+        sequence:
+          - target:
+              entity_id: cover.seans_room_blind
+            action: cover.open_cover
+            data: {}
+          - target:
+              entity_id: input_boolean.sean_s_bedside_lamp
+            action: input_boolean.turn_off
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: fallback_school_open
+          - condition: template
+            value_template: |
+              {{ is_state('binary_sensor.schoolday', 'on')
+                 or is_state('binary_sensor.fridayschool', 'on') }}
+            alias: If it's a schoolday.
+          - condition: state
+            entity_id: cover.jamies_room_blind
+            state: closed
+        sequence:
+          - target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            action: cover.open_cover
+            data: {}
+          - target:
+              entity_id:
+                - input_boolean.jamie_s_bedside_lamp
+                - input_boolean.sean_s_bedside_lamp
+            action: input_boolean.turn_off
+            data: {}
+          - data:
+              title: Fallback Trigger Used
+              message: >
+                Both blinds opened at 07:30 using fallback school day logic.
+                Because `sensor.school_tomorrow` is {{
+                states('sensor.school_tomorrow') }}.
+            action: persistent_notification.create
+      - conditions:
+          - condition: trigger
+            id: fallback_weekend_open
+          - condition: template
+            value_template: |
+              {{ is_state('binary_sensor.schoolday', 'off')
+                 and is_state('binary_sensor.fridayschool', 'off') }}
+          - condition: state
+            entity_id: cover.jamies_room_blind
+            state: closed
+        sequence:
+          - target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            action: cover.open_cover
+            data: {}
+          - target:
+              entity_id:
+                - input_boolean.jamie_s_bedside_lamp
+                - input_boolean.sean_s_bedside_lamp
+            action: input_boolean.turn_off
+            data: {}
+          - data:
+              title: Fallback Trigger Used
+              message: >
+                Both boys' blinds opened at 07:45 using fallback weekend/holiday
+                logic. Because `sensor.school_tomorrow` is {{
+                states('sensor.school_tomorrow') }}.
+            action: persistent_notification.create
+      - conditions:
+          - condition: trigger
+            id: winter_close
+        sequence:
+          - target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            action: cover.close_cover
+            data: {}
+          - target:
+              entity_id:
+                - input_boolean.jamie_s_bedside_lamp
+                - input_boolean.sean_s_bedside_lamp
+            action: input_boolean.turn_on
+            data: {}
+      - conditions:
+          - condition: trigger
+            id: summer_close
+        sequence:
+          - target:
+              entity_id:
+                - cover.jamies_room_blind
+                - cover.seans_room_blind
+            action: cover.close_cover
+            data: {}
+          - target:
+              entity_id:
+                - input_boolean.jamie_s_bedside_lamp
+                - input_boolean.sean_s_bedside_lamp
+            action: input_boolean.turn_on
+            data: {}
+mode: parallel
+max: 3
