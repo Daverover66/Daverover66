@@ -1,0 +1,113 @@
+alias: Welcome Home
+description: ""
+triggers:
+  - entity_id:
+      - binary_sensor.dave_home
+      - binary_sensor.gem_home
+      - binary_sensor.sean_home
+    to: "on"
+    trigger: state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.welcome_home
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+        sequence:
+          - wait_for_trigger:
+              - entity_id:
+                  - binary_sensor.front_door_sense_contact
+                  - binary_sensor.back_door_sensor_contact
+                to: "off"
+                from: "on"
+                for:
+                  hours: 0
+                  minutes: 0
+                  seconds: 0
+                trigger: state
+            timeout:
+              hours: 0
+              minutes: 10
+              seconds: 0
+              milliseconds: 0
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 20
+              milliseconds: 0
+          - if:
+              - condition: state
+                entity_id: input_boolean.announcement_playing
+                state: "off"
+            then:
+              - data: {}
+                action: script.welcome_briefing_2
+            alias: >-
+              Play welcome message unless morning briefing is playing in
+              kitchen.
+    default:
+      - data:
+          object_id: arriving
+          add_entities: "{{ trigger.to_state.entity_id }}"
+        action: group.set
+      - wait_for_trigger:
+          - entity_id:
+              - binary_sensor.front_door_sense_contact
+              - binary_sensor.back_door_sensor_contact
+            from: "on"
+            to: "off"
+            trigger: state
+        timeout:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 20
+          milliseconds: 0
+      - if:
+          - condition: state
+            entity_id: input_boolean.announcement_playing
+            state: "off"
+        then:
+          - data:
+              where: kitchen
+              type: announcement
+              message: >
+                {% set person =
+                expand('group.arriving')|map(attribute='name')|join(' and ') %}
+                {% set peoplecount = expand('group.arriving') | count %} {% if
+                peoplecount == 1 %}
+                  {% set is_are = ' is ' %}
+                  {% set has_have = ' has ' %}
+                {% else %}
+                  {% set is_are = ' are ' %}
+                  {% set has_have = ' have ' %}
+                {% endif %} {%- macro greeting_sentence(person, is_are,
+                has_have) -%}
+                  {{ [
+                  person ~ has_have + " arrived.",
+                  "My sensors are picking up the presence of additional humans. " ~ person ~ has_have + " been identified as home.",
+                  "Guess who is in the house?" ~ person ~ is_are,
+                  "I am sensing a disturbance in the force. "  ~ person +" must be back!",
+                  person ~ is_are + "now in the house.",
+                  person  ~ is_are + " now here.  Welcome Home.",
+                  person  ~ is_are + " now here.",
+                  "Just a quick announcement. " ~ person ~ has_have + "  arrived!",
+                  person ~ has_have + " finally made it home."
+                  ] | random }}
+                {%- endmacro -%} {{greeting_sentence(person, is_are, has_have)}}
+            action: script.jarvis_speech_engine_v3_0
+        alias: "Announce welcome home if no other announcement is playing "
+      - delay: "00:02:00"
+      - data:
+          object_id: arriving
+          entities: []
+        action: group.set
+mode: restart
