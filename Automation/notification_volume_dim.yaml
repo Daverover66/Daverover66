@@ -31,5 +31,7 @@ actions:
         - media_player.jarvis_main_bedroom_media_player
         - media_player.jarvis_kitchen_media_player
         - media_player.jarvis_jamie_media_player
+        - media_player.jarvis_sean_media_player
+        - media_player.jarvis_office_media_player
 mode: single
 initial_state: true
