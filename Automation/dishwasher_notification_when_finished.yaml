@@ -1,0 +1,149 @@
+alias: Dishwasher Notification When Finished
+description: >-
+  Set the value of input boolean "dishwasher on/off" based on power consumption.
+  Announce when the dishwasher has finished and check the dishes have been
+  removed.
+triggers:
+  - alias: Dishwasher drawing more than 10W power
+    entity_id:
+      - sensor.dishwasher_power_consumed
+    above: 10
+    id: Dishwasher On
+    trigger: numeric_state
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  - alias: Dishwasher drawing less than 10W power for 2 mins..
+    entity_id:
+      - sensor.dishwasher_power_consumed
+    below: 10
+    id: Dishwasher off
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    trigger: numeric_state
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Dishwasher On
+          - condition: state
+            state: "off"
+            entity_id: input_boolean.dishwasher_on
+        sequence:
+          - action: input_boolean.turn_on
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.dishwasher_on
+          - action: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.dishwasher_started
+            data:
+              datetime: "{{ now().isoformat() }}"
+      - conditions:
+          - condition: trigger
+            id:
+              - Dishwasher off
+          - condition: state
+            state: "on"
+            entity_id: input_boolean.dishwasher_on
+          - condition: template
+            value_template: >
+              {{ (now().astimezone() -
+              (states('input_datetime.dishwasher_started')
+                | as_datetime()).astimezone()).total_seconds() > 4800 }}
+        sequence:
+          - delay:
+              seconds: 30
+          - action: input_boolean.turn_off
+            data: {}
+            target:
+              entity_id:
+                - input_boolean.dishwasher_on
+          - alias: Announce finished
+            if:
+              - condition: state
+                entity_id: input_boolean.audible_notifications
+                state: "on"
+              - condition: state
+                entity_id: binary_sensor.dave_home
+                state: "on"
+            then:
+              - action: script.jarvis_speech_engine_v3_0
+                data:
+                  where: dave
+                  message: >
+                    {{ ['I think the dishwasher might be finished. Better check
+                    to see.'   
+                        ] | random }}
+            else:
+              - alias: Announce to Gem
+                if:
+                  - condition: state
+                    entity_id: binary_sensor.gem_home
+                    state: "on"
+                  - condition: state
+                    entity_id: binary_sensor.gem_workstation_status
+                    state: "off"
+                then:
+                  - action: script.jarvis_speech_engine_v3_0
+                    data:
+                      where: gem
+                      message: >
+                        {{ ['I think the dishwasher might be finished. Better
+                        check to see.'   
+                            ] | random }}
+                else:
+                  - if:
+                      - condition: state
+                        entity_id: input_boolean.audible_notifications
+                        state: "on"
+                    then:
+                      - action: script.jarvis_speech_engine_v3_0
+                        data:
+                          where: all
+                          type: announcement
+                          message: |
+                            {{ [
+                                'The washing machine has completed its cycle. Better get the washing hung up to dry',   
+                                'I have detected a reduction in the power consumption of the washing machine.  My fuzzy logic circuit has determined that means its finished',   
+                                'My sensors have detected a reduction in the rotational velocity of the washing machine. My artificially intuitive logic system has determined that now might be the optimal time to hang it up to dry',   
+                                'The washing machine has finished its cycle. It has cycled quite a long way and is quite tired after its exertions. I would hang the washing out to dry, but I dont have any arms. Or legs.  So I guess its up to you'     
+                                ] | random }}
+                    alias: Announce to house if allowed.
+          - alias: Send a text to Dave
+            if:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.text_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.text_notifications_dave
+                    state: "on"
+            then:
+              - action: script.text_notify_dave
+                data:
+                  message: That's the dishwasher finished.
+                  title: DISHWASHER
+          - alias: Send a text to Gem
+            if:
+              - condition: and
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.text_notifications
+                    state: "on"
+                  - condition: state
+                    entity_id: input_boolean.text_notifications_gem
+                    state: "on"
+            then:
+              - action: script.text_notify_gem
+                data:
+                  message: That's the dishwasher finished.
+                  title: DISHWASHER
+mode: single
