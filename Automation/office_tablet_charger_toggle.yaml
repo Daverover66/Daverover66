@@ -20,7 +20,7 @@ actions:
           - action: switch.turn_on
             data: {}
             target:
-              entity_id: switch.office_tablet_charger_local
+              entity_id: switch.office_tablet_charger
       - conditions:
           - condition: trigger
             id: Battery Charged
@@ -28,7 +28,7 @@ actions:
           - action: switch.turn_off
             data: {}
             target:
-              entity_id: switch.office_tablet_charger_local
+              entity_id: switch.office_tablet_charger
 mode: queued
 initial_state: true
 max: 10
