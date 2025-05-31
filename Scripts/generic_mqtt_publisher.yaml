@@ -1,0 +1,22 @@
+alias: Generic MQTT Publisher
+mode: parallel
+fields:
+  topic:
+    required: true
+    selector:
+      text: null
+  payload:
+    required: true
+    selector:
+      text: null
+  retain:
+    required: false
+    default: true
+    selector:
+      boolean: null
+sequence:
+  - data:
+      topic: "{{ topic }}"
+      payload: "{{ payload }}"
+      retain: "{{ retain | default(true) | bool }}"
+    action: mqtt.publish
