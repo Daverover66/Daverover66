@@ -1,0 +1,304 @@
+alias: Security Check
+sequence:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ security_query == 'General Security Check | Query Everything'
+              }}
+        sequence:
+          - action: script.capture_camera_snapshots
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 25
+              milliseconds: 0
+          - action: llmvision.image_analyzer
+            data:
+              remember: true
+              use_memory: false
+              detail: high
+              include_filename: false
+              target_width: 1600
+              max_tokens: 200
+              temperature: 0.7
+              generate_title: false
+              expose_images: true
+              provider: 01JP4YW4N12R828GZP72CNX013
+              message: >-
+                You have been invoked for a Security Check. You are a Home
+                Automation assistant connected to sensors and systems in a home.
+                Attached are snapshots from inside and outside the home. Please
+                summarise what you see, within the context of a security check.
+                Do not mention anything that seems ordinary. We are looking for
+                potential hazards, people, animals etc. Describe those things in
+                detail but do not describe the overall scene if there is nothing
+                relevant to report in the context of a focused Security check.
+                Your response is going to be announced on an audio system so do
+                not use any special characters. Make your response
+                conversational in paragraph form rather than list form.
+              image_file: |-
+                /config/www/snapshots/camera1.jpg
+                /config/www/snapshots/camera2.jpg
+                /config/www/snapshots/camera3.jpg
+                /config/www/snapshots/camera4.jpg
+                /config/www/snapshots/camera5.jpg
+                /config/www/snapshots/camera6.jpg
+                /config/www/snapshots/camera7.jpg
+                /config/www/snapshots/camera8.jpg
+                /config/www/snapshots/camera9.jpg
+            response_variable: security_cam_snapshot_summary
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - variables:
+              response:
+                camera_check: |
+                  {{ security_cam_snapshot_summary.response_text }}
+                query_all_motion_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.garage_occupied': '(Garage)',
+                    'binary_sensor.living_room_occupied': '(Living Room)',
+                    'binary_sensor.kitchen_occupied': '(Kitchen)',
+                    'binary_sensor.utility_room_occupied': '(Utility Room)',
+                    'binary_sensor.cloakroom_occupied': '(Cloakroom)',
+                    'binary_sensor.dining_room_occupied': '(Dining Room)',
+                    'binary_sensor.hallway_occupied': '(Hallway)',
+                    'binary_sensor.landing_occupied': '(Landing)',
+                    'binary_sensor.office_occupied': '(Office)',
+                    'binary_sensor.guest_bedroom_occupied': '(Spare Room)',
+                    'binary_sensor.seans_room_occupied': '(Seans Room)',
+                    'binary_sensor.jamies_room_occupied': '(Jamies Room)',
+                    'binary_sensor.master_bedroom_occupied': '(Our Bedroom)',
+                    } %} {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'detected' if states[sensor].state == 'on' else 'clear'
+                    if states[sensor].state == 'off' else 'unknown' }} {{ note }}
+                    |{% endfor %} 
+                query_all_contact_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.front_door_sense_contact': '(Front Door)',
+                    'binary_sensor.garage_door_left_contact': '(Garage Door Left)',
+                    'binary_sensor.garage_door_right_contact': '(Garage Door Right)',
+                    'binary_sensor.back_door_sensor_contact': '(Back Door)',
+                    'binary_sensor.side_door_sensor_contact': '(Side Door)',
+                    'binary_sensor.downstairs_windows': '(Downstairs Windows)',
+                    'binary_sensor.upstairs_windows': '(Upstairs  Windows)'
+                    } %} Alarm State: {{ states('alarm_control_panel.downstairs')
+                    | title }} | {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'open' if states[sensor].state == 'on' else 'closed' if
+                    states[sensor].state == 'off' else 'unknown' }} {{ note }} |
+                    {% endfor %} 
+          - stop: Alright. Im done.
+            response_variable: response
+        alias: Query All Motion Sensors and Camera Snapshot Analysis
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ security_query == 'Security Check | Query Motion and Door
+              Contact Sensors' }}
+        sequence:
+          - delay:
+              seconds: 2
+          - variables:
+              response:
+                query_all_motion_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.garage_occupied': '(Garage)',
+                    'binary_sensor.living_room_occupied': '(Living Room)',
+                    'binary_sensor.kitchen_occupied': '(Kitchen)',
+                    'binary_sensor.utility_room_occupied': '(Utility Room)',
+                    'binary_sensor.cloakroom_occupied': '(Cloakroom)',
+                    'binary_sensor.dining_room_occupied': '(Dining Room)',
+                    'binary_sensor.hallway_occupied': '(Hallway)',
+                    'binary_sensor.landing_occupied': '(Landing)',
+                    'binary_sensor.office_occupied': '(Office)',
+                    'binary_sensor.guest_bedroom_occupied': '(Spare Room)',
+                    'binary_sensor.seans_room_occupied': '(Seans Room)',
+                    'binary_sensor.jamies_room_occupied': '(Jamies Room)',
+                    'binary_sensor.master_bedroom_occupied': '(Our Bedroom)',
+                    } %} {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'detected' if states[sensor].state == 'on' else 'clear'
+                    if states[sensor].state == 'off' else 'unknown' }} {{ note }}
+                    |{% endfor %} 
+                query_all_contact_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.front_door_sense_contact': '(Front Door)',
+                    'binary_sensor.garage_door_left_contact': '(Garage Door Left)',
+                    'binary_sensor.garage_door_right_contact': '(Garage Door Right)',
+                    'binary_sensor.back_door_sensor_contact': '(Back Door)',
+                    'binary_sensor.side_door_sensor_contact': '(Side Door)',
+                    'binary_sensor.downstairs_windows': '(Downstairs Windows)',
+                    'binary_sensor.upstairs_windows': '(Upstairs  Windows)'
+                    } %} Alarm State: {{ states('alarm_control_panel.downstairs')
+                    | title }} | {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'open' if states[sensor].state == 'on' else 'closed' if
+                    states[sensor].state == 'off' else 'unknown' }} {{ note }} |
+                    {% endfor %}
+          - stop: Alright. Im done.
+            response_variable: response
+        alias: Query All Motion and Contact Sensors
+      - conditions:
+          - condition: template
+            value_template: "{{ security_query == 'Security Check | Query Camera Snapshots' }}"
+        sequence:
+          - action: script.capture_camera_snapshots
+            data: {}
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 25
+              milliseconds: 0
+          - action: llmvision.image_analyzer
+            data:
+              remember: true
+              use_memory: false
+              detail: high
+              include_filename: false
+              target_width: 1600
+              max_tokens: 200
+              temperature: 0.7
+              generate_title: false
+              expose_images: true
+              provider: 01JP4YW4N12R828GZP72CNX013
+              message: >-
+                You have been invoked for a Security Check. You are a Home
+                Automation assistant connected to sensors and systems in a home.
+                Attached are snapshots from inside and outside the home. Please
+                summarise what you see, within the context of a security check.
+                Do not mention anything that seems ordinary. We are looking for
+                potential hazards, people, animals etc. Describe those things in
+                detail but do not describe the overall scene if there is nothing
+                relevant to report in the context of a focused Security check.
+                Your response is going to be announced on an audio system so do
+                not use any special characters. Make your response
+                conversational in paragraph form rather than list form.
+              image_file: |-
+                /config/www/snapshots/camera1.jpg
+                /config/www/snapshots/camera2.jpg
+                /config/www/snapshots/camera3.jpg
+                /config/www/snapshots/camera4.jpg
+                /config/www/snapshots/camera5.jpg
+                /config/www/snapshots/camera6.jpg
+                /config/www/snapshots/camera7.jpg
+                /config/www/snapshots/camera8.jpg
+                /config/www/snapshots/camera9.jpg
+            response_variable: security_cam_snapshot_summary
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - variables:
+              response:
+                camera_check: |
+                  {{ security_cam_snapshot_summary.response_text }}
+          - stop: Alright. Im done.
+            response_variable: response
+        alias: Query All Camera Snapshots
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ security_query == 'Security Check | Query Garage Camera
+              Snapshot and Door Sensors' }}
+        sequence:
+          - action: camera.snapshot
+            target:
+              entity_id: camera.garage_camera_hd_stream
+            data:
+              filename: /config/www/snapshots/camera2.jpg
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+          - action: llmvision.image_analyzer
+            data:
+              remember: true
+              use_memory: false
+              detail: high
+              include_filename: false
+              target_width: 1600
+              max_tokens: 200
+              temperature: 0.7
+              generate_title: false
+              expose_images: true
+              provider: 01JP4YW4N12R828GZP72CNX013
+              message: >-
+                You have been invoked for a Security Check. You are a Home
+                Automation assistant connected to sensors and systems in a home.
+                Attached is a snapshot from inside a garage. Please summarise
+                what you see, within the context of a security check. Do not
+                mention anything that seems ordinary. We are looking for
+                potential hazards, people, animals etc. Describe those things in
+                detail but do not describe the overall scene if there is nothing
+                relevant to report in the context of a focused Security check.
+                Your response is going to be announced on an audio system so do
+                not use any special characters. Make your response
+                conversational in paragraph form rather than list form.
+              image_file: /config/www/snapshots/camera2.jpg
+            response_variable: garage_cam_snapshot_summary
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+          - variables:
+              response:
+                camera_check: |
+                  {{ garage_cam_snapshot_summary.response_text }}
+                query_all_motion_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.garage_occupied': '(Garage)'
+                    } %} {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'detected' if states[sensor].state == 'on' else 'clear'
+                    if states[sensor].state == 'off' else 'unknown' }} {{ note }}
+                    |{% endfor %}
+                query_all_contact_sensors: |
+                  {% set sensors = {
+                    'binary_sensor.garage_door_left_contact': '(Garage Door Left)',
+                    'binary_sensor.garage_door_right_contact': '(Garage Door Right)'
+                    } %} Alarm State: {{ states('alarm_control_panel.downstairs')
+                    | title }} | {% for sensor, note in sensors.items() %} {{
+                    states[sensor].name if states[sensor] is not none else sensor
+                    }}: {{ 'open' if states[sensor].state == 'on' else 'closed' if
+                    states[sensor].state == 'off' else 'unknown' }} {{ note }} |
+                    {% endfor %} 
+          - stop: Alright. Im done.
+            response_variable: response
+        alias: Query Garage Door Sensors and  Camera
+fields:
+  security_query:
+    selector:
+      select:
+        options:
+          - General Security Check | Query Everything
+          - Security Check | Query Motion and Door Contact Sensors
+          - Security Check | Query Camera Snapshots
+          - Security Check | Query Garage Camera Snapshot and Door Sensors
+        multiple: false
+    description: >-
+      Select a query to determine the current status of motion sensors, whether
+      or not they are detecting motion, and/or request an analysis of various
+      security cameras in the house. This will analyse the most recent snapshot
+      from cameras and provide this analysis to you.
+    name: Security Query
+    required: true
+    default: General Security Check | Query Everything
+description: >-
+  Use this tool to query motion sensors, contact sensors, and camera snapshots
+  in and around the home to give home occupants feedback on motion in and
+  outside the home as well as provide an analysis of what the security cameras
+  are seeing in the house. Do not include emoji in your response and make sure
+  your response is conversational since it is being audibly broadcasted over a
+  speaker system.
+icon: mdi:security-network
+mode: parallel
+max: 10
