@@ -1,0 +1,28 @@
+alias: Update Govee Scene Tracker
+description: Update last and current Govee scene trackers
+fields:
+  new_scene:
+    description: The name of the new Govee scene
+    example: Evening
+sequence:
+  - condition: state
+    entity_id: input_boolean.govee_scene_update_lock
+    state: "off"
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.govee_scene_update_lock
+    data: {}
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.last_govee_scene
+    data:
+      value: "{{ states('input_text.current_govee_scene') }}"
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.current_govee_scene
+    data:
+      value: "{{ new_scene }}"
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.govee_scene_update_lock
+    data: {}
