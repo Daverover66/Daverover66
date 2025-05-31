@@ -1,0 +1,663 @@
+alias: Update Weather Records
+description: ""
+triggers:
+  - entity_id: sensor.gw2000a_lightning_strikes
+    id: new_strike
+    trigger: state
+  - entity_id:
+      - sensor.gw2000a_max_daily_gust
+    id: new_gust
+    trigger: state
+  - entity_id: sensor.gw2000a_wind_speed
+    id: new_wind_speed
+    trigger: state
+  - at: "23:55:00"
+    id: daily
+    trigger: time
+  - at: "00:01:00"
+    id: save_stats
+    trigger: time
+  - at: "00:03:00"
+    id: record_reset
+    trigger: time
+  - at: "00:00:00"
+    id: record_reset
+    trigger: time
+  - trigger: numeric_state
+    entity_id:
+      - sensor.gw2000a_wh90_battery
+    below: 1.75
+    id: WH90 Batt Low
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: new_strike
+            alias: When a lightning strike occurs
+        sequence:
+          - if:
+              - condition: template
+                value_template: |-
+                  {{ (states('sensor.gw2000a_lightning_strikes') | float(0)) >
+                     (states('sensor.max_lightning_strikes') | float(0)) }}
+            then:
+              - data:
+                  topic: house/weather/maxstrikes
+                  payload: "{{ states('sensor.gw2000a_lightning_strikes') }}"
+                action: script.generic_mqtt_publisher
+              - data:
+                  topic: house/weather/maxstrikes/timestamp
+                  payload: "{{ now().isoformat() }}"
+                action: script.generic_mqtt_publisher
+            alias: Update max number of strikes if greater than
+      - conditions:
+          - condition: trigger
+            id: new_gust
+            alias: When there is a gust of wind
+        sequence:
+          - alias: Notify us if gust is a new ATH
+            if:
+              - condition: template
+                value_template: |-
+                  {{ (states('sensor.gw2000a_max_daily_gust') | float(0)) >
+                     (states('sensor.ath_wind_gust') | float(0)) }}
+            then:
+              - data:
+                  topic: house/weather/athwind
+                  payload: "{{ states('sensor.gw2000a_max_daily_gust') }}"
+                action: script.generic_mqtt_publisher
+              - data:
+                  topic: house/weather/athwind/timestamp
+                  payload: "{{ now().isoformat() }}"
+                action: script.generic_mqtt_publisher
+              - data:
+                  title: New ATH Gust
+                  message: >-
+                    Just recorded a new ALL TIME HIGH WIND GUST: {{
+                    states('sensor.ath_wind_gust')}} mph at
+                    {{states('sensor.ath_wind_gust_timestamp')}}
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+      - conditions:
+          - condition: trigger
+            id: save_stats
+        sequence:
+          - if:
+              - condition: numeric_state
+                entity_id: sensor.chill_time_yesterday
+                above: 0
+            then:
+              - data:
+                  topic: house/weather/chillhours
+                  payload: >
+                    {% set total = (states('sensor.chill_time_yesterday') |
+                    float | round(1)) + (states('sensor.chill_hours') | float) |
+                    round(1) %} {{ total|int }}
+                  retain: true
+                action: mqtt.publish
+            alias: Update Chill Time
+          - if:
+              - condition: numeric_state
+                entity_id: sensor.freeze_time_yesterday
+                above: 0
+            then:
+              - data:
+                  topic: house/weather/freezehours
+                  payload: >
+                    {% set total = (states('sensor.freeze_time_yesterday') |
+                    float | round(1)) + (states('sensor.freeze_hours') | float)
+                    | round(1) %} {{ total }}
+                  retain: true
+                action: mqtt.publish
+            alias: Update Freeze Time
+        alias: At the start of the day
+      - conditions:
+          - condition: trigger
+            id: record_reset
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ now().day == 1 }}"
+            then:
+              - data:
+                  topic: house/weather/monthlymaxtemp
+                  payload: "{{ states('sensor.gw2000a_outdoor_temperature') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  topic: house/weather/monthlylowtemp
+                  payload: "{{ states('sensor.gw2000a_outdoor_temperature') }}"
+                  retain: true
+                action: mqtt.publish
+            alias: Update min and max monthly temperatures
+          - if:
+              - condition: time
+                weekday:
+                  - sun
+            then:
+              - data:
+                  topic: house/weather/weekly_rainfall
+                  payload: "{{ states('sensor.rainfall_last_week') }}"
+                action: mqtt.publish
+            alias: Update weekly rainfall total
+          - alias: Reset freeze and chill hours at the start of the month
+            if:
+              - condition: template
+                value_template: "{{ now().day == 1 }}"
+            then:
+              - data:
+                  topic: house/weather/chillhours
+                  payload: "0"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  topic: house/weather/freezehours
+                  payload: "0"
+                  retain: true
+                action: mqtt.publish
+        alias: At the start of the month
+      - conditions:
+          - condition: trigger
+            id: new_wind_speed
+            alias: When wind speed changes
+        sequence:
+          - data:
+              topic: house/weather/new_wind_speed
+              payload: |
+                {% if has_value('sensor.gw2000a_wind_speed') %}
+                  {{ states('sensor.gw2000a_wind_speed') | int }}
+                {% else %}
+                  0
+                {% endif %}
+            action: script.generic_mqtt_publisher
+      - conditions:
+          - condition: trigger
+            id: daily
+        sequence:
+          - data:
+              topic: house/weather/yesterday_rainfall_mm
+              payload: >-
+                {{ state_attr('sensor.daily_rainfall_ut','last_period') | float
+                }}
+              retain: true
+            action: mqtt.publish
+            alias: Update daily rainfall total
+          - alias: Record daily max temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_temp') | float) >
+                  (states('sensor.max_temp') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxtemp
+                  payload: "{{ states('sensor.daily_max_temp') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_temp') | float) >
+                  (states('sensor.ath_max_temp') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxtemp
+                  payload: "{{ states('sensor.daily_max_temp') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High Temp
+                  message: >-
+                    Just recorded a new ALL TIME HIGH TEMP: {{
+                    states('sensor.daily_max_temp') }} degrees.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily low temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_low_temp') | float) <
+                  (states('sensor.low_temp') | float) }}
+            then:
+              - data:
+                  topic: house/weather/lowtemp
+                  payload: "{{ states('sensor.daily_low_temp') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATL temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_low_temp') | float) <
+                  (states('sensor.ath_low_temp') | float) }}
+            then:
+              - data:
+                  topic: house/weather/athlowtemp
+                  payload: "{{ states('sensor.daily_low_temp') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH Low Temp
+                  message: >-
+                    Just recorded a new ALL TIME LOW TEMP: {{
+                    states('sensor.daily_low_temp') }} degrees.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record ATH Daily Rain
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_rainfall_ut') | float) >
+                  (states('sensor.ath_24h_rain') | float) }}
+            then:
+              - data:
+                  topic: house/weather/athdailyrain
+                  payload: "{{ states('sensor.daily_rainfall_ut') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New Wettest Day
+                  message: >-
+                    Just recorded a new ALL TIME HIGH DAILY RAINFALL: {{
+                    states('sensor.ath_24h_rain') }} mm.
+                action: script.text_notify_parents
+          - alias: Record daily max wind speed
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_wind_speed') | float) >
+                  (states('sensor.max_wind_gust') | float) }}
+            then:
+              - data:
+                  topic: house/weather/maxwind
+                  payload: "{{ states('sensor.daily_max_wind_speed') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record number of days with rain and total rainfall
+            if:
+              - condition: numeric_state
+                entity_id: sensor.daily_rainfall_ut
+                above: 0
+            then:
+              - data:
+                  topic: house/weather/daysrain
+                  payload: >
+                    {% set total = states('sensor.days_with_rain') | int + 1 %}
+                    {{ total }}
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  topic: house/weather/totalrainfall
+                  payload: >
+                    {% set total = (states('sensor.daily_rainfall_ut') | float)
+                    + (states('sensor.gw2000a_daily_rain_rate') | float) |
+                    round(1) %} {{ total }}
+                  retain: true
+                action: mqtt.publish
+            else:
+              - if:
+                  - condition: state
+                    entity_id: sensor.daily_rainfall_ut
+                    state: "0"
+                then:
+                  - data:
+                      topic: house/weather/daysnorain
+                      payload: >
+                        {% set total = states('sensor.days_without_rain') | int
+                        + 1 %} {{ total }}
+                      retain: true
+                    action: mqtt.publish
+          - if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_pressure') | float) >
+                  (states('sensor.max_pressure') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxpress
+                  payload: "{{ states('sensor.daily_max_pressure') }}"
+                  retain: true
+                action: mqtt.publish
+            alias: Record daily high pressure
+          - alias: Record ATH Pressure
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_pressure') | float) >
+                  (states('sensor.ath_max_pressure') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxpress
+                  payload: "{{ states('sensor.daily_max_pressure') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High Pressure
+                  message: >-
+                    Just recorded a new ALL TIME HIGH BAROMETRIC PRESSURE: {{
+                    states('sensor.daily_max_pressure') }} millibars.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_low_pressure') | float) <
+                  (states('sensor.min_pressure') | float) }}
+            then:
+              - data:
+                  topic: house/weather/minpress
+                  payload: "{{ states('sensor.daily_low_pressure') }}"
+                  retain: true
+                action: mqtt.publish
+            alias: Record daily low pressure
+          - alias: Record ATL pressure
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_low_pressure') | float) <
+                  (states('sensor.ath_min_pressure') | float) }}
+            then:
+              - data:
+                  topic: house/weather/athminpress
+                  payload: "{{ states('sensor.daily_low_pressure') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH Low Pressure
+                  message: >-
+                    Just recorded a new ALL TIME LOW BAROMETRIC PRESSURE: {{
+                    states('sensor.daily_low_pressure') }} millibars.
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily max humidity
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_humidity') | float) >
+                  (states('sensor.max_humidity') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxhum
+                  payload: "{{ states('sensor.daily_max_humidity') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH humidity
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_humidity') | float) >
+                  (states('sensor.ath_max_humidity') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxhum
+                  payload: "{{ states('sensor.daily_max_humidity') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High Humidity Level
+                  message: >-
+                    Just recorded a new ALL TIME HIGH HUMDITIY LEVEL: {{
+                    states('sensor.daily_max_humidity') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily low humidity
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_humidity') | float) <
+                  (states('sensor.min_humidity') | float) }}
+            then:
+              - data:
+                  topic: house/weather/minhum
+                  payload: "{{ states('sensor.daily_min_humidity') }}"
+                  retain: true
+                action: mqtt.publish
+          - if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_humidity') | float) <
+                  (states('sensor.ath_min_humidity') | float) }}
+            then:
+              - data:
+                  topic: house/weather/athminhum
+                  payload: "{{ states('sensor.daily_min_humidity') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH Low Humidity Level
+                  message: >-
+                    Just recorded a new ALL TIME LOW HUMIDITY LEVEL: {{
+                    states('sensor.daily_min_humidity') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+            alias: Record ATL humidity
+          - alias: Record daily max solar radiation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_solar_radiation') | float) >
+                  (states('sensor.max_solar_radiation') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxsolrad
+                  payload: "{{ states('sensor.daily_max_solar_radiation') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH solar radiation
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_solar_radiation') | float) >
+                  (states('sensor.ath_max_solar_radiation') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxsolrad
+                  payload: "{{ states('sensor.daily_max_solar_radiation') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High Solar Radiation Level
+                  message: >-
+                    Just recorded a new ALL TIME HIGH SOLAR RADIATION LEVEL: {{
+                    states('sensor.daily_max_solar_radiation') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily max lux level
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_solar_lux') | float) >
+                  (states('sensor.max_solar_lux') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxsollux
+                  payload: "{{ states('sensor.daily_max_solar_lux') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH lux level
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_solar_lux') | float) >
+                  (states('sensor.ath_max_solar_lux') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxsollux
+                  payload: "{{ states('sensor.daily_max_solar_lux') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High Solar Lux Level
+                  message: >-
+                    Just recorded a new ALL TIME HIGH SOLAR LUX LEVEL: {{
+                    states('sensor.daily_max_solar_lux') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily max uv index
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_uv_index') | float) >
+                  (states('sensor.max_uv_index') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxuv
+                  payload: "{{ states('sensor.daily_max_uv_index') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH uv index
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_uv_index') | float) >
+                  (states('sensor.ath_max_uv_index') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxuv
+                  payload: "{{ states('sensor.daily_max_uv_index') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH High UV Index
+                  message: >-
+                    Just recorded a new ALL TIME HIGH UV LEVEL: {{
+                    states('sensor.daily_max_uv_index') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily max soil temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_soil_temp') | float) >
+                  (states('sensor.max_soil_temperature') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxsoiltemp
+                  payload: "{{ states('sensor.daily_max_soil_temp') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH soil temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_soil_temp') | float) >
+                  (states('sensor.ath_max_soil_temperature') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxsoiltemp
+                  payload: "{{ states('sensor.daily_max_soil_temp') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH Soil Temp
+                  message: >-
+                    Just recorded a new ALL TIME HIGH SOIL TEMPERATURE: {{
+                    states('sensor.daily_max_soil_temp') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily min soil temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_soil_temp') | float) <
+                  (states('sensor.min_soil_temperature') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/minsoiltemp
+                  payload: "{{ states('sensor.daily_min_soil_temp') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATL soil temp
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_soil_temp') | float) <
+                  (states('sensor.ath_min_soil_temperature') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athminsoiltemp
+                  payload: "{{ states('sensor.daily_min_soil_temp') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATL Soil Temp
+                  message: >-
+                    Just recorded a new ALL TIME LOW SOIL TEMPERATURE: {{
+                    states('sensor.daily_min_soil_temp') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily max soil moisture
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_soil_moisture') | float) >
+                  (states('sensor.max_soil_moisture') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/maxsoilmoist
+                  payload: "{{ states('sensor.daily_max_soil_moisture') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATH soil moisture
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_max_soil_moisture') | float) >
+                  (states('sensor.ath_max_soil_moisture') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athmaxsoilmoist
+                  payload: "{{ states('sensor.daily_max_soil_moisture') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATH Soil Moisture
+                  message: >-
+                    Just recorded a new ALL TIME HIGH SOIL MOISTURE: {{
+                    states('sensor.daily_max_soil_moisture') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+          - alias: Record daily min soil moisture
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_soil_moisture') | float) <
+                  (states('sensor.min_soil_moisture') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/minsoilmoist
+                  payload: "{{ states('sensor.daily_min_soil_moisture') }}"
+                  retain: true
+                action: mqtt.publish
+          - alias: Record ATL soil moisture
+            if:
+              - condition: template
+                value_template: >-
+                  {{ (states('sensor.daily_min_soil_moisture') | float) <
+                  (states('sensor.ath_min_soil_moisture') | float)  }}
+            then:
+              - data:
+                  topic: house/weather/athminsoilmoist
+                  payload: "{{ states('sensor.daily_min_soil_moisture') }}"
+                  retain: true
+                action: mqtt.publish
+              - data:
+                  title: New ATL Soil Moisture
+                  message: >-
+                    Just recorded a new ALL TIME LOW SOIL MOISTURE: {{
+                    states('sensor.daily_min_soil_moisture') }}%
+                action: script.text_notify_parents
+              - delay: "00:00:30"
+        alias: At the end of the day
+      - conditions:
+          - condition: trigger
+            id:
+              - WH90 Batt Low
+        sequence:
+          - action: script.text_notify_dave
+            data:
+              title: WITTBOY BATTERY LOW
+              message: The Wittboy battery seems low.  Please check.
+mode: queued
