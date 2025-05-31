@@ -1,0 +1,38 @@
+description: ""
+alias: Capture Camera Snapshots
+sequence:
+  - variables:
+      cameras:
+        - entity_id: camera.front_doorbell_camera_clear
+          filename: /config/www/snapshots/camera1.jpg
+        - entity_id: camera.garage_camera_hd_stream
+          filename: /config/www/snapshots/camera2.jpg
+        - entity_id: camera.hallway_camera_hd_stream
+          filename: /config/www/snapshots/camera3.jpg
+        - entity_id: camera.landing_camera_hd_stream
+          filename: /config/www/snapshots/camera4.jpg
+        - entity_id: camera.camera_hub_g3_ddd9
+          filename: /config/www/snapshots/camera5.jpg
+        - entity_id: camera.guest_bedroom_camera_hd_stream
+          filename: /config/www/snapshots/camera6.jpg
+        - entity_id: camera.sean_s_room_camera_hd_stream
+          filename: /config/www/snapshots/camera7.jpg
+        - entity_id: camera.jamie_s_room_camera_hd_stream
+          filename: /config/www/snapshots/camera8.jpg
+        - entity_id: camera.e1_back_garden_fluent
+          filename: /config/www/snapshots/camera9.jpg
+  - repeat:
+      for_each: "{{ cameras }}"
+      sequence:
+        - target:
+            entity_id: "{{ repeat.item.entity_id }}"
+          data:
+            filename: "{{ repeat.item.filename }}"
+          action: camera.snapshot
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 0
+            milliseconds: 500
+mode: parallel
+max: 2
