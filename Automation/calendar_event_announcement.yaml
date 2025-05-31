@@ -10,7 +10,8 @@ conditions:
     entity_id: input_boolean.audible_notifications
     state: "on"
 actions:
-  - if:
+  - alias: Announce to Dave if home, else Gem.
+    if:
       - condition: state
         entity_id: binary_sensor.dave_home
         state: "on"
@@ -18,50 +19,91 @@ actions:
       - action: script.jarvis_speech_engine_v3_0
         data:
           where: dave
-          type: announcement
           message: |-
-            {%- macro getReport() -%} 
-                You have {{state_attr('calendar.forrester_events','message') }} 
-                in half an hour
-                {%- endmacro-%}
-                      
-                {# a macro that removes all newline characters, empty spaces, and returns formatted text  #} 
-                {%- macro cleanup(data) -%} 
-                  {%- for item in data.split("\n")  if item | trim != "" -%} 
-                    {{ item | trim }} {% endfor -%} 
-                {%- endmacro -%} 
+            {%- macro getReport() -%}
+              {% set response = state_attr('sensor.calendar_events', 'calendar_response') %}
+              {% set cal = response['calendar.forrester_events'] if response and 'calendar.forrester_events' in response else {} %}
+              {% set events = cal['events'] if 'events' in cal else [] %}
+              {% set now = now() %}
+              {% set upcoming = events
+                | selectattr('start', 'defined')
+                | selectattr('start', '>', now.isoformat())
+                | sort(attribute='start')
+                | list %}
+              
+              {% if upcoming %}
+                {% set next = upcoming[0] %}
+                {% set event_title = next.summary %}
+                {% set event_description = (next.description or '') | lower %}
+                {% set car_tags = ['#car', '#drive', '#needscar', '#trip'] %}
+                {% set needs_car = car_tags | select('in', event_description) | list | count > 0 %}
+                
+                You have {{ event_title }} at {{ as_datetime(next.start).strftime('%H:%M') }} — in about half an hour.
+                
+                {%- if needs_car and is_state('input_boolean.car_plugged_in', 'on') -%}
+                  The car is still plugged in — don't forget to unplug it!
+                {%- elif is_state('input_boolean.car_plugged_in', 'on') -%}
+                  If the car is needed, remember that it is still plugged in.
+                {%- endif -%}
+              {% else %}
+                No upcoming events found.
+              {% endif %}
+            {%- endmacro -%}
 
-                {# a macro to call all macros :)  #} 
-                {%- macro mother_of_all_macros() -%} 
-                  {{ getReport() }} 
-                {%- endmacro -%} 
+            {%- macro cleanup(data) -%}
+              {%- for item in data.split("\n") if item | trim != "" -%}
+                {{ item | trim }} {% endfor -%}
+            {%- endmacro -%}
 
-                {# Call the macro  #} 
-                  {{- cleanup(mother_of_all_macros()) -}}
+            {%- macro mother_of_all_macros() -%}
+              {{ getReport() }}
+            {%- endmacro -%}
+
+            {{- cleanup(mother_of_all_macros()) -}}
     else:
       - action: script.jarvis_speech_engine_v3_0
         data:
           where: gem
-          type: announcement
           message: |-
-            {%- macro getReport() -%} 
-                You have {{state_attr('calendar.forrester_events','message') }} 
-                in half an hour
-                {%- endmacro-%}
-                      
-                {# a macro that removes all newline characters, empty spaces, and returns formatted text  #} 
-                {%- macro cleanup(data) -%} 
-                  {%- for item in data.split("\n")  if item | trim != "" -%} 
-                    {{ item | trim }} {% endfor -%} 
-                {%- endmacro -%} 
+            {%- macro getReport() -%}
+              {% set response = state_attr('sensor.calendar_events', 'calendar_response') %}
+              {% set cal = response['calendar.forrester_events'] if response and 'calendar.forrester_events' in response else {} %}
+              {% set events = cal['events'] if 'events' in cal else [] %}
+              {% set now = now() %}
+              {% set upcoming = events
+                | selectattr('start', 'defined')
+                | selectattr('start', '>', now.isoformat())
+                | sort(attribute='start')
+                | list %}
+              
+              {% if upcoming %}
+                {% set next = upcoming[0] %}
+                {% set event_title = next.summary %}
+                {% set event_description = (next.description or '') | lower %}
+                {% set car_tags = ['#car', '#drive', '#needscar', '#trip'] %}
+                {% set needs_car = car_tags | select('in', event_description) | list | count > 0 %}
+                
+                You have {{ event_title }} at {{ as_datetime(next.start).strftime('%H:%M') }} — in about half an hour.
+                
+                {%- if needs_car and is_state('input_boolean.car_plugged_in', 'on') -%}
+                  The car is still plugged in — don't forget to unplug it!
+                {%- elif is_state('input_boolean.car_plugged_in', 'on') -%}
+                  If the car is needed, remember that it is still plugged in.
+                {%- endif -%}
+              {% else %}
+                No upcoming events found.
+              {% endif %}
+            {%- endmacro -%}
 
-                {# a macro to call all macros :)  #} 
-                {%- macro mother_of_all_macros() -%} 
-                  {{ getReport() }} 
-                {%- endmacro -%} 
+            {%- macro cleanup(data) -%}
+              {%- for item in data.split("\n") if item | trim != "" -%}
+                {{ item | trim }} {% endfor -%}
+            {%- endmacro -%}
 
-                {# Call the macro  #} 
-                  {{- cleanup(mother_of_all_macros()) -}}
-    alias: Announce to Dave if home, else Gem.
+            {%- macro mother_of_all_macros() -%}
+              {{ getReport() }}
+            {%- endmacro -%}
+
+            {{- cleanup(mother_of_all_macros()) -}}
 mode: single
 initial_state: true
