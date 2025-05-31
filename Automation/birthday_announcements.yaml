@@ -9,12 +9,12 @@ conditions:
   - condition: template
     value_template: "{{ is_state('input_boolean.audible_notifications','on') }}"
 actions:
-  - action: media_player.volume_set
+  - alias: Pump up the volume
+    action: media_player.volume_set
     target:
       entity_id: media_player.living_room_pop
     data:
-      volume_level: 0.6
-    alias: Pump up the volume
+      volume_level: 0.4
   - action: script.birthday_announcement
     data:
       where: living_room
@@ -28,6 +28,7 @@ actions:
       media_content_id: Awesome Birthday Song in everywhere group
       media_content_type: AMAZON_MUSIC
     action: media_player.play_media
+    alias: Play Happy Birthday everywhere.
   - action: media_player.volume_set
     target:
       entity_id: media_player.living_room_pop
