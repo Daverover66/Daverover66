@@ -1,0 +1,8 @@
+alias: Back Door Light With Level
+sequence:
+  - entity_id: light.back_door_light
+    data:
+      brightness: |
+        {{ level | int }} 
+    action: light.turn_on
+mode: single
