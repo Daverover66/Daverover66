@@ -1,0 +1,14 @@
+alias: Repeat Last Message or Announcement
+description: ""
+triggers:
+  - command:
+      - "(sorry) I missed what you [just] said [please]  [repeat|say again] "
+      - what did you just say
+      - say that again
+      - repeat [your] last [message|announcement]
+    trigger: conversation
+conditions: []
+actions:
+  - action: script.play_last_message_2
+    data: {}
+mode: single
