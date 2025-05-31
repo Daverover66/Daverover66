@@ -1,0 +1,81 @@
+alias: Bedtime for Sean
+description: ""
+triggers:
+  - trigger: conversation
+    command:
+      - it's bedtime
+      - goodnight
+      - It is bedtime
+    id: Voice
+  - trigger: state
+    entity_id:
+      - input_boolean.we_are_in_bed
+    from: "off"
+    to: "on"
+    id: Stop play
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Voice
+          - condition: state
+            entity_id: assist_satellite.jarvis_sean_assist_satellite
+            state: processing
+        sequence:
+          - alias: Silence normal response.
+            set_conversation_response: ""
+          - alias: Respond with a Marvel goodnight.
+            action: assist_satellite.announce
+            target:
+              entity_id: assist_satellite.jarvis_sean_assist_satellite
+            metadata: {}
+            data:
+              message: >-
+                {{ ["Sleep tight, Spidey! Your spider-sense needs to rest for
+                the day and your web shooters need a recharge so you're ready to
+                swing into action tomorrow!",
+                    "Close your eyes Avenger. We assemble tomorrow when the world might need you to save the day!",
+                    "Okay Iron Man.  Helmet off and power down all systems. Friday will look after you as you sleep!",
+                    "Rest up, young hero! Captain America can do this all day, but you need sleep to stay strong for your next mission.",
+                    "Time to relax big guy. Sleep well my wee Hulk, and try not to smash your duvet in your sleep!",
+                    "The stars are your Infinity Stones, so your dreams are powered by the most elemental forces. Sleep tight.",
+                    "Time to get some sleep Thor. So put the hammer down, close your eyes and the gods of Aasgard will watch over you",
+                    "The mirror dimension is calling you Doctor Strange. So open the eye of agamoto and prepare for some magical dreams",
+                    "Director Fury of SHIELD has assigned you a mission: Get a full night’s rest so you can be a hero tomorrow!"
+                    ] | random }}
+              preannounce: false
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.jarvis_sean_media_player
+            data:
+              volume_level: 0.25
+          - parallel:
+              - action: music_assistant.play_media
+                target:
+                  entity_id:
+                    - media_player.jarvis_sean_media_player_2
+                data:
+                  media_id: library://audiobook/5
+                alias: Read an  audiobook on JARVIS media player
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.seans_light_toggle
+                data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Stop play
+        sequence:
+          - action: media_player.media_stop
+            metadata: {}
+            data: {}
+            target:
+              entity_id: media_player.jarvis_sean_media_player_2
+mode: single
