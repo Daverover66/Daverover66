@@ -11,7 +11,7 @@ triggers:
     enabled: true
   - entity_id:
       - sensor.power_grid_export
-    above: 2500
+    above: 2800
     id: Switch On
     for:
       hours: 0
@@ -20,7 +20,7 @@ triggers:
     trigger: numeric_state
   - entity_id:
       - sensor.power_battery_load
-    above: 1000
+    above: 500
     id: Switch Off
     for:
       hours: 0
@@ -48,6 +48,11 @@ triggers:
   - at: "21:00:00"
     id: Last Check
     trigger: time
+  - trigger: numeric_state
+    entity_id:
+      - sensor.battery_state_of_charge
+    above: 99
+    id: Battery Charged
 conditions: []
 actions:
   - choose:
@@ -66,15 +71,16 @@ actions:
           - condition: numeric_state
             entity_id: sensor.power_grid_export
             above: 2500
-          - action: switch.turn_on
+          - action: light.turn_on
             target:
-              entity_id: switch.valkyrie_solar_hot_water
+              entity_id: light.valkyrie_solar_hot_water
             data: {}
           - action: timer.start
             data: {}
             target:
               entity_id:
                 - timer.solar_hot_water_heating
+        alias: Activate solar water when electricity bill for the day hits zero
       - conditions:
           - condition: trigger
             id:
@@ -82,19 +88,16 @@ actions:
           - condition: sun
             after: sunrise
             before: sunset
-          - condition: numeric_state
-            entity_id: sensor.electricity_bill_today
-            below: 0
           - condition: state
             entity_id: input_boolean.allow_valkyrie_on
             state: "on"
           - condition: state
-            entity_id: switch.valkyrie_solar_hot_water
+            entity_id: light.valkyrie_solar_hot_water
             state: "off"
         sequence:
-          - action: switch.turn_on
+          - action: light.turn_on
             target:
-              entity_id: switch.valkyrie_solar_hot_water
+              entity_id: light.valkyrie_solar_hot_water
             data: {}
           - action: timer.start
             data: {}
@@ -105,12 +108,12 @@ actions:
           - condition: trigger
             id: Switch Off
           - condition: state
-            entity_id: switch.valkyrie_solar_hot_water
+            entity_id: light.valkyrie_solar_hot_water
             state: "on"
         sequence:
-          - action: switch.turn_off
+          - action: light.turn_off
             target:
-              entity_id: switch.valkyrie_solar_hot_water
+              entity_id: light.valkyrie_solar_hot_water
             data: {}
           - action: timer.pause
             data: {}
@@ -128,14 +131,42 @@ actions:
             target:
               entity_id: input_boolean.allow_valkyrie_on
             data: {}
-          - condition: state
-            entity_id: switch.valkyrie_solar_hot_water
-            state: "on"
-          - action: switch.turn_off
+          - if:
+              - condition: template
+                value_template: >-
+                  {{ states('light.valkyrie_solar_hot_water') != 'unavailable'
+                  }}
+                alias: If Valkyrie is not unavailable
+              - condition: state
+                entity_id: light.valkyrie_solar_hot_water
+                state: "on"
+            then:
+              - action: light.turn_off
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: light.valkyrie_solar_hot_water
+              - action: timer.cancel
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: timer.solar_hot_water_heating
+            alias: >-
+              If Valkyrie is available and on, turn it off,  else wait until it
+              becomes available then turn it off.
+          - wait_for_trigger:
+              - trigger: template
+                value_template: "{{ is_state('light.valkyrie_solar_hot_water','on') }}"
+            timeout:
+              hours: 0
+              minutes: 30
+              seconds: 0
+              milliseconds: 0
+          - action: light.turn_off
             metadata: {}
             data: {}
             target:
-              entity_id: switch.valkyrie_solar_hot_water
+              entity_id: light.valkyrie_solar_hot_water
           - action: timer.cancel
             metadata: {}
             data: {}
@@ -147,7 +178,7 @@ actions:
               - Time On
           - condition: numeric_state
             entity_id: sensor.hot_water_energy_consumption_daily
-            below: 6
+            below: 2.5
         sequence:
           - action: tado.set_water_heater_timer
             target:
@@ -158,19 +189,45 @@ actions:
           - condition: trigger
             id:
               - Last Check
-          - condition: or
-            conditions:
-              - condition: numeric_state
-                entity_id: sensor.hot_water_energy_consumption_daily
-                below: 6
-              - condition: numeric_state
-                entity_id: >-
-                  sensor.octopus_energy_gas_e6e03812572121_7645677109_current_accumulative_consumption_kwh
-                below: 6
+          - condition: numeric_state
+            entity_id: sensor.hot_water_energy_consumption_daily
+            below: 2.5
         sequence:
           - action: tado.set_water_heater_timer
             target:
               entity_id: water_heater.hot_water
             data:
               time_period: "00:30:00"
+      - conditions:
+          - condition: trigger
+            id:
+              - Battery Charged
+          - condition: template
+            value_template: >-
+              {{ states('sensor.rolec_energy_consumption_daily')| float(0) > 5
+              }}
+            alias: If the car was charged overnight
+          - condition: sun
+            after: sunrise
+            before: sunset
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.allow_valkyrie_on
+            data: {}
+          - condition: numeric_state
+            entity_id: sensor.power_grid_export
+            above: 2500
+          - action: light.turn_on
+            target:
+              entity_id: light.valkyrie_solar_hot_water
+            data: {}
+          - action: timer.start
+            data: {}
+            target:
+              entity_id:
+                - timer.solar_hot_water_heating
+        alias: >-
+          Activate solar water when the battery is charged if the EV has also
+          been charged overnight
 mode: single
