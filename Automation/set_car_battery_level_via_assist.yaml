@@ -1,0 +1,18 @@
+alias: Set Car Battery Level via Assist
+triggers:
+  - command:
+      - >-
+        (set|change) [the] car (battery charge|battery charge level) to {number}
+        [percent] 
+      - "[the] car battery is [now] [at] {number} [percent]"
+    trigger: conversation
+conditions: []
+actions:
+  - variables:
+      level: "{{ trigger.slots['number'] | regex_replace('%', '') | int }}"
+  - target:
+      entity_id: input_number.car_battery_charge_level
+    data:
+      value: "{{ level }}"
+    action: input_number.set_value
+mode: single
