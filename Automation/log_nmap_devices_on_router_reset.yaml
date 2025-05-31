@@ -1,0 +1,13 @@
+alias: Log Nmap devices on Router Reset
+description: Runs the Nmap scan when the router comes online.
+triggers:
+  - trigger: state
+    entity_id:
+      - device_tracker.skyrouter
+    from: not_home
+    to: home
+conditions: []
+actions:
+  - action: shell_command.log_nmap_devices
+    data: {}
+mode: single
