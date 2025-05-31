@@ -1,0 +1,275 @@
+alias: Living Room Lights with Presence V2.0
+description: ""
+triggers:
+  - entity_id: light.living_room_lights
+    from: "off"
+    to: "on"
+    id: Ceiling Light On
+    trigger: state
+  - entity_id: light.living_room_lights
+    from: "on"
+    to: "off"
+    id: Ceiling Light Off
+    trigger: state
+  - trigger: state
+    entity_id:
+      - binary_sensor.living_room_fp2_presence_sensor_1
+    from: "off"
+    to: "on"
+    id: Light On With Presence
+  - entity_id:
+      - binary_sensor.living_room_fp2_presence_sensor_1
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    id: Light Off With No Presence
+    trigger: state
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
+    below: input_number.low_light_threshold
+    for:
+      seconds: 20
+    id: Low Light
+    trigger: numeric_state
+  - entity_id: sensor.living_room_fp2_light_sensor_light_level
+    above: input_number.upper_light_threshold_level
+    for:
+      seconds: 20
+    id: Good Light
+    trigger: numeric_state
+  - trigger: conversation
+    command:
+      - >-
+        (i need | can I get) some [help with] [the] (light | lights | lighting)
+        [in here | in this room]  
+      - (it is | its) a bit dark [in here | in this room]
+      - there is too much light [in here | in this room]
+      - >-
+        (can you | will you) dim the (light | lights | lighting) [in here | in
+        this room]
+      - ( its | it is ) too bright [in here | in this room]
+    id: JARVIS
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Ceiling Light On
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: light.corner_lamp_2
+                state: "on"
+              - condition: state
+                entity_id: light.dreamview_g1_pro_2
+                state: "on"
+            alias: If corner lamp is on or the tv lights are on
+        sequence:
+          - data: {}
+            target:
+              entity_id:
+                - light.dreamview_g1_pro_2
+            action: light.turn_off
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          - action: scene.create
+            data:
+              scene_id: lights_before
+              snapshot_entities:
+                - light.floor_lamp_pro_1
+                - light.glide_lights_right_2
+                - light.govee_glide_left_2
+                - light.corner_lamp_2
+          - action: script.update_living_room_scene_tracker
+            data:
+              new_scene: lights_before
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+          - action: light.turn_off
+            target:
+              entity_id:
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Ceiling Light Off
+        sequence:
+          - if:
+              - condition: state
+                entity_id: switch.living_room_tv
+                state: "on"
+            then:
+              - action: scene.turn_on
+                target:
+                  entity_id: scene.lights_before
+                data: {}
+              - delay:
+                  hours: 0
+                  minutes: 0
+                  seconds: 20
+              - data: {}
+                target:
+                  entity_id: light.dreamview_g1_pro_2
+                action: light.turn_on
+          - action: scene.turn_on
+            target:
+              entity_id: scene.lights_before
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Light On With Presence
+          - condition: numeric_state
+            entity_id: sensor.living_room_fp2_light_sensor_light_level
+            below: input_number.low_light_threshold
+          - condition: state
+            entity_id: light.living_room_lights
+            state: "off"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: state
+                    entity_id: input_boolean.living_room_scene_update_lock
+                    state: "off"
+                sequence:
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: >-
+                              {{ states('input_text.current_living_room_scene')
+                              == 'lights_before' }}
+                        sequence:
+                          - action: scene.turn_on
+                            target:
+                              entity_id: scene.lights_before
+                            data: {}
+                      - conditions:
+                          - condition: state
+                            entity_id: binary_sensor.morning
+                            state: "on"
+                        sequence:
+                          - action: scene.turn_on
+                            target:
+                              entity_id: scene.ready_for_morning
+                            data: {}
+                      - conditions:
+                          - condition: state
+                            entity_id: binary_sensor.lunchtime
+                            state: "on"
+                        sequence:
+                          - action: scene.turn_on
+                            target:
+                              entity_id: scene.lunchtime_govee
+                            data: {}
+                      - conditions:
+                          - condition: state
+                            entity_id: binary_sensor.afternoon
+                            state: "on"
+                        sequence:
+                          - action: scene.turn_on
+                            target:
+                              entity_id: scene.afternoon_govee
+                            data: {}
+                      - conditions:
+                          - condition: state
+                            entity_id: binary_sensor.dinner_time
+                            state: "on"
+                        sequence:
+                          - action: scene.turn_on
+                            target:
+                              entity_id: scene.dinnertime_govee
+                            data: {}
+                    default:
+                      - action: scene.turn_on
+                        target:
+                          entity_id: scene.evening_govee
+                        data: {}
+                    alias: Choose between 6 scenes to set
+                  - action: script.update_living_room_scene_tracker
+                    data:
+                      new_scene: >
+                        {% if states('input_text.current_living_room_scene') ==
+                        'lights_before' %}
+                          lights_before
+                        {% elif is_state('binary_sensor.morning', 'on') %}
+                          ready_for_morning
+                        {% elif is_state('binary_sensor.lunchtime', 'on') %}
+                          lunchtime_govee
+                        {% elif is_state('binary_sensor.afternoon', 'on') %}
+                          afternoon_govee
+                        {% elif is_state('binary_sensor.dinner_time', 'on') %}
+                          dinnertime_govee
+                        {% else %}
+                          evening_govee
+                        {% endif %}     
+      - conditions:
+          - condition: trigger
+            id:
+              - Light Off With No Presence
+        sequence:
+          - alias: Turn off lamps when no presence
+            action: light.turn_off
+            target:
+              entity_id:
+                - light.corner_lamp_2
+                - light.floor_lamp_pro_1
+                - light.govee_glide_left_2
+                - light.glide_lights_right_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Low Light
+          - condition: state
+            entity_id: binary_sensor.living_room_fp2_presence_sensor_1
+            state: "on"
+          - condition: state
+            entity_id: light.living_room_lights
+            state: "off"
+        sequence:
+          - alias: Turn on lamp if light level is low and presence is detected
+            action: light.turn_on
+            target:
+              entity_id:
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - Good Light
+        sequence:
+          - alias: Turn off lamp if light level is good
+            action: light.turn_off
+            target:
+              entity_id:
+                - light.corner_lamp_2
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - JARVIS
+        sequence:
+          - variables:
+              device: "{{ trigger.context.id }}"
+              area: >-
+                {{ area_name(trigger.context.id) if trigger.context.id else
+                'living room' }}
+          - data:
+              voice_command: "{{ trigger.event.intent_input }}"
+              room_area: "{{ area }}"
+            action: script.jarvis_get_the_lights
+mode: parallel
+max: 5
