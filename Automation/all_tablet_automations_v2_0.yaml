@@ -1,0 +1,136 @@
+alias: All Tablet Automations V2.0
+triggers:
+  - entity_id: sensor.sm_t736b_battery_state
+    to: full
+    id: dave_charged
+    trigger: state
+  - entity_id: sensor.sm_t736b_battery_state
+    to: charging
+    id: dave_charging
+    trigger: state
+  - entity_id: sensor.jamie_s_samsung_tablet_network_type
+    id: jamie_network
+    trigger: state
+  - entity_id: sensor.jamie_s_samsung_tablet_battery_level
+    below: 10
+    id: jamie_low_battery
+    trigger: numeric_state
+  - entity_id: sensor.jamie_s_samsung_tablet_battery_level
+    above: 99
+    id: jamie_charged
+    trigger: numeric_state
+  - entity_id: sensor.sean_s_samsung_galaxy_network_type
+    id: sean_network
+    trigger: state
+  - entity_id: sensor.sean_s_samsung_galaxy_battery_level
+    below: 10
+    id: sean_low_battery
+    trigger: numeric_state
+  - entity_id: sensor.sean_s_samsung_galaxy_battery_level
+    above: 99
+    id: sean_charged
+    trigger: numeric_state
+  - entity_id: sensor.jamie_s_samsung_tablet_battery_state
+    to: charging
+    id: jamie_now_charging
+    trigger: state
+  - entity_id: sensor.sean_s_samsung_galaxy_battery_state
+    to: charging
+    id: sean_now_charging
+    trigger: state
+conditions:
+  - condition: or
+    conditions:
+      - condition: not
+        conditions:
+          - condition: template
+            value_template: "{{ trigger.id in ['jamie_network', 'sean_network'] }}"
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: "{{ trigger.id == 'jamie_network' }}"
+          - condition: state
+            entity_id: person.jamie
+            state: home
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: "{{ trigger.id == 'sean_network' }}"
+          - condition: state
+            entity_id: person.sean
+            state: home
+actions:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id in ['jamie_now_charging', 'sean_now_charging'] }}"
+        sequence:
+          - data:
+              notification_id: |
+                {% if trigger.id == 'jamie_now_charging' %}
+                  jamie_tablet_still_not_charging
+                {% elif trigger.id == 'sean_now_charging' %}
+                  sean_tablet_still_not_charging
+                {% endif %}
+            action: persistent_notification.dismiss
+  - data:
+      title: >
+        {% if trigger.id == 'dave_charged' %}TABLET CHARGED {% elif
+        trigger.id.startswith('jamie') %}JAMIE TABLET {% elif
+        trigger.id.startswith('sean') %}SEAN TABLET {% else %}TABLET STATUS{%
+        endif %}
+      message: |
+        {% if trigger.id == 'dave_charged' %}
+          Your tablet is charged.
+        {% elif trigger.id == 'jamie_network' %}
+          Jamie's tablet has changed network.
+        {% elif trigger.id == 'jamie_low_battery' %}
+          Jamie's tablet needs charged.
+        {% elif trigger.id == 'jamie_charged' %}
+          Jamie's tablet is charged.
+        {% elif trigger.id == 'sean_network' %}
+          Sean's tablet has changed network.
+        {% elif trigger.id == 'sean_low_battery' %}
+          Sean's tablet needs charged.
+        {% elif trigger.id == 'sean_charged' %}
+          Sean's tablet is charged.
+        {% elif trigger.id == 'jamie_now_charging' %}
+          Jamie's tablet has started charging.
+        {% elif trigger.id == 'sean_now_charging' %}
+          Sean's tablet has started charging.
+        {% else %}Tablet status changed.{% endif %}
+    action: script.text_notify_dave
+  - if:
+      - condition: template
+        value_template: "{{ trigger.id == 'jamie_low_battery' }}"
+    then:
+      - delay: "00:10:00"
+      - condition: state
+        entity_id: binary_sensor.jamie_s_samsung_tablet_is_charging
+        state: "off"
+      - data:
+          title: Jamie's Tablet Still Not Charging
+          message: >-
+            Jamie's tablet is still below 10% and hasn't been plugged in after
+            10 minutes.
+          notification_id: jamie_tablet_still_not_charging
+        action: persistent_notification.create
+    alias: Notify if Jamie's tablet is still not charging after 10 minutes
+  - if:
+      - condition: template
+        value_template: "{{ trigger.id == 'sean_low_battery' }}"
+    then:
+      - delay: "00:10:00"
+      - condition: state
+        entity_id: binary_sensor.sean_s_samsung_galaxy_is_charging
+        state: "off"
+      - data:
+          title: Sean's Tablet Still Not Charging
+          message: >-
+            Sean's tablet is still below 10% and hasn't been plugged in after 10
+            minutes.
+          notification_id: sean_tablet_still_not_charging
+        action: persistent_notification.create
+    alias: Notify if Sean's tablet is still not charging after 10 minutes
+mode: single
+initial_state: true
