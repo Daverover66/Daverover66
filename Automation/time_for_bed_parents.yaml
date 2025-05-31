@@ -1,0 +1,14 @@
+alias: Time for Bed Parents
+description: ""
+triggers:
+  - at: "22:10:00"
+    trigger: time
+conditions:
+  - condition: state
+    entity_id: input_boolean.audible_notifications
+    state: "on"
+actions:
+  - action: script.parents_bedtime_announcement
+    data:
+      where: living room
+mode: single
