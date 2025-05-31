@@ -3,6 +3,7 @@ description: ""
 triggers:
   - at: input_datetime.seans_morning_briefing
     trigger: time
+    id: Sean
 conditions:
   - condition: or
     conditions:
@@ -19,8 +20,7 @@ conditions:
     entity_id: input_boolean.seans_morning_briefing_played
     state: "off"
 actions:
-  - action: script.sean_briefing
-    data:
-      where: jamie's room
+  - action: script.sean_briefing_v2_0
+    data: {}
 mode: single
 initial_state: true
