@@ -1,0 +1,64 @@
+alias: Bread Maker
+description: ""
+triggers:
+  - trigger: numeric_state
+    entity_id:
+      - sensor.kitchen_socket_power_power
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+    above: 50
+    id: Start
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bread_timer
+    id: Time
+    alias: When bread timer finishes.
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - Start
+          - condition: state
+            entity_id: input_boolean.bread_done
+            state: "off"
+          - condition: template
+            value_template: "{{ trigger.from_state.state not in ['unknown', 'unavailable'] }}"
+        sequence:
+          - parallel:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.bread_done
+                data: {}
+              - action: timer.start
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: timer.bread_timer
+      - conditions:
+          - condition: trigger
+            id:
+              - Time
+          - condition: state
+            entity_id: input_boolean.bread_done
+            state: "on"
+          - condition: numeric_state
+            entity_id: sensor.kitchen_socket_power_power
+            below: 10
+        sequence:
+          - parallel:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.bread_done
+                data: {}
+              - action: script.text_notify_parents
+                data:
+                  title: BREAD DONE!
+                  message: >-
+                    It has been 3 hours since you put the bread maker on. Its
+                    probaby done making another loaf, but I suggest checking.
+mode: single
