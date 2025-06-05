@@ -1,0 +1,66 @@
+alias: Send shopping list when at the shops
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - person.david_forrester
+      - person.gem_forrester
+    to: null
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15
+conditions:
+  - condition: template
+    value_template: |
+      {{ trigger.to_state.state in ['tesco', 'asda', 'aldi']
+         and trigger.to_state.state != trigger.from_state.state }}  
+  - condition: template
+    value_template: >
+      {{ trigger.entity_id in ['person.david_forrester', 'person.gem_forrester']
+      }}
+actions:
+  - variables:
+      zone_name: "{{ trigger.to_state.state | title }}"
+      trigger_person: "{{ trigger.entity_id }}"
+  - action: todo.get_items
+    target:
+      entity_id: todo.shopping_list
+    data:
+      status: needs_action
+  - wait_template: "{{ state_attr('todo.shopping_list', 'items') is not none }}"
+    timeout: "00:00:03"
+  - variables:
+      shopping_items: |
+        {% set items = state_attr('todo.shopping_list', 'items')
+           | selectattr('status', 'eq', 'needs_action')
+           | map(attribute='summary') | list %}
+        {{ items | join(', ', ' and ') }}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ shopping_items | length > 0 }}"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ trigger_person == 'person.david_forrester' }}"
+                sequence:
+                  - action: script.text_notify_dave
+                    data:
+                      title: 🛒 While you're at {{ zone_name }}...
+                      message: >
+                        I can see that you're at {{ zone_name }}. While you're
+                        here, don't forget to pick up {{ shopping_items }}.
+              - conditions:
+                  - condition: template
+                    value_template: "{{ trigger_person == 'person.gem_forrester' }}"
+                sequence:
+                  - action: script.text_notify_gem
+                    data:
+                      title: 🛒 While you're at {{ zone_name }}...
+                      message: >
+                        I can see that you're at {{ zone_name }}. While you're
+                        here, don't forget to pick up {{ shopping_items }}.
+mode: parallel
+max: 4
