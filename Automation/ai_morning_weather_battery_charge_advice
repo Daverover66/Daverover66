@@ -1,0 +1,57 @@
+alias: Determine morning solar production and set battery charge duration
+description: >-
+  Use the total estimate of solar production for tomorrow and the % generated in
+  the morning to determine how  long to grid charge the home battery overnight.
+triggers:
+  - trigger: state
+    entity_id:
+      - input_boolean.grid_charge_home_battery
+    from: "off"
+    to: "on"
+actions:
+  - variables:
+      forecast_analysis: >
+        {% set estimate_total =
+        state_attr('sensor.solcast_pv_forecast_forecast_tomorrow', 'estimate') |
+        float(0) %} {% set detailed =
+        state_attr('sensor.solcast_pv_forecast_forecast_tomorrow',
+        'detailedHourly') %} {% set sunrise = as_datetime(state_attr('sun.sun',
+        'next_rising')) %} {% set midday = sunrise.replace(hour=12, minute=0,
+        second=0, microsecond=0) %}
+
+        {% set morning_kwh = namespace(total=0.0) %} {% for hour in detailed %}
+          {% set ts = as_datetime(hour.period_start) %}
+          {% if sunrise <= ts < midday %}
+            {% set morning_kwh.total = morning_kwh.total + (hour.pv_estimate | float(0)) %}
+          {% endif %}
+        {% endfor %}
+
+        {% set pct_morning = (morning_kwh.total / estimate_total * 100) if
+        estimate_total > 0 else 0 %}
+
+        {% set grid_charge_length = 
+          0.5 if estimate_total > 40 and pct_morning > 60 else
+          1 if estimate_total > 30 and pct_morning > 50 else
+          2 if estimate_total > 20 and pct_morning > 40 else
+          2.5
+        %}
+
+        {
+          "grid_charge_length": {{ grid_charge_length }},
+          "morning_kwh": {{ morning_kwh.total }},
+          "total_estimate": {{ estimate_total }},
+          "morning_pct": {{ pct_morning }}
+        }
+      grid_charge_length: "{{ forecast_analysis.grid_charge_length }}"
+      morning_kwh: "{{ forecast_analysis.morning_kwh }}"
+      total_estimate: "{{ forecast_analysis.total_estimate }}"
+      morning_pct: "{{ forecast_analysis.morning_pct }}"
+      message: >
+        Total estimated solar tomorrow is {{ total_estimate | float(0) |
+        round(1)}}. Morning = {{ morning_kwh  | float(0) | round(1)}}. Morning
+        pct = {{ morning_pct  | float(0) | round(1)}}%. Charge battery for {{
+        grid_charge_length  | float(0) }} hrs.
+  - action: script.text_notify_dave
+    data:
+      title: BATT CHARGE LENGTH
+      message: "{{message}}"
