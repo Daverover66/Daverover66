@@ -1,0 +1,443 @@
+[
+    {
+        "id": "7b3065384a2cc43b",
+        "type": "tab",
+        "label": "Kitchen Lights",
+        "disabled": false,
+        "info": "All flows that control lights in the \nkitchen.",
+        "env": [
+            {
+                "name": "back_door_switch",
+                "value": "sensor.back_door_light_switch_action",
+                "type": "str"
+            },
+            {
+                "name": "back_door_light",
+                "value": "light.back_door_light",
+                "type": "str"
+            },
+            {
+                "name": "kitchen_main_lights",
+                "value": "light.kitchen_lights_2",
+                "type": "str"
+            },
+            {
+                "name": "worktop_lights",
+                "value": "light.ikea_kitchen_lights",
+                "type": "str"
+            },
+            {
+                "name": "sink_lights",
+                "value": "light.oversink_kitchen_lights",
+                "type": "str"
+            },
+            {
+                "name": "aura_lamp",
+                "value": "light.aura_lamp_2",
+                "type": "str"
+            },
+            {
+                "name": "kitchen_presence",
+                "value": "binary_sensor.kitchen_presence_sensor_presence_sensor_1",
+                "type": "str"
+            },
+            {
+                "name": "bdz_presence",
+                "value": "binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_3",
+                "type": "str"
+            },
+            {
+                "name": "light_level",
+                "value": "sensor.kitchen_presence_sensor_light_sensor_light_level",
+                "type": "str"
+            },
+            {
+                "name": "undershelf_lights",
+                "value": "switch.under_shelf_lights_local",
+                "type": "str"
+            },
+            {
+                "name": "holiday_mode",
+                "value": "input_boolean.holiday_mode",
+                "type": "str"
+            }
+        ]
+    },
+    {
+        "id": "f5a8dcec4c6af58f",
+        "type": "server-state-changed",
+        "z": "7b3065384a2cc43b",
+        "name": "Back Door Switch Action",
+        "server": "e1cb801a.ed5b6",
+        "version": 6,
+        "outputs": 2,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "${back_door_switch}"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "single_down",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": false,
+        "ignorePrevStateUnknown": false,
+        "ignorePrevStateUnavailable": false,
+        "ignoreCurrentStateUnknown": false,
+        "ignoreCurrentStateUnavailable": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "triggerId"
+            }
+        ],
+        "x": 130,
+        "y": 40,
+        "wires": [
+            [
+                "3e58ec6779a965f0"
+            ],
+            []
+        ],
+        "outputLabels": [
+            "single_down",
+            "null"
+        ]
+    },
+    {
+        "id": "3e58ec6779a965f0",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Is Back Door Light off?",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "off",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "${back_door_light}",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 180,
+        "y": 100,
+        "wires": [
+            [
+                "235c29a9d6e6c90e"
+            ],
+            [
+                "dcc8b751d3cc985b"
+            ]
+        ],
+        "outputLabels": [
+            "Yes",
+            "No"
+        ]
+    },
+    {
+        "id": "235c29a9d6e6c90e",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on the light",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": false,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${back_door_light}"
+        ],
+        "labelId": [],
+        "data": "{   \"brightness\": 255 }",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 460,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dcc8b751d3cc985b",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn off the light",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": false,
+        "action": "light.turn_off",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${back_door_light}"
+        ],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_off",
+        "x": 460,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f0cd75000b77db1e",
+        "type": "server-state-changed",
+        "z": "7b3065384a2cc43b",
+        "name": "Back Door Zone Presence",
+        "server": "e1cb801a.ed5b6",
+        "version": 6,
+        "outputs": 1,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "${bdz_presence}"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": false,
+        "ignorePrevStateUnknown": true,
+        "ignorePrevStateUnavailable": true,
+        "ignoreCurrentStateUnknown": true,
+        "ignoreCurrentStateUnavailable": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "triggerId"
+            }
+        ],
+        "x": 130,
+        "y": 180,
+        "wires": [
+            [
+                "d9a83e8ae880a6bb"
+            ]
+        ],
+        "outputLabels": [
+            "State Changed"
+        ]
+    },
+    {
+        "id": "d9a83e8ae880a6bb",
+        "type": "switch",
+        "z": "7b3065384a2cc43b",
+        "name": "Check if presence is on or off",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "\"on\"",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "\"off\"",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 200,
+        "y": 260,
+        "wires": [
+            [
+                "f7329d4534669d0b"
+            ],
+            [
+                "d784fc654cef293b"
+            ]
+        ],
+        "inputLabels": [
+            "State Change"
+        ],
+        "outputLabels": [
+            "Presence On",
+            "Presence Off"
+        ]
+    },
+    {
+        "id": "f7329d4534669d0b",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Is Holiday Mode On?",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "on",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "${holiday_mode}",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 460,
+        "y": 220,
+        "wires": [
+            [],
+            []
+        ],
+        "outputLabels": [
+            "On",
+            "Off"
+        ]
+    },
+    {
+        "id": "d784fc654cef293b",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Is Holiday Mode On?",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "on",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "${holiday_mode}",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 460,
+        "y": 300,
+        "wires": [
+            [],
+            []
+        ],
+        "outputLabels": [
+            "On",
+            "Off"
+        ]
+    },
+    {
+        "id": "e1cb801a.ed5b6",
+        "type": "server",
+        "name": "Home Assistant",
+        "addon": true
+    }
+]
