@@ -85,6 +85,16 @@
                 "name": "back_door_contact",
                 "value": "binary_sensor.back_door_sensor_contact",
                 "type": "str"
+            },
+            {
+                "name": "worktop_presence",
+                "value": "binary_sensor.presence_sensor_fp2_4b3c_presence_sensor_6",
+                "type": "str"
+            },
+            {
+                "name": "al_sleep_mode",
+                "value": "input_boolean.adaptive_lighting_sleep_mode_active",
+                "type": "str"
             }
         ]
     },
@@ -357,8 +367,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 910,
-        "y": 660,
+        "x": 330,
+        "y": 1000,
         "wires": [
             []
         ]
@@ -726,6 +736,447 @@
         "y": 540,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "c918725959b5fc08",
+        "type": "comment",
+        "z": "7b3065384a2cc43b",
+        "name": "Worktop and Sink Lights",
+        "info": "",
+        "x": 130,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "221843d4495a1da7",
+        "type": "server-state-changed",
+        "z": "7b3065384a2cc43b",
+        "name": "Worktop Presence",
+        "server": "e1cb801a.ed5b6",
+        "version": 6,
+        "outputs": 2,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "${worktop_presence}"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "on",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": false,
+        "ignorePrevStateUnknown": false,
+        "ignorePrevStateUnavailable": true,
+        "ignoreCurrentStateUnknown": false,
+        "ignoreCurrentStateUnavailable": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "triggerId"
+            }
+        ],
+        "x": 121,
+        "y": 699,
+        "wires": [
+            [
+                "6f3377a6c1ec3015",
+                "304177a11bf69b79"
+            ],
+            [
+                "bde25b7492a15bb8"
+            ]
+        ]
+    },
+    {
+        "id": "6f3377a6c1ec3015",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Low Light?",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "300",
+        "halt_if_type": "num",
+        "halt_if_compare": "lt",
+        "entity_id": "${light_level}",
+        "state_type": "num",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 450,
+        "y": 680,
+        "wires": [
+            [
+                "edfc0e621afdb5f1"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "edfc0e621afdb5f1",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Are we in bed",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "on",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "${we_are_in_bed}",
+        "state_type": "str",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 680,
+        "y": 680,
+        "wires": [
+            [],
+            [
+                "109ec89fdc872b48",
+                "38ac1bb91c2c205f"
+            ]
+        ],
+        "outputLabels": [
+            "Yes",
+            "No"
+        ]
+    },
+    {
+        "id": "109ec89fdc872b48",
+        "type": "api-current-state",
+        "z": "7b3065384a2cc43b",
+        "name": "Adaptive Lighting Sleep Mode On?",
+        "server": "e1cb801a.ed5b6",
+        "version": 3,
+        "outputs": 2,
+        "halt_if": "on",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "${al_sleep_mode}",
+        "state_type": "num",
+        "blockInputOverrides": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entity"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "payload",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 1000,
+        "y": 640,
+        "wires": [
+            [
+                "196f1517be19d540",
+                "f7348398d4ccd414"
+            ],
+            [
+                "ad02b63e044d979e",
+                "b9322d8ac3eaafe7"
+            ]
+        ]
+    },
+    {
+        "id": "38ac1bb91c2c205f",
+        "type": "time-range-switch",
+        "z": "7b3065384a2cc43b",
+        "name": "Between sunset and sunrise",
+        "lat": "",
+        "lon": "",
+        "startTime": "sunset",
+        "endTime": "sunrise",
+        "startOffset": 0,
+        "endOffset": 0,
+        "x": 980,
+        "y": 720,
+        "wires": [
+            [
+                "196f1517be19d540",
+                "f7348398d4ccd414"
+            ],
+            [
+                "ad02b63e044d979e",
+                "b9322d8ac3eaafe7"
+            ]
+        ]
+    },
+    {
+        "id": "196f1517be19d540",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on the sink lights at low level.",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${sink_lights}"
+        ],
+        "labelId": [],
+        "data": "{   \"brightness_pct\": 30,   \"color_temp\": 400 }",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 1480,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f7348398d4ccd414",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on worktop lights at low level.",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${worktop_lights}"
+        ],
+        "labelId": [],
+        "data": "{   \"brightness_pct\": 30 }",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 1480,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ad02b63e044d979e",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on the sink lights at high level.",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${sink_lights}"
+        ],
+        "labelId": [],
+        "data": "{   \"brightness_pct\": 100,   \"color_temp\": 200 }",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 1480,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b9322d8ac3eaafe7",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on worktop lights at high level.",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${worktop_lights}"
+        ],
+        "labelId": [],
+        "data": "{   \"brightness_pct\": 70 }",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 1480,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0be939d63c053eb0",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn off the lights",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_off",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${worktop_lights}",
+            "${sink_lights}"
+        ],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_off",
+        "x": 610,
+        "y": 880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bde25b7492a15bb8",
+        "type": "trigger",
+        "z": "7b3065384a2cc43b",
+        "name": "Wait 30 seconds then turn off unless presence detected again.",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "pay",
+        "duration": "30",
+        "extend": true,
+        "overrideDelay": false,
+        "units": "s",
+        "reset": "on",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 530,
+        "y": 820,
+        "wires": [
+            [
+                "0be939d63c053eb0"
+            ]
+        ]
+    },
+    {
+        "id": "304177a11bf69b79",
+        "type": "function",
+        "z": "7b3065384a2cc43b",
+        "name": "Send Reset on presence.",
+        "func": "msg.reset = \"on\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 740,
+        "wires": [
+            [
+                "bde25b7492a15bb8"
+            ]
         ]
     },
     {
