@@ -80,6 +80,11 @@
                 "name": "bdz_light",
                 "value": "light.back_door_zone_light",
                 "type": "str"
+            },
+            {
+                "name": "back_door_contact",
+                "value": "binary_sensor.back_door_sensor_contact",
+                "type": "str"
             }
         ]
     },
@@ -110,7 +115,7 @@
         "forUnits": "minutes",
         "ignorePrevStateNull": false,
         "ignorePrevStateUnknown": false,
-        "ignorePrevStateUnavailable": false,
+        "ignorePrevStateUnavailable": true,
         "ignoreCurrentStateUnknown": false,
         "ignoreCurrentStateUnavailable": false,
         "outputProperties": [
@@ -133,8 +138,8 @@
                 "valueType": "triggerId"
             }
         ],
-        "x": 170,
-        "y": 180,
+        "x": 130,
+        "y": 100,
         "wires": [
             [
                 "3e58ec6779a965f0"
@@ -182,8 +187,8 @@
         "override_payload": "msg",
         "entity_location": "data",
         "override_data": "msg",
-        "x": 380,
-        "y": 100,
+        "x": 200,
+        "y": 160,
         "wires": [
             [
                 "235c29a9d6e6c90e"
@@ -222,8 +227,8 @@
         "blockInputOverrides": true,
         "domain": "light",
         "service": "turn_on",
-        "x": 580,
-        "y": 60,
+        "x": 440,
+        "y": 120,
         "wires": [
             []
         ]
@@ -253,8 +258,8 @@
         "blockInputOverrides": true,
         "domain": "light",
         "service": "turn_off",
-        "x": 580,
-        "y": 160,
+        "x": 440,
+        "y": 200,
         "wires": [
             []
         ]
@@ -266,7 +271,7 @@
         "name": "Back Door Zone Presence",
         "server": "e1cb801a.ed5b6",
         "version": 6,
-        "outputs": 1,
+        "outputs": 2,
         "exposeAsEntityConfig": "",
         "entities": {
             "entity": [
@@ -277,7 +282,7 @@
         },
         "outputInitially": false,
         "stateType": "str",
-        "ifState": "",
+        "ifState": "on",
         "ifStateType": "str",
         "ifStateOperator": "is",
         "outputOnlyOnStateChange": true,
@@ -285,10 +290,10 @@
         "forType": "num",
         "forUnits": "minutes",
         "ignorePrevStateNull": false,
-        "ignorePrevStateUnknown": true,
-        "ignorePrevStateUnavailable": true,
-        "ignoreCurrentStateUnknown": true,
-        "ignoreCurrentStateUnavailable": true,
+        "ignorePrevStateUnknown": false,
+        "ignorePrevStateUnavailable": false,
+        "ignoreCurrentStateUnknown": false,
+        "ignoreCurrentStateUnavailable": false,
         "outputProperties": [
             {
                 "property": "payload",
@@ -309,154 +314,16 @@
                 "valueType": "triggerId"
             }
         ],
-        "x": 170,
-        "y": 340,
+        "x": 130,
+        "y": 320,
         "wires": [
             [
-                "d9a83e8ae880a6bb"
-            ]
-        ],
-        "outputLabels": [
-            "State Changed"
-        ]
-    },
-    {
-        "id": "d9a83e8ae880a6bb",
-        "type": "switch",
-        "z": "7b3065384a2cc43b",
-        "name": "Check if presence is on or off",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "\"on\"",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "\"off\"",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 320,
-        "y": 420,
-        "wires": [
-            [
-                "f7329d4534669d0b"
+                "56e84c97f23fd1dd",
+                "2f934835b66658d9"
             ],
-            [
-                "d784fc654cef293b"
-            ]
-        ],
-        "inputLabels": [
-            "State Change"
-        ],
-        "outputLabels": [
-            "Presence On",
-            "Presence Off"
-        ]
-    },
-    {
-        "id": "f7329d4534669d0b",
-        "type": "api-current-state",
-        "z": "7b3065384a2cc43b",
-        "name": "Is Holiday Mode On?",
-        "server": "e1cb801a.ed5b6",
-        "version": 3,
-        "outputs": 2,
-        "halt_if": "on",
-        "halt_if_type": "str",
-        "halt_if_compare": "is",
-        "entity_id": "${holiday_mode}",
-        "state_type": "str",
-        "blockInputOverrides": true,
-        "outputProperties": [
-            {
-                "property": "payload",
-                "propertyType": "msg",
-                "value": "",
-                "valueType": "entityState"
-            },
-            {
-                "property": "data",
-                "propertyType": "msg",
-                "value": "",
-                "valueType": "entity"
-            }
-        ],
-        "for": "0",
-        "forType": "num",
-        "forUnits": "minutes",
-        "override_topic": false,
-        "state_location": "payload",
-        "override_payload": "msg",
-        "entity_location": "data",
-        "override_data": "msg",
-        "x": 460,
-        "y": 360,
-        "wires": [
-            [],
-            [
-                "2f934835b66658d9",
-                "56e84c97f23fd1dd"
-            ]
-        ],
-        "outputLabels": [
-            "On",
-            "Off"
-        ]
-    },
-    {
-        "id": "d784fc654cef293b",
-        "type": "api-current-state",
-        "z": "7b3065384a2cc43b",
-        "name": "Is Holiday Mode On?",
-        "server": "e1cb801a.ed5b6",
-        "version": 3,
-        "outputs": 2,
-        "halt_if": "on",
-        "halt_if_type": "str",
-        "halt_if_compare": "is",
-        "entity_id": "${holiday_mode}",
-        "state_type": "str",
-        "blockInputOverrides": true,
-        "outputProperties": [
-            {
-                "property": "payload",
-                "propertyType": "msg",
-                "value": "",
-                "valueType": "entityState"
-            },
-            {
-                "property": "data",
-                "propertyType": "msg",
-                "value": "",
-                "valueType": "entity"
-            }
-        ],
-        "for": "0",
-        "forType": "num",
-        "forUnits": "minutes",
-        "override_topic": false,
-        "state_location": "payload",
-        "override_payload": "msg",
-        "entity_location": "data",
-        "override_data": "msg",
-        "x": 460,
-        "y": 480,
-        "wires": [
-            [],
             [
                 "af66fd3419520971"
             ]
-        ],
-        "outputLabels": [
-            "On",
-            "Off"
         ]
     },
     {
@@ -465,7 +332,7 @@
         "z": "7b3065384a2cc43b",
         "name": "Back Door Light Needed",
         "info": "",
-        "x": 140,
+        "x": 120,
         "y": 40,
         "wires": []
     },
@@ -490,8 +357,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
-        "y": 460,
+        "x": 910,
+        "y": 660,
         "wires": [
             []
         ]
@@ -509,7 +376,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1240,
+        "x": 720,
         "y": 440,
         "wires": []
     },
@@ -519,7 +386,7 @@
         "z": "7b3065384a2cc43b",
         "name": "Back Door Zone Lights with presence",
         "info": "",
-        "x": 190,
+        "x": 170,
         "y": 260,
         "wires": []
     },
@@ -559,17 +426,13 @@
         "override_payload": "msg",
         "entity_location": "data",
         "override_data": "msg",
-        "x": 730,
-        "y": 380,
+        "x": 390,
+        "y": 360,
         "wires": [
             [
                 "fd571c0a5c27bbc5"
             ],
             []
-        ],
-        "outputLabels": [
-            "Yes",
-            "No"
         ]
     },
     {
@@ -582,20 +445,20 @@
         "rules": [
             {
                 "t": "eq",
-                "v": "\"autumn\"",
+                "v": "autumn",
                 "vt": "str"
             },
             {
                 "t": "eq",
-                "v": "\"winter\"",
+                "v": "winter",
                 "vt": "str"
             }
         ],
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 750,
-        "y": 260,
+        "x": 450,
+        "y": 300,
         "wires": [
             [
                 "4b508de3edf75adc"
@@ -622,7 +485,7 @@
         "startOffset": 0,
         "endOffset": 0,
         "x": 740,
-        "y": 320,
+        "y": 260,
         "wires": [
             [
                 "fd571c0a5c27bbc5"
@@ -638,7 +501,7 @@
         "server": "e1cb801a.ed5b6",
         "version": 3,
         "outputs": 2,
-        "halt_if": "\"on\"",
+        "halt_if": "on",
         "halt_if_type": "str",
         "halt_if_compare": "is",
         "entity_id": "${we_are_in_bed}",
@@ -666,7 +529,7 @@
         "override_payload": "msg",
         "entity_location": "data",
         "override_data": "msg",
-        "x": 980,
+        "x": 640,
         "y": 380,
         "wires": [
             [],
@@ -704,8 +567,8 @@
         "blockInputOverrides": true,
         "domain": "light",
         "service": "turn_on",
-        "x": 1060,
-        "y": 440,
+        "x": 840,
+        "y": 340,
         "wires": [
             []
         ]
@@ -735,8 +598,132 @@
         "blockInputOverrides": true,
         "domain": "light",
         "service": "turn_off",
-        "x": 720,
+        "x": 160,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "96d334c2825ae664",
+        "type": "comment",
+        "z": "7b3065384a2cc43b",
+        "name": "Back Door Zone Lights when back door opens",
+        "info": "",
+        "x": 190,
         "y": 480,
+        "wires": []
+    },
+    {
+        "id": "b9a04735fa41a901",
+        "type": "server-state-changed",
+        "z": "7b3065384a2cc43b",
+        "name": "Back Door Opened",
+        "server": "e1cb801a.ed5b6",
+        "version": 6,
+        "outputs": 2,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "${back_door_contact}"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": false,
+        "stateType": "str",
+        "ifState": "on",
+        "ifStateType": "str",
+        "ifStateOperator": "is",
+        "outputOnlyOnStateChange": true,
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "ignorePrevStateNull": false,
+        "ignorePrevStateUnknown": false,
+        "ignorePrevStateUnavailable": true,
+        "ignoreCurrentStateUnknown": false,
+        "ignoreCurrentStateUnavailable": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            },
+            {
+                "property": "data",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "eventData"
+            },
+            {
+                "property": "topic",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "triggerId"
+            }
+        ],
+        "x": 110,
+        "y": 540,
+        "wires": [
+            [
+                "0512dda65eeb2e70"
+            ],
+            []
+        ],
+        "outputLabels": [
+            "Open",
+            "Close"
+        ]
+    },
+    {
+        "id": "0512dda65eeb2e70",
+        "type": "time-range-switch",
+        "z": "7b3065384a2cc43b",
+        "name": "Between sunset and sunrise",
+        "lat": "",
+        "lon": "",
+        "startTime": "sunset",
+        "endTime": "sunrise",
+        "startOffset": 0,
+        "endOffset": 0,
+        "x": 400,
+        "y": 540,
+        "wires": [
+            [
+                "e1c50f510b974630"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e1c50f510b974630",
+        "type": "api-call-service",
+        "z": "7b3065384a2cc43b",
+        "name": "Turn on the light",
+        "server": "e1cb801a.ed5b6",
+        "version": 7,
+        "debugenabled": true,
+        "action": "light.turn_on",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "${bdz_light}"
+        ],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": true,
+        "domain": "light",
+        "service": "turn_on",
+        "x": 720,
+        "y": 540,
         "wires": [
             []
         ]
