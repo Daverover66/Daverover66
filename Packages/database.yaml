@@ -11,7 +11,13 @@
 recorder: 
   db_url: !secret mariadb_url
   purge_keep_days: 3 
-  exclude: 
+  exclude:
+    entity_globs:
+      - sensor.office_presence_target_1_*
+      - sensor.jamies_room_presence_target_1_*
+      - sensor.seans_room_presence_target_1_*
+      - sensor.spare_room_presence_target_1_*
+      - sensor.everything_presence_lite_f2ab54_target_1_* 
     domains: 
       - automation  
       - updater 
