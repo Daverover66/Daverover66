@@ -1,65 +1,97 @@
 ############################################################################### 
- #   @author         :   Jeffrey Stone 
- #   @date           :   06/10/2020 
- #   @package        :   Database 
- #   @description    :   Recorder and Logger and History Configurations 
- # 
- #   @modified by    :   Dave Forrester (@Daverover66)
- #   @date           :   08/08/2023 
- ############################################################################### 
+#   @author         :   Jeffrey Stone 
+#   @date           :   06/10/2020 
+#   @package        :   Database 
+#   @description    :   Recorder and Logger and History Configurations 
+# 
+#   @modified by    :   Dave Forrester (@Daverover66)
+#   @date           :   08/08/2023 
+############################################################################### 
   
- recorder: 
-   db_url: !secret mariadb_url
-   purge_keep_days: 30 
-   exclude: 
-     domains: 
-       - automation  
-       - updater 
-       - script 
-     entities: 
-       - sun.sun # Don't record sun data
-       - sensor.date 
-       - sensor.date_time
-       - sensor.date_time_iso
-       - sensor.date_time_utc
-       - sensor.moon # Don't record moon data
-       - weather.forecast_home
-       - water_heater.hot_water
-       
- logbook: 
-   include: 
-     domains: 
-       - media_player 
-       - automation 
-       - script 
-       - scene 
-       - light 
-       - switch 
-       - device_tracker 
-       - input_boolean 
-       - person 
+recorder: 
+  db_url: !secret mariadb_url
+  purge_keep_days: 3 
+  exclude: 
+    domains: 
+      - automation  
+      - updater 
+      - script 
+    entities: 
+      - sun.sun # Don't record sun data
+      - sensor.date 
+      - sensor.date_time
+      - sensor.date_time_iso
+      - sensor.date_time_utc
+      - sensor.moon # Don't record moon data
+      - weather.forecast_home
+      - water_heater.hot_water
+    
+logbook: 
+  include: 
+    domains: 
+      - media_player 
+      - automation 
+      - script 
+      - scene 
+      - light 
+      - switch 
+      - device_tracker 
+      - input_boolean 
+      - person 
   
- # Lets try to make the logs less chatty and more fine tuned. 
- logger: 
-   default: error 
-   logs: 
-     homeassistant.core: warning 
-     homeassistant.loader: error 
-     homeassistant.components.recorder: error # to spot db issues 
-     homeassistant.config_entries: error 
-     homeassistant.setup: error 
-     homeassistant.helpers.entity: critical 
-     homeassistant.components.automation: error 
-     homeassistant.components.statistics.sensor: critical 
-     homeassistant.helpers.event: critical
+# Lets try to make the logs less chatty and more fine tuned. 
+logger: 
+  default: error 
+  logs: 
+    homeassistant.core: warning 
+    homeassistant.loader: error 
+    homeassistant.components.recorder: error # to spot db issues 
+    homeassistant.config_entries: error 
+    homeassistant.setup: error 
+    homeassistant.helpers.entity: critical 
+    homeassistant.components.automation: error 
+    homeassistant.components.statistics.sensor: critical 
+    homeassistant.helpers.event: critical
+
+#####  allows change of logger level without restart. 
+##     Use with automation below 
+input_select:
+  logger_level:
+    name: Log Level 
+    options:
+      - critical
+      - fatal
+      - error
+      - warning
+      - warn
+      - info
+      - debug
+      - notset 
+    initial: error
+    icon: mdi:bug 
+
+automation:
+  - id: logger_level_set 
+    alias: Logger Level Set
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: input_select.logger_level 
+    action:
+      - action: logger.set_level
+        data:
+          homeassistant.components: "{{ states('input_select.logger_level') }}"
+        
+
   
- history: 
-   include: 
-     domains: 
-       - sensor 
-       - switch 
-       - media_player 
-       - light 
-       - scene 
-       - automation
-       - binary_sensor
+history: 
+  include: 
+    domains: 
+      - sensor 
+      - switch 
+      - media_player 
+      - light 
+      - scene 
+      - automation
+      - binary_sensor
