@@ -22,6 +22,7 @@ sequence:
         {{ weather_info.sun_status }}
         {{ briefing_data.moon_phase }} 
         {{ briefing_data.family_birthday }}
+        {{ briefing_data.gregor_birthday }}
         {{ briefing_data.bin_day }} 
         {{ briefing_data.annual_event }}
         {{ weather_info.current_conditions_detail }}
