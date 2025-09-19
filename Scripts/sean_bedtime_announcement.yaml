@@ -39,7 +39,7 @@ sequence:
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 15
       milliseconds: 0
   - action: media_player.volume_set
     metadata: {}
