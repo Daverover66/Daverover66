@@ -1,0 +1,183 @@
+alias: Jarvis Speech Engine
+sequence:
+  - response_variable: greetings
+    data: {}
+    action: script.get_tts_greeting
+  - variables:
+      type: |
+        {% if type is defined and type != 'none' %}
+          {{ type }}
+        {% else %}
+          normal
+        {% endif %}
+      summary: |
+        {% if msg_summary %}
+          {{ msg_summary }}
+        {% else %}
+          none
+        {% endif %}
+      room: |
+        {% if where is defined %}
+          {{ where }}
+        {% elif room is defined %}
+          {{ room }}
+        {% else %}
+          NA
+        {% endif %}
+      greeting: |
+        {% if room == 'dave' %}
+          {{ greetings.dave }}
+        {% elif room == 'gem' %}
+          {{ greetings.gem }}
+        {% elif type == 'weather_warning' %}
+          {{ greetings.weather_warning }}
+        {% elif type == 'alert' %}
+          {{ greetings.alert }}
+        {% else %}         
+        {% endif %}
+      briefing_greeting: |
+        {% if type == 'briefing' %}
+          {{ greetings.general }}
+        {% else %} 
+        {% endif %}
+  - data:
+      room: |
+        {{room}}
+      type: |
+        {{type}}
+    response_variable: room_services
+    action: script.get_room_audio_v2
+  - data:
+      message: |
+        {{ briefing }} {{ greeting }} {{ message }}
+    response_variable: cleaned_message
+    action: script.cleanup_text
+  - data_template:
+      topic: house/alexa/lastmsg
+      payload: |
+        {% if summary == 'none' %}
+          {{ cleaned_message.text | string }}
+        {% else %}
+          {{ summary }}
+        {% endif %}
+      retain: true
+    action: mqtt.publish
+  - data_template:
+      topic: house/alexa/msgtime
+      payload: >-
+        {{ now().strftime("%-I") }}:{{ now().strftime("%M") }} {{
+        now().strftime("%p") }} 
+      retain: true
+    action: mqtt.publish
+  - data_template:
+      topic: house/alexa/lastloc
+      payload: "{{ room_services.area | string }}"
+      retain: true
+    action: mqtt.publish
+  - data_template:
+      topic: house/alexa/verbal
+      payload: |
+        {{ room_services.area != 'none'}}
+      retain: true
+    action: mqtt.publish
+  - data_template:
+      topic: house/alexa/timestamp
+      payload: |
+        {{ as_timestamp(now()) }}
+      retain: true
+    action: mqtt.publish
+  - data_template:
+      topic: house/jarvis/event
+      payload: >
+        {"destination":"{{ room_services.area | string }}", "message":"{{
+        cleaned_message.text | string }}", "verbal":"{{ room_services.area !=
+        'none'}}", "speaker":"{{ room_services.jarvis_speaker | string }}",
+        "tts":"{{ room_services.jarvis_tts | string }}", "type":"{{type |
+        string}}", "last_event":{{as_timestamp(now())}}}
+      retain: true
+    action: mqtt.publish
+  - condition: state
+    entity_id: binary_sensor.family_home
+    state: "on"
+  - condition: state
+    entity_id: input_boolean.holiday_mode
+    state: "off"
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: template
+            value_template: "{{ type | string == 'alert' }}"
+        sequence:
+          - data:
+              entity_id: "{{ room_services.jarvis_speaker | string }}"
+              volume_level: |
+                {{ states('input_number.alexa_volume_level_high') | float }}
+            action: media_player.volume_set
+          - data:
+              message: >
+                <voice name="{{ states('input_select.echo_voice') }}">
+                <amazon:auto-breaths> <prosody rate="115%"> {{
+                cleaned_message.text }} </prosody> </amazon:auto-breaths>
+                </voice>
+              target: |
+                {{ room_services.jarvis_speaker | string }}
+              data:
+                type: tts
+            action: notify.alexa_media
+          - delay:
+              seconds: 20
+          - data:
+              entity_id: "{{ room_services.jarvis_speaker | string }} "
+              volume_level: >-
+                {{ states('input_number.alexa_volume_level_announcements') |
+                float }}
+            action: media_player.volume_set
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: template
+            value_template: "{{ room_services.jarvis_tts | string == 'amp' }}"
+          - condition: template
+            value_template: "{{ room_services.jarvis_speaker | string != 'none' }}"
+          - condition: template
+            value_template: "{{ room_services.type | string != 'notification' }}"
+        sequence:
+          - data:
+              message: >
+                <voice name="{{ states('input_select.echo_voice') }}">
+                <amazon:auto-breaths> <prosody rate="115%"> {{
+                cleaned_message.text }} </prosody> </amazon:auto-breaths>
+                </voice>
+              target: "{{ room_services.jarvis_speaker | string }}"
+              data:
+                type: tts
+            action: notify.alexa_media
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.audible_notifications
+            state: "on"
+          - condition: template
+            value_template: "{{ room_services.audio_speaker | string != 'none' }}"
+        sequence:
+          - data:
+              language: en-GB
+              entity_id: |
+                {{ room_services.audio_speaker | string }}
+              options:
+                voice: AlfieNeural
+              message: |
+                {{ cleaned_message.text }}
+            action: tts.cloud_say
+    default:
+      - data:
+          notification_id: house_notification
+        action: persistent_notification.dismiss
+      - data:
+          notification_id: house_notification
+          message: "{{ message }}"
+          title: From Jarvis
+        action: persistent_notification.create
+description: "The first and original against which all future versions are measured"
