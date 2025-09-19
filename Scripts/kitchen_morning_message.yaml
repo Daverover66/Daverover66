@@ -26,6 +26,8 @@ sequence:
 
         {{ briefing_data.family_birthday }}
 
+        {{ briefing_data.gregor_birthday }}
+
         {{ briefing_data.bin_day }}
 
         {{ briefing_data.clocks_change }}
