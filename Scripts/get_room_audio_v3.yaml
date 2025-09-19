@@ -36,17 +36,20 @@ sequence:
           replace('dining_room','Dining Room') |
           replace('guest_bedroom','Guest Bedroom') |
           replace('spareroom','Guest Bedroom') |
-          replace('jamies_room','jamie_s_room') |
+          replace('jamies room','jamie_s_room') |
           replace('jamiesroom','jamie_s_room') |
-          replace('seans_room','sean_s_room') |
+          replace('jamies_room','jamie_s_room') |
+          replace('seans room','sean_s_room') |
           replace('seansroom','sean_s_room') |
+          replace('seans_room','sean_s_room') |
           replace('master_bedroom','Master Bedroom') |
           replace('mainbedroom','Master Bedroom') |
           replace('en_suite','Master Bedroom') |
           replace('office','Office') |
           replace('landing','Master Bedroom') |
           replace('main_bathroom','Guest Bedroom') |
-          replace('kids_bathroom','jamie_s_room') }}
+          replace('kids_bathroom','jamie_s_room')
+        }}
       room_services: |
         {% if type in ['alarm','alert','weather-alert','weather-advisory'] %}
           {% set jarvis_speaker = 'media_player.all_jarvis_media_player' %}
