@@ -1,0 +1,2 @@
+.*\.googleadservices\.com$
+.*\.doubleclick\.net$
