@@ -1,5 +1,5 @@
 census-app.scorecardresearch.com|1
 qbrere.cdn-settings.appsflyersdk.com|1
 d127n5jiwb3j0b.cloudfront.net|1
-b-graph.facebook.com
-t.co
+b-graph.facebook.com|1
+t.co|1
