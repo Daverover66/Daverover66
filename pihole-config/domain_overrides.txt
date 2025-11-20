@@ -1,7 +1,5 @@
 census-app.scorecardresearch.com|1
 qbrere.cdn-settings.appsflyersdk.com|1
 d127n5jiwb3j0b.cloudfront.net|1
-.*\.googleadservices\.com$
-.*\.doubleclick\.net$
 b-graph.facebook.com
 t.co
